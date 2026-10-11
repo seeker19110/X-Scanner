@@ -1,0 +1,101 @@
+name: Adopt projects-template
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/adopt-projects-template.yml'
+      - 'scripts/apply-projects-template.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: x-scanner-framework-adoption
+  cancel-in-progress: false
+
+jobs:
+  adopt:
+    if: github.repository == 'seeker19110/X-Scanner' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout destination
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Inspect adoption state
+        id: state
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f docs/framework/FRAMEWORK-VERSION ]]; then
+            echo 'installed=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'installed=false' >> "$GITHUB_OUTPUT"
+          fi
+          command -v python3
+          command -v jq
+          command -v git
+      - name: Fetch pinned template and apply official copy script
+        if: steps.state.outputs.installed == 'false'
+        env:
+          TEMPLATE_SHA: aab9f887ec4acc4480da852cc300978979087f6b
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$RUNNER_TEMP/projects-template"
+          git init "$source_dir"
+          git -C "$source_dir" remote add origin https://github.com/seeker19110/projects-template.git
+          git -C "$source_dir" fetch --depth 1 origin "$TEMPLATE_SHA"
+          git -C "$source_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$TEMPLATE_SHA"
+          python3 scripts/apply-projects-template.py --source "$source_dir" --target "$GITHUB_WORKSPACE"
+      - name: Verify real repository checks and upstream safety hooks
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/dev-task.sh doctor
+          bash scripts/dev-task.sh gate
+      - name: Record evidence and commit adopted files
+        if: steps.state.outputs.installed == 'false'
+        env:
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          url = os.environ['RUN_URL']
+          text = f'''# Framework adoption verification
+
+          Run: {url}
+          Source: seeker19110/projects-template @ aab9f887ec4acc4480da852cc300978979087f6b
+
+          The preceding workflow step completed successfully:
+          - scripts/dev-task.sh doctor
+          - scripts/dev-task.sh gate
+          - syntax/JSON checks in scripts/check-adoption.py --lint
+          - seven adoption regression tests in scripts/check-adoption.py
+          - upstream scripts/test-hooks-gate.sh and scripts/test-hooks-gate-guard.sh
+
+          Scope: repository/framework adoption only. Product build/typecheck are explicitly N/A.
+          No mobile build, scan, OCR, depth benchmark, release, security certification or
+          repository branch-protection verification is claimed. See the run for exact output.
+          '''
+          Path('docs/adoption/VERIFICATION.md').write_text(text, encoding='utf-8')
+          with Path('PROGRESS.md').open('a', encoding='utf-8') as out:
+              out.write(f'\n## Bằng chứng bộ khung\n\nDoctor/gate đã chạy thành công: {url}\nChỉ xác nhận repository/framework, không xác nhận app.\n')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --all
+          git add -f .claude/project-commands.sh
+          git config core.hooksPath scripts/githooks
+          git commit -m 'chore: adopt projects-template for X-Scanner with verified repository gates'
+          git push origin HEAD:main
+          echo 'Framework adoption committed; app implementation remains unstarted.' >> "$GITHUB_STEP_SUMMARY"
