@@ -1,0 +1,119 @@
+name: Maintenance sweep
+
+# VÌ SAO CẦN (spec docs/specs/2026-09-14-maintenance-agent.md): bảo trì là thứ "mục nát theo thời
+# gian dù code không đổi" — nhánh chết, PROGRESS.md lỗi thời, spec/goal treo, action chưa ghim,
+# bí mật lọt git, cổng khung bắt đầu đỏ. CI thường chỉ chạy khi có push, nên giữa hai đợt phát
+# triển không ai đo. Workflow này chạy theo LỊCH, đo bằng đúng engine `scripts/maintenance-sweep.sh`
+# mà `/maintain` dùng, rồi gom về MỘT issue tổng hợp làm tín hiệu cho người dùng gõ `/maintain`.
+#
+# Chỉ ĐỌC + ĐO rồi mở/cập nhật/đóng MỘT issue. Không tự sửa, không mở PR, không nâng dependency
+# (dependency đã có dependabot.yml + dependency-review.yml; ở đây chạy --no-deps cho nhanh, sạch).
+
+on:
+  schedule:
+    - cron: '47 6 * * 1' # 06:47 UTC thứ Hai hằng tuần — sau stale-pr-alert (06:17), không trùng
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # engine đếm nhánh đã merge + khoảng cách với origin/main
+
+      - name: Quét bảo trì (chỉ đọc + đo)
+        id: sweep
+        run: |
+          set +e
+          bash scripts/maintenance-sweep.sh --no-deps --out maintenance-report.md
+          rc=$?
+          set -e
+          # Sweep chết ≠ sweep sạch: thoát ngay, không bước nào sau đụng tới issue (F-202).
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::maintenance-sweep.sh thoát mã $rc — không cập nhật/đóng issue"
+            exit 1
+          fi
+          red="$(grep -m1 -oE '🔴 [0-9]+' maintenance-report.md | grep -oE '[0-9]+' || true)"
+          yel="$(grep -m1 -oE '🟡 [0-9]+' maintenance-report.md | grep -oE '[0-9]+' || true)"
+          if [ -z "$red" ] || [ -z "$yel" ]; then
+            echo "::error::báo cáo không hoàn chỉnh: thiếu dòng tổng '🔴 N · 🟡 N' — không cập nhật/đóng issue"
+            exit 1
+          fi
+          echo "red=$red" >> "$GITHUB_OUTPUT"
+          echo "yel=$yel" >> "$GITHUB_OUTPUT"
+          # Step summary được ghi ở bước sau, cùng chỗ cắt + bọc fence với body issue (một nguồn).
+
+      - name: Mở / cập nhật / đóng issue tổng hợp
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          RED: ${{ steps.sweep.outputs.red }}
+          YEL: ${{ steps.sweep.outputs.yel }}
+        with:
+          script: |
+            const fs = require('fs');
+            const MARKER = '<!-- maintenance-sweep -->';
+            const red = Number(process.env.RED || '0');
+            const yel = Number(process.env.YEL || '0');
+            let report = fs.readFileSync('maintenance-report.md', 'utf8');
+            const MAX = 60000; // issue body giới hạn 65536 ký tự — cắt TRƯỚC khi bọc để fence đóng còn nguyên
+            const truncated = report.length > MAX;
+            if (truncated) report = report.slice(0, MAX);
+            // Report chứa tên file/nội dung repo (dữ liệu không tin cậy, ADR-0009): bọc code fence
+            // ```text để không render thành markdown/HTML/@mention. Fence dài hơn mọi chuỗi backtick
+            // trong report để nội dung không tự đóng fence sớm.
+            const longestTicks = (report.match(/`+/g) || []).reduce((m, t) => Math.max(m, t.length), 0);
+            const fence = '`'.repeat(Math.max(3, longestTicks + 1));
+            const fenced = `${fence}text\n${report}\n${fence}` + (truncated ? '\n\n_(cắt bớt — xem log workflow)_' : '');
+            await core.summary.addRaw(fenced, true).write();
+
+            // Chỉ issue do chính workflow tạo: người ngoài mở issue chứa MARKER không chiếm được kênh báo cáo.
+            const existing = (
+              await github.paginate(github.rest.issues.listForRepo, {
+                ...context.repo, state: 'open', per_page: 100,
+              })
+            ).find((i) => !i.pull_request && i.user?.login === 'github-actions[bot]' && (i.body || '').includes(MARKER));
+
+            if (red === 0 && yel === 0) {
+              if (existing) {
+                await github.rest.issues.createComment({
+                  ...context.repo, issue_number: existing.number,
+                  body: 'Lượt quét mới: 🔴 0 · 🟡 0 — đóng issue. Sẽ mở lại khi có phát hiện.',
+                });
+                await github.rest.issues.update({ ...context.repo, issue_number: existing.number, state: 'closed' });
+                core.info(`Đã đóng issue #${existing.number} (sạch)`);
+              } else {
+                core.info('Sạch — không có gì để báo.');
+              }
+              return;
+            }
+
+            const title = `Bảo trì: 🔴 ${red} · 🟡 ${yel} phát hiện (quét ${new Date().toISOString().slice(0, 10)})`;
+            const body = [
+              MARKER,
+              fenced,
+              '',
+              '### Bước tiếp theo',
+              '',
+              'Mở phiên Claude Code trong repo và gõ `/maintain` — agent `maintainer` sẽ triage, lập',
+              '`docs/ops/MAINTENANCE-PLAN.md` chờ duyệt, rồi thực thi từng PR nhỏ qua `/gate`.',
+              '',
+              '_Cập nhật tự động bởi `.github/workflows/maintenance.yml`._',
+            ].join('\n');
+
+            if (existing) {
+              await github.rest.issues.update({ ...context.repo, issue_number: existing.number, title, body });
+              core.info(`Đã cập nhật issue #${existing.number}`);
+            } else {
+              const { data } = await github.rest.issues.create({ ...context.repo, title, body });
+              core.info(`Đã mở issue #${data.number}`);
+            }

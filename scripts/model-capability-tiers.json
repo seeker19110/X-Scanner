@@ -1,0 +1,45 @@
+{
+  "_comment": "Ánh xạ CẤP NĂNG LỰC (không phải model cụ thể) sang các ứng viên đa nhà cung cấp cho từng cấp. Dùng ở Tầng 1 (chọn planner) và khi Tầng 2 dispatch Tầng 3 qua scripts/subagent-dispatch.sh --tier. TÁCH RA FILE RIÊNG (không hard-code trong .py) vì model/hãng đổi theo thời gian — xem docs/framework/orchestration-3-tier.md + models-and-automation.md §2b.",
+  "_verified_on": "2026-09-15",
+  "_source": "scripts/maintain-run.sh (cú pháp CLI đã xác minh: hermes-agents/skills/cli-provider-bridges + doubt-driven-development + opencode) — CHỈ liệt kê harness/provider ĐÃ CÓ nhánh xử lý thật trong scripts/subagent-dispatch.py hoặc scripts/maintain-run.sh. Model cụ thể của hãng ngoài Claude (GPT/Gemini phiên bản nào) PHẢI xác minh lại bằng subagent version-check hoặc nguồn sống trước khi chốt — không bịa số phiên bản (CLAUDE.md §4).",
+  "_note": "'harness' khớp giá trị --harness của subagent-dispatch.sh/maintain-run.sh. 'model_hint' là gợi ý alias, KHÔNG phải cam kết — verify_before_use=true nghĩa là bắt buộc tra nguồn sống trước khi dùng thật.",
+  "tiers": {
+    "planning": {
+      "desc": "Lập kế hoạch / quyết định kiến trúc — Tầng 1, cần suy luận sâu nhất, ít tần suất",
+      "candidates": [
+        { "provider": "anthropic", "harness": "claude", "model_hint": "claude-opus-5-5 (chuyển tay bằng /model cho pha lập kế hoạch) hoặc claude-fable-5-1 cho ca khó nhất", "verify_before_use": false },
+        { "provider": "google-qua-hermes", "harness": "hermes --provider antigravity", "model_hint": "gemini-3.1-pro", "verify_before_use": true },
+        { "provider": "openai", "harness": "codex", "model_hint": "model mặc định của `codex exec` (CLI không nhận --model qua maintain-run.sh)", "verify_before_use": true }
+      ]
+    },
+    "complex": {
+      "desc": "route:complex — phức tạp, còn chỗ tự quyết trong ranh giới brief",
+      "candidates": [
+        { "provider": "anthropic", "harness": "claude", "model_hint": "opus · effort medium (subagent complex-implementer)", "verify_before_use": false },
+        { "provider": "google-qua-hermes", "harness": "hermes --provider antigravity", "model_hint": "gemini-3.7-flash (mức cao nếu có medium/pro)", "verify_before_use": true }
+      ]
+    },
+    "spec": {
+      "desc": "route:spec — phức tạp nhưng đặc tả kín, chỉ thi hành",
+      "candidates": [
+        { "provider": "anthropic", "harness": "claude", "model_hint": "sonnet · effort low (subagent spec-executor; cần Opus → route:complex)", "verify_before_use": false },
+        { "provider": "openai", "harness": "codex", "model_hint": "codex exec (thi hành đặc tả kín hợp thế mạnh)", "verify_before_use": true }
+      ]
+    },
+    "standard": {
+      "desc": "route:standard — việc vừa, đặc tả cụ thể (test theo spec, boilerplate, docs)",
+      "candidates": [
+        { "provider": "anthropic", "harness": "claude", "model_hint": "sonnet · effort medium (subagent standard-worker)", "verify_before_use": false },
+        { "provider": "google-qua-hermes", "harness": "hermes --provider antigravity", "model_hint": "gemini-3.6-flash", "verify_before_use": true },
+        { "provider": "opencode-local", "harness": "opencode", "model_hint": "model mặc định cấu hình trong opencode", "verify_before_use": true }
+      ]
+    },
+    "mechanical": {
+      "desc": "route:mechanical — cơ học theo mẫu/thông báo, khép kín, gần như không phán đoán",
+      "candidates": [
+        { "provider": "anthropic", "harness": "claude", "model_hint": "haiku (subagent mechanical-worker)", "verify_before_use": false },
+        { "provider": "google-qua-hermes", "harness": "hermes --provider antigravity", "model_hint": "gemini-3.5-flash", "verify_before_use": true }
+      ]
+    }
+  }
+}

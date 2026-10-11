@@ -1,0 +1,14 @@
+# Chủ sở hữu mã nguồn — tự gán reviewer cho mọi PR. LƯU Ý: ruleset main.json để required_approving_review_count = 0
+# và require_code_owner_review = false (repo một người) → file này chỉ auto-assign reviewer, KHÔNG phải cổng;
+# bật lại cả hai trong ruleset khi repo có ≥ 2 collaborator (docs/ops/repository-settings.md).
+# Cú pháp: <mẫu đường dẫn>  <@user hoặc @org/team>
+# Đổi @OWNER-CHANGE-ME thành chủ repo / team thật của dự án.
+
+# Mặc định: chủ repo review mọi thay đổi.
+*                         @OWNER-CHANGE-ME
+
+# Khu vực nhạy cảm — nên có review kỹ hơn (giữ đồng bộ khi thêm người).
+/.github/                 @OWNER-CHANGE-ME
+/.claude/                 @OWNER-CHANGE-ME
+/docs/framework/          @OWNER-CHANGE-ME
+/CLAUDE.md                @OWNER-CHANGE-ME

@@ -1,0 +1,37 @@
+name: "🎯 Large goal"
+description: Khởi tạo mục tiêu nhiều milestone/PR với metric và checkpoint
+title: "goal: "
+labels: ["type: goal", "status: framing"]
+body:
+  - type: textarea
+    id: outcome
+    attributes: {label: Outcome và user/job}
+    validations: {required: true}
+  - type: textarea
+    id: metric
+    attributes: {label: Baseline, target, window và guardrails}
+    validations: {required: true}
+  - type: textarea
+    id: complete
+    attributes:
+      label: Definition of Goal Complete
+      description: Tiêu chí kiểm chứng được, không dùng “code xong”.
+    validations: {required: true}
+  - type: textarea
+    id: scope
+    attributes: {label: Scope và non-goals}
+    validations: {required: true}
+  - type: checkboxes
+    id: authority
+    attributes:
+      label: Quyền cấp cho AI
+      options:
+        - label: Research và viết spec
+        - label: Tạo branch và draft PR
+        - label: Chuyển PR Ready
+        - label: Merge sau required checks
+        - label: Release/deploy/production
+  - type: textarea
+    id: stop
+    attributes: {label: Quyết định và điều kiện phải dừng}
+    validations: {required: true}

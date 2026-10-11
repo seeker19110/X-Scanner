@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# pre-commit — hook GIT chuẩn (harness-agnostic), bản chiếu của .claude/hooks/pre-commit-gate.sh cho
+# mọi công cụ không có hook Claude Code (Cursor/Codex/Copilot/Gemini/OpenCode, hay dev gõ tay).
+# Bật một lần trong dự án:   git config core.hooksPath scripts/githooks
+# Kiểm: (1) không commit trên main/master (ALLOW_COMMIT_ON_MAIN=1 bỏ qua); (2) không có chuỗi giống
+# bí mật / file > 1 MB trong diff staged; (3) cổng build/typecheck/lint/test qua scripts/dev-task.sh gate.
+# `git commit --no-verify` bỏ qua toàn bộ (cơ chế chuẩn của git — tường minh, có chủ ý).
+set -uo pipefail
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
+branch="$(git -C "$ROOT" branch --show-current 2>/dev/null || true)"
+if [ "${ALLOW_COMMIT_ON_MAIN:-0}" != "1" ] && { [ "$branch" = "main" ] || [ "$branch" = "master" ]; }; then
+  echo "pre-commit: đang ở '$branch' — mọi thay đổi vào nhánh chính đi qua PR (AGENTS.md). Tạo nhánh: git switch -c feat/<tên>. Cố ý: ALLOW_COMMIT_ON_MAIN=1." >&2
+  exit 1
+fi
+
+# Mẫu bí mật + ngưỡng file lớn: một nguồn scripts/_commit-guard.sh (chung với .claude/hooks/pre-commit-gate.sh và
+# maintenance-sweep). Tìm cạnh hook (core.hooksPath) rồi ở gốc repo (hook chép tay vào .git/hooks/).
+# Thiếu cả hai → CHẶN kèm lời nhắc: buông kiểm bí mật âm thầm không đảo ngược được, commit bị chặn thì có.
+for guard in "$(dirname "$0")/../_commit-guard.sh" "$ROOT/scripts/_commit-guard.sh"; do
+  # shellcheck source=scripts/_commit-guard.sh
+  [ -f "$guard" ] && . "$guard" && break
+done
+if [ -z "${COMMIT_GUARD_SECRET_RE:-}" ] || ! declare -F commit_guard_added_lines >/dev/null; then   # lib cũ thiếu hàm lọc → fail-closed
+  echo "pre-commit: thiếu hoặc cũ scripts/_commit-guard.sh (mẫu bí mật + bộ lọc dùng chung) — copy từ khung (copy-framework.sh), hoặc git commit --no-verify có chủ đích." >&2
+  exit 1
+fi
+if git -C "$ROOT" diff --cached -U0 -- 2>/dev/null | commit_guard_added_lines | grep -Eq "$COMMIT_GUARD_SECRET_RE"; then
+  echo "pre-commit: diff staged chứa chuỗi giống khoá/token (AWS/PEM/GitHub/GitLab/Google/OpenAI/Anthropic/Slack/Stripe/JWT/npm/SendGrid/Hugging Face/DigitalOcean/Azure) — gỡ khỏi staged, dùng biến môi trường, xoay khoá nếu đã lộ." >&2
+  exit 1
+fi
+big=""
+while IFS= read -r -d '' f; do
+  [ -f "$ROOT/$f" ] || continue   # gitlink repo lồng = thư mục, không phải file để đo (TRAPS mục 67)
+  sz="$(wc -c <"$ROOT/$f" 2>/dev/null || echo 0)"; [ "$sz" -gt "$COMMIT_GUARD_MAX_FILE_BYTES" ] && big="$big $f"
+done < <(git -C "$ROOT" diff --cached --name-only --diff-filter=AM -z -- 2>/dev/null)
+[ -z "$big" ] || { echo "pre-commit: file staged > 1 MB:$big — Git LFS hoặc loại khỏi repo." >&2; exit 1; }
+
+if [ -x "$ROOT/scripts/dev-task.sh" ]; then
+  # Git truyền GIT_DIR/GIT_INDEX_FILE/... vào hook. Gate tạo repo tạm để kiểm thử;
+  # giữ các biến đó sẽ khiến lệnh git trong repo tạm trỏ ngược về repo thật.
+  git_local_vars="$(git -C "$ROOT" rev-parse --local-env-vars)" || {
+    echo "pre-commit: không xác định được biến Git nội bộ để chạy gate an toàn." >&2
+    exit 1
+  }
+  (
+    while IFS= read -r name; do
+      [ -n "$name" ] && unset "$name"
+    done <<< "$git_local_vars"
+    "$ROOT/scripts/dev-task.sh" gate
+  ) || { echo "pre-commit: cổng build/typecheck/lint/test ĐỎ — sửa rồi commit lại." >&2; exit 1; }
+fi
+exit 0

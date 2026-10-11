@@ -1,0 +1,52 @@
+# Biến môi trường
+.env
+.env*.local
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+!.env.*.example
+!.env.*.sample
+!.env.*.template
+
+# Linh tinh
+.DS_Store
+
+# Bytecode cache Python (scripts/*.py sinh ra khi chạy/test các engine)
+__pycache__/
+*.pyc
+
+# Khai bao lenh dev dac thu du an (copy tu .claude/project-commands.example.sh)
+.claude/project-commands.sh
+
+# Permission/setting ca nhan (copy tu .claude/settings.local.json.example) — khong dung chung
+.claude/settings.local.json
+
+# MCP server ca nhan/co bi mat that (copy mau tu .mcp.json.example)
+.mcp.local.json
+
+# Ước tính usage (tự hiệu chỉnh) + marker
+.claude/usage-budget.sh
+.claude/.winddown-nudged
+.claude/.compact-checkpoint
+
+# Khoá tiến trình của maintain-cron.sh (chạy không giám sát trên VPS/cron) — không commit
+.claude/.maintain-cron.lock
+
+# Dữ liệu nhật ký telemetry động cục bộ (telemetry-log.py)
+.ai-telemetry/
+# tên cũ, giữ lại để repo đã clone trước 2026-09-13 không commit nhầm log cũ
+.hermes/
+
+# Contract tests tự động sinh bởi spec-compiler.py
+tests/contracts/
+
+# Báo cáo quét bảo trì sinh lại mỗi lượt (maintenance-sweep.sh); KẾ HOẠCH + LOG thì commit
+docs/ops/MAINTENANCE-REPORT.md
+
+# coverage.py (scripts/test-py-coverage.sh sinh ở gốc)
+.coverage
+htmlcov/
+
+# Worktree do Claude Code tạo cho subagent (isolation: worktree) — repo lồng, không đưa vào git
+.claude/worktrees/

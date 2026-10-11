@@ -46,7 +46,7 @@ def apply(source: Path, target: Path) -> None:
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dst)
     shutil.rmtree(drop)
-    for rel in ('.nvmrc', '.mcp.json', '.codex/config.toml'):
+    for rel in ('.nvmrc', '.codex/config.toml'):
         src = target / rel
         if src.exists():
             dst = archive / (rel + '.example')
@@ -54,9 +54,9 @@ def apply(source: Path, target: Path) -> None:
             shutil.move(str(src), str(dst))
     write(target, '.codex/config.toml', '# Inherit local provider/model/context configuration; no credentials or paid automation selected.')
     settings = json.loads((target / '.claude/settings.json').read_text(encoding='utf-8'))
-    for key in ('model', 'fallbackModel', 'effortLevel', 'env', 'enabledMcpjsonServers'):
+    for key in ('model', 'fallbackModel', 'effortLevel', 'env'):
         settings.pop(key, None)
-    settings['permissions']['allow'] = [entry for entry in settings['permissions']['allow'] if entry != 'mcp__context7']
+    # Preserve upstream Context7 permission for developer documentation only.
     write(target, '.claude/settings.json', json.dumps(settings, ensure_ascii=False, indent=2))
     overlay = f'''# X-Scanner — project context (2026-10-11)
 
@@ -66,7 +66,7 @@ Template example stacks/models and the proposed P0–P4 roadmap do not authorize
 Use `.claude/project-commands.sh`: `bash scripts/dev-task.sh doctor` and `bash scripts/dev-task.sh gate`.
 Build/typecheck N/A applies only to this adoption; replace with real app checks before product implementation.
 Framework PASS is not evidence of mobile build, scan, OCR, depth or release quality.
-Inherit a live model from the operator's configured provider; no paid API or external MCP is mandatory.
+Inherit a live model from the operator's provider; no paid API is required. Context7 is for developer docs only; never send scans or OCR.
 Parallel work requires disjoint files, separate worktrees and agreed interface contracts.
 Never upload real documents/OCR, log sensitive contents, invent missing text or discard scan originals.
 Do not activate release, auto-merge, schedulers, cloud services or X-Agents from this advisory alone.
@@ -215,7 +215,7 @@ License nguồn giữ nguyên ở third_party/projects-template.LICENSE, không 
 
 ## Điều chỉnh
 
-Giữ research ADVISORY; không app scaffold, .nvmrc ép Node, model/context 500k mặc định hoặc MCP ngoài.
+Giữ research ADVISORY; không app scaffold, .nvmrc ép Node, model/context 500k mặc định; giữ Context7 của khung chỉ để tra tài liệu phát triển.
 Giữ hooks an toàn; developer cần jq và hooksPath cục bộ. Gate chỉ cho adoption;
 build/typecheck N/A có lý do, phải thay trước khi code app.
 
@@ -326,7 +326,7 @@ class AdoptionTests(unittest.TestCase):
         self.assertFalse((ROOT / '_framework-dropins').exists())
         self.assertFalse(list(ROOT.rglob('*.framework-new')))
         self.assertFalse((ROOT / '.nvmrc').exists())
-        self.assertFalse((ROOT / '.mcp.json').exists())
+        self.assertTrue((ROOT / '.mcp.json').exists())
 
     def test_no_forced_model(self):
         settings = json.loads((ROOT / '.claude/settings.json').read_text())
@@ -339,6 +339,8 @@ class AdoptionTests(unittest.TestCase):
         self.assertIn('Chưa chốt stack', text)
         self.assertNotIn('radar 100/100', text)
         self.assertIn('N/A', (ROOT / 'PROJECT.md').read_text(encoding='utf-8'))
+        for directory in ('apps', 'packages', 'android', 'ios'):
+            self.assertFalse((ROOT / directory).exists(), 'Configure real product gates before adding application source')
 
 if __name__ == '__main__':
     if sys.argv[1:] == ['--lint']:

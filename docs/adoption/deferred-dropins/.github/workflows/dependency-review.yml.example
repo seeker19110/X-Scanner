@@ -1,0 +1,51 @@
+name: Dependency review
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Detect project manifest
+        id: project
+        shell: bash
+        run: |
+          # Checkout only contains tracked files; scan every directory for monorepos.
+          manifest_list="$(mktemp)" || exit 1
+          trap 'rm -f "$manifest_list"' EXIT
+          git ls-files -z > "$manifest_list" || {
+            echo "::error::Cannot list tracked manifests; dependency review must not be skipped."
+            exit 1
+          }
+          while IFS= read -r -d '' file; do
+            case "${file##*/}" in
+              package.json|package-lock.json|pnpm-lock.yaml|yarn.lock|\
+              pyproject.toml|requirements*.txt|Pipfile|Pipfile.lock|poetry.lock|\
+              go.mod|Cargo.toml|Cargo.lock|pom.xml|build.gradle|build.gradle.kts|\
+              Gemfile|Gemfile.lock|composer.json|composer.lock)
+                echo "exists=true" >> "$GITHUB_OUTPUT"
+                echo "Found $file"
+                exit 0
+                ;;
+            esac
+          done < "$manifest_list"
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+          echo "::notice::No tracked dependency manifest found; dependency review is skipped."
+
+      - name: Review dependency changes
+        if: steps.project.outputs.exists == 'true'
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high

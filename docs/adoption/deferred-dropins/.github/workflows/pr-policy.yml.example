@@ -1,0 +1,118 @@
+name: PR policy
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate title, evidence and approved feature spec
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || "";
+            const title = /^(feat|fix|refactor|docs|test|chore|style|perf|build|ci|revert)(\([a-z0-9._/-]+\))?!?: .+/;
+            if (!title.test(pr.title)) core.setFailed("PR title must follow Conventional Commits.");
+            // Trần WIP = tối đa 5 PR mở toàn repo, mọi tác giả, kể cả draft/bot (CLAUDE.md §8).
+            // Đếm mọi PR KHÁC trước miễn trừ metadata; PR này là cái thứ 6 trở đi → đỏ.
+            const openPrs = await github.paginate(github.rest.pulls.list, {
+              owner: context.repo.owner, repo: context.repo.repo, state: "open", per_page: 100,
+            });
+            const others = openPrs.filter(p => p.number !== pr.number);
+            if (others.length >= 5) {
+              core.setFailed(`Trần WIP: đã có ${others.length} PR khác đang mở (#${others.map(p => p.number).join(", #")}) — tối đa 5 PR mở đồng thời (CLAUDE.md §8). Merge/đóng bớt rồi re-run check này.`);
+            }
+            if (pr.draft) return;
+            // Miễn trừ PR do BOT tạo (audit 2026-09-12, F-001 — nguyên nhân gốc):
+            // dependabot/renovate không thể điền các mục của PR template, nên required check này
+            // KHÔNG BAO GIỜ xanh được → 5 PR nâng cấp bảo mật kẹt 19 ngày mà không ai lần ra lý do
+            // (cổng đỏ nhìn giống "PR chưa đạt chuẩn"). Kiểm tiêu đề conventional ở trên VẪN áp dụng.
+            const BOT_ACTORS = ["dependabot[bot]", "renovate[bot]", "github-actions[bot]"];
+            if (BOT_ACTORS.includes(pr.user.login)) {
+              core.info(`PR của bot (${pr.user.login}) → miễn trừ yêu cầu mục PR template.`);
+              return;
+            }
+            // Tiêu đề ≤ 72 ký tự và không ký tự điều khiển/mojibake (TRAPS mục 22: cổng chỉ soi tiền tố
+            // nên tiêu đề hỏng vẫn qua; audit 2026-09-23 C10).
+            if (pr.title.length > 72) core.setFailed(`PR title dài ${pr.title.length} ký tự (tối đa 72 — squash lấy làm tiêu đề commit trên main).`);
+            if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\uFFFD]/.test(pr.title)) core.setFailed("PR title chứa ký tự điều khiển hoặc U+FFFD (mojibake).");
+            // fix: mà không chạm TRAPS.md → chỉ CẢNH BÁO (CLAUDE.md §1: bug là một khuôn thì ghi TRAPS; typo thì không).
+            if (/^fix(\(|:)/.test(pr.title)) {
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number, per_page: 100,
+              });
+              if (!files.some(f => f.filename === "TRAPS.md")) {
+                core.warning("PR fix: không chạm TRAPS.md — nếu bug này là một KHUÔN (không phải lỗi gõ một lần) thì thêm mục TRAPS trong cùng PR (CLAUDE.md §8 bước 0).");
+              }
+            }
+            const headings = ["## Summary", "## Issue / Goal", "## Research / Spec",
+              "## Validation", "## Risk, rollout and rollback", "## Definition of Done"];
+            const missing = headings.filter(h => !body.includes(h));
+            if (missing.length) core.setFailed(`Missing PR sections: ${missing.join(", ")}`);
+            // Feature gate phải soi CẢ tiêu đề PR LẪN tiêu đề từng commit (audit 2026-09-13, B-01).
+            // VÌ SAO: squash merge dùng tiêu đề COMMIT khi PR chỉ có MỘT commit, nên trước đây một
+            // PR đặt tiêu đề `test:` mà commit ghi `feat:` sẽ đưa commit feat: vào main mà KHÔNG
+            // qua Feature gate. Xảy ra thật ở PR #99 (main nhận 76fc65e "feat(test): ...").
+            // Chuỗi nào CÓ THỂ thành tiêu đề commit trên main thì chuỗi đó phải bị soi.
+            const commits = await github.paginate(github.rest.pulls.listCommits, {
+              owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number,
+            });
+            const commitSubjects = commits.map(c => (c.commit.message || "").split("\n")[0]);
+            // Độ dài cũng phải soi ở tiêu đề commit: PR MỘT commit thì squash lấy tiêu đề commit, không lấy
+            // tiêu đề PR — #234 (tiêu đề PR 66 ký tự) đưa lên main một tiêu đề commit 90 ký tự (TRAPS mục 58).
+            const longSubjects = commitSubjects.filter(sub => sub.length > 72);
+            if (longSubjects.length) {
+              core.setFailed("Tiêu đề commit dài quá 72 ký tự (squash có thể lấy làm tiêu đề commit trên main): " +
+                longSubjects.map(s => `${s.length}: ${s}`).join(" | "));
+            }
+            const badSubjects = commitSubjects.filter(sub => !title.test(sub));
+            if (badSubjects.length) {
+              core.setFailed(
+                "Mọi commit phải theo Conventional Commits (squash có thể lấy tiêu đề commit làm " +
+                "tiêu đề commit trên main). Vi phạm: " + badSubjects.join(" | "));
+            }
+
+            const featureSubjects = [pr.title, ...commitSubjects].filter(t => /^feat(\(|:)/.test(t));
+            if (featureSubjects.length) {
+              if (!/docs\/specs\/\d{4}-\d{2}-\d{2}-[a-z0-9-]+\.md/.test(body)) {
+                core.setFailed("Feature PR must link docs/specs/YYYY-MM-DD-slug.md. " +
+                  "Tiêu đề kiểu feat: " + featureSubjects.join(" | "));
+              }
+              if (!/Approved for implementation/i.test(body)) {
+                core.setFailed("Feature spec must be Approved for implementation. " +
+                  "Tiêu đề kiểu feat: " + featureSubjects.join(" | "));
+              }
+            }
+      # Work ID (2026-10-09): mỗi PR ghi `Work ID: <ngày-slug>` trỏ tới hồ sơ docs/work/<id>/ có thật trên
+      # nhánh PR, để truy được từ PR về việc đã giao (standard-delivery §3e). Cùng miễn trừ draft/bot như trên.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: ${{ !github.event.pull_request.draft && !contains(fromJSON('["dependabot[bot]","renovate[bot]","github-actions[bot]"]'), github.event.pull_request.user.login) }}
+        with:
+          persist-credentials: false
+      - name: Work ID trỏ tới hồ sơ có thật
+        if: ${{ !github.event.pull_request.draft && !contains(fromJSON('["dependabot[bot]","renovate[bot]","github-actions[bot]"]'), github.event.pull_request.user.login) }}
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          id="$(printf '%s\n' "$PR_BODY" | tr -d '\r' | sed -n 's/^[-*[:space:]]*Work ID:[[:space:]]*`\{0,1\}\([^`[:space:]]*\)`\{0,1\}[[:space:]]*$/\1/p' | head -n 1)"
+          if ! [[ "$id" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+            echo "::error::Mô tả PR thiếu dòng 'Work ID: YYYY-MM-DD-slug' hợp lệ (nhận: '${id}') — mục Issue / Goal."
+            exit 1
+          fi
+          if [ ! -f "docs/work/$id/working.md" ] && [ ! -f "docs/work/$id/done.md" ]; then
+            echo "::error::Work ID '$id' không có hồ sơ docs/work/$id/working.md hoặc done.md trên nhánh PR."
+            exit 1
+          fi
+          echo "Work ID $id → docs/work/$id/"

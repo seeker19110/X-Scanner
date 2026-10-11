@@ -1,0 +1,35 @@
+{
+  "_readme": "Mẫu MCP server dùng chung cho mọi AI coding agent hỗ trợ MCP (Claude Code, Cursor, Codex CLI...). Copy phần cần dùng sang .mcp.json của dự án — KHÔNG bật server dự án không dùng tới. Server cần xác thực (token/API key) phải khai báo qua biến môi trường, KHÔNG hardcode giá trị thật vào file này.",
+
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "_note": "Tra cứu tài liệu/thư viện mới nhất — dùng ở bước research-first (KHUNG-3)."
+    },
+
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "_note": "Chỉ bật khi agent cần thao tác PR/issue trực tiếp qua MCP thay vì gh CLI."
+    },
+
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+      "_note": "Truy cập file có giới hạn phạm vi — cân nhắc dùng thay vì quyền đọc/ghi không giới hạn khi giao việc cho agent ít tin cậy hơn."
+    },
+
+    "postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL}"],
+      "_note": "Chỉ bật cho dự án có Postgres và cần agent tự truy vấn schema/dữ liệu. KHÔNG trỏ vào CSDL production chứa dữ liệu người dùng thật."
+    }
+  }
+}

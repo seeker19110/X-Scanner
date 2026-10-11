@@ -1,0 +1,29 @@
+name: "🐛 Bug report"
+description: Lỗi tái hiện được với impact và verification
+title: "fix: "
+labels: ["type: bug", "status: triage"]
+body:
+  - type: textarea
+    id: impact
+    attributes: {label: User impact, severity và frequency}
+    validations: {required: true}
+  - type: textarea
+    id: reproduce
+    attributes: {label: Reproduction steps}
+    validations: {required: true}
+  - type: textarea
+    id: expected
+    attributes: {label: Expected behavior}
+    validations: {required: true}
+  - type: textarea
+    id: actual
+    attributes: {label: Actual behavior}
+    validations: {required: true}
+  - type: textarea
+    id: environment
+    attributes: {label: Environment và evidence đã loại sensitive data}
+    validations: {required: true}
+  - type: textarea
+    id: verify
+    attributes: {label: Regression test và fix verification}
+    validations: {required: true}

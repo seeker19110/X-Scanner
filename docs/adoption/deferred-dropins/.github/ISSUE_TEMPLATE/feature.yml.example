@@ -1,0 +1,39 @@
+name: "💡 Feature research"
+description: Nghiên cứu và đặc tả trước implementation
+title: "research: "
+labels: ["type: feature", "status: discovery"]
+body:
+  - type: markdown
+    attributes:
+      value: "Không code trước khi docs/specs/* được Approved for implementation."
+  - type: textarea
+    id: problem
+    attributes: {label: Problem, user và evidence}
+    validations: {required: true}
+  - type: textarea
+    id: outcome
+    attributes: {label: Baseline, target và guardrails}
+    validations: {required: true}
+  - type: textarea
+    id: research
+    attributes: {label: Kế hoạch research code/data/user/source}
+    validations: {required: true}
+  - type: textarea
+    id: options
+    attributes: {label: Alternatives kể cả không làm}
+    validations: {required: true}
+  - type: textarea
+    id: unknowns
+    attributes: {label: Assumptions, unknowns và decisions cần chốt}
+    validations: {required: true}
+  - type: checkboxes
+    id: gate
+    attributes:
+      label: Spec gate
+      options:
+        - label: Chưa sửa source trước khi research hoàn tất.
+          required: true
+        - label: Sẽ tạo docs/specs/YYYY-MM-DD-slug.md từ canonical template.
+          required: true
+        - label: Chỉ code sau Approved, approver và date.
+          required: true

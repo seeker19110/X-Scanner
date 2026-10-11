@@ -1,0 +1,9 @@
+{
+  "repository": "seeker19110/projects-template",
+  "commit": "aab9f887ec4acc4480da852cc300978979087f6b",
+  "date": "2026-10-11",
+  "method": "official copy-framework.sh --no-hooks",
+  "research_sha256": "aa482f885977673dbbda05284c82da174273e05b8ba1a636b4533dc39445ee3e",
+  "scope": "framework-adoption-only",
+  "product_stack": null
+}
