@@ -103,7 +103,7 @@ Không quyền camera/lưu trữ, không mạng, không log. Không dữ liệu 
 | AC-4 | `apps/mobile/test/core/scan_page_test.dart::normalizes quarter turns` | unit |
 | AC-5 | `apps/mobile/test/app_test.dart::shows the app shell in dark mode by default` | widget |
 | AC-6 | `scripts/check-adoption.py::test_app_requires_real_gates` | guard |
-| AC-7 | `thủ công: GitHub Actions "Repository checks" xanh trên head của PR-2` | CI run của head PR |
+| AC-7 | thủ công: GitHub Actions "Repository checks" xanh trên head của PR-2 | CI run của head PR |
 
 ## 17. Slice/PR plan
 

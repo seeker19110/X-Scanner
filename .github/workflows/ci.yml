@@ -16,21 +16,37 @@ concurrency:
 
 jobs:
   framework-gate:
-    name: Framework gate (not mobile build)
+    name: Framework and Android app gate
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - name: Checkout exact revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+      - name: Install pinned Flutter SDK (ADR-0002)
+        shell: bash
+        env:
+          FLUTTER_VERSION: 3.47.7
+          FLUTTER_SHA256: af7455f540df951184c7953fbe3cf884766e7541dacf8571f9f582db03dd6230
+        run: |
+          set -euo pipefail
+          archive="flutter_linux_${FLUTTER_VERSION}-stable.tar.xz"
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/$archive" \
+            "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/$archive"
+          echo "$FLUTTER_SHA256  $RUNNER_TEMP/$archive" | sha256sum -c -
+          tar -xJf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP"
+          rm "$RUNNER_TEMP/$archive"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/flutter/bin/flutter" --disable-analytics
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
       - name: Verify prerequisites and reviewed commands
         shell: bash
         run: |
           set -euo pipefail
           git config core.hooksPath scripts/githooks
           bash scripts/dev-task.sh doctor
-      - name: Run syntax, provenance, regression and upstream hook tests
+      - name: Run app build, analyze, format, tests and repository checks
         shell: bash
         run: |
           set -euo pipefail
@@ -40,7 +56,6 @@ jobs:
         run: |
           {
             echo '## X-Scanner repository checks'
-            echo 'PASS: reviewed repository checks and upstream safety-hook tests.'
-            echo 'App build/typecheck, scan, OCR and depth benchmarks are not implemented or verified.'
-            echo 'Replace adoption-only commands with real product gates before adding application source.'
+            echo 'PASS: Android debug APK build, flutter analyze, dart format, flutter test and repository checks.'
+            echo 'Not verified here: iOS build, physical-device camera/depth, scan quality, OCR or release readiness.'
           } >> "$GITHUB_STEP_SUMMARY"

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Reviewed: docs/specs/2026-10-11-framework-adoption.md; assignments only, no secrets.
-export gate_tools='bash git python3 jq'
-export lint='python3 scripts/check-adoption.py --lint'
-export test='python3 scripts/check-adoption.py && bash scripts/test-hooks-gate.sh && bash scripts/test-hooks-gate-guard.sh'
-export gate_skip_build_reason='Adoption-only: no application source or chosen SDK; not a mobile build. Replace before product implementation.'
-export gate_skip_typecheck_reason='Adoption-only docs and Bash; syntax/JSON checks run in lint. Add real language analysis when the app stack is chosen.'
+# Reviewed: docs/specs/2026-10-11-p0-foundation.md (ADR-0002); assignments only, no secrets.
+# Flutter app gates run in apps/mobile; each command runs in its own bash -c from the repo root.
+export gate_tools='bash git python3 jq flutter'
+export format='cd apps/mobile && dart format lib test'
+export lint='python3 scripts/check-adoption.py --lint && cd apps/mobile && dart format --output=none --set-exit-if-changed lib test'
+export typecheck='cd apps/mobile && flutter analyze --fatal-infos'
+export test='python3 scripts/check-adoption.py && bash scripts/test-hooks-gate.sh && bash scripts/test-hooks-gate-guard.sh && cd apps/mobile && flutter test'
+export build='cd apps/mobile && flutter build apk --debug'

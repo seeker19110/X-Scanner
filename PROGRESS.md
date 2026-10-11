@@ -13,7 +13,8 @@ Stack chốt ở ADR-0002 (Flutter 3.47.7, Android trước); spec P0 nền Appr
 
 ## Chưa thực hiện
 
-Chưa tạo app; chưa chạy mobile build, scan, OCR, depth hoặc benchmark.
+App nền `apps/mobile`: build APK debug, analyze, test chạy trong gate/CI (PR-2).
+Chưa build iOS; chưa chạy camera, scan, OCR, depth hoặc benchmark trên thiết bị.
 Branch protection/ruleset và security gates theo stack chưa xác minh áp dụng.
 Release, tự merge, dịch vụ ngoài và tác vụ định kỳ chưa bật. P0–P4 chỉ là gợi ý.
 

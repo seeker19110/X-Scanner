@@ -2,16 +2,16 @@
 
 ## Trạng thái
 
-Greenfield / discovery. Chủ dự án: @seeker19110.
-Đã duyệt ngày 2026-10-11: lưu nghiên cứu làm gợi ý và áp dụng projects-template.
+Greenfield / P0 nền. Chủ dự án: @seeker19110.
+Đã duyệt ngày 2026-10-11: lưu nghiên cứu, áp dụng projects-template, stack ADR-0002 và spec P0 nền.
 Mục tiêu sản phẩm: scan tài liệu, xuất PDF hoặc ảnh; nghiên cứu khoảng cách/depth để tăng chất lượng.
 Người dùng: người cần số hóa tài liệu; phân khúc cụ thể và nền tảng phát hành chưa chốt.
 Outcome: bản scan rõ, đủ và file dùng được; chưa có số đo thực nghiệm.
 
 ## Scope hiện tại
 
-Advisory, bộ khung chuẩn, project brief, hướng dẫn agent, gate repository và provenance.
-Không có code camera, OCR, PDF engine hoặc mobile app trong lần áp dụng này.
+App Flutter nền `apps/mobile` (Android trước) và lõi hợp đồng trang `PageQuad`/`ScanPage` theo
+`docs/specs/2026-10-11-p0-foundation.md`. Chưa có camera, depth, OCR, PDF engine hoặc lưu trữ.
 
 ## Gợi ý, không phải quyết định
 
@@ -28,9 +28,10 @@ bắt buộc tài khoản/cloud/billing hoặc gọi AI API trả phí.
 
 Đặc tả sản phẩm cần kiểm tra bảo toàn bản gốc/nội dung, quyền camera/lưu trữ, retention,
 không log/upload tài liệu thật, Unicode Việt, bộ nhớ và fallback depth.
-Còn mở: nền tảng, stack/SDK, thiết bị, OCR/PDF engine, giấy phép, threat model và benchmark.
+Đã chốt: Flutter 3.47.7, Android build trước (ADR-0002). Còn mở: thiết bị, đường capture native/depth,
+OCR/PDF engine, giấy phép sản phẩm, threat model và benchmark.
 
 ## Gate hiện tại
 
-Doctor/gate qua scripts/dev-task.sh. Build/typecheck app **N/A**, không phải PASS.
-Trước feature đầu: spec duyệt, ADR phù hợp, lệnh app thật, SDK ghim phiên bản và review license.
+Doctor/gate qua scripts/dev-task.sh: build APK debug, `flutter analyze --fatal-infos`, `dart format`, `flutter test`
+và kiểm tra repository; CI chạy cùng gate. Build iOS và kiểm thử thiết bị thật: **chưa kiểm chứng**.

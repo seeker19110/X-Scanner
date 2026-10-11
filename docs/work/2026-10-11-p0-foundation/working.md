@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-11-p0-foundation
 - Yêu cầu / outcome: `/auto-complete` sau báo cáo hiện trạng; outcome đề xuất = chốt stack + nền app có cổng build/type/lint/test thật (P0 nền).
-- Trạng thái: Active — PR-1.
+- Trạng thái: Active — PR-2 (PR-1 merged `cf620cf`).
 - Chủ trì / writer: phiên chính.
 - Mức rủi ro / số PR: L (quyết định stack khó đảo); 2 PR: PR-1 docs + guard, PR-2 feat giao worker.
 - Scope / non-goal: theo `docs/specs/2026-10-11-p0-foundation.md` §5.
@@ -23,6 +23,12 @@
 - Một dự án `apps/mobile`, lõi `lib/core/` Dart thuần · loại package `packages/scan_core` riêng · bậc 2.
 - Chỉ `PageQuad` + `ScanPage` ở P0 · loại `ScanSession`/lưu phiên · bậc 2 (nhu cầu thuộc P1).
 - CI tải archive Flutter ghim sha256 · loại `subosito/flutter-action` · bậc 1 (chuỗi cung ứng) rồi bậc 2.
+- PR-1 https://github.com/seeker19110/X-Scanner/pull/1 merged squash `cf620cf` sau CI xanh trên head `14df309`.
+- Gradle wrapper giữ `-all.zip` của template + SHA all `17f27786…6e43` (xác minh services.gradle.org) · loại đổi sang `-bin.zip` · bậc 2 (không lệch file template, ít rủi ro khi migrate).
+- Phân giao: T1 (app + lõi) giao `complex-implementer` qua brief đã `--check-plan` OK; phiên chính làm gate/CI/tài liệu (file không trùng).
+- Worker: test lõi đỏ trước (17 lỗi `UnimplementedError` từ stub) → xanh 18/18; 4 lệnh cổng thoát 0. Phiên chính review diff `lib/`, `test/`.
+- Gate PR-2 cục bộ: `dev-task.sh gate` PASS 4/4 (build APK debug, analyze 0 issue, format, 7 guard + hook + 18 Flutter test), 54 s. `spec-compiler.sh --trace` TRACE COMPLETE sau khi sửa định dạng ô AC-7 (bỏ backtick cho bằng chứng thủ công).
+- `docs/adoption/source.json` giữ nguyên (provenance của lần áp khung) · loại ghi `product_stack` · bậc 2; lệch nhỏ so với spec §11.
 - Môi trường cục bộ đã cài (ngoài repo): Flutter 3.47.7 `/root/sdk/flutter` (sha256 OK), Android cmdline-tools 23.0 (sha1 OK), platform 36, build-tools 36.0.0.
 
 ## Lần thử / blocker
@@ -41,7 +47,7 @@
 
 ## Bàn giao / bước tiếp theo
 
-Mở PR-1 (docs + guard), chờ CI xanh, squash merge; rồi reset nhánh về `main` và giao PR-2 cho worker.
+Mở PR-2, chờ CI xanh trên head (AC-7), squash merge; rồi `/completion`.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
