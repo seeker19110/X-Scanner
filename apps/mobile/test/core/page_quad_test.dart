@@ -91,5 +91,15 @@ void main() {
       expect(quad.topRight, const Point<double>(0.1, 0));
       expect(PageQuad.minArea, 0.01);
     });
+
+    test('area exactly minArea is accepted anywhere in the frame', () {
+      // Same 0.1 x 0.1 square translated; floating-point rounding must not
+      // make the 1% boundary depend on position.
+      expect(quadOf([0.6, 0.6, 0.7, 0.6, 0.7, 0.7, 0.6, 0.7]), isA<PageQuad>());
+      expect(
+        quadOf([0.3, 0.2, 1.0, 0.2, 1.0, 0.2 + 1 / 70, 0.3, 0.2 + 1 / 70]),
+        isA<PageQuad>(),
+      );
+    });
   });
 }

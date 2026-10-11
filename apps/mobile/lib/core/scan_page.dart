@@ -48,5 +48,6 @@ class ScanPage {
     return value;
   }
 
-  static int _normalizeQuarterTurns(int value) => ((value % 4) + 4) % 4;
+  /// Dart's int `%` is Euclidean: never negative for a positive divisor.
+  static int _normalizeQuarterTurns(int value) => value % 4;
 }

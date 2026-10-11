@@ -31,6 +31,10 @@ class PageQuad {
   /// Minimum allowed area: 1% of the frame.
   static const double minArea = 0.01;
 
+  /// Tolerance for the area check so floating-point rounding of the
+  /// shoelace sum cannot make the boundary depend on the quad's position.
+  static const double _areaTolerance = 1e-9;
+
   /// The whole image.
   static const PageQuad fullFrame = PageQuad._(
     Point<double>(0, 0),
@@ -89,7 +93,7 @@ class PageQuad {
 
   static void _checkArea(List<Point<double>> corners) {
     final area = _shoelaceArea(corners);
-    if (area < minArea) {
+    if (area < minArea - _areaTolerance) {
       throw ArgumentError.value(area, 'area', 'must be at least $minArea');
     }
   }
