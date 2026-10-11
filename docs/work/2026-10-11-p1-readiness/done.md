@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-11-p1-readiness
 - Yêu cầu / outcome: `/auto-complete` lần 2 (chủ repo chưa trả lời câu hỏi thiết bị/P1). Outcome: gia cố P0 đã duyệt + spec P1 sẵn để duyệt.
-- Trạng thái: Blocked — chờ chủ repo duyệt spec P1 (§19 D1–D4). PR-A merged; PR-B (spec) mở.
+- Trạng thái: Done — PR-A (#4) và PR-B (#5) merged; spec P1 được chủ repo duyệt 2026-10-11.
 - Chủ trì / writer: phiên chính; PR-A giao `mechanical-worker`.
 - Mức rủi ro / số PR: S (PR-A chore) + docs (PR-B spec, không code); 2 PR tuần tự (một nhánh được giao).
 - Scope / non-goal: trong scope = gia cố cổng P0 + research/spec P1 (In review). Non-goal: code tính năng P1 (chưa được duyệt), release, chi phí mới.
@@ -33,18 +33,10 @@
 
 ## Lần thử / blocker
 
-- BLOCKED: code P1 cần chủ repo ghi "Approved for implementation" trong `docs/specs/2026-10-11-p1-scan-export.md` và chốt D1–D4.
+- Từng BLOCKED chờ chủ repo duyệt spec P1; gỡ ngày 2026-10-11 (chủ repo chọn "Duyệt theo đề xuất").
 
+## Nghiệm thu cuối
 
-<Failure, số lần cùng failure, giả thuyết đã bác bỏ, blocker và cách kiểm tiếp.>
-
-## Bàn giao / bước tiếp theo
-
-Chủ repo đọc `docs/specs/2026-10-11-p1-scan-export.md` §4, §17, §19 → trả lời D1–D4 và duyệt. Có duyệt → tạo goal P1,
-PR-1 `ScanSession` + `SessionStore` theo §17. Không duyệt → sửa spec theo phản hồi.
-
-## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
-
-<DoD, mọi PR MERGED + merge SHA và main đã đối chiếu, giới hạn/rủi ro còn lại,
-ngày và người nghiệm thu theo ủy quyền. Khi đủ điều kiện rename working.md → done.md
-trong cùng thư mục; không overwrite lịch sử. Chưa có PR/merge thì giữ working.md.>
+- PR-A https://github.com/seeker19110/X-Scanner/pull/4 → `8e1c319`; PR-B https://github.com/seeker19110/X-Scanner/pull/5 → `b6c0113` (CI xanh, job 114509830542).
+- Outcome đạt: Flutter ghim trong pubspec; spec P1 có trên `main` và đã được duyệt. Việc tiếp theo ở `docs/work/2026-10-11-p1-scan-export/`.
+- Nghiệm thu: phiên chính theo ủy quyền §3d, 2026-10-11.

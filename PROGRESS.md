@@ -13,10 +13,11 @@ PR seeker19110/X-Scanner#1 (`cf620cf`), seeker19110/X-Scanner#2 (`37658f9`).
 Stack chốt ở ADR-0002 (Flutter 3.47.7, Android trước); spec P0 nền Approved bởi chủ repo 2026-10-11.
 App nền `apps/mobile` + lõi `PageQuad`/`ScanPage`: build APK debug, analyze, test chạy trong gate/CI (PR-2).
 
-## Đang chờ chủ repo
+## Đang làm: P1 scan và xuất (2026-10-11)
 
-Hồ sơ `docs/work/2026-10-11-p1-readiness/working.md` (Blocked). Spec P1 `docs/specs/2026-10-11-p1-scan-export.md`
-In review: duyệt + chốt D1–D4 (capture, 5 dependency, backup dữ liệu, cách UAT trên thiết bị). Flutter đã ghim trong pubspec (#4).
+Hồ sơ `docs/work/2026-10-11-p1-scan-export/working.md` · goal `docs/goals/2026-10-11-p1-scan-export.md`.
+Spec P1 `docs/specs/2026-10-11-p1-scan-export.md` Approved bởi chủ repo (D1 camera hệ thống, D2 5 dependency,
+D3 tắt backup, D4 UAT emulator do chủ repo chạy). Chuẩn bị: #4 ghim Flutter, #5 spec (hồ sơ `2026-10-11-p1-readiness` done).
 Spike camera/ARCore depth trên thiết bị thật vẫn cần thiết bị.
 
 ## Chưa thực hiện

@@ -2,14 +2,14 @@
 
 | Thuộc tính | Giá trị |
 | --- | --- |
-| Issue / Goal | Work ID `2026-10-11-p1-readiness` (spec); goal tạo khi Approved |
+| Issue / Goal | `docs/goals/2026-10-11-p1-scan-export.md` · Work ID `2026-10-11-p1-scan-export` (spec soạn ở `2026-10-11-p1-readiness`) |
 | Spec owner | Phiên chính (Claude Code) |
-| State | **In review** — chờ chủ repo duyệt; chưa được code |
-| Approver / date | Chưa duyệt |
+| State | **Approved for implementation** |
+| Approver / date | Chủ repo, chọn "Duyệt theo đề xuất" trực tiếp trong phiên — 2026-10-11 |
 | Last updated | 2026-10-11 |
 
-> `CLAUDE.md` (ngữ cảnh X-Scanner): lộ trình P0–P4 không tự cho phép triển khai sản phẩm. Spec này chỉ được code
-> khi chủ repo ghi **Approved for implementation** kèm tên/ngày, và chốt các quyết định mở ở §19.
+> `CLAUDE.md` (ngữ cảnh X-Scanner): lộ trình P0–P4 không tự cho phép triển khai sản phẩm. Chủ repo đã duyệt spec
+> này và chốt D1–D4 theo đề xuất (§19) ngày 2026-10-11; chỉ phạm vi P1 ở đây được code.
 
 ## 1. Problem, user và evidence
 
@@ -37,8 +37,13 @@ giữ bản gốc. Chưa có dữ liệu người dùng; mọi số liệu ở �
 | `camera` | 0.12.1 | flutter.dev | BSD-3-Clause | Phương án thay cho capture (preview tự dựng) |
 | `google_mlkit_document_scanner` | 0.6.1 | flutter-ml.dev | MIT | Phương án thay (scanner hệ thống) |
 
-Ràng buộc tối thiểu của mọi package (Flutter ≥ 3.24–3.44, Dart ≥ 3.0–3.12) đều thoả với Flutter 3.47.7 / Dart 3.13.5 đang ghim. `image` 4.12.0 phát hành 2026-10-11 — khi code, chọn bản ổn định
-mới nhất đã phát hành ≥ 7 ngày và kiểm lại changelog.
+Ràng buộc tối thiểu của mọi package (Flutter ≥ 3.24–3.44, Dart ≥ 3.0–3.12) đều thoả với Flutter 3.47.7 / Dart 3.13.5 đang ghim. Ghim khi code (bản ổn định mới nhất đã phát hành ≥ 7 ngày, kiểm 2026-10-11): `image_picker` 1.2.3 (1.2.4 mới 5 ngày),
+`path_provider` 2.1.6, `image` 4.10.1 (4.10.2–4.12.0 phát hành 2026-10-10/11), `pdf` 3.13.1 (`image` >=4.1.0 <=5.0.0),
+`share_plus` 13.3.1.
+
+Kiểm mã nguồn `image` 4.10.1: `copyRectify` nội suy **song tuyến** 4 góc, không phải phép chiếu phối cảnh, nên làm
+méo tỷ lệ chữ khi trang chụp nghiêng mạnh. FR-5 vì vậy dùng homography (ánh xạ hình vuông → tứ giác, dạng đóng)
+tự viết, lấy mẫu bằng `getPixelInterpolate` của `image`.
 
 ## 4. Alternatives và decision
 
@@ -75,7 +80,8 @@ Chụp → Xem lại → Xuất.
   crash, giữ bản gốc, báo phiên không phục hồi được.
 - FR-3 Xoá trang/chụp lại: chỉ khi người dùng xác nhận; file gốc của trang bị thay/xoá chỉ bị dọn khi phiên được lưu xong.
 - FR-4 Chỉnh góc: 4 điểm kéo được, ràng buộc bởi `PageQuad` (không cho tạo tứ giác không hợp lệ); xoay 90°.
-- FR-5 Render: nắn phối cảnh từ bản gốc bằng `copyRectify` trong isolate; preview dùng thumbnail giới hạn cạnh dài.
+- FR-5 Render: nắn phối cảnh từ bản gốc bằng homography (§3) trong isolate, sau khi áp hướng EXIF; giải mã từ chối ảnh
+  quá `maxPixels`; preview dùng thumbnail giới hạn cạnh dài.
 - FR-6 Xuất PDF: mỗi trang một trang PDF, giữ tỷ lệ ảnh (không kéo giãn), chiều theo ảnh; xuất JPG/PNG từng trang.
 - FR-7 Chia sẻ file xuất qua share sheet; file tạm xuất được dọn sau khi chia sẻ xong hoặc khi mở lại app.
 
@@ -105,9 +111,12 @@ export) · test tương ứng dưới `test/` · `pubspec.yaml`/`pubspec.lock` (
 
 ## 12–13. Contract và dữ liệu
 
-Manifest `session.json`: `{schemaVersion: 1, pages: [{id, original, quad: [8 số], quarterTurns}]}`; đường dẫn tương
-đối thư mục app. Dữ liệu là tài liệu người dùng (có thể nhạy cảm): chỉ ở thư mục riêng của app, xoá khi người dùng xoá
-phiên; không backup ra cloud mặc định (`android:allowBackup` cần quyết định — §19).
+Manifest `session.json`: `{schemaVersion: 1, pages: [{id, original, quad: [8 số], quarterTurns}]}`; `original` là
+đường dẫn tương đối thư mục phiên, đúng khuôn `originals/<id>.<ext>` (từ chối đường dẫn tuyệt đối, `..`, id lạ).
+Tọa độ `quad` tính trên ảnh gốc **sau khi áp hướng EXIF**, trước `quarterTurns`. Manifest hỏng được đổi tên sang
+`session.corrupt-<thời điểm>.json` (giữ để phục hồi tay), bản gốc không bị dọn khi manifest không đọc được. Dữ liệu là tài liệu người dùng (có thể nhạy cảm): chỉ ở thư mục riêng của app, xoá khi người dùng xoá
+phiên; không backup ra cloud và không chuyển máy (`android:allowBackup="false"` + `dataExtractionRules` loại trừ mọi
+miền — D3).
 
 ## 14. Security/privacy/abuse cases
 
@@ -130,8 +139,9 @@ app trừ khi người dùng chủ động chia sẻ. Cần Data Governance ng�
 
 ## 17. Slice/PR plan
 
-PR-1 `ScanSession` + `SessionStore` (AC-1..3) → PR-2 nắn ảnh (AC-5) → PR-3 UI chụp/xem lại/chỉnh góc + Dark/Light
-(AC-4, AC-7, AC-8) → PR-4 xuất PDF/ảnh + chia sẻ (AC-6) → UAT AC-9. Tuần tự vì chung `pubspec.lock`.
+PR-0 `docs` duyệt spec/goal → PR-1 `ScanSession` + `SessionStore` (AC-1..3, không dependency mới: thư mục được tiêm
+vào) → PR-2 nắn ảnh + `image` (AC-5) → PR-3 UI chụp/xem lại/chỉnh góc + Dark/Light + `image_picker`/`path_provider`
++ D3 (AC-4, AC-7, AC-8) → PR-4 xuất PDF/ảnh + `pdf`/`share_plus` (AC-6) → UAT AC-9. Tuần tự vì chung `pubspec.lock`.
 
 ## 18. Rollout/rollback
 
@@ -141,22 +151,22 @@ Chưa phát hành. Mỗi PR revert được độc lập theo thứ tự ngượ
 
 | Item | Verification/mitigation | Owner | Due | Decision |
 | --- | --- | --- | --- | --- |
-| D1 Capture: phương án A (camera hệ thống) hay B (`camera` plugin) | Đề xuất A cho P1, B ở P2 | Chủ repo | Trước code | **Mở** |
-| D2 Thêm 5 dependency ở §3 | License đã ghi; ghim phiên bản khi code | Chủ repo | Trước code | **Mở** |
-| D3 `android:allowBackup` cho dữ liệu tài liệu | Đề xuất tắt backup thư mục phiên | Chủ repo | Trước PR-1 | **Mở** |
-| D4 Cách kiểm AC-9 (máy thật hay emulator) | Không có thiết bị trong phiên AI | Chủ repo | Trước UAT | **Mở** |
+| D1 Capture: phương án A (camera hệ thống) hay B (`camera` plugin) | A cho P1, B ở P2 | Chủ repo | Trước code | **A** (2026-10-11) |
+| D2 Thêm 5 dependency ở §3 | License đã ghi; ghim phiên bản ở §3 | Chủ repo | Trước code | **Đồng ý** (2026-10-11) |
+| D3 `android:allowBackup` cho dữ liệu tài liệu | Tắt backup + chuyển máy | Chủ repo | PR-3 | **Tắt** (2026-10-11) |
+| D4 Cách kiểm AC-9 (máy thật hay emulator) | Container AI không có `/dev/kvm` nên không chạy được emulator | Chủ repo | Sau PR-4 | **Emulator**, chủ repo chạy; máy thật sau |
 | Hiệu năng `copyRectify` thuần Dart trên ảnh 12 MP | Đo ở PR-2; vượt ngân sách → ADR cho native/OpenCV | Phiên chính | PR-2 | Theo dõi |
 
-Không Approved khi còn quyết định mở.
+Mọi quyết định chặn đã đóng.
 
 ## Approval
 
-- [ ] Product/scope
-- [ ] UX/a11y
-- [ ] Architecture/API/data
-- [ ] Security/privacy/cost
-- [ ] Test/telemetry/rollout/rollback
-- [ ] Blocking decisions closed
+- [x] Product/scope — §5, phương án A
+- [x] UX/a11y — §6, §8
+- [x] Architecture/API/data — §11–13
+- [x] Security/privacy/cost — §14, D3; không chi phí
+- [x] Test/telemetry/rollout/rollback — §16, §18
+- [x] Blocking decisions closed — D1–D4
 
-**Conclusion:** In review
-**Approver/date:** chưa duyệt
+**Conclusion:** **Approved for implementation**
+**Approver/date:** chủ repo chọn "Duyệt theo đề xuất" (D1 A, D2 5 dependency, D3 tắt backup, D4 emulator) — 2026-10-11.
