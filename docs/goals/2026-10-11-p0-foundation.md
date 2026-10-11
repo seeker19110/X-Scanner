@@ -4,8 +4,8 @@
 | --- | --- |
 | Goal ID | 2026-10-11-p0-foundation |
 | Owner | Chủ repo; thực thi: phiên chính |
-| State | ACTIVE |
-| Default-branch SHA đã reconcile | `cf620cf` |
+| State | COMPLETE |
+| Default-branch SHA đã reconcile | `37658f9` |
 | Bắt đầu / review | 2026-10-11 |
 | Quyền AI | research / branch / PR / merge khi CI xanh (chủ repo xác nhận 2026-10-11); không deploy/release |
 | Budget | Không chi phí mới; CI runner Linux |
@@ -22,7 +22,7 @@
 | ID | Outcome/AC | Dependency | Spec | PR | State | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
 | S1 | ADR-0002, spec, guard AC-6 | — | `docs/specs/2026-10-11-p0-foundation.md` | #1 | DONE | merge `cf620cf`, CI xanh |
-| S2 | App nền + lõi + gate/CI, AC-1..5, AC-7 | S1 merged | như trên | PR-2 | VERIFY | gate PASS 4/4 cục bộ; chờ CI |
+| S2 | App nền + lõi + gate/CI, AC-1..5, AC-7 | S1 merged | như trên | #2 | DONE | merge `37658f9`; CI job 114502711383: gate PASS 4/4, 20/20 test |
 
 ## Risk register
 
@@ -32,5 +32,5 @@
 
 ## Current truth
 
-- Goal gap: S2 chưa merge.
+- Goal gap: không còn — Goal DoD đạt 2026-10-11.
 - Blocker/open decision: spike thiết bị nằm ngoài goal này.

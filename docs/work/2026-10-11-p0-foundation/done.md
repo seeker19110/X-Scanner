@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-11-p0-foundation
 - Yêu cầu / outcome: `/auto-complete` sau báo cáo hiện trạng; outcome đề xuất = chốt stack + nền app có cổng build/type/lint/test thật (P0 nền).
-- Trạng thái: Active — PR-2 (PR-1 merged `cf620cf`).
+- Trạng thái: Done — PR-1, PR-2 merged; Goal DoD đạt.
 - Chủ trì / writer: phiên chính.
 - Mức rủi ro / số PR: L (quyết định stack khó đảo); 2 PR: PR-1 docs + guard, PR-2 feat giao worker.
 - Scope / non-goal: theo `docs/specs/2026-10-11-p0-foundation.md` §5.
@@ -30,6 +30,8 @@
 - Gate PR-2 cục bộ: `dev-task.sh gate` PASS 4/4 (build APK debug, analyze 0 issue, format, 7 guard + hook + 18 Flutter test), 54 s. `spec-compiler.sh --trace` TRACE COMPLETE sau khi sửa định dạng ô AC-7 (bỏ backtick cho bằng chứng thủ công).
 - `docs/adoption/source.json` giữ nguyên (provenance của lần áp khung) · loại ghi `product_stack` · bậc 2; lệch nhỏ so với spec §11.
 - Review `code-review` trên diff PR-2 (9 điểm): sửa #1 diện tích phụ thuộc vị trí do sai số số thực (test đỏ-trước `area exactly minArea is accepted anywhere in the frame` → dung sai 1e-9), #5 `% 4` Euclid, #6 tên launcher Android/iOS "X-Scanner", #7 test FR-3 `core library does not import Flutter` (đỏ khi chèn import), #8 spec §11, #9 PROGRESS. Không sửa trong PR này: #2 nút chuyển Light (UI P1; spec chốt Dark mặc định), #3 doctor kiểm phiên bản SDK, #4 cache CI — ghi ở Bàn giao · bậc 2 (không mở rộng PR).
+- PR-2 https://github.com/seeker19110/X-Scanner/pull/2 merged squash `37658f9` sau CI xanh trên head `2bfa22c` (job 114502711383: `dev-task` PASS 4/4, 20/20 Flutter test); 0 review thread.
+- `/completion` dừng ở Bước -1 của `comprehensive-audit-prompt.md` · loại chạy audit 12 nhóm + FEATURE-MAP/CONVENTIONS/CODEMAP · bậc 1 (đúng/chống ảo giác: chưa có luồng người dùng nào — chỉ khung template, màn hình giữ chỗ, lõi hợp đồng trang; audit sẽ phải bịa phát hiện). Definition of Complete cấp dự án: chưa áp dụng được, không tuyên bố đạt.
 - Môi trường cục bộ đã cài (ngoài repo): Flutter 3.47.7 `/root/sdk/flutter` (sha256 OK), Android cmdline-tools 23.0 (sha1 OK), platform 36, build-tools 36.0.0.
 
 ## Lần thử / blocker
@@ -48,11 +50,14 @@
 
 ## Bàn giao / bước tiếp theo
 
-Mở PR-2, chờ CI xanh trên head (AC-7), squash merge; rồi `/completion`.
-Việc sau (chưa lên lịch): nút chuyển Dark/Light + kiểm AA cả hai chế độ (P1 UI); doctor kiểm Flutter 3.47.7/Android SDK/Java 17; cache Flutter/Gradle/pub trong CI; spike camera/depth trên thiết bị (cần chủ repo).
+Việc sau (chưa lên lịch, cần chủ repo chọn): spike camera độ phân giải cao + ARCore depth trên thiết bị Android thật
+→ ADR đường capture native; nút chuyển Dark/Light + kiểm AA cả hai chế độ; doctor kiểm Flutter 3.47.7/Android SDK/Java 17;
+cache Flutter/Gradle/pub trong CI; build iOS khi có macOS runner. Khi có luồng người dùng đầu tiên (P1) mới chạy `/completion`.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
-<DoD, mọi PR MERGED + merge SHA và main đã đối chiếu, giới hạn/rủi ro còn lại,
-ngày và người nghiệm thu theo ủy quyền. Khi đủ điều kiện rename working.md → done.md
-trong cùng thư mục; không overwrite lịch sử. Chưa có PR/merge thì giữ working.md.>
+- Ngày: 2026-10-11 · nghiệm thu: phiên chính theo ủy quyền + xác nhận (a)(b)(c) của chủ repo.
+- PR: seeker19110/X-Scanner#1 → `cf620cf`, seeker19110/X-Scanner#2 → `37658f9` (đều MERGED, CI xanh trên head, 0 review thread mở).
+- AC: AC-1..6 map tới test (`spec-compiler.sh --trace` TRACE COMPLETE); AC-7 = CI job 114502711383 PASS trên `2bfa22c`.
+- DoD: spec Approved trước code; test đỏ-trước (17 stub + 2 hồi quy review); gate cục bộ + CI xanh; không quyền/mạng/log; tài liệu cập nhật.
+- Giới hạn còn lại: iOS chưa build; không có camera/depth/scan/OCR; chưa kiểm thiết bị; branch protection chưa xác minh.
