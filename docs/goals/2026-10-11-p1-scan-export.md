@@ -5,7 +5,7 @@
 | Goal ID | 2026-10-11-p1-scan-export |
 | Owner | Chủ repo; thực thi: phiên chính + worker |
 | State | ACTIVE |
-| Default-branch SHA đã reconcile | `b6c0113` |
+| Default-branch SHA đã reconcile | `a1549c5` |
 | Bắt đầu / review | 2026-10-11 |
 | Quyền AI | research / branch / PR / merge khi CI xanh; không deploy/release |
 | Budget | Không chi phí mới; CI runner Linux |
@@ -22,8 +22,8 @@
 
 | ID | Outcome/AC | Dependency | Spec | PR | State | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| S0 | Spec Approved, goal, hồ sơ | — | `docs/specs/2026-10-11-p1-scan-export.md` | PR-0 | IN PROGRESS | |
-| S1 | `ScanSession` + `SessionStore`, AC-1..3 | S0 | như trên | PR-1 | TODO | |
+| S0 | Spec Approved, goal, hồ sơ | — | `docs/specs/2026-10-11-p1-scan-export.md` | #6 | DONE | merge `a1549c5`, CI xanh |
+| S1 | `ScanSession` + `SessionStore`, AC-1..3 | S0 | như trên | PR-1 | IN PROGRESS | gate cục bộ PASS 99/99 |
 | S2 | Nắn phối cảnh, AC-5 | S1 | như trên | PR-2 | TODO | |
 | S3 | UI chụp/xem lại/chỉnh góc + Dark/Light, AC-4, AC-7, AC-8 | S2 | như trên | PR-3 | TODO | |
 | S4 | Xuất PDF/ảnh + chia sẻ, AC-6 | S3 | như trên | PR-4 | TODO | |
@@ -38,5 +38,5 @@
 
 ## Current truth
 
-- Goal gap: toàn bộ S1–S5.
+- Goal gap: S1–S5.
 - Blocker/open decision: không.
