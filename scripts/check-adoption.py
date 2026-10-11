@@ -75,13 +75,16 @@ class AdoptionTests(unittest.TestCase):
         self.assertIn('hooks', settings)
         self.assertTrue(settings['permissions']['deny'])
 
-    def test_no_fake_product_completion(self):
-        text = (ROOT / 'PROGRESS.md').read_text(encoding='utf-8')
-        self.assertIn('Chưa chốt stack', text)
-        self.assertNotIn('radar 100/100', text)
-        self.assertIn('N/A', (ROOT / 'PROJECT.md').read_text(encoding='utf-8'))
-        for directory in ('apps', 'packages', 'android', 'ios'):
-            self.assertFalse((ROOT / directory).exists(), 'Configure real product gates before adding application source')
+    def test_app_requires_real_gates(self):
+        self.assertNotIn('radar 100/100', (ROOT / 'PROGRESS.md').read_text(encoding='utf-8'))
+        commands = (ROOT / '.claude/project-commands.sh').read_text(encoding='utf-8')
+        if not any((ROOT / d).exists() for d in ('apps', 'packages', 'android', 'ios')):
+            self.assertIn('N/A', (ROOT / 'PROJECT.md').read_text(encoding='utf-8'))
+            return
+        for task in ('build', 'typecheck'):
+            with self.subTest(task=task):
+                self.assertNotIn(f'gate_skip_{task}_reason', commands,
+                                 'Configure real product gates before adding application source')
 
 if __name__ == '__main__':
     if sys.argv[1:] == ['--lint']:

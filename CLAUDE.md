@@ -1,7 +1,7 @@
 # X-Scanner — project context (2026-10-11)
 
 Read PROJECT.md, PROGRESS.md and `docs/research/2026-10-11-scanner-product-suggestions.md` first. Research is **ADVISORY**, not approved architecture.
-Only saving suggestions and framework adoption is approved in this change. No app source exists yet.
+Approved: suggestions, framework adoption and P0 foundation (ADR-0002, `docs/specs/2026-10-11-p0-foundation.md`). No app source exists yet.
 Template example stacks/models and the proposed P0–P4 roadmap do not authorize product implementation.
 Use `.claude/project-commands.sh`: `bash scripts/dev-task.sh doctor` and `bash scripts/dev-task.sh gate`.
 Build/typecheck N/A applies only to this adoption; replace with real app checks before product implementation.
