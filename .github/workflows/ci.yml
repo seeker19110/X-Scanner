@@ -1,0 +1,46 @@
+name: Repository checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  framework-gate:
+    name: Framework gate (not mobile build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify prerequisites and reviewed commands
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config core.hooksPath scripts/githooks
+          bash scripts/dev-task.sh doctor
+      - name: Run syntax, provenance, regression and upstream hook tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/dev-task.sh gate
+      - name: State verification scope
+        shell: bash
+        run: |
+          {
+            echo '## X-Scanner repository checks'
+            echo 'PASS: reviewed repository checks and upstream safety-hook tests.'
+            echo 'App build/typecheck, scan, OCR and depth benchmarks are not implemented or verified.'
+            echo 'Replace adoption-only commands with real product gates before adding application source.'
+          } >> "$GITHUB_STEP_SUMMARY"
