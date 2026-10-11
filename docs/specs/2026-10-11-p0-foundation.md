@@ -3,9 +3,9 @@
 | Thuộc tính | Giá trị |
 | --- | --- |
 | Issue / Goal | `docs/goals/2026-10-11-p0-foundation.md` · Work ID `2026-10-11-p0-foundation` |
-| Spec owner | Phiên chính (Claude Code) theo `/auto-complete` của chủ repo |
-| State | In review — chờ chủ repo xác nhận |
-| Approver / date | Chưa duyệt |
+| Spec owner | Phiên chính (Claude Code), `/auto-complete` |
+| State | **Approved for implementation** |
+| Approver / date | Chủ repo, xác nhận trực tiếp trong phiên — 2026-10-11 |
 | Last updated | 2026-10-11 |
 
 ## 1. Problem, user và evidence
@@ -124,12 +124,12 @@ Không phát hành. Rollback = revert squash commit của PR-2; PR-1 chỉ tài 
 
 ## Approval
 
-- [ ] Product/scope — chỉ nền P0, không tính năng người dùng mới
-- [ ] UX/a11y — màn hình nền tối giản, token theme
-- [ ] Architecture/API/data — ADR-0002, §12–13
-- [ ] Security/privacy/cost — không quyền/mạng/chi phí
-- [ ] Test/telemetry/rollout/rollback — §16, §18
-- [ ] Blocking decisions closed — spike thiết bị nằm ngoài scope
+- [x] Product/scope — chỉ nền P0, không tính năng người dùng mới
+- [x] UX/a11y — màn hình nền tối giản, token theme
+- [x] Architecture/API/data — ADR-0002, §12–13
+- [x] Security/privacy/cost — không quyền/mạng/chi phí
+- [x] Test/telemetry/rollout/rollback — §16, §18
+- [x] Blocking decisions closed — spike thiết bị nằm ngoài scope
 
-**Conclusion:** In review — chưa được code.
-**Approver/date:** chờ chủ repo.
+**Conclusion:** **Approved for implementation**
+**Approver/date:** chủ repo xác nhận trực tiếp trong phiên (a) triển khai P0 nền, (b) đổi guard AC-6, (c) merge khi CI xanh — 2026-10-11.

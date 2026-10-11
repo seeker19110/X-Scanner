@@ -1,6 +1,6 @@
 # ADR-0002: Flutter, Android trước, lõi Dart thuần cho hợp đồng trang
 
-- **Trạng thái:** Đề xuất — chờ chủ repo xác nhận (ngữ cảnh X-Scanner trong `CLAUDE.md`/`AGENTS.md` nói research/roadmap không tự cho phép triển khai sản phẩm).
+- **Trạng thái:** Đã chấp nhận — chủ repo xác nhận trực tiếp trong phiên ngày 2026-10-11 (cho phép triển khai P0 nền, đổi guard AC-6, merge khi CI xanh).
 - **Ngày:** 2026-10-11
 - **Work ID:** `2026-10-11-p0-foundation`
 

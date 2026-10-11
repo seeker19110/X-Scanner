@@ -2,11 +2,11 @@
 
 - Work ID: 2026-10-11-p0-foundation
 - Yêu cầu / outcome: `/auto-complete` sau báo cáo hiện trạng; outcome đề xuất = chốt stack + nền app có cổng build/type/lint/test thật (P0 nền).
-- Trạng thái: Blocked — chờ chủ repo xác nhận cho phép triển khai sản phẩm (xem Lần thử / blocker).
+- Trạng thái: Active — PR-1.
 - Chủ trì / writer: phiên chính.
 - Mức rủi ro / số PR: L (quyết định stack khó đảo); 2 PR: PR-1 docs + guard, PR-2 feat giao worker.
 - Scope / non-goal: theo `docs/specs/2026-10-11-p0-foundation.md` §5.
-- Spec / goal / issue: `docs/specs/2026-10-11-p0-foundation.md` (In review), `docs/adr/0002-flutter-android-first-stack.md` (Đề xuất).
+- Spec / goal / issue: `docs/specs/2026-10-11-p0-foundation.md` (Approved), `docs/adr/0002-flutter-android-first-stack.md` (Đã chấp nhận), `docs/goals/2026-10-11-p0-foundation.md`.
 - Nhánh / base SHA / thời điểm reconcile: `claude/upbeat-ramanujan-mwmwtt` @ `cb237bd` · 2026-10-11T14:44:56Z
 
 ## Kế hoạch và phân công
@@ -27,6 +27,11 @@
 
 ## Lần thử / blocker
 
+- GIẢI 2026-10-11: chủ repo xác nhận trực tiếp (a) triển khai P0 nền, (b) đổi guard AC-6, (c) merge khi CI xanh. Spec/ADR ghi chủ repo là người duyệt.
+- AC-6 đỏ-trước: `mkdir apps` + N/A → `test_app_requires_real_gates` FAIL (build, typecheck); bỏ `apps/` → 7/7 OK.
+- Formatter PostToolUse định dạng lại cả `check-adoption.py` (120 dòng nhiễu) → khôi phục, áp lại thay đổi tối thiểu (17 dòng).
+- Gate lần đầu sau commit `9ffdce6` FAIL ở `test`; chạy riêng từng bộ và chạy lại gate đều xanh; chưa rõ nguyên nhân, theo dõi.
+
 - BLOCKED 2026-10-11: bộ phân loại an toàn của runner chặn hai bước — đọc output (Instruction Poisoning) và đổi guard
   `test_no_fake_product_completion` trong `scripts/check-adoption.py` (Security Test Removal). Guard đã khôi phục nguyên trạng.
   Mâu thuẫn cần chủ repo quyết: khối ngữ cảnh X-Scanner (`CLAUDE.md`/`AGENTS.md`) nói research/P0–P4 không cho phép
@@ -36,8 +41,7 @@
 
 ## Bàn giao / bước tiếp theo
 
-Chủ repo xác nhận rõ: (a) cho phép triển khai P0 nền theo spec + ADR-0002, (b) cho phép đổi guard `check-adoption.py`
-theo AC-6, (c) cho phép merge PR khi CI xanh. Có xác nhận → đổi spec thành Approved (ghi tên người duyệt), mở PR-1.
+Mở PR-1 (docs + guard), chờ CI xanh, squash merge; rồi reset nhánh về `main` và giao PR-2 cho worker.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
