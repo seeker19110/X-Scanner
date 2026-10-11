@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-11-p1-scan-export
 - Yêu cầu / outcome: `/auto-complete` lần 3; chủ repo duyệt spec P1 theo đề xuất (D1 A, D2 5 dependency, D3 tắt backup, D4 emulator). Outcome: Goal DoD ở `docs/goals/2026-10-11-p1-scan-export.md`.
-- Trạng thái: In progress — PR-0 (docs duyệt spec).
+- Trạng thái: In progress — PR-0 merged (#6 `a1549c5`); PR-1 mở.
 - Chủ trì / writer: phiên chính (PR-0, review/gate/tích hợp); PR-1..4 giao `complex-implementer`.
 - Mức rủi ro / số PR: L (dữ liệu tài liệu nhạy cảm, 5 dependency, nhiều màn hình); 5 PR tuần tự vì chung `pubspec.lock`.
 - Scope / non-goal: spec §5. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release.
@@ -28,13 +28,18 @@
 - D3: `allowBackup="false"` + `dataExtractionRules` loại mọi miền · loại chỉ `allowBackup` · bậc 1 (Android 12+ vẫn chuyển máy khi chỉ tắt `allowBackup`).
 - D4: AC-9 chủ repo chạy trên emulator · loại chạy trong phiên · bậc 1 (container không có `/dev/kvm`).
 
+- PR-0 https://github.com/seeker19110/X-Scanner/pull/6 merged squash `a1549c5` sau CI xanh (job 114603780732); 0 review thread.
+- PR-1 do `complex-implementer` viết theo brief `--check-plan` OK. Container khởi động lại nên báo cáo đỏ/xanh của worker bị mất; phiên chính đọc lại toàn bộ diff và chạy lại test.
+- Review PR-1 tìm thấy lỗi mất dữ liệu: sau khi manifest bị cách ly, lần `load` thành công kế tiếp xoá bản gốc của phiên hỏng (vì brief cho dọn mọi file không tham chiếu). Đỏ: test `a later new session never deletes the quarantined originals` → PathNotFoundException; sửa: khi còn `session.corrupt-*.json` chỉ dọn `.part`; xanh 22/22 · loại xoá bản gốc mồ côi · bậc 1.
+- Gate PR-1 cục bộ: `dev-task.sh gate` PASS 4/4, `flutter test` 99/99.
+
 ## Lần thử / blocker
 
 - Không.
 
 ## Bàn giao / bước tiếp theo
 
-- Merge PR-0, rồi giao PR-1 theo brief trong scratchpad của phiên (`PLAN-p1.md`).
+- Merge PR-1 khi CI xanh, rồi viết brief PR-2 (nắn ảnh + `image` 4.10.1).
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 

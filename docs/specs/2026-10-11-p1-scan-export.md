@@ -127,9 +127,9 @@ app trừ khi người dùng chủ động chia sẻ. Cần Data Governance ng�
 
 | AC | Bằng chứng | Ghi chú |
 | --- | --- | --- |
-| AC-1 | chưa có — test unit `ScanSession` + test lưu trữ (viết khi Approved) | |
-| AC-2 | chưa có — test `SessionStore` ghi/đọc lại | |
-| AC-3 | chưa có — test manifest hỏng | |
+| AC-1 | `apps/mobile/test/storage/session_store_test.dart::keeps original bytes and cleans the deleted page after save` | + `test/core/scan_session_test.dart` |
+| AC-2 | `apps/mobile/test/storage/session_store_test.dart::a new store on the same root restores pages and edits` | |
+| AC-3 | `apps/mobile/test/storage/session_store_test.dart::garbage manifest` | + schemaVersion 2, bản gốc thiếu, UTF-8 sai, bản gốc của phiên bị cách ly |
 | AC-4 | chưa có — widget test editor | |
 | AC-5 | chưa có — test nắn ảnh tổng hợp (không dùng ảnh thật) | |
 | AC-6 | chưa có — test PDF (đếm trang, kích thước) | |
