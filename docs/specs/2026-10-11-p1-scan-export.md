@@ -1,0 +1,162 @@
+# Feature spec: P1 — scan nhiều trang, chỉnh góc, lưu gốc, xuất PDF/ảnh
+
+| Thuộc tính | Giá trị |
+| --- | --- |
+| Issue / Goal | Work ID `2026-10-11-p1-readiness` (spec); goal tạo khi Approved |
+| Spec owner | Phiên chính (Claude Code) |
+| State | **In review** — chờ chủ repo duyệt; chưa được code |
+| Approver / date | Chưa duyệt |
+| Last updated | 2026-10-11 |
+
+> `CLAUDE.md` (ngữ cảnh X-Scanner): lộ trình P0–P4 không tự cho phép triển khai sản phẩm. Spec này chỉ được code
+> khi chủ repo ghi **Approved for implementation** kèm tên/ngày, và chốt các quyết định mở ở §19.
+
+## 1. Problem, user và evidence
+
+App hiện chỉ có màn hình nền và lõi `PageQuad`/`ScanPage` (P0). Người cần số hóa tài liệu chưa làm được gì.
+Nghiên cứu §6 đề xuất MVP: chụp/nhập → xem lại (sắp xếp, chụp lại, chỉnh góc, xoay) → xuất PDF/JPG/PNG, offline,
+giữ bản gốc. Chưa có dữ liệu người dùng; mọi số liệu ở §2 là mục tiêu đề xuất, chưa đo.
+
+## 2. Outcome, baseline, target và guardrails
+
+- Baseline: không tạo được tài liệu nào.
+- Target: tạo tài liệu nhiều trang và xuất PDF/ảnh hoàn toàn offline, trên Android (máy thật hoặc emulator).
+- Guardrails: không mạng/upload/log nội dung; bản gốc không bị ghi đè; không mất phiên khi app bị đóng giữa chừng;
+  không nạp đồng thời nhiều ảnh gốc 12 MP vào bộ nhớ; không bịa nội dung trang.
+- Chưa cam kết: p95 xử lý ≤ 2 giây, 100 trang (đo ở P2 trên thiết bị được chọn).
+
+## 3. Research current state (nguồn sống, truy cập 2026-10-11)
+
+| Package | Phiên bản | Publisher | License | Vai trò đề xuất |
+| --- | --- | --- | --- | --- |
+| `image_picker` | 1.2.4 | flutter.dev | BSD-3-Clause/Apache-2.0 | Chụp bằng app camera hệ thống + nhập từ thư viện |
+| `path_provider` | 2.1.6 | flutter.dev | BSD-3-Clause | Thư mục riêng của app cho bản gốc/phiên |
+| `image` | 4.12.0 | loki3d.com | MIT | Giải mã, `copyRectify` (đã kiểm mã nguồn), xoay, mã hoá JPG/PNG |
+| `pdf` | 3.13.1 | nfet.net | Apache-2.0 | Tạo PDF nhiều trang từ ảnh |
+| `share_plus` | 13.3.1 | fluttercommunity.dev | BSD-3-Clause | Chia sẻ/lưu file xuất qua share sheet hệ thống |
+| `camera` | 0.12.1 | flutter.dev | BSD-3-Clause | Phương án thay cho capture (preview tự dựng) |
+| `google_mlkit_document_scanner` | 0.6.1 | flutter-ml.dev | MIT | Phương án thay (scanner hệ thống) |
+
+Ràng buộc tối thiểu của mọi package (Flutter ≥ 3.24–3.44, Dart ≥ 3.0–3.12) đều thoả với Flutter 3.47.7 / Dart 3.13.5 đang ghim. `image` 4.12.0 phát hành 2026-10-11 — khi code, chọn bản ổn định
+mới nhất đã phát hành ≥ 7 ngày và kiểm lại changelog.
+
+## 4. Alternatives và decision
+
+| Option | Benefits | Cost/risk | Decision |
+| --- | --- | --- | --- |
+| Do nothing | Không chi phí | App không dùng được | Loại |
+| A. `image_picker` (camera hệ thống) + chỉnh góc tay + `image`/`pdf` | Ít code nhất; ảnh độ phân giải đầy đủ của app camera; không cần quyền CAMERA riêng | Không có hướng dẫn chụp/tự chụp (để P2) | **Đề xuất** |
+| B. `camera` plugin, preview tự dựng | Kiểm soát preview, nền cho hướng dẫn/depth (P2–P3) | Nhiều code, quyền CAMERA, vòng đời camera | Hoãn sang P2 |
+| C. ML Kit Document Scanner | Gần như không code | Phụ thuộc Play services, chỉ trả ảnh đã xử lý → không giữ bản gốc, khó tích hợp depth | Loại (vi phạm guardrail bản gốc) |
+
+## 5. Scope / non-goals
+
+Scope: phiên scan nhiều trang; chụp (camera hệ thống) hoặc nhập ảnh; danh sách trang (sắp xếp, xoá có xác nhận,
+chụp lại); chỉnh 4 góc thủ công + xoay 90°; lưu bản gốc bất biến + tham số chỉnh sửa; phục hồi phiên sau khi app bị
+đóng; xuất PDF nhiều trang, JPG, PNG; chia sẻ qua share sheet.
+Non-goals: tự nhận diện mép trang, hướng dẫn chụp, mờ/chói, tự chụp, bộ lọc ảnh, OCR, depth, iOS, đồng bộ/cloud,
+tài khoản, nhiều tài liệu song song (P1 chỉ một phiên đang mở).
+
+## 6. User journeys và mọi state
+
+Chụp → Xem lại → Xuất.
+- Rỗng: chưa có trang → nút "Chụp" và "Nhập ảnh".
+- Đang xử lý: tạo thumbnail/nắn ảnh/xuất → chỉ báo tiến trình, không chặn UI.
+- Lỗi: người dùng huỷ camera (không phải lỗi, không thêm trang); ảnh không giải mã được → thông báo, không thêm trang;
+  hết dung lượng khi sao chép → thông báo, phiên giữ nguyên trạng thái trước.
+- Phục hồi: mở lại app khi có phiên dở → hiện lại đúng các trang và chỉnh sửa.
+- Quyền: không yêu cầu quyền CAMERA/STORAGE của app (camera hệ thống và photo picker tự xử lý).
+
+## 7. Functional requirements
+
+- FR-1 `ScanSession` (lõi Dart thuần): danh sách `ScanPage` có thứ tự; thêm, xoá, di chuyển, thay trang (chụp lại); id duy nhất.
+- FR-2 Lưu trữ: bản gốc được sao chép vào thư mục riêng của app, tên theo id, không bao giờ ghi đè; manifest JSON có
+  `schemaVersion`, ghi nguyên tử (ghi file tạm rồi đổi tên); đọc manifest được validate tại biên, manifest hỏng → không
+  crash, giữ bản gốc, báo phiên không phục hồi được.
+- FR-3 Xoá trang/chụp lại: chỉ khi người dùng xác nhận; file gốc của trang bị thay/xoá chỉ bị dọn khi phiên được lưu xong.
+- FR-4 Chỉnh góc: 4 điểm kéo được, ràng buộc bởi `PageQuad` (không cho tạo tứ giác không hợp lệ); xoay 90°.
+- FR-5 Render: nắn phối cảnh từ bản gốc bằng `copyRectify` trong isolate; preview dùng thumbnail giới hạn cạnh dài.
+- FR-6 Xuất PDF: mỗi trang một trang PDF, giữ tỷ lệ ảnh (không kéo giãn), chiều theo ảnh; xuất JPG/PNG từng trang.
+- FR-7 Chia sẻ file xuất qua share sheet; file tạm xuất được dọn sau khi chia sẻ xong hoặc khi mở lại app.
+
+## 8. Non-functional requirements
+
+Privacy: không mạng, không log đường dẫn/nội dung ảnh. Bộ nhớ: xử lý tuần tự từng trang, không giữ quá 1 ảnh gốc đã
+giải mã cùng lúc. A11y: nhãn cho mọi nút, vùng chạm ≥ 44×44 dp, AA cả Dark/Light (thêm chuyển chế độ Dark/Light ở P1).
+Độ tin cậy: mọi I/O có nhánh lỗi; ghi manifest nguyên tử.
+
+## 9. Acceptance criteria
+
+- AC-1 Given phiên có 3 trang, When di chuyển trang 3 lên đầu và xoá trang 2, Then thứ tự và id đúng; bản gốc trên đĩa không đổi byte.
+- AC-2 Given app bị đóng sau khi thêm trang, When mở lại, Then phiên phục hồi đủ trang và chỉnh sửa.
+- AC-3 Given manifest hỏng hoặc sai `schemaVersion`, When mở app, Then không crash, bản gốc còn nguyên, hiện thông báo.
+- AC-4 Given người dùng kéo góc tạo tứ giác không hợp lệ, Then thay đổi bị từ chối, quad trước đó giữ nguyên.
+- AC-5 Given ảnh gốc và quad, When nắn, Then ảnh đầu ra đúng kích thước dự kiến và bản gốc không đổi.
+- AC-6 Given 3 trang khác tỷ lệ, When xuất PDF, Then PDF có 3 trang, mỗi trang đúng tỷ lệ/chiều ảnh.
+- AC-7 Given người dùng huỷ camera hoặc ảnh không giải mã được, Then không thêm trang và không mất trang cũ.
+- AC-8 Given app khởi động, Then không có request mạng nào và không xin quyền CAMERA/STORAGE.
+- AC-9 Given máy Android/emulator thật, When chụp → chỉnh → xuất PDF, Then file mở được trong trình xem PDF (UAT thủ công).
+
+## 11. Architecture và code touchpoints
+
+`lib/core/scan_session.dart` (thuần Dart) · `lib/storage/session_store.dart` (đĩa, manifest) · `lib/imaging/rectify.dart`
+(isolate, `image`) · `lib/export/pdf_export.dart`, `lib/export/image_export.dart` · `lib/ui/` (capture, review, edit,
+export) · test tương ứng dưới `test/` · `pubspec.yaml`/`pubspec.lock` (5 dependency ở §3, phương án A).
+
+## 12–13. Contract và dữ liệu
+
+Manifest `session.json`: `{schemaVersion: 1, pages: [{id, original, quad: [8 số], quarterTurns}]}`; đường dẫn tương
+đối thư mục app. Dữ liệu là tài liệu người dùng (có thể nhạy cảm): chỉ ở thư mục riêng của app, xoá khi người dùng xoá
+phiên; không backup ra cloud mặc định (`android:allowBackup` cần quyết định — §19).
+
+## 14. Security/privacy/abuse cases
+
+Ảnh nhập từ thư viện là dữ liệu ngoài: giải mã có giới hạn kích thước, lỗi giải mã không crash. Không lưu ngoài thư mục
+app trừ khi người dùng chủ động chia sẻ. Cần Data Governance ngắn (retention/xoá) trước khi phát hành — không thuộc P1 code.
+
+## 16. Test/eval plan
+
+| AC | Bằng chứng | Ghi chú |
+| --- | --- | --- |
+| AC-1 | chưa có — test unit `ScanSession` + test lưu trữ (viết khi Approved) | |
+| AC-2 | chưa có — test `SessionStore` ghi/đọc lại | |
+| AC-3 | chưa có — test manifest hỏng | |
+| AC-4 | chưa có — widget test editor | |
+| AC-5 | chưa có — test nắn ảnh tổng hợp (không dùng ảnh thật) | |
+| AC-6 | chưa có — test PDF (đếm trang, kích thước) | |
+| AC-7 | chưa có — test luồng huỷ/lỗi với picker giả | |
+| AC-8 | chưa có — kiểm manifest Android không có INTERNET/CAMERA ở release | |
+| AC-9 | chưa có — UAT thủ công trên thiết bị | cần thiết bị/emulator |
+
+## 17. Slice/PR plan
+
+PR-1 `ScanSession` + `SessionStore` (AC-1..3) → PR-2 nắn ảnh (AC-5) → PR-3 UI chụp/xem lại/chỉnh góc + Dark/Light
+(AC-4, AC-7, AC-8) → PR-4 xuất PDF/ảnh + chia sẻ (AC-6) → UAT AC-9. Tuần tự vì chung `pubspec.lock`.
+
+## 18. Rollout/rollback
+
+Chưa phát hành. Mỗi PR revert được độc lập theo thứ tự ngược. Không migration (manifest `schemaVersion` 1 đầu tiên).
+
+## 19. Risk, assumptions và open decisions
+
+| Item | Verification/mitigation | Owner | Due | Decision |
+| --- | --- | --- | --- | --- |
+| D1 Capture: phương án A (camera hệ thống) hay B (`camera` plugin) | Đề xuất A cho P1, B ở P2 | Chủ repo | Trước code | **Mở** |
+| D2 Thêm 5 dependency ở §3 | License đã ghi; ghim phiên bản khi code | Chủ repo | Trước code | **Mở** |
+| D3 `android:allowBackup` cho dữ liệu tài liệu | Đề xuất tắt backup thư mục phiên | Chủ repo | Trước PR-1 | **Mở** |
+| D4 Cách kiểm AC-9 (máy thật hay emulator) | Không có thiết bị trong phiên AI | Chủ repo | Trước UAT | **Mở** |
+| Hiệu năng `copyRectify` thuần Dart trên ảnh 12 MP | Đo ở PR-2; vượt ngân sách → ADR cho native/OpenCV | Phiên chính | PR-2 | Theo dõi |
+
+Không Approved khi còn quyết định mở.
+
+## Approval
+
+- [ ] Product/scope
+- [ ] UX/a11y
+- [ ] Architecture/API/data
+- [ ] Security/privacy/cost
+- [ ] Test/telemetry/rollout/rollback
+- [ ] Blocking decisions closed
+
+**Conclusion:** In review
+**Approver/date:** chưa duyệt

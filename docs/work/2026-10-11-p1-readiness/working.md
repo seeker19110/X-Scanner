@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-11-p1-readiness
 - Yêu cầu / outcome: `/auto-complete` lần 2 (chủ repo chưa trả lời câu hỏi thiết bị/P1). Outcome: gia cố P0 đã duyệt + spec P1 sẵn để duyệt.
-- Trạng thái: Active — PR-A (commit/PR).
+- Trạng thái: Blocked — chờ chủ repo duyệt spec P1 (§19 D1–D4). PR-A merged; PR-B (spec) mở.
 - Chủ trì / writer: phiên chính; PR-A giao `mechanical-worker`.
 - Mức rủi ro / số PR: S (PR-A chore) + docs (PR-B spec, không code); 2 PR tuần tự (một nhánh được giao).
 - Scope / non-goal: trong scope = gia cố cổng P0 + research/spec P1 (In review). Non-goal: code tính năng P1 (chưa được duyệt), release, chi phí mới.
@@ -25,14 +25,23 @@
 
 - PR-A thực thi bởi `mechanical-worker` (brief `--check-plan` OK). Phiên chính kiểm lại trên repo: diff 1 dòng `flutter: 3.47.7` + `pubspec.lock` (`sdks.flutter: "3.47.7"`, sinh lại bằng `pub get`); đỏ: ghim 3.47.8 → "requires Flutter SDK version 3.47.8, version solving failed"; xanh: "Got dependencies!". Gate worker: PASS 4/4.
 
+- PR-A https://github.com/seeker19110/X-Scanner/pull/4 merged squash `8e1c319` sau CI xanh trên head `dcd467f` (job 114508434013); 0 review thread.
+- Spec P1 phương án A (camera hệ thống qua `image_picker` + chỉnh góc tay + `image`/`pdf`) · loại B (`camera` plugin, nhiều code → P2) và C (ML Kit, không trả bản gốc) · bậc 1 với C (mất bản gốc), bậc 2 với B.
+- Spec P1 để In review, 4 quyết định mở D1–D4 cho chủ repo · loại tự duyệt · bậc 1 (ngoài scope đã giao).
+- `/completion` dừng ở Bước -1 lần nữa · loại audit 12 nhóm · bậc 1 (vẫn chưa có luồng người dùng; chỉ thêm 1 dòng cấu hình).
+- Hồ sơ này giữ `working.md` (Blocked) · loại đổi `done.md` · bậc 1 (outcome thật là spec được duyệt; chưa xảy ra).
+
 ## Lần thử / blocker
+
+- BLOCKED: code P1 cần chủ repo ghi "Approved for implementation" trong `docs/specs/2026-10-11-p1-scan-export.md` và chốt D1–D4.
+
 
 <Failure, số lần cùng failure, giả thuyết đã bác bỏ, blocker và cách kiểm tiếp.>
 
 ## Bàn giao / bước tiếp theo
 
-<Một hành động cụ thể, file/lệnh cần đọc/chạy; thay đổi chưa commit và nơi giữ;
-điều kiện có thể tiếp tục. Cập nhật trước nén/chuyển phiên/giao việc.>
+Chủ repo đọc `docs/specs/2026-10-11-p1-scan-export.md` §4, §17, §19 → trả lời D1–D4 và duyệt. Có duyệt → tạo goal P1,
+PR-1 `ScanSession` + `SessionStore` theo §17. Không duyệt → sửa spec theo phản hồi.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
