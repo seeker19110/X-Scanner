@@ -79,7 +79,7 @@ Hiệu năng/thiết bị: chưa đo ở P0 (không có camera).
   `apps/mobile/lib/app/theme.dart`, `apps/mobile/lib/core/page_quad.dart`, `apps/mobile/lib/core/scan_page.dart`.
 - `apps/mobile/test/core/page_quad_test.dart`, `apps/mobile/test/core/scan_page_test.dart`, `apps/mobile/test/app_test.dart`.
 - `.claude/project-commands.sh`, `.github/workflows/ci.yml`, `scripts/check-adoption.py`.
-- Tài liệu: `PROJECT.md`, `PROGRESS.md`, `README.md`, khối ngữ cảnh đầu `CLAUDE.md`/`AGENTS.md`, `docs/adoption/source.json` (`product_stack`).
+- Tài liệu: `PROJECT.md`, `PROGRESS.md`, `README.md`, khối ngữ cảnh đầu `CLAUDE.md`/`AGENTS.md`. (Bỏ `docs/adoption/source.json`: là provenance của lần áp khung — sửa ở PR-2.)
 
 ## 12. Contract
 
@@ -103,7 +103,7 @@ Không quyền camera/lưu trữ, không mạng, không log. Không dữ liệu 
 | AC-4 | `apps/mobile/test/core/scan_page_test.dart::normalizes quarter turns` | unit |
 | AC-5 | `apps/mobile/test/app_test.dart::shows the app shell in dark mode by default` | widget |
 | AC-6 | `scripts/check-adoption.py::test_app_requires_real_gates` | guard |
-| AC-7 | `thủ công: GitHub Actions "Repository checks" xanh trên head của PR-2` | CI run của head PR |
+| AC-7 | thủ công: GitHub Actions "Repository checks" xanh trên head của PR-2 | CI run của head PR |
 
 ## 17. Slice/PR plan
 
