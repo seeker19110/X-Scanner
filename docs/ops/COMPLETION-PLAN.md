@@ -30,7 +30,7 @@
 | ID | Từ phát hiện | Việc | Tiêu chí nghiệm thu | Phụ thuộc | Ước lượng | Trạng thái | PR / bằng chứng |
 |----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
 | W-101 | F-001, F-019, F-018 | `SessionStore` từ chối `save` khi `session.json` còn trên đĩa mà `load` chưa hoàn tất; `importOriginal` tuần tự với `load`; dấu `DEBT:` cho bản gốc cách ly | Test đỏ trước: load lỗi I/O → save ném lỗi, manifest + bản gốc cũ còn nguyên, lần load sau còn đủ trang; test load ∥ import không mất file | – | S | ✅ | seeker19110/X-Scanner#12 `faf89a0`, CI xanh; đỏ 5 test → xanh; `flutter test` 211/211 |
-| W-102 | F-005 | Sau khi lưu trang thành công, xoá bản sao của picker nếu đường dẫn nằm trong thư mục tạm của app (chuẩn hoá, không bao giờ xoá ngoài) | Test đỏ trước: file nguồn trong temp bị xoá sau capture/import thành công; còn nguyên khi lưu lỗi; file ngoài temp không bị đụng | W-101 | S | ⬜ | |
+| W-102 | F-005 | Sau khi lưu trang thành công, xoá bản sao của picker nếu đường dẫn nằm trong thư mục tạm của app (chuẩn hoá, không bao giờ xoá ngoài) | Test đỏ trước: file nguồn trong temp bị xoá sau capture/import thành công; còn nguyên khi lưu lỗi; file ngoài temp không bị đụng | W-101 | S | 🔄 | đỏ 7 test → xanh; gate PASS 219; khuôn ghi `TRAPS.md` |
 | W-103 | F-006, F-007 | Một cổng giải mã tuần tự cho thumbnail và render khi xuất; tắt kéo-thả khi bận | Test đỏ trước: `maxActive == 1` giữa thumbnail và render khi xuất; kéo khi bận không đổi thứ tự | W-102 | M | ⬜ | |
 | W-104 | F-004 | Nâng `image` ≥ 4.12.0 khi đủ 7 ngày (từ 2026-10-18) + test hồi quy 2 ảnh tổng hợp (EXIF IFD lặp, PNG bom) | Test hồi quy xanh với bản mới, đỏ với 4.10.1; gate PASS; manifest release sạch | – | S | ⏳ 2026-10-18 | Exception ở `docs/ops/supply-chain-exceptions.md` |
 
@@ -45,7 +45,7 @@
 
 | ID | Từ phát hiện | Việc | Tiêu chí nghiệm thu | Phụ thuộc | Ước lượng | Trạng thái | PR / bằng chứng |
 |----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
-| W-401 | F-012, F-013, F-023 | `buildPdf` chạy ngoài UI isolate; trần điểm ảnh đầu ra nắn (giữ tỷ lệ); `DEBT:` cho trần 50 MP và số trang PDF; số trang đệm theo tổng số trang | Test đỏ trước: đầu ra nắn ≤ trần; 100 trang sắp đúng; PDF vẫn đúng AC-6 | – | S | 🔄 | đỏ 4 test (68694 > 10000 px; (1000,1) thay (100,1); 42436 > 40000 px; `trang-01` thay `trang-001`) → xanh; `flutter test` 210/210 |
+| W-401 | F-012, F-013, F-023 | `buildPdf` chạy ngoài UI isolate; trần điểm ảnh đầu ra nắn (giữ tỷ lệ); `DEBT:` cho trần 50 MP và số trang PDF; số trang đệm theo tổng số trang | Test đỏ trước: đầu ra nắn ≤ trần; 100 trang sắp đúng; PDF vẫn đúng AC-6 | – | S | ✅ | seeker19110/X-Scanner#14 `4efd3d8`, CI xanh; đỏ 4 test (68694 > 10000 px; (1000,1) thay (100,1); 42436 > 40000 px; `trang-01` thay `trang-001`) → xanh; `flutter test` 210/210 |
 | W-402 | F-020, F-021, F-022 | Trạng thái "đang mở phiên" khi khôi phục; thumbnail lỗi được thử lại + ô lỗi có nhãn; `cacheWidth` cho thumbnail; nhãn cho thanh tiến trình | Test đỏ trước cho từng hành vi | W-302 | S | ⬜ | |
 | W-403 | F-024, F-025, F-027 (test) | Một helper phần mở rộng ở `core/session_manifest.dart`; `imageSizeOf` ở `imaging/`; sửa chuỗi purity test | Refactor không đổi hành vi, test hiện có xanh; grep khuôn `[a-z0-9]{1,5}` chỉ còn 1 nơi | W-402 | S | ⬜ | |
 
