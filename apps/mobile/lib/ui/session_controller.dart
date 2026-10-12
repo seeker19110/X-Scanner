@@ -182,7 +182,8 @@ class SessionController extends ChangeNotifier {
   bool _contains(String id) => _session.pages.any((p) => p.id == id);
 
   /// Checks that [path] decodes, copies it in as a new page, saves the
-  /// session built by [apply] and only then shows it.
+  /// session built by [apply] and only then shows it and lets the source
+  /// discard its copy at [path].
   Future<void> _addFromPath(
     String path,
     ScanSession Function(ScanPage page) apply,
@@ -212,9 +213,14 @@ class SessionController extends ChangeNotifier {
       _notify();
     } on FileSystemException {
       _report(SessionNotice.saveFailed);
+      return;
     } on StateError {
       _report(SessionNotice.saveFailed);
+      return;
     }
+    // Only now is the original safely ours; on any failure above the
+    // picker's copy is kept so the photo is not lost.
+    await _source.discard(path);
   }
 
   /// Saves [next] and adopts it; returns whether that succeeded.

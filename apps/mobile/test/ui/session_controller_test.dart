@@ -13,8 +13,11 @@ import 'package:x_scanner/storage/session_store.dart';
 import 'package:x_scanner/ui/page_source.dart';
 import 'package:x_scanner/ui/session_controller.dart';
 
-/// Scripted [PageSource]: each call takes the next queued result.
+/// Scripted [PageSource]: each call takes the next queued result;
+/// [discarded] records every [discard] call, which also runs [onDiscard].
 class FakeSource implements PageSource {
+  final List<String> discarded = [];
+  void Function(String path)? onDiscard;
   final List<String?> captures = [];
   final List<String?> gallery = [];
   final List<String?> lost = [];
@@ -28,6 +31,12 @@ class FakeSource implements PageSource {
   @override
   Future<String?> retrieveLost() async =>
       lost.isEmpty ? null : lost.removeAt(0);
+
+  @override
+  Future<void> discard(String path) async {
+    discarded.add(path);
+    onDiscard?.call(path);
+  }
 }
 
 /// [SessionStore] whose [save] can be made to fail like a full disk and
@@ -362,6 +371,86 @@ void main() {
     expect(controller.session.pages, isEmpty);
     expect(manifestPages(), isEmpty);
     expect(controller.takeNotice(), isNull);
+  });
+
+  group('picker copy is discarded only after the page is saved (F-005)', () {
+    /// Records the number of saved pages each time [FakeSource.discard]
+    /// runs, so a test can tell the call came after the save.
+    List<int> savedPagesAtDiscard() {
+      final counts = <int>[];
+      source.onDiscard = (_) => counts.add(manifestPages().length);
+      return counts;
+    }
+
+    test('capture (F-005)', () async {
+      final counts = savedPagesAtDiscard();
+      final path = png();
+      source.captures.add(path);
+      await controller.capture();
+      expect(source.discarded, [path]);
+      expect(counts, [1]);
+    });
+
+    test('import from the photo picker (F-005)', () async {
+      final counts = savedPagesAtDiscard();
+      final path = png();
+      source.gallery.add(path);
+      await controller.importFromGallery();
+      expect(source.discarded, [path]);
+      expect(counts, [1]);
+    });
+
+    test('retake (F-005)', () async {
+      await addPages(1);
+      source.discarded.clear();
+      final page = controller.session.pages.single;
+      final counts = <String>[];
+      source.onDiscard = (_) =>
+          counts.add((manifestPages().single! as Map)['id']! as String);
+      final path = png();
+      source.captures.add(path);
+      await controller.retake(page.id);
+      expect(source.discarded, [path]);
+      expect(counts, [controller.session.pages.single.id]);
+      expect(counts.single, isNot(page.id));
+    });
+
+    test('photo recovered on restore (F-005)', () async {
+      final counts = savedPagesAtDiscard();
+      final path = png();
+      source.lost.add(path);
+      await controller.restore();
+      expect(source.discarded, [path]);
+      expect(counts, [1]);
+    });
+
+    test('an undecodable image is not discarded (F-005)', () async {
+      source.captures.add(garbage());
+      source.gallery.add(garbage());
+      await controller.capture();
+      await controller.importFromGallery();
+      expect(controller.takeNotice(), SessionNotice.decodeFailed);
+      expect(controller.takeNotice(), SessionNotice.decodeFailed);
+      expect(source.discarded, isEmpty);
+    });
+
+    test('a failed save does not discard the source image (F-005)', () async {
+      await addPages(1);
+      source.discarded.clear();
+      store.failSave = true;
+      final path = png();
+      source.captures.add(path);
+      source.gallery.add(png());
+      source.captures.add(png());
+      await controller.capture();
+      await controller.importFromGallery();
+      await controller.retake(controller.session.pages.single.id);
+      for (var i = 0; i < 3; i++) {
+        expect(controller.takeNotice(), SessionNotice.saveFailed);
+      }
+      expect(source.discarded, isEmpty);
+      expect(File(path).existsSync(), isTrue);
+    });
   });
 
   test('cancelled retake keeps the page', () async {

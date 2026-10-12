@@ -13,8 +13,10 @@ import 'package:x_scanner/storage/session_store.dart';
 import 'package:x_scanner/ui/page_source.dart';
 import 'package:x_scanner/ui/session_controller.dart';
 
-/// Scripted [PageSource]: each call takes the next queued result.
+/// Scripted [PageSource]: each call takes the next queued result;
+/// [discarded] records every [discard] call.
 class FakeSource implements PageSource {
+  final List<String> discarded = [];
   final List<String?> captures = [];
   final List<String?> gallery = [];
 
@@ -26,6 +28,9 @@ class FakeSource implements PageSource {
 
   @override
   Future<String?> retrieveLost() async => null;
+
+  @override
+  Future<void> discard(String path) async => discarded.add(path);
 }
 
 /// [FileSharer] that records shared file names and can be made to fail.

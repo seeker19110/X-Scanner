@@ -19,6 +19,9 @@ class _NoSource implements PageSource {
 
   @override
   Future<String?> retrieveLost() async => null;
+
+  @override
+  Future<void> discard(String path) async {}
 }
 
 /// A [FileSharer] that shares nothing.
