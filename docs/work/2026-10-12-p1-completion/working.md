@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-p1-completion
 - Yêu cầu / outcome: `/auto-complete` lần 4, bước 2: `/completion` (`docs/framework/project-completion.md` Pha 0–4) sau khi P1 PR-0..4 merged (#6..#10). Outcome: Definition of Complete có bằng chứng hoặc BLOCKED/WAITING đúng §8.
-- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 PR mở; W-401, W-102 sẵn trong worktree (`afcc67a`, `e3c3197`).
+- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 PR mở; W-102, W-103 sẵn trong worktree (`e3c3197`, `c7b5b20`).
 - Chủ trì / writer: phiên chính (kế hoạch, duyệt, tích hợp); audit giao 3 subagent chỉ đọc; sửa giao worker theo số PR.
 - Mức rủi ro / số PR: M; PR-A tài liệu Pha 0–2, rồi một PR mỗi việc W-xxx theo kế hoạch.
 - Scope / non-goal: app `apps/mobile` P1 + tài liệu dự án. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release, bật branch protection/auto-merge (cần quyền chủ repo).
@@ -37,13 +37,17 @@
 - W-101 https://github.com/seeker19110/X-Scanner/pull/12 merged squash `faf89a0` sau CI xanh (job 114638363016); 0 review thread.
 - W-102 (worker): `PageSource.discard` — nguồn tự xoá bản sao của nó, chỉ trong `cacheDir` sau `resolveSymbolicLinks`, chỉ sau khi lưu thành công · loại controller tự xoá theo tiền tố thư mục tạm · bậc 2 (kiến thức "bản sao picker nằm ở cache" ở đúng adapter) và bậc 3 (test bằng fake). Đỏ 7 → xanh; gate PASS 219.
 
+- W-301 https://github.com/seeker19110/X-Scanner/pull/13 merged squash `ba3d5a9` sau CI xanh (job 114640319002); 0 review thread.
+- W-401 tích hợp trước W-102/W-103 (bỏ phụ thuộc "W-103" trong kế hoạch) · loại giữ thứ tự cũ · bậc 4 (file không giao nhau: `page_exporter.dart`/`page_render.dart` vs controller/main/review; worker đã xong, không đổi rủi ro).
+- W-103 (worker): `DecodeGate` dùng chung cho thumbnail, giải mã thử và render khi xuất; `buildDefaultDragHandles: !busy` · loại khoá toàn cục trong `page_render.dart` · bậc 2 (một lớp nhỏ tiêm qua `main.dart`, test bằng fake) và bậc 3. Đỏ 4 (2 gate, 1 controller `maxActive` 2 thay 1, 1 widget kéo khi bận đổi thứ tự) → xanh; gate PASS 229. Không deadlock: job trong cổng không chờ hàng đợi ghi.
+
 ## Lần thử / blocker
 
 - Không.
 
 ## Bàn giao / bước tiếp theo
 
-- Merge PR kế hoạch (Pha 0–2 + W-201). Tích hợp W-101 → W-301 → W-401 từ worktree (báo cáo `REPORT-w101.md`, `REPORT-w301.md`, `REPORT-w401.md` ở scratchpad), mỗi W một PR; rồi W-102 → W-103 → W-302 → W-402 → W-403; W-104 từ 2026-10-18.
+- Merge PR W-401; rồi tích hợp W-102 (`e3c3197`) → W-103 (`c7b5b20`, worktree agent-a735438779c74e8b3) mỗi W một PR; rồi W-302 → W-402 → W-403; W-104 từ 2026-10-18; Pha 4 re-audit.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
