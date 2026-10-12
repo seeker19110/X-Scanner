@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-xs13-preview-corner-editor
 - Yêu cầu / outcome: `/auto-complete` lần 9 (2026-10-12): XS-09 PR-4 BLOCKED chờ chủ repo → làm việc kế tiếp không bị chặn của kế hoạch M1: XS-13 (F-026, F-032).
-- Trạng thái: In progress — spec Approved (PR spec đang mở).
+- Trạng thái: Done — spec #35 `29e868f`, PR-1 #36 `f7dc45c`, PR-2 #37 `9fbe2fd`.
 - Chủ trì / writer: phiên chính (spec, review, tích hợp, cổng); mỗi PR code một worker `complex-implementer`, tuần tự.
 - Mức rủi ro / số PR: M (chỉ UI + ảnh xem trước từ thumbnail; không đổi dữ liệu/dependency); 1 PR spec + 2 PR code tuần tự (PR-2 mở trình chỉnh từ màn danh sách PR-1 sửa).
 - Scope / non-goal: FR-1..FR-10, AC-1..AC-10 của spec. Non-goal: phóng to hai ngón, bộ lọc, F-033 (XS-12), F-031 (XS-20), chỉnh góc một-chạm cho mọi người dùng.
@@ -36,6 +36,7 @@
 - PR-2 worker: đỏ-trước `+166 -5` (thiếu `edit_history.dart`, `toDisplay`/`fromDisplay`, nút "Hoàn tác"), xanh nhóm nhanh +203; gate worker PASS +489 trên `ebddd74` + diff (lần chạy đầu BLOCKED vì HEAD đổi khi Tầng 1 merge `main`, chạy lại PASS). Test cũ sửa: "rejects an invalid drag…" — "Lưu" khi không đổi giờ trả `null` (FR-7).
 - PR-2 lựa chọn của worker (giữ): kính lúp 96 dp, ×2, cách góc 96 dp; đang kéo cũng tính là "có thay đổi" khi Back · bậc 2/3 (đơn giản, kiểm được). Hai lựa chọn khác (dịch góc chỉ bị kẹp và "Đặt lại" trên khung đầy vẫn là một bước) bị review đổi, xem dòng dưới.
 - Review PR-2 (`reviewer`, chạy 203 test): 0 Cao, 0 Trung bình. Sửa đỏ-trước (2 test đỏ → xanh, nhóm nhanh +206): F1/F2 Thấp — bước không đổi gì (dịch góc chỉ bị kẹp ở mép, "Đặt lại" khi đã là khung đầy) vẫn vào lịch sử nên "Hoàn tác" sáng mà bấm không có gì → `_commit` bỏ qua trang trông như trang hiện tại · bậc 1; F3 Thấp — "Lưu" bằng ngón thứ hai giữa lúc kéo trả trang chưa có nét kéo dở → trả trang đang hiện · bậc 1. F4 — chưa có test buộc phép xoay hiển thị với `img.copyRotate` của file xuất → thêm `display mapping matches the export rotation` (xanh ngay: chứng minh tính chất, như AC-2). Không làm: F5 (test vị trí kính lúp, ngắt kéo bằng hoàn tác — code đã xử lý, chi phí test cao hơn lợi), F6 (gộp `setState`, chỉ là gọn).
+- PR-2 merged #37 `9fbe2fd` (CI xanh trên `8c912b4`).
 
 ## Lần thử / blocker
 
@@ -43,11 +44,10 @@
 
 ## Bàn giao / bước tiếp theo
 
-<Một hành động cụ thể, file/lệnh cần đọc/chạy; thay đổi chưa commit và nơi giữ;
-điều kiện có thể tiếp tục. Cập nhật trước nén/chuyển phiên/giao việc.>
+- Hồ sơ xong. Việc kế tiếp liên quan: XS-20 (a11y đầy đủ: chỉnh góc một-chạm, `flutter_localizations` F-031), XS-12 (tiến độ/huỷ xuất F-033); phóng to hai ngón xem lại khi UAT thiết bị.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
-<DoD, mọi PR MERGED + merge SHA và main đã đối chiếu, giới hạn/rủi ro còn lại,
-ngày và người nghiệm thu theo ủy quyền. Khi đủ điều kiện rename working.md → done.md
-trong cùng thư mục; không overwrite lịch sử. Chưa có PR/merge thì giữ working.md.>
+- Outcome đạt: F-026 và F-032 đóng; spec XS-13 AC-1..AC-10 có test (`spec-compiler --trace`: TRACE COMPLETE). Spec #35 `29e868f`, PR-1 #36 `f7dc45c`, PR-2 #37 `9fbe2fd`, mỗi PR CI "Framework and Android app gate" xanh trước khi merge. `main` đã đối chiếu 2026-10-12T15:46Z.
+- Giới hạn còn lại: chưa chạy trên thiết bị/TalkBack; kính lúp và cỡ chữ lớn chưa kiểm trên máy thật; `DEBT:` chỉnh góc một-chạm → XS-20.
+- Nghiệm thu: phiên chính theo ủy quyền §3d, 2026-10-12.

@@ -58,13 +58,13 @@ Mức: Cao = mất/hỏng dữ liệu, rò riêng tư, crash luồng chính, tà
 | F-023 | 12 | Thấp | `page_exporter.dart` `padLeft(2)` | ≥ 100 trang thì tên file sắp sai thứ tự | Thứ tự ảnh xuất sai ở tài liệu dài | W-401 |
 | F-024 | 12 | Thấp | controller, store, manifest, `file_sharer.dart` | Khuôn phần mở rộng lặp 3 nơi, tách đuôi lặp 2 nơi | Lệch quy tắc → ngoại lệ không xử lý | W-403 |
 | F-025 | 1 | Thấp | `lib/ui/quad_editor_screen.dart` | `ui/` import thẳng `package:image` | Logic giải mã phân tán | W-403 |
-| F-026 | 12 | Thấp | `review_screen.dart` thumbnail | Xem trước danh sách không áp khung cắt | Không thấy kết quả cắt trước khi xuất | Dời P2 (chủ ý, ghi FEATURE-MAP) |
+| F-026 | 12 | Thấp | `review_screen.dart` thumbnail | Xem trước danh sách không áp khung cắt | Không thấy kết quả cắt trước khi xuất | Đóng 2026-10-12: XS-13 PR-1 #36 `f7dc45c` |
 | F-027 | 1/9 | Thấp | spec P1 §11; `test/core/core_purity_test.dart` | Touchpoint `rectify.dart`/`image_export.dart` không tồn tại, thiếu tiền tố `apps/mobile/`; test ghi "spec FR-3" sai spec | Truy vết gãy | W-201 + W-403 |
 | F-028 | 4 | Thấp | `session_controller.dart`, `review_screen.dart` | Một số nhánh lỗi chưa có test (file biến mất, `StateError`, lost image hỏng, ô lỗi thumbnail, chuỗi saveFailed) | Đổi hành vi không ai biết | W-302 |
 | F-029 | 4 | Thấp | `quad_editor_screen_test.dart`, `review_screen_test.dart`, `pdf_export_test.dart` | Test yếu hơn tên (44 thay 48 dp; nhãn AC-6 chỉ kiểm đuôi; kích thước trang PDF chỉ ở bản không nén) | Test xanh khi tiêu chí đã sai | W-302 |
 | F-030 | 5 | Thấp | `session_controller.dart` thumbnails | Thumbnail chỉ trong RAM, mỗi lần mở app giải mã lại | Khởi động chậm với phiên dài | Dời P2 (cần số đo thiết bị) |
 | F-031 | 6 | Thấp | `lib/main.dart` | Không có `flutter_localizations`: chuỗi framework (Back, Move up…) tiếng Anh | TalkBack đọc lẫn Anh–Việt | Dời P2 (thêm dependency ngoài D2) |
-| F-032 | 6 | Thấp | `quad_editor_screen.dart` | Trình chỉnh góc hiện ảnh chưa xoay; Back bỏ thay đổi không hỏi | Chỉnh nhầm, mất công | Dời P2 (UX) |
+| F-032 | 6 | Thấp | `quad_editor_screen.dart` | Trình chỉnh góc hiện ảnh chưa xoay; Back bỏ thay đổi không hỏi | Chỉnh nhầm, mất công | Đóng 2026-10-12: XS-13 PR-2 #37 `9fbe2fd` |
 | F-033 | 6 | Thấp | `review_screen.dart` | Xuất nhiều trang không có tiến trình i/N, không huỷ | Tưởng app treo | Dời P2 (UX) |
 | F-034 | 8 | Thấp | `.github/workflows/ci.yml` concurrency | `cancel-in-progress` áp cả push `main` | Mất kết quả CI của commit trên `main` | W-301 |
 | F-035 | 7 | Thấp | `.claude/project-commands.sh` | Gate không `flutter pub get --enforce-lockfile` | Build/test với lock khác bản đã review | W-301 |
