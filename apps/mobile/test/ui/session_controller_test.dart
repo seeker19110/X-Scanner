@@ -541,6 +541,7 @@ void main() {
     expect(ids(), [c, retaken.id]);
     expect(retaken.quad, PageQuad.fullFrame);
     expect(retaken.quarterTurns, 0);
+    expect(retaken.revision, 0);
     expect(
       controller.originalFile(retaken).readAsBytesSync(),
       File(retakePath).readAsBytesSync(),

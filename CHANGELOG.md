@@ -15,6 +15,8 @@
   intent-filter mà không khai `exported` vẫn bị exported ngầm.
 - Hàng rào ảnh đầu vào (W-104a): chỉ nhận JPEG/PNG/WebP tĩnh nhận dạng theo nội dung, từ chối bản gốc trên 64 MiB
   trước khi đọc, và dừng hẳn thumbnail/render quá 60 giây; các trường hợp này báo "không đọc được", không mất trang.
+- XS-09 PR-1 (chưa nối vào app): mô hình tài liệu `ScanDocument` (tên 1–120 ký tự, thời điểm UTC), `revision` mỗi trang
+  tăng ở mọi lần chỉnh, codec `document.json` schema 2 đọc được schema 1 và báo "cần cập nhật app" với schema mới hơn.
 - P0 nền (#1, #2): app Flutter `apps/mobile`, lõi `PageQuad`/`ScanPage`, gate APK debug/analyze/format/test.
 
 ## 2026-10-11

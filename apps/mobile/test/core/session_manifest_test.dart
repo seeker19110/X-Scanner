@@ -3,12 +3,15 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:x_scanner/core/page_quad.dart';
+import 'package:x_scanner/core/scan_document.dart';
 import 'package:x_scanner/core/scan_page.dart';
 import 'package:x_scanner/core/scan_session.dart';
 import 'package:x_scanner/core/session_manifest.dart';
 
 const String _idA = '0123456789abcdef0123456789abcdef';
 const String _idB = 'fedcba9876543210fedcba9876543210';
+const String _idC = 'cccccccccccccccccccccccccccccccc';
+const String _docId = 'dddddddddddddddddddddddddddddddd';
 
 final PageQuad _skewed = PageQuad(
   topLeft: const Point<double>(0.1, 0.05),
@@ -43,6 +46,43 @@ Map<String, Object?> _withPage(Map<String, Object?> page) => {
 
 Map<String, Object?> _pageWith(String key, Object? value) =>
     _withPage({..._validPage(), key: value});
+
+Map<String, Object?> _validDocument() => {
+  'schemaVersion': 2,
+  'document': {
+    'id': _docId,
+    'title': 'Hợp đồng',
+    'createdAt': '2026-10-12T09:00:00Z',
+    'updatedAt': '2026-10-12T09:05:00.123456Z',
+  },
+  'pages': [
+    {..._validPage(), 'revision': 2},
+  ],
+};
+
+Map<String, Object?> _documentWith(String key, Object? value) {
+  final root = _validDocument();
+  final document = {...root['document']! as Map<String, Object?>, key: value};
+  return {...root, 'document': document};
+}
+
+Map<String, Object?> _documentWithout(String key) {
+  final root = _validDocument();
+  final document = {...root['document']! as Map<String, Object?>}..remove(key);
+  return {...root, 'document': document};
+}
+
+Map<String, Object?> _documentPageWith(String key, Object? value) {
+  final root = _validDocument();
+  final page = {
+    ...(root['pages']! as List<Object?>).single! as Map,
+    key: value,
+  };
+  return {
+    ...root,
+    'pages': [page],
+  };
+}
 
 Matcher _formatError(String field) => throwsA(
   isA<FormatException>().having((e) => e.message, 'message', contains(field)),
@@ -280,6 +320,435 @@ void main() {
     test('rejects empty, too long, uppercase and other characters', () {
       for (final ext in ['', 'jpegxl', 'JPG', 'j-g']) {
         expect(isValidExtension(ext), isFalse, reason: ext);
+      }
+    });
+  });
+
+  group('document schema 2', () {
+    void expectSamePages(List<ScanPage> actual, List<ScanPage> expected) {
+      expect(actual, hasLength(expected.length));
+      for (var i = 0; i < expected.length; i++) {
+        final a = actual[i];
+        final e = expected[i];
+        expect(a.id, e.id);
+        expect(a.originalPath, e.originalPath);
+        expect(a.quad.topLeft, e.quad.topLeft);
+        expect(a.quad.topRight, e.quad.topRight);
+        expect(a.quad.bottomRight, e.quad.bottomRight);
+        expect(a.quad.bottomLeft, e.quad.bottomLeft);
+        expect(a.quarterTurns, e.quarterTurns);
+        expect(a.revision, e.revision);
+      }
+    }
+
+    ScanDocument roundTrip(ScanDocument document) {
+      final result = decodeDocument(encodeDocument(document));
+      expect(result, isA<DecodedDocument>());
+      return (result as DecodedDocument).document;
+    }
+
+    group('round trip (AC-1)', () {
+      final created = DateTime.utc(2026, 10, 12, 9, 0, 0, 123, 456);
+      final updated = DateTime.utc(2026, 10, 12, 9, 5);
+
+      test('keeps every field of a document with 3 pages', () {
+        final pages = [
+          ScanPage(
+            id: _idA,
+            originalPath: 'originals/$_idA.jpg',
+            quad: _skewed,
+            quarterTurns: 1,
+          ),
+          ScanPage(
+            id: _idB,
+            originalPath: 'originals/$_idB.png',
+            quad: _skewed,
+            quarterTurns: 2,
+            revision: 1,
+          ),
+          ScanPage(
+            id: _idC,
+            originalPath: 'originals/$_idC.heic',
+            quad: _skewed,
+            quarterTurns: 3,
+            revision: 7,
+          ),
+        ];
+        final original = ScanDocument(
+          id: _docId,
+          title: 'Hợp đồng thuê nhà — bản ký',
+          createdAt: created,
+          updatedAt: updated,
+          pages: pages,
+        );
+        final decoded = roundTrip(original);
+        expect(decoded.id, original.id);
+        expect(decoded.title, original.title);
+        expect(decoded.createdAt, created);
+        expect(decoded.createdAt.isUtc, isTrue);
+        expect(decoded.updatedAt, updated);
+        expect(decoded.updatedAt.isUtc, isTrue);
+        expectSamePages(decoded.pages, pages);
+      });
+
+      test('keeps a document without pages', () {
+        final decoded = roundTrip(
+          ScanDocument(
+            id: _docId,
+            title: 'Trống',
+            createdAt: created,
+            updatedAt: created,
+          ),
+        );
+        expect(decoded.pages, isEmpty);
+        expect(decoded.createdAt, created);
+        expect(decoded.updatedAt, created);
+      });
+
+      test('encodes the documented schema', () {
+        final map = jsonDecode(
+          encodeDocument(
+            ScanDocument(
+              id: _docId,
+              title: 'T',
+              createdAt: DateTime.utc(2026, 10, 12, 9),
+              updatedAt: updated,
+              pages: [
+                ScanPage(
+                  id: _idA,
+                  originalPath: 'originals/$_idA.jpg',
+                  revision: 2,
+                ),
+              ],
+            ),
+          ),
+        ) as Map<String, Object?>;
+        expect(map, {
+          'schemaVersion': documentSchemaVersion,
+          'document': {
+            'id': _docId,
+            'title': 'T',
+            'createdAt': '2026-10-12T09:00:00.000Z',
+            'updatedAt': '2026-10-12T09:05:00.000Z',
+          },
+          'pages': [
+            {
+              'id': _idA,
+              'original': 'originals/$_idA.jpg',
+              'quad': [0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0],
+              'quarterTurns': 0,
+              'revision': 2,
+            },
+          ],
+        });
+      });
+
+      test('encodeManifest still writes no revision', () {
+        final map = jsonDecode(
+          encodeManifest(
+            ScanSession(
+              pages: [
+                ScanPage(
+                  id: _idA,
+                  originalPath: 'originals/$_idA.jpg',
+                  revision: 3,
+                ),
+              ],
+            ),
+          ),
+        ) as Map<String, Object?>;
+        expect(
+          (map['pages']! as List<Object?>).single,
+          isNot(contains('revision')),
+        );
+      });
+
+      test('refuses to encode a page whose original path is invalid', () {
+        final bad = ScanDocument(
+          id: _docId,
+          title: 'T',
+          createdAt: created,
+          updatedAt: created,
+          pages: [ScanPage(id: _idA, originalPath: '/etc/passwd')],
+        );
+        expect(() => encodeDocument(bad), throwsArgumentError);
+        final badId = ScanDocument(
+          id: _docId,
+          title: 'T',
+          createdAt: created,
+          updatedAt: created,
+          pages: [ScanPage(id: 'p1', originalPath: 'originals/p1.jpg')],
+        );
+        expect(() => encodeDocument(badId), throwsArgumentError);
+      });
+
+      test('refuses to encode a time it could not read back', () {
+        final far = DateTime.utc(10000);
+        final bad = ScanDocument(
+          id: _docId,
+          title: 'T',
+          createdAt: far,
+          updatedAt: far,
+        );
+        expect(() => encodeDocument(bad), throwsArgumentError);
+      });
+    });
+
+    test('schema 1 reads as one document with revision 0 (AC-2)', () {
+      final json = jsonEncode({
+        'schemaVersion': 1,
+        'pages': [
+          {..._validPage(_idB), 'revision': 5},
+          _validPage(_idA),
+          _validPage(_idC),
+        ],
+      });
+      final session = decodeManifest(json);
+      final time = DateTime.utc(2026, 10, 1, 8);
+      final document = ScanDocument(
+        id: _docId,
+        title: 'Phiên cũ',
+        createdAt: time,
+        updatedAt: time,
+        pages: session.pages,
+      );
+      expect(document.pages, hasLength(3));
+      expect([for (final p in document.pages) p.id], [_idB, _idA, _idC]);
+      expect([for (final p in document.pages) p.revision], [0, 0, 0]);
+      expect(document.id, _docId);
+      expect(document.title, 'Phiên cũ');
+      expect(document.createdAt, time);
+    });
+
+    test('decodes the documented example', () {
+      final result = decodeDocument(jsonEncode(_validDocument()));
+      final document = (result as DecodedDocument).document;
+      expect(document.id, _docId);
+      expect(document.title, 'Hợp đồng');
+      expect(document.createdAt, DateTime.utc(2026, 10, 12, 9));
+      expect(document.updatedAt, DateTime.utc(2026, 10, 12, 9, 5, 0, 123, 456));
+      expect(document.pages.single.revision, 2);
+    });
+
+    group('newer schema (FR-7)', () {
+      test('schemaVersion 3 needs an app update', () {
+        expect(
+          decodeDocument(jsonEncode({..._validDocument(), 'schemaVersion': 3})),
+          isA<DocumentNeedsAppUpdate>(),
+        );
+      });
+
+      test('schemaVersion 3 is not validated further', () {
+        expect(
+          decodeDocument('{"schemaVersion":3,"pages":"not a list"}'),
+          isA<DocumentNeedsAppUpdate>(),
+        );
+      });
+    });
+
+    test('accepts a leap day', () {
+      final result = decodeDocument(
+        jsonEncode(_documentWith('createdAt', '2024-02-29T23:59:59Z')),
+      );
+      final document = (result as DecodedDocument).document;
+      expect(document.createdAt, DateTime.utc(2024, 2, 29, 23, 59, 59));
+    });
+
+    group('decode rejects (AC-3)', () {
+      const secret = 'SECRET-TITLE';
+      // (input, field, user value that must not appear in the message)
+      final cases = <String, (Object, String, String?)>{
+        'unparsable JSON': ('{"SECRET-KEY": ', 'JSON', 'SECRET-KEY'),
+        'root that is a list': ('[]', 'root', null),
+        'schemaVersion 1': (
+          {..._validDocument(), 'schemaVersion': 1},
+          'schemaVersion',
+          null,
+        ),
+        'schemaVersion "2"': (
+          {..._validDocument(), 'schemaVersion': '2'},
+          'schemaVersion',
+          null,
+        ),
+        'schemaVersion 2.0': (
+          {..._validDocument(), 'schemaVersion': 2.0},
+          'schemaVersion',
+          null,
+        ),
+        'missing schemaVersion': (
+          {..._validDocument()}..remove('schemaVersion'),
+          'schemaVersion',
+          null,
+        ),
+        'missing document': (
+          {..._validDocument()}..remove('document'),
+          'document',
+          null,
+        ),
+        'document not an object': (
+          {..._validDocument(), 'document': 'SECRET-DOC'},
+          'document',
+          'SECRET-DOC',
+        ),
+        'document.id too short': (
+          _documentWith('id', 'abc123'),
+          'document.id',
+          'abc123',
+        ),
+        'document.id uppercase': (
+          _documentWith('id', _docId.toUpperCase()),
+          'document.id',
+          _docId.toUpperCase(),
+        ),
+        'empty title': (_documentWith('title', ''), 'document.title', null),
+        'blank title': (_documentWith('title', '   '), 'document.title', null),
+        'title of 121 code points': (
+          _documentWith('title', '$secret${'x' * 109}'),
+          'document.title',
+          secret,
+        ),
+        'title with U+0007': (
+          _documentWith('title', '$secret\u0007x'),
+          'document.title',
+          secret,
+        ),
+        'title with a leading space': (
+          _documentWith('title', ' $secret'),
+          'document.title',
+          secret,
+        ),
+        'title with a trailing space': (
+          _documentWith('title', '$secret '),
+          'document.title',
+          secret,
+        ),
+        'title with U+007F': (
+          _documentWith('title', '$secret\u007f'),
+          'document.title',
+          secret,
+        ),
+        'title not a string': (
+          _documentWith('title', 7),
+          'document.title',
+          null,
+        ),
+        'missing title': (_documentWithout('title'), 'document.title', null),
+        'createdAt without Z': (
+          _documentWith('createdAt', '2026-10-12T09:00:00'),
+          'document.createdAt',
+          '2026-10-12T09',
+        ),
+        'createdAt with an offset': (
+          _documentWith('createdAt', '2026-10-12T09:00:00+07:00'),
+          'document.createdAt',
+          '2026-10-12T09',
+        ),
+        'createdAt not a date': (
+          _documentWith('createdAt', 'SECRET-DATE'),
+          'document.createdAt',
+          'SECRET-DATE',
+        ),
+        'createdAt on a day that does not exist': (
+          _documentWith('createdAt', '2026-02-30T00:00:00Z'),
+          'document.createdAt',
+          '2026-02-30',
+        ),
+        'createdAt at hour 24': (
+          _documentWith('createdAt', '2026-10-12T24:00:00Z'),
+          'document.createdAt',
+          '2026-10-12T24',
+        ),
+        'createdAt at minute 60': (
+          _documentWith('createdAt', '2026-10-12T09:60:00Z'),
+          'document.createdAt',
+          '2026-10-12T09',
+        ),
+        'createdAt at second 60': (
+          _documentWith('createdAt', '2026-10-12T09:00:60Z'),
+          'document.createdAt',
+          '2026-10-12T09',
+        ),
+        'createdAt with 7 fraction digits': (
+          _documentWith('createdAt', '2026-10-12T09:00:00.1234567Z'),
+          'document.createdAt',
+          '2026-10-12T09',
+        ),
+        'createdAt not a string': (
+          _documentWith('createdAt', 1),
+          'document.createdAt',
+          null,
+        ),
+        'updatedAt without Z': (
+          _documentWith('updatedAt', '2026-10-12T09:05:00'),
+          'document.updatedAt',
+          '2026-10-12T09',
+        ),
+        'updatedAt before createdAt': (
+          _documentWith('updatedAt', '2026-10-12T08:59:59.999999Z'),
+          'document.updatedAt',
+          '2026-10-12T08',
+        ),
+        'pages not a list': (
+          {..._validDocument(), 'pages': 'x'},
+          'pages',
+          null,
+        ),
+        'bad page original': (
+          _documentPageWith('original', 'originals/../SECRET-PATH.jpg'),
+          'pages[0].original',
+          'SECRET-PATH',
+        ),
+        'revision -1': (
+          _documentPageWith('revision', -1),
+          'pages[0].revision',
+          null,
+        ),
+        'revision 1.5': (
+          _documentPageWith('revision', 1.5),
+          'pages[0].revision',
+          null,
+        ),
+        'revision "1"': (
+          _documentPageWith('revision', '1'),
+          'pages[0].revision',
+          null,
+        ),
+        'missing revision': (
+          {
+            ..._validDocument(),
+            'pages': [_validPage()],
+          },
+          'pages[0].revision',
+          null,
+        ),
+        'duplicate page id': (
+          {
+            ..._validDocument(),
+            'pages': [
+              {..._validPage(), 'revision': 0},
+              {..._validPage(), 'revision': 1},
+            ],
+          },
+          'pages[1].id',
+          null,
+        ),
+      };
+
+      for (final MapEntry(key: name, value: (input, field, hidden))
+          in cases.entries) {
+        test(name, () {
+          final json = input is String ? input : jsonEncode(input);
+          try {
+            decodeDocument(json);
+            fail('expected FormatException');
+          } on FormatException catch (e) {
+            expect(e.message, contains(field));
+            expect(e.source, isNull);
+            if (hidden != null) {
+              expect(e.toString(), isNot(contains(hidden)));
+            }
+          }
+        });
       }
     });
   });
