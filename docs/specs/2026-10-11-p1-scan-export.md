@@ -105,9 +105,12 @@ giải mã cùng lúc. A11y: nhãn cho mọi nút, vùng chạm ≥ 44×44 dp, A
 
 ## 11. Architecture và code touchpoints
 
-`lib/core/scan_session.dart` (thuần Dart) · `lib/storage/session_store.dart` (đĩa, manifest) · `lib/imaging/rectify.dart`
-(isolate, `image`) · `lib/export/pdf_export.dart`, `lib/export/image_export.dart` · `lib/ui/` (capture, review, edit,
-export) · test tương ứng dưới `test/` · `pubspec.yaml`/`pubspec.lock` (5 dependency ở §3, phương án A).
+Đường dẫn thật sau khi triển khai (cập nhật 2026-10-12, F-027; bản đồ đầy đủ ở `CODEMAP.md`):
+`apps/mobile/lib/core/scan_session.dart`, `apps/mobile/lib/core/session_manifest.dart`, `apps/mobile/lib/core/quad_editing.dart` (thuần Dart) ·
+`apps/mobile/lib/storage/session_store.dart` (đĩa, manifest) · `apps/mobile/lib/imaging/homography.dart`, `apps/mobile/lib/imaging/page_render.dart`
+(isolate, `image`) · `apps/mobile/lib/export/pdf_export.dart`, `apps/mobile/lib/export/page_exporter.dart`, `apps/mobile/lib/export/file_sharer.dart` ·
+`apps/mobile/lib/ui/` (`page_source.dart`, `session_controller.dart`, `review_screen.dart`, `quad_editor_screen.dart`) · `apps/mobile/lib/main.dart` ·
+test tương ứng dưới `apps/mobile/test/` · `apps/mobile/pubspec.yaml`/`pubspec.lock` (5 dependency ở §3, phương án A).
 
 ## 12–13. Contract và dữ liệu
 

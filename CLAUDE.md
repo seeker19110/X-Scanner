@@ -1,7 +1,7 @@
-# X-Scanner — project context (2026-10-11)
+# X-Scanner — project context (2026-10-12)
 
 Read PROJECT.md, PROGRESS.md and `docs/research/2026-10-11-scanner-product-suggestions.md` first. Research is **ADVISORY**, not approved architecture.
-Approved: suggestions, framework adoption and P0 foundation (ADR-0002, `docs/specs/2026-10-11-p0-foundation.md`). App: Flutter in `apps/mobile`.
+Approved: suggestions, framework adoption, P0 foundation (ADR-0002, `docs/specs/2026-10-11-p0-foundation.md`) and P1 scan & export (ADR-0003, `docs/specs/2026-10-11-p1-scan-export.md`, merged). App: Flutter in `apps/mobile`; map: `CODEMAP.md`, `docs/FEATURE-MAP.md`.
 Template example stacks/models and the proposed P0–P4 roadmap do not authorize product implementation.
 Use `.claude/project-commands.sh`: `bash scripts/dev-task.sh doctor` and `bash scripts/dev-task.sh gate`.
 Gate = Android debug APK build, `flutter analyze`, `dart format`, `flutter test` + repository checks; needs Flutter 3.47.7 and an Android SDK.
@@ -12,6 +12,7 @@ Never upload real documents/OCR, log sensitive contents, invent missing text or 
 Do not activate release, auto-merge, schedulers, cloud services or X-Agents from this advisory alone.
 Each developer checkout needs `git config core.hooksPath scripts/githooks`, Bash >=4 and jq.
 Do not change global Git configuration. Repository-level branch protection is not yet verified.
+Not active here: `pr-policy.yml`, `progress-freshness`, `protection-guard`, auto-merge and the Evidence table in `docs/ops/repository-settings.md` (that table is the template repo's). Check Work ID, spec approval and PROGRESS by hand; X-Scanner evidence: `docs/adoption/README.md`.
 This context governs X-Scanner over generic examples and unfilled product placeholders below.
 
 ---
