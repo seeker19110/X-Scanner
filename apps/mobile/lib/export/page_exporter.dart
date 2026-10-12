@@ -6,10 +6,10 @@ import 'dart:typed_data';
 import '../core/page_quad.dart';
 import '../core/scan_page.dart';
 import '../imaging/page_render.dart';
+import 'export_job.dart';
 import 'pdf_export.dart';
 
-/// File types the session can be exported to.
-enum ExportFormat { pdf, jpeg, png }
+export 'export_job.dart' show ExportFormat;
 
 /// Renders one page of an original image; see [renderPage].
 typedef PageRenderer = Future<Uint8List> Function(
@@ -42,33 +42,86 @@ class PageExporter {
 
   static const String _baseName = 'X-Scanner';
 
-  /// Renders [pages] in order, one at a time, from the originals given by
-  /// [originalOf] and writes them as [format]: one `X-Scanner.pdf`, built
-  /// in a background isolate, or one `X-Scanner-trang-NN.jpg`/`.png` per
-  /// page, numbered with at least two digits and as many as the page count
-  /// needs so names sort in page order. Returns the files in page order.
+  /// Runs [job]: renders its pages in order, one at a time, from the
+  /// originals given by [originalOf] and writes them as its format: one
+  /// `X-Scanner.pdf`, built in a background isolate, or one
+  /// `X-Scanner-trang-NN.jpg`/`.png` per page, numbered with at least two
+  /// digits and as many as the page count needs so names sort in page
+  /// order. The files, in page order, are published only through
+  /// [ExportJob.succeed].
   ///
-  /// Throws [ArgumentError] for an empty [pages]. Any other failure removes
-  /// the exported files and is rethrown.
-  Future<List<File>> export(
-    List<ScanPage> pages,
+  /// Does not throw: a cancel is honoured before every page and once more
+  /// before publishing, and a failure ends the job with its
+  /// [ExportFailure]. Either way the exported files are removed before the
+  /// job ends. A job cancelled while queued is not run; running a job
+  /// that already ran is a [StateError].
+  Future<void> run(
+    ExportJob job,
     File Function(ScanPage page) originalOf,
-    ExportFormat format,
   ) async {
     // DEBT: a PDF holds every rendered page in memory, and Isolate.run copies those JPEGs into the PDF isolate, so the peak is about twice their size | trần: about 100 pages of 12 MP on a 4 GB device, not measured | xem lại khi: P2 measures export on devices (spec §2).
-    if (pages.isEmpty) {
-      throw ArgumentError.value(pages, 'pages', 'must not be empty');
+    // Checked before the clear, which would delete the files of a job
+    // that already ran. A job cancelled while queued still clears.
+    if (job.state != ExportState.queued && job.state != ExportState.cancelled) {
+      throw StateError('the job already ran');
     }
     await clear();
+    // Cancelled while queued, possibly during the clear above.
+    if (job.state == ExportState.cancelled) return;
+    job.start();
+    final pages = job.pages;
+    final pdf = job.format == ExportFormat.pdf;
+    final (renderFormat, extension) = job.format == ExportFormat.png
+        ? (RenderFormat.png, 'png')
+        : (RenderFormat.jpeg, 'jpg');
+    final digits = max(2, '${pages.length}'.length);
+    final images = <Uint8List>[];
+    final files = <File>[];
     try {
-      await exportDir.create(recursive: true);
-      return format == ExportFormat.pdf
-          ? [await _writePdf(pages, originalOf)]
-          : await _writeImages(pages, originalOf, format);
-    } catch (_) {
+      await _step(
+        ExportFailure.writeFailed,
+        () => exportDir.create(recursive: true),
+      );
+      for (var i = 0; i < pages.length; i++) {
+        _stopIfCancelled(job);
+        final bytes = await _step(
+          ExportFailure.renderFailed,
+          () => _render(pages[i], originalOf, renderFormat),
+        );
+        if (pdf) {
+          images.add(bytes);
+        } else {
+          final number = '${i + 1}'.padLeft(digits, '0');
+          files.add(
+            await _step(
+              ExportFailure.writeFailed,
+              () => _write('$_baseName-trang-$number.$extension', bytes),
+            ),
+          );
+        }
+        job.pageDone();
+      }
+      if (pdf) {
+        files.add(
+          await _step(
+            ExportFailure.writeFailed,
+            () async =>
+                _write('$_baseName.pdf', await _buildPdfInIsolate(images)),
+          ),
+        );
+      }
+      _stopIfCancelled(job);
+    } on _Stop catch (stop) {
+      // Listeners only see the job end once its files are gone.
       await clear();
-      rethrow;
+      if (stop.failure == ExportFailure.cancelled) {
+        job.markCancelled();
+      } else {
+        job.fail(stop.failure);
+      }
+      return;
     }
+    job.succeed(files);
   }
 
   /// Deletes [exportDir] and everything in it; a missing directory or a
@@ -92,38 +145,27 @@ class PageExporter {
     }
   }
 
-  Future<File> _writePdf(
-    List<ScanPage> pages,
-    File Function(ScanPage page) originalOf,
-  ) async {
-    final images = <Uint8List>[];
-    for (final page in pages) {
-      images.add(await _render(page, originalOf, RenderFormat.jpeg));
-    }
-    return _write('$_baseName.pdf', await _buildPdfInIsolate(images));
-  }
-
   /// Runs [buildPdf] off the UI isolate. Static so the closure captures
   /// only [images]; a [PdfException] is rethrown here as it was raised.
   static Future<Uint8List> _buildPdfInIsolate(List<Uint8List> images) =>
       Isolate.run(() => buildPdf(images));
 
-  Future<List<File>> _writeImages(
-    List<ScanPage> pages,
-    File Function(ScanPage page) originalOf,
-    ExportFormat format,
+  /// Runs [action]; any error it throws becomes a [_Stop] with
+  /// [failure]. Decode, isolate, file system errors and a `PdfException`
+  /// all mean the same to the job; none of their details are kept.
+  static Future<T> _step<T>(
+    ExportFailure failure,
+    Future<T> Function() action,
   ) async {
-    final (renderFormat, extension) = format == ExportFormat.png
-        ? (RenderFormat.png, 'png')
-        : (RenderFormat.jpeg, 'jpg');
-    final digits = max(2, '${pages.length}'.length);
-    final files = <File>[];
-    for (var i = 0; i < pages.length; i++) {
-      final bytes = await _render(pages[i], originalOf, renderFormat);
-      final number = '${i + 1}'.padLeft(digits, '0');
-      files.add(await _write('$_baseName-trang-$number.$extension', bytes));
+    try {
+      return await action();
+    } catch (_) {
+      throw _Stop(failure);
     }
-    return List.unmodifiable(files);
+  }
+
+  static void _stopIfCancelled(ExportJob job) {
+    if (job.cancelRequested) throw const _Stop(ExportFailure.cancelled);
   }
 
   Future<Uint8List> _render(
@@ -139,4 +181,11 @@ class PageExporter {
 
   Future<File> _write(String name, Uint8List bytes) =>
       File('${exportDir.path}/$name').writeAsBytes(bytes, flush: true);
+}
+
+/// Ends a run early with [failure].
+class _Stop implements Exception {
+  const _Stop(this.failure);
+
+  final ExportFailure failure;
 }

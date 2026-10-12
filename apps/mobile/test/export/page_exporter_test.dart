@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -5,9 +6,9 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
-import 'package:pdf/pdf.dart' show PdfException;
 import 'package:x_scanner/core/page_quad.dart';
 import 'package:x_scanner/core/scan_page.dart';
+import 'package:x_scanner/export/export_job.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/imaging/page_render.dart';
@@ -57,11 +58,64 @@ void main() {
   bool exportDirIsEmpty() =>
       !exportDir.existsSync() || exportDir.listSync().isEmpty;
 
+  /// Runs a new job for [pages] on [exporter] and returns it once ended.
+  Future<ExportJob> runJob(
+    PageExporter exporter,
+    List<ScanPage> pages,
+    ExportFormat format,
+  ) async {
+    final job = ExportJob(pages, format);
+    await exporter.run(job, originalOf);
+    return job;
+  }
+
+  /// Runs a job that must succeed and returns its files.
+  Future<List<File>> exportFiles(
+    PageExporter exporter,
+    List<ScanPage> pages,
+    ExportFormat format,
+  ) async {
+    final job = await runJob(exporter, pages, format);
+    expect(job.state, ExportState.succeeded, reason: '$format');
+    return job.files!;
+  }
+
+  /// Expects [job] to have ended as [state] with [failure], with the
+  /// export directory already empty when listeners saw it end.
+  void expectEnded(
+    ExportJob job,
+    ExportState state,
+    ExportFailure failure,
+    List<bool> emptyWhenEnded, {
+    String? reason,
+  }) {
+    expect(job.state, state, reason: reason);
+    expect(job.failure, failure, reason: reason);
+    expect(job.files, isNull, reason: reason);
+    expect(emptyWhenEnded, [true], reason: reason);
+    expect(exportDirIsEmpty(), isTrue, reason: reason);
+  }
+
+  /// Records, when [job] reaches a final state, whether the export
+  /// directory was empty at that moment.
+  List<bool> watchEnd(ExportJob job) {
+    final seen = <bool>[];
+    job.addListener(() {
+      if (job.state != ExportState.queued && job.state != ExportState.running) {
+        seen.add(exportDirIsEmpty());
+      }
+    });
+    return seen;
+  }
+
   test('pdf: 3 pages become one X-Scanner.pdf with 3 pages', () async {
     final pages = threePages();
     final before = originalBytes();
-    final files = await PageExporter(exportDir: exportDir)
-        .export(pages, originalOf, ExportFormat.pdf);
+    final files = await exportFiles(
+      PageExporter(exportDir: exportDir),
+      pages,
+      ExportFormat.pdf,
+    );
 
     expect(files, hasLength(1));
     expect(files.single.path, '${exportDir.path}/X-Scanner.pdf');
@@ -79,8 +133,11 @@ void main() {
     test('$ext: one file per page, named and ordered by page', () async {
       final pages = threePages();
       final before = originalBytes();
-      final files = await PageExporter(exportDir: exportDir)
-          .export(pages, originalOf, format);
+      final files = await exportFiles(
+        PageExporter(exportDir: exportDir),
+        pages,
+        format,
+      );
 
       expect(
         [for (final f in files) f.path],
@@ -112,11 +169,15 @@ void main() {
       for (var i = 0; i < 10; i++)
         ScanPage(id: 'q$i', originalPath: page.originalPath),
     ];
-    final files = await PageExporter(
-      exportDir: exportDir,
-      renderer: (path, quad, turns, {format = RenderFormat.jpeg}) async =>
-          Uint8List(1),
-    ).export(pages, originalOf, ExportFormat.jpeg);
+    final files = await exportFiles(
+      PageExporter(
+        exportDir: exportDir,
+        renderer: (path, quad, turns, {format = RenderFormat.jpeg}) async =>
+            Uint8List(1),
+      ),
+      pages,
+      ExportFormat.jpeg,
+    );
     expect(files.first.path.endsWith('X-Scanner-trang-01.jpg'), isTrue);
     expect(files.last.path.endsWith('X-Scanner-trang-10.jpg'), isTrue);
   });
@@ -127,11 +188,15 @@ void main() {
       for (var i = 0; i < 100; i++)
         ScanPage(id: 'q$i', originalPath: page.originalPath),
     ];
-    final files = await PageExporter(
-      exportDir: exportDir,
-      renderer: (path, quad, turns, {format = RenderFormat.jpeg}) async =>
-          Uint8List(1),
-    ).export(pages, originalOf, ExportFormat.jpeg);
+    final files = await exportFiles(
+      PageExporter(
+        exportDir: exportDir,
+        renderer: (path, quad, turns, {format = RenderFormat.jpeg}) async =>
+            Uint8List(1),
+      ),
+      pages,
+      ExportFormat.jpeg,
+    );
     final names = [for (final f in files) f.path.split('/').last];
     expect(names, [
       for (var i = 1; i <= 100; i++)
@@ -167,7 +232,7 @@ void main() {
 
     final exporter = PageExporter(exportDir: exportDir, renderer: renderer);
     for (final format in ExportFormat.values) {
-      await exporter.export(threePages(), originalOf, format);
+      await exportFiles(exporter, threePages(), format);
     }
     expect(maxActive, 1);
     expect(calls, [
@@ -178,79 +243,250 @@ void main() {
 
   test('a new export removes the files of the previous one', () async {
     final exporter = PageExporter(exportDir: exportDir);
-    await exporter.export(threePages(), originalOf, ExportFormat.jpeg);
-    final files = await exporter.export(
-      threePages(),
-      originalOf,
-      ExportFormat.pdf,
-    );
+    await exportFiles(exporter, threePages(), ExportFormat.jpeg);
+    final files = await exportFiles(exporter, threePages(), ExportFormat.pdf);
     expect([for (final f in exportDir.listSync()) f.path], [files.single.path]);
   });
 
-  test('an undecodable page fails the export and leaves no file', () async {
+  test('job reports progress page by page (AC-2)', () async {
+    for (final (format, names) in [
+      (ExportFormat.pdf, ['X-Scanner.pdf']),
+      (
+        ExportFormat.jpeg,
+        [for (var i = 1; i <= 3; i++) 'X-Scanner-trang-0$i.jpg'],
+      ),
+    ]) {
+      final job = ExportJob(threePages(), format);
+      final done = <int>[];
+      final states = <ExportState>[];
+      job.addListener(() {
+        done.add(job.done);
+        if (states.isEmpty || states.last != job.state) states.add(job.state);
+      });
+
+      await PageExporter(exportDir: exportDir).run(job, originalOf);
+
+      expect(job.state, ExportState.succeeded, reason: '$format');
+      expect(job.done, 3, reason: '$format');
+      expect(job.failure, isNull, reason: '$format');
+      expect(
+        [for (final f in job.files!) f.path],
+        [for (final name in names) '${exportDir.path}/$name'],
+        reason: '$format',
+      );
+      expect(exportDir.listSync(), hasLength(names.length));
+      expect(states, [ExportState.running, ExportState.succeeded]);
+      expect(done, containsAllInOrder([1, 2, 3]), reason: '$format');
+      expect(done.last, 3, reason: '$format');
+      for (var i = 1; i < done.length; i++) {
+        expect(done[i], greaterThanOrEqualTo(done[i - 1]), reason: '$format');
+      }
+    }
+  });
+
+  test('cancel stops at the next page (AC-3)', () async {
+    for (final format in ExportFormat.values) {
+      final renderer = _HeldRenderer(holds: {2});
+      final job = ExportJob(threePages(), format);
+      final ended = watchEnd(job);
+      final running = PageExporter(
+        exportDir: exportDir,
+        renderer: renderer.call,
+      ).run(job, originalOf);
+      await renderer.reached(2);
+
+      job.cancel();
+      expect(job.state, ExportState.running, reason: '$format');
+      renderer.release(2);
+      await running;
+
+      expectEnded(
+        job,
+        ExportState.cancelled,
+        ExportFailure.cancelled,
+        ended,
+        reason: '$format',
+      );
+      expect(job.done, lessThanOrEqualTo(2), reason: '$format');
+      expect(renderer.calls, hasLength(2), reason: 'page 3 not rendered');
+    }
+  });
+
+  test('cancel before publishing leaves no files (AC-3)', () async {
+    for (final format in [ExportFormat.jpeg, ExportFormat.pdf]) {
+      final renderer = _HeldRenderer(holds: {3});
+      final job = ExportJob(threePages(), format);
+      final ended = watchEnd(job);
+      final running = PageExporter(
+        exportDir: exportDir,
+        renderer: renderer.call,
+      ).run(job, originalOf);
+      await renderer.reached(3);
+
+      job.cancel();
+      renderer.release(3);
+      await running;
+
+      expectEnded(
+        job,
+        ExportState.cancelled,
+        ExportFailure.cancelled,
+        ended,
+        reason: '$format',
+      );
+      expect(renderer.calls, hasLength(3), reason: '$format');
+    }
+  });
+
+  test('a job cancelled while queued is not run', () async {
+    exportDir.createSync();
+    File('${exportDir.path}/stale.jpg').writeAsStringSync('s');
+    final renderer = _HeldRenderer();
+    final job = ExportJob(threePages(), ExportFormat.jpeg)..cancel();
+
+    await PageExporter(
+      exportDir: exportDir,
+      renderer: renderer.call,
+    ).run(job, originalOf);
+
+    expect(job.state, ExportState.cancelled);
+    expect(renderer.calls, isEmpty);
+    expect(exportDirIsEmpty(), isTrue);
+  });
+
+  test('running a job that already ran throws and keeps its files', () async {
+    final exporter = PageExporter(exportDir: exportDir);
+    final job = await runJob(exporter, threePages(), ExportFormat.jpeg);
+    expect(job.state, ExportState.succeeded);
+
+    await expectLater(exporter.run(job, originalOf), throwsStateError);
+
+    expect(job.state, ExportState.succeeded);
+    for (final f in job.files!) {
+      expect(f.existsSync(), isTrue, reason: f.path);
+    }
+  });
+
+  test('render failure fails the job (AC-4)', () async {
+    for (final format in ExportFormat.values) {
+      final renderer = _HeldRenderer(failing: {2});
+      final job = ExportJob(threePages(), format);
+      final ended = watchEnd(job);
+
+      await PageExporter(
+        exportDir: exportDir,
+        renderer: renderer.call,
+      ).run(job, originalOf);
+
+      expectEnded(
+        job,
+        ExportState.failed,
+        ExportFailure.renderFailed,
+        ended,
+        reason: '$format',
+      );
+      expect(job.done, 1, reason: '$format');
+      expect(renderer.calls, hasLength(2), reason: '$format');
+    }
+  });
+
+  test('render failure fails the job: an undecodable original', () async {
     final pages = threePages();
     File(pages[1].originalPath).writeAsBytesSync([1, 2, 3]);
     for (final format in ExportFormat.values) {
-      await expectLater(
-        PageExporter(exportDir: exportDir).export(pages, originalOf, format),
-        throwsA(isA<ImageDecodeFailure>()),
-        reason: '$format',
+      final job = await runJob(
+        PageExporter(exportDir: exportDir),
+        pages,
+        format,
       );
+      expect(job.state, ExportState.failed, reason: '$format');
+      expect(job.failure, ExportFailure.renderFailed, reason: '$format');
       expect(exportDirIsEmpty(), isTrue, reason: '$format');
     }
   });
 
-  test('any renderer error is passed on after cleaning up', () async {
-    var call = 0;
-    final exporter = PageExporter(
-      exportDir: exportDir,
-      renderer: (path, quad, turns, {format = RenderFormat.jpeg}) async {
-        if (++call == 3) throw StateError('boom');
-        return img.encodeJpg(img.Image(width: 4, height: 4));
-      },
-    );
-    await expectLater(
-      exporter.export(threePages(), originalOf, ExportFormat.jpeg),
-      throwsStateError,
-    );
-    expect(exportDirIsEmpty(), isTrue);
-  });
-
-  test('an unreadable rendered image fails the pdf without files', () async {
-    final exporter = PageExporter(
+  test('write failure fails the job: an unreadable rendered image fails the '
+      'pdf (AC-4)', () async {
+    final job = ExportJob(threePages(), ExportFormat.pdf);
+    final ended = watchEnd(job);
+    await PageExporter(
       exportDir: exportDir,
       renderer: (path, quad, turns, {format = RenderFormat.jpeg}) async =>
           Uint8List.fromList(List<int>.filled(16, 7)),
-    );
-    await expectLater(
-      exporter.export(threePages(), originalOf, ExportFormat.pdf),
-      throwsA(isA<PdfException>()),
-    );
-    expect(exportDirIsEmpty(), isTrue);
+    ).run(job, originalOf);
+
+    expectEnded(job, ExportState.failed, ExportFailure.writeFailed, ended);
+    expect(job.done, 3);
   });
 
-  test('an export directory that cannot be created fails', () async {
+  test('write failure fails the job: an export directory that cannot be '
+      'created (AC-4)', () async {
     final blocker = File('${tmp.path}/blocker')..writeAsStringSync('x');
-    final exporter = PageExporter(
-      exportDir: Directory('${blocker.path}/exports'),
-    );
-    await expectLater(
-      exporter.export(threePages(), originalOf, ExportFormat.png),
-      throwsA(isA<FileSystemException>()),
-    );
+    final renderer = _HeldRenderer();
+    for (final format in ExportFormat.values) {
+      final job = await runJob(
+        PageExporter(
+          exportDir: Directory('${blocker.path}/exports'),
+          renderer: renderer.call,
+        ),
+        threePages(),
+        format,
+      );
+      expect(job.state, ExportState.failed, reason: '$format');
+      expect(job.failure, ExportFailure.writeFailed, reason: '$format');
+      expect(job.files, isNull, reason: '$format');
+    }
+    expect(renderer.calls, isEmpty);
     expect(blocker.readAsStringSync(), 'x');
   });
 
-  test('an empty page list is rejected without touching files', () async {
-    exportDir.createSync();
-    final keep = File('${exportDir.path}/keep')..writeAsStringSync('k');
-    await expectLater(
-      PageExporter(exportDir: exportDir)
-          .export(const [], originalOf, ExportFormat.pdf),
-      throwsArgumentError,
-    );
-    expect(keep.existsSync(), isTrue);
+  test('write failure fails the job: a page file that cannot be written '
+      '(AC-4)', () async {
+    final job = ExportJob(threePages(), ExportFormat.png);
+    final ended = watchEnd(job);
+    var call = 0;
+    await PageExporter(
+      exportDir: exportDir,
+      renderer: (path, quad, turns, {format = RenderFormat.jpeg}) async {
+        // A directory in the way of the second page's file.
+        if (++call == 2) {
+          Directory('${exportDir.path}/X-Scanner-trang-02.png').createSync();
+        }
+        return Uint8List(1);
+      },
+    ).run(job, originalOf);
+
+    expectEnded(job, ExportState.failed, ExportFailure.writeFailed, ended);
+    expect(job.done, 1);
   });
+
+  test(
+    'export uses the snapshot taken when the job was created (AC-5)',
+    () async {
+      final pages = threePages();
+      final renderer = _HeldRenderer(holds: {1});
+      final job = ExportJob(pages, ExportFormat.jpeg);
+      final running = PageExporter(
+        exportDir: exportDir,
+        renderer: renderer.call,
+      ).run(job, originalOf);
+      await renderer.reached(1);
+
+      // The caller's list changes: page 3 removed, page 2 turned again.
+      final turned = pages[1].rotatedClockwise();
+      pages
+        ..removeLast()
+        ..[1] = turned;
+      renderer.release(1);
+      await running;
+
+      expect(job.state, ExportState.succeeded);
+      expect(job.files, hasLength(3));
+      expect(renderer.calls, [
+        for (var i = 0; i < 3; i++) (PageQuad.fullFrame, i == 1 ? 1 : 0),
+      ]);
+    },
+  );
 
   test('clear removes the directory and tolerates a missing one', () async {
     final exporter = PageExporter(exportDir: exportDir);
@@ -299,4 +535,41 @@ void main() {
       expect(() => mimeTypeFor('/x/noext'), throwsArgumentError);
     });
   });
+}
+
+/// Renderer returning a small JPEG. Records the quad and quarter turns of
+/// every call; waits at the 1-based calls in `holds` until [release] and
+/// throws at those in `failing`.
+class _HeldRenderer {
+  _HeldRenderer({Set<int> holds = const {}, this.failing = const {}})
+    : _holds = {for (final n in holds) n: Completer<void>()};
+
+  final Set<int> failing;
+  final Map<int, Completer<void>> _holds;
+  final Map<int, Completer<void>> _reached = {};
+  final List<(PageQuad, int)> calls = [];
+
+  static final Uint8List _jpeg = img.encodeJpg(img.Image(width: 4, height: 4));
+
+  /// Completes once call [n] has started.
+  Future<void> reached(int n) =>
+      _reached.putIfAbsent(n, Completer<void>.new).future;
+
+  /// Lets call [n] return.
+  void release(int n) => _holds[n]!.complete();
+
+  Future<Uint8List> call(
+    String path,
+    PageQuad quad,
+    int turns, {
+    RenderFormat format = RenderFormat.jpeg,
+  }) async {
+    calls.add((quad, turns));
+    final n = calls.length;
+    final reached = _reached.putIfAbsent(n, Completer<void>.new);
+    if (!reached.isCompleted) reached.complete();
+    await _holds[n]?.future;
+    if (failing.contains(n)) throw StateError('render failed');
+    return _jpeg;
+  }
 }

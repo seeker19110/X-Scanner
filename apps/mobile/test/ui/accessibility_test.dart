@@ -8,6 +8,7 @@ import 'package:image/image.dart' as img;
 import 'package:x_scanner/app/theme.dart';
 import 'package:x_scanner/core/page_quad.dart';
 import 'package:x_scanner/core/scan_page.dart';
+import 'package:x_scanner/export/export_job.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/imaging/page_render.dart';
@@ -248,6 +249,82 @@ void main() {
       }
       expect(controller.busy, isFalse);
       await tester.pumpAndSettle();
+      handle.dispose();
+    });
+
+    testWidgets('review screen while exporting meets the a11y guidelines in '
+        '${brightness.name} theme (XS-12a AC-7)', (tester) async {
+      final handle = tester.ensureSemantics();
+      final source = _Source();
+      final hold = Completer<void>();
+      final controller = (await tester.runAsync(() async {
+        final c = SessionController(
+          store: SessionStore(Directory('${tmp.path}/session')..createSync()),
+          source: source,
+          exporter: PageExporter(
+            exportDir: Directory('${tmp.path}/exports'),
+            // Holds the first page so the export stays in progress.
+            renderer: (path, quad, turns, {format = RenderFormat.jpeg}) async {
+              await hold.future;
+              return Uint8List.fromList([1, 2, 3]);
+            },
+          ),
+          sharer: _Sharer(),
+          thumbnailer: (_) async => _thumb,
+          previewer: _preview,
+        );
+        final file = File('${tmp.path}/p.png')..writeAsBytesSync(_thumb);
+        source.captures.add(file.path);
+        await c.capture();
+        unawaited(c.exportAndShare(ExportFormat.jpeg));
+        for (
+          var i = 0;
+          i < 500 && c.exportJob?.state != ExportState.running;
+          i++
+        ) {
+          await Future<void>.delayed(const Duration(milliseconds: 5));
+        }
+        return c;
+      }))!;
+
+      expect(controller.exportJob?.state, ExportState.running);
+
+      await tester.pumpWidget(screen(controller));
+      // The cached preview future completes on the real event loop.
+      await tester.runAsync(
+        () => controller.croppedPreviewFor(controller.session.pages.single),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(Image), findsOneWidget);
+      expect(find.text('Đang xuất trang 1/1'), findsOneWidget);
+      final cancel = find.ancestor(
+        of: find.text('Huỷ'),
+        matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+      );
+      expect(cancel, findsOneWidget);
+      expect(
+        tester.widget<ButtonStyleButton>(cancel).onPressed,
+        isNotNull,
+        reason: 'enabled while busy',
+      );
+      final size = tester.getSize(cancel);
+      expect(size.width, greaterThanOrEqualTo(48));
+      expect(size.height, greaterThanOrEqualTo(48));
+
+      await _expectGuidelines(tester);
+
+      await tester.tap(cancel);
+      hold.complete();
+      for (var i = 0; i < 500 && controller.busy; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 5)),
+        );
+        await tester.pump();
+      }
+      expect(controller.busy, isFalse);
+      expect(controller.exportJob, isNull);
+      await tester.pumpAndSettle();
+      expect(find.text('Chụp'), findsOneWidget);
       handle.dispose();
     });
 

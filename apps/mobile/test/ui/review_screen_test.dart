@@ -68,6 +68,30 @@ class HeldStore extends SessionStore {
   }
 }
 
+/// Renderer returning a few bytes that waits at the 1-based calls in
+/// `holds` until [release].
+class HeldRenderer {
+  HeldRenderer({Set<int> holds = const {}})
+    : _holds = {for (final n in holds) n: Completer<void>()};
+
+  final Map<int, Completer<void>> _holds;
+  int calls = 0;
+
+  /// Lets call [n] return.
+  void release(int n) => _holds[n]!.complete();
+
+  Future<Uint8List> call(
+    String path,
+    PageQuad quad,
+    int turns, {
+    RenderFormat format = RenderFormat.jpeg,
+  }) async {
+    final n = ++calls;
+    await _holds[n]?.future;
+    return Uint8List.fromList([1, 2, 3]);
+  }
+}
+
 const String _empty = 'Chưa có trang nào. Chụp hoặc nhập ảnh để bắt đầu.';
 
 void main() {
@@ -907,5 +931,83 @@ void main() {
       ['X-Scanner.pdf'],
     ]);
     expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('export shows page progress and can be cancelled (AC-7)', (
+    tester,
+  ) async {
+    final renderer = HeldRenderer(holds: {1, 2});
+    // Created outside the fake clock, like in setUp, so its queue runs on
+    // the real I/O of start().
+    await tester.runAsync(() async {
+      controller = SessionController(
+        store: SessionStore(Directory('${tmp.path}/session')),
+        source: source,
+        exporter: PageExporter(
+          exportDir: Directory('${tmp.path}/exports'),
+          renderer: renderer.call,
+        ),
+        sharer: sharer,
+        thumbnailer: (path) async =>
+            thumbnailSync(File(path).readAsBytesSync()),
+        previewer: (bytes, quad, turns) async =>
+            renderPageSync(bytes, quad, turns),
+      );
+    });
+    await start(tester, pages: 3);
+
+    /// Runs real I/O until the renderer has been called [n] times, then
+    /// lets the format sheet finish closing.
+    Future<void> waitForRender(int n) async {
+      for (var i = 0; i < 500 && renderer.calls < n; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 5)),
+        );
+        await tester.pump();
+      }
+      expect(renderer.calls, n);
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    double? progress() => tester
+        .widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator))
+        .value;
+
+    await tester.tap(find.byTooltip('Xuất'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('JPG'));
+    await waitForRender(1);
+    expect(find.text('Đang xuất trang 1/3'), findsOneWidget);
+    expect(progress(), 0);
+    expect(find.text('Chụp'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Chụp'), findsNothing);
+    expect(controller.busy, isTrue);
+
+    renderer.release(1);
+    await waitForRender(2);
+    expect(find.text('Đang xuất trang 2/3'), findsOneWidget);
+    expect(progress(), closeTo(1 / 3, 1e-9));
+
+    await tester.tap(find.text('Huỷ'));
+    await tester.pump();
+    // Until the page being rendered is done, the request shows and the
+    // button cannot be pressed again for nothing.
+    expect(find.text('Đang huỷ…'), findsOneWidget);
+    expect(
+      tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
+      isNull,
+    );
+    renderer.release(2);
+    await settle(tester);
+
+    expect(renderer.calls, 2);
+    expect(sharer.shared, isEmpty);
+    expect(find.text('Đã huỷ xuất.'), findsOneWidget);
+    expect(find.textContaining('Đang xuất trang'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Chụp'), findsOneWidget);
+    expect(find.text('Nhập ảnh'), findsOneWidget);
+    expect(controller.session.pages, hasLength(3));
   });
 }

@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:x_scanner/core/page_quad.dart';
+import 'package:x_scanner/export/export_job.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/imaging/decode_gate.dart';
@@ -82,14 +83,50 @@ class FakeSharer implements FileSharer {
   final List<List<String>> existing = [];
   bool fail = false;
 
+  /// Runs while sharing, before the share returns.
+  void Function()? onShare;
+
   @override
   Future<void> share(List<File> files) async {
+    onShare?.call();
     shared.add([for (final f in files) f.path.split('/').last]);
     existing.add([
       for (final f in files)
         if (f.existsSync()) f.path.split('/').last,
     ]);
     if (fail) throw StateError('share failed');
+  }
+}
+
+/// Renderer returning a few bytes that waits at the 1-based calls in
+/// `holds` until [release]; records the quarter turns of every call.
+class HeldRenderer {
+  HeldRenderer({Set<int> holds = const {}})
+    : _holds = {for (final n in holds) n: Completer<void>()};
+
+  final Map<int, Completer<void>> _holds;
+  final Map<int, Completer<void>> _reached = {};
+  final List<int> turns = [];
+
+  /// Completes once call [n] has started.
+  Future<void> reached(int n) =>
+      _reached.putIfAbsent(n, Completer<void>.new).future;
+
+  /// Lets call [n] return.
+  void release(int n) => _holds[n]!.complete();
+
+  Future<Uint8List> call(
+    String path,
+    PageQuad quad,
+    int quarterTurns, {
+    RenderFormat format = RenderFormat.jpeg,
+  }) async {
+    turns.add(quarterTurns);
+    final n = turns.length;
+    final reached = _reached.putIfAbsent(n, Completer<void>.new);
+    if (!reached.isCompleted) reached.complete();
+    await _holds[n]?.future;
+    return Uint8List.fromList([1, 2, 3]);
   }
 }
 
@@ -1217,4 +1254,150 @@ void main() {
     expect(shareCopy.existsSync(), isFalse);
     expect(controller.takeNotice(), isNull);
   });
+
+  /// A controller on the same session and exports as [controller], whose
+  /// exporter renders through [renderer]; its session is restored.
+  Future<SessionController> withRenderer(HeldRenderer renderer) async {
+    final c = SessionController(
+      store: SessionStore(root),
+      source: source,
+      exporter: PageExporter(exportDir: exports, renderer: renderer.call),
+      sharer: sharer,
+    );
+    await c.restore();
+    return c;
+  }
+
+  test('export job reports progress (AC-6)', () async {
+    await addPages(3);
+    final renderer = HeldRenderer(holds: {2});
+    final c = await withRenderer(renderer);
+    final seen = <int?>[];
+    c.addListener(() => seen.add(c.exportJob?.done));
+    expect(c.exportJob, isNull);
+
+    final export = c.exportAndShare(ExportFormat.jpeg);
+    await renderer.reached(2);
+    final job = c.exportJob;
+    expect(job, isNotNull);
+    expect(job!.state, ExportState.running);
+    expect(job.total, 3);
+    expect(job.done, 1);
+    expect(c.busy, isTrue);
+
+    renderer.release(2);
+    await export;
+    expect(seen, containsAllInOrder([0, 1, 2, 3, null]));
+    expect(job.state, ExportState.succeeded);
+    expect(c.exportJob, isNull);
+    expect(c.busy, isFalse);
+    expect(sharer.shared.single, hasLength(3));
+    expect(c.takeNotice(), isNull);
+  });
+
+  test('export job reports progress (AC-6): the job is gone while sharing, '
+      'so there is no cancel that could not act', () async {
+    await addPages(2);
+    final c = await withRenderer(HeldRenderer());
+    (ExportJob?, bool)? whileSharing;
+    sharer.onShare = () => whileSharing = (c.exportJob, c.busy);
+
+    await c.exportAndShare(ExportFormat.jpeg);
+
+    expect(sharer.shared.single, hasLength(2));
+    expect(whileSharing, (null, true));
+  });
+
+  test('cancelling an export shares nothing (AC-6): disposing the '
+      'controller cancels its export', () async {
+    await addPages(3);
+    final renderer = HeldRenderer(holds: {2});
+    final c = await withRenderer(renderer);
+
+    final export = c.exportAndShare(ExportFormat.jpeg);
+    await renderer.reached(2);
+    final job = c.exportJob!;
+    c.dispose();
+    renderer.release(2);
+    await export;
+
+    expect(job.state, ExportState.cancelled);
+    expect(sharer.shared, isEmpty);
+    expect(exports.existsSync(), isFalse);
+  });
+
+  test('cancelling an export shares nothing (AC-6)', () async {
+    await addPages(3);
+    final renderer = HeldRenderer(holds: {2});
+    final c = await withRenderer(renderer);
+    final before = c.session;
+    final onDisk = manifestPages();
+    final originals = {
+      for (final p in before.pages) p.id: c.originalFile(p).readAsBytesSync(),
+    };
+
+    final export = c.exportAndShare(ExportFormat.pdf);
+    await renderer.reached(2);
+    final job = c.exportJob!;
+    c.cancelExport();
+    c.cancelExport();
+    renderer.release(2);
+    await export;
+
+    expect(job.state, ExportState.cancelled);
+    expect(renderer.turns, hasLength(2), reason: 'page 3 not rendered');
+    expect(sharer.shared, isEmpty);
+    expect(c.takeNotice(), SessionNotice.exportCancelled);
+    expect(c.takeNotice(), isNull);
+    expect(c.exportJob, isNull);
+    expect(c.busy, isFalse);
+    expect(exports.existsSync(), isFalse);
+    expect(c.session, same(before));
+    expect(manifestPages(), onDisk);
+    for (final p in before.pages) {
+      expect(c.originalFile(p).readAsBytesSync(), originals[p.id]);
+    }
+  });
+
+  test('cancelling an export shares nothing: cancelExport without an export '
+      'does nothing (AC-6)', () async {
+    controller.cancelExport();
+    await addPages(1);
+    var notified = 0;
+    controller.addListener(() => notified++);
+    controller.cancelExport();
+    expect(notified, 0);
+
+    await controller.exportAndShare(ExportFormat.jpeg);
+    controller.cancelExport();
+    expect(sharer.shared, hasLength(1));
+    expect(controller.takeNotice(), isNull);
+    expect(controller.exportJob, isNull);
+  });
+
+  test(
+    'export uses the snapshot taken when the job was created (AC-5)',
+    () async {
+      await addPages(3);
+      final renderer = HeldRenderer(holds: {1});
+      final c = await withRenderer(renderer);
+      final [_, second, third] = c.session.pages;
+
+      final export = c.exportAndShare(ExportFormat.jpeg);
+      await renderer.reached(1);
+      // Both edits queue behind the export.
+      final rotate = c.updatePage(second.rotatedClockwise());
+      final remove = c.remove(third.id);
+      renderer.release(1);
+      await Future.wait([export, rotate, remove]);
+
+      expect(renderer.turns, [0, 0, 0]);
+      expect(sharer.shared.single, [
+        for (var i = 1; i <= 3; i++) 'X-Scanner-trang-0$i.jpg',
+      ]);
+      expect(c.takeNotice(), isNull);
+      expect(c.session.pages, hasLength(2));
+      expect(c.session.pages[1].quarterTurns, 1);
+    },
+  );
 }

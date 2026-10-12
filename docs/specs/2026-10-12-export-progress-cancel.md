@@ -9,7 +9,7 @@
 | Last updated | 2026-10-12 |
 
 > Mức **M**: đổi cách chạy xuất và thêm giao diện tiến độ/huỷ. Không đổi dữ liệu lưu, manifest, định dạng/tên file xuất,
-> writer PDF hay dependency. Là consumer đầu tiên của hợp đồng tác vụ xuất XS-08 (FR-5, §12.2, AC-7, AC-8;
+> writer PDF hay dependency. Là consumer đầu tiên của hợp đồng tác vụ xuất XS-08 (FR-5, §12.2, §9 tiêu chí 7 và 8;
 > `docs/specs/2026-10-12-document-revision-export-contract.md`, ADR-0004).
 
 ## 1. Problem, user và evidence
@@ -46,7 +46,7 @@
   `done + 1` và báo tiến độ; kiểm yêu cầu huỷ **trước mỗi trang** và **trước khi công bố** (sau khi ghi PDF/ảnh cuối). Lỗi
   render → `failed(renderFailed)`; lỗi ghi file/dựng PDF → `failed(writeFailed)`; huỷ → `cancelled(cancelled)`; ba trường
   hợp đều xoá thư mục xuất. Tên file và định dạng giữ nguyên quy ước P1.
-- **FR-3 Snapshot (XS-08 AC-7).** File xuất phản ánh các trang lúc tạo tác vụ, kể cả khi phiên bị sửa trong lúc chạy.
+- **FR-3 Snapshot (XS-08 §9 tiêu chí 7).** File xuất phản ánh các trang lúc tạo tác vụ, kể cả khi phiên bị sửa trong lúc chạy.
 - **FR-4 Controller.** `exportAndShare(format)` tạo tác vụ từ trang hiện tại, cho UI đọc tác vụ đang chạy (`exportJob`:
   trạng thái, `done`, `total`) và báo thay đổi mỗi khi tiến độ/trạng thái đổi; `cancelExport()` huỷ tác vụ đang chạy (không
   có thì không làm gì). `succeeded` → chia sẻ rồi dọn như hiện nay; `failed` → `SessionNotice.exportFailed` như hiện nay;
@@ -71,9 +71,9 @@
 - **AC-3** Given renderer giả chặn ở trang 2, when huỷ rồi thả, then `cancelled(cancelled)`, `done` ≤ 2, thư mục xuất không
   còn file, renderer không được gọi cho trang 3; huỷ ngay trước khi công bố (sau trang cuối) cũng ra `cancelled` không file.
 - **AC-4** Given trang 2 render lỗi, then `failed(renderFailed)`, thư mục xuất rỗng; given ghi file/dựng PDF lỗi, then
-  `failed(writeFailed)`, thư mục rỗng (XS-08 AC-8).
+  `failed(writeFailed)`, thư mục rỗng (XS-08 §9 tiêu chí 8).
 - **AC-5** Given tác vụ đang chạy, when phiên bị sửa (xoay/xoá một trang qua controller), then file xuất phản ánh snapshot
-  lúc tạo (XS-08 AC-7).
+  lúc tạo (XS-08 §9 tiêu chí 7).
 - **AC-6** Given controller đang xuất, then `exportJob` có `done/total` và listener được báo theo tiến độ; `cancelExport()` →
   không chia sẻ, `SessionNotice.exportCancelled`, phiên/bản gốc không đổi, sau đó `exportJob` null; lỗi → `exportFailed`.
 - **AC-7** Given màn danh sách đang xuất 3 trang, then hiện "Đang xuất trang i/3" và thanh tiến độ xác định; bấm "Huỷ" →
@@ -95,13 +95,13 @@
 
 | AC | Bằng chứng | Ghi chú |
 | --- | --- | --- |
-| AC-1 | chưa có — PR-1 | |
-| AC-2 | chưa có — PR-1 | |
-| AC-3 | chưa có — PR-1 | |
-| AC-4 | chưa có — PR-1 | |
-| AC-5 | chưa có — PR-1 | |
-| AC-6 | chưa có — PR-1 | |
-| AC-7 | chưa có — PR-1 | |
+| AC-1 | `apps/mobile/test/export/export_job_test.dart::new job is queued with a frozen snapshot (AC-1)` | + `illegal transitions throw`, `final states do not change` (huỷ khi `queued` kết thúc ngay; khi `running` chờ runner) |
+| AC-2 | `apps/mobile/test/export/page_exporter_test.dart::job reports progress page by page (AC-2)` | PDF và JPG; test tên file P1 cũ chuyển sang `run`, assert giữ nguyên |
+| AC-3 | `apps/mobile/test/export/page_exporter_test.dart::cancel stops at the next page (AC-3)` | + `cancel before publishing leaves no files (AC-3)`, `a job cancelled while queued is not run` |
+| AC-4 | `apps/mobile/test/export/page_exporter_test.dart::render failure fails the job (AC-4)` | + các ca `write failure fails the job` (PDF hỏng, thư mục không tạo được, file trang không ghi được) |
+| AC-5 | `apps/mobile/test/export/page_exporter_test.dart::export uses the snapshot taken when the job was created (AC-5)` | bằng chứng snapshot thật (đổi danh sách trang giữa lúc chạy); ca cùng tên ở `session_controller_test.dart` chỉ chứng minh sửa qua controller xếp hàng sau tác vụ xuất (xanh cả trên code cũ) |
+| AC-6 | `apps/mobile/test/ui/session_controller_test.dart::cancelling an export shares nothing (AC-6)` | + `export job reports progress (AC-6)`, `… the job is gone while sharing`, `cancelExport without an export does nothing` |
+| AC-7 | `apps/mobile/test/ui/review_screen_test.dart::export shows page progress and can be cancelled (AC-7)` | + `accessibility_test.dart` "review screen while exporting meets the a11y guidelines in … theme (XS-12a AC-7)" Dark/Light |
 
 ## 17. Slice/PR plan
 

@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
 import '../core/scan_page.dart';
-import '../export/page_exporter.dart';
+import '../export/export_job.dart';
 import 'quad_editor_screen.dart';
 import 'session_controller.dart';
 
@@ -91,6 +92,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
       'Không lưu được (có thể bộ nhớ đầy). Phiên giữ nguyên như trước.',
     SessionNotice.exportFailed =>
       'Không xuất được tài liệu. Bản gốc vẫn còn nguyên.',
+    SessionNotice.exportCancelled => 'Đã huỷ xuất.',
   };
 
   /// Asks a yes/no question; true only if [confirmLabel] was pressed.
@@ -167,6 +169,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   @override
   Widget build(BuildContext context) {
     final busy = _controller.busy;
+    final job = _controller.exportJob;
     final pages = _controller.session.pages;
     final dark = widget.themeMode == ThemeMode.dark;
     return Scaffold(
@@ -197,7 +200,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
           // Fixed slot so the indicator never shifts or covers content.
           SizedBox(
             height: 4,
-            child: busy
+            child: job != null
+                ? LinearProgressIndicator(
+                    value: job.done / job.total,
+                    semanticsLabel: _exportLabel(job),
+                  )
+                : busy
                 ? const LinearProgressIndicator(semanticsLabel: 'Đang xử lý')
                 : null,
           ),
@@ -228,7 +236,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
           : SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(8),
-                child: _sourceButtons(busy),
+                child: job != null
+                    ? _exportProgress(job)
+                    : _sourceButtons(busy),
               ),
             ),
     );
@@ -257,6 +267,30 @@ class _ReviewScreenState extends State<ReviewScreen> {
         CircularProgressIndicator(),
         SizedBox(height: 16),
         Text(_openingText, textAlign: TextAlign.center),
+      ],
+    ),
+  );
+
+  /// "Exporting page i/N", where i is the page being exported.
+  static String _exportLabel(ExportJob job) =>
+      'Đang xuất trang ${min(job.done + 1, job.total)}/${job.total}';
+
+  /// Takes the place of the source buttons during an export. Cancel stays
+  /// enabled while busy, as the export itself keeps the controller busy,
+  /// until it was pressed: the job then stops after the current page.
+  Widget _exportProgress(ExportJob job) => ConstrainedBox(
+    // At least as tall as the source buttons, so the bar does not jump.
+    constraints: const BoxConstraints(minHeight: 48),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(job.cancelRequested ? 'Đang huỷ…' : _exportLabel(job)),
+        ),
+        const SizedBox(width: 12),
+        OutlinedButton(
+          onPressed: job.cancelRequested ? null : _controller.cancelExport,
+          child: const Text('Huỷ'),
+        ),
       ],
     ),
   );
