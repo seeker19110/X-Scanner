@@ -2,12 +2,12 @@
 
 - Work ID: 2026-10-12-p1-completion
 - Yêu cầu / outcome: `/auto-complete` lần 4, bước 2: `/completion` (`docs/framework/project-completion.md` Pha 0–4) sau khi P1 PR-0..4 merged (#6..#10). Outcome: Definition of Complete có bằng chứng hoặc BLOCKED/WAITING đúng §8.
-- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 merged (#18 `4d07a6a`); W-403 merged (#19 `a7399de`); Pha 4 quét lại xong → Đợt 4: W-501 merged (#20 `673ed97`); W-503 merged (#21 `0e45794`); W-502 PR mở.
+- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 merged (#18 `4d07a6a`); W-403 merged (#19 `a7399de`); Pha 4 quét lại xong → Đợt 4: W-501 merged (#20 `673ed97`); W-503 merged (#21 `0e45794`); W-502 merged (#22 `d219ce7`); Pha 4 lần 2 xong; W-504 đang làm (`/auto-complete` lần 5).
 - Chủ trì / writer: phiên chính (kế hoạch, duyệt, tích hợp); audit giao 3 subagent chỉ đọc; sửa giao worker theo số PR.
 - Mức rủi ro / số PR: M; PR-A tài liệu Pha 0–2, rồi một PR mỗi việc W-xxx theo kế hoạch.
 - Scope / non-goal: app `apps/mobile` P1 + tài liệu dự án. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release, bật branch protection/auto-merge (cần quyền chủ repo).
 - Spec / goal / issue: `docs/specs/2026-10-11-p1-scan-export.md` · `docs/goals/2026-10-11-p1-scan-export.md` · `docs/ops/COMPLETION-PLAN.md` (Pha 2)
-- Nhánh / base SHA / thời điểm reconcile: `claude/upbeat-ramanujan-mwmwtt` @ `6177e29` · 2026-10-12T02:03:07Z
+- Nhánh / base SHA / thời điểm reconcile: `claude/upbeat-ramanujan-mwmwtt` @ `6177e29` · 2026-10-12T02:03:07Z; lần 5: `claude/admiring-mccarthy-5b360i` @ `ac2c435` (sau #23) · 2026-10-12
 
 ## Kế hoạch và phân công
 
@@ -70,13 +70,19 @@
 - Quan sát auditor không tính phát hiện (thao tác Move up/down khi bận im lặng; `_HeldStore` lặp; nút theme bật khi bận) · giữ nguyên · bậc 2.
 - F-058 chỉ ghi baseline coverage (94,6 %), không thêm cổng ngưỡng · loại thêm `--coverage` + ngưỡng vào gate · bậc 2 (đã ghi dời P2 trong kế hoạch; vùng thấp là phần nối nền tảng).
 
+- `/auto-complete` lần 5 bước 1: không có phạm vi `/auto` mới — PR P1 #6..#10 đã merge; nối tiếp `/completion` (W-504, W-104, DoC) · loại triển khai kế hoạch M0–M5 (`docs/plans/2026-10-12-comprehensive-development-plan.md`, chủ repo merge seeker19110/X-Scanner#23 `ac2c435`) · CLAUDE.md header (roadmap đề xuất không cho phép triển khai; kế hoạch tự ghi DRAFT) + §3d "ngoài scope đã giao". Việc lượt này trùng M0 của kế hoạch: XS-01 = đóng W-502, XS-02 = W-504, XS-03 = W-104.
+- W-504 phiên chính tự làm (1 PR, 1 file) · loại giao worker · bậc 4. FAIL cả khi targetSdk không phải số · bậc 1 (giá trị lạ không chứng minh được ≥ 31).
+
+- Container mới: Maven Central trả 429 qua proxy → init script Gradle cục bộ `~/.gradle/init.d` trỏ mirror Google của Central · loại `--no-verify` hoặc sửa repo Gradle trong repo · bậc 1 (cổng giữ nguyên, repo không đổi). Không đổi cấu hình Git toàn cục (gỡ `safe.directory` lỡ thêm, `chown` SDK thay thế).
+- W-504 gate PASS: build + manifest gộp thật (`targetSdkVersion="36"`) PASS, analyze 0, format, `flutter test` 272/272, self-test 10/10.
+
 ## Lần thử / blocker
 
 - Không.
 
 ## Bàn giao / bước tiếp theo
 
-- Merge PR W-502; quét lại nhóm bị ảnh hưởng (2/3/4/6/8/9/12); DoC; W-104 từ 2026-10-18; Pha 4 re-audit.
+- W-504: gate đầy đủ (container mới, đang cài Flutter 3.47.7 + Android SDK) → PR → merge; quét lại nhóm 2/8; đối chiếu DoC; W-104 ⏳ từ 2026-10-18.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 

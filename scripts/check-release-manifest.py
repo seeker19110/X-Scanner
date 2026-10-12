@@ -3,6 +3,7 @@
 
 Usage: check-release-manifest.py PATH | --self-test
 Checks (F-008): only allowed permissions, only allowed exported components, allowBackup="false".
+Checks (F-071): targetSdkVersion >= 31, where a component without android:exported is never exported.
 """
 
 import argparse
@@ -21,11 +22,20 @@ ALLOWED_EXPORTED = {
     "org.xscanner.x_scanner.MainActivity": None,
     "androidx.profileinstaller.ProfileInstallReceiver": "android.permission.DUMP",
 }
+# From API 31 a component with an intent-filter must declare android:exported,
+# so an absent attribute can no longer mean exported.
+MIN_TARGET_SDK = 31
 
 
 def violations(root):
     """Return a list of human-readable violations for a parsed <manifest> element."""
     found = []
+    uses_sdk = root.find("uses-sdk")
+    target = None if uses_sdk is None else uses_sdk.get(ANDROID + "targetSdkVersion")
+    if target is None or not target.isdigit() or int(target) < MIN_TARGET_SDK:
+        found.append(
+            f"uses-sdk android:targetSdkVersion must be a number >= {MIN_TARGET_SDK}"
+        )
     for tag in PERMISSION_TAGS:
         for element in root.iter(tag):
             name = element.get(ANDROID + "name", "<unnamed>")
@@ -72,6 +82,7 @@ def check(path):
 
 
 CLEAN = """<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.xscanner.x_scanner">
+  <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="36"/>
   <uses-permission android:name="org.xscanner.x_scanner.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"/>
   <application android:allowBackup="false">
     <activity android:name="org.xscanner.x_scanner.MainActivity" android:exported="true"/>
@@ -128,6 +139,27 @@ class ReleaseManifestTests(unittest.TestCase):
                 ["exported provider not allowed: dev.example.FileProvider"],
                 value,
             )
+
+    def test_target_sdk_below_31_or_missing_fails(self):
+        # Below 31 a component with an intent-filter and no android:exported is exported.
+        sdk = '<uses-sdk android:minSdkVersion="24" android:targetSdkVersion="36"/>'
+        for replacement in (
+            sdk.replace('"36"', '"30"'),
+            sdk.replace(' android:targetSdkVersion="36"', ""),
+            sdk.replace('"36"', '"S"'),
+            "",
+        ):
+            self.assertEqual(
+                self.run_on(CLEAN.replace(sdk, replacement)),
+                ["uses-sdk android:targetSdkVersion must be a number >= 31"],
+                replacement,
+            )
+
+    def test_target_sdk_31_passes(self):
+        self.assertEqual(
+            self.run_on(CLEAN.replace('targetSdkVersion="36"', 'targetSdkVersion="31"')),
+            [],
+        )
 
     def test_profile_receiver_without_dump_fails(self):
         text = CLEAN.replace('android:permission="android.permission.DUMP"', "")
