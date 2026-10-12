@@ -55,7 +55,7 @@ class PageExporter {
     File Function(ScanPage page) originalOf,
     ExportFormat format,
   ) async {
-    // DEBT: a PDF holds every rendered page in memory | trần: about 100 pages of 12 MP on a 4 GB device, not measured | xem lại khi: P2 measures export on devices (spec §2).
+    // DEBT: a PDF holds every rendered page in memory, and Isolate.run copies those JPEGs into the PDF isolate, so the peak is about twice their size | trần: about 100 pages of 12 MP on a 4 GB device, not measured | xem lại khi: P2 measures export on devices (spec §2).
     if (pages.isEmpty) {
       throw ArgumentError.value(pages, 'pages', 'must not be empty');
     }
