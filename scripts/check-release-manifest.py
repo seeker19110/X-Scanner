@@ -33,7 +33,8 @@ def violations(root):
                 found.append(f"{tag} not allowed: {name}")
     for tag in COMPONENT_TAGS:
         for element in root.iter(tag):
-            if element.get(ANDROID + "exported") != "true":
+            # Anything but absent or a literal "false" may be exported (True, @bool/...).
+            if element.get(ANDROID + "exported") in (None, "false"):
                 continue
             name = element.get(ANDROID + "name", "<unnamed>")
             if name not in ALLOWED_EXPORTED:
@@ -114,6 +115,19 @@ class ReleaseManifestTests(unittest.TestCase):
             self.run_on(text),
             ["exported provider not allowed: dev.example.FileProvider"],
         )
+
+    def test_exported_written_another_way_fails(self):
+        # Android also reads True/TRUE and resource references as exported.
+        for value in ("True", "TRUE", " true", "@bool/exported"):
+            text = CLEAN.replace(
+                'android:name="dev.example.FileProvider" android:exported="false"',
+                f'android:name="dev.example.FileProvider" android:exported="{value}"',
+            )
+            self.assertEqual(
+                self.run_on(text),
+                ["exported provider not allowed: dev.example.FileProvider"],
+                value,
+            )
 
     def test_profile_receiver_without_dump_fails(self):
         text = CLEAN.replace('android:permission="android.permission.DUMP"', "")

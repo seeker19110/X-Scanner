@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-p1-completion
 - Yêu cầu / outcome: `/auto-complete` lần 4, bước 2: `/completion` (`docs/framework/project-completion.md` Pha 0–4) sau khi P1 PR-0..4 merged (#6..#10). Outcome: Definition of Complete có bằng chứng hoặc BLOCKED/WAITING đúng §8.
-- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 merged (#18 `4d07a6a`); W-403 PR mở.
+- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 merged (#18 `4d07a6a`); W-403 merged (#19 `a7399de`); Pha 4 quét lại xong → Đợt 4 (W-501 PR mở).
 - Chủ trì / writer: phiên chính (kế hoạch, duyệt, tích hợp); audit giao 3 subagent chỉ đọc; sửa giao worker theo số PR.
 - Mức rủi ro / số PR: M; PR-A tài liệu Pha 0–2, rồi một PR mỗi việc W-xxx theo kế hoạch.
 - Scope / non-goal: app `apps/mobile` P1 + tài liệu dự án. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release, bật branch protection/auto-merge (cần quyền chủ repo).
@@ -53,6 +53,11 @@
 - W-402 (worker): thumbnail lỗi bỏ khỏi cache nên mọi lần dựng lại dòng (notify khác, đổi theme, bấm nút) đều giải mã lại · loại màn tự giữ future để chỉ thử lại khi bấm · bậc 2 (không phải vòng tự động: giải mã lỗi không notify nên không tự kích hoạt; giữ trong controller). `restoring` dùng bộ đếm (hai lần `restore` vẫn đúng), về false trong `finally`.
 - W-402 https://github.com/seeker19110/X-Scanner/pull/18 merged squash `4d07a6a` sau CI xanh (job 114657046253); 0 review thread.
 - W-403 (worker): phiên chính gỡ `try/catch` toàn bộ trong `imageSizeOf` · loại giữ · bậc 2 (chỉ đọc thumbnail do app tự mã hoá nên nhánh bắt lỗi không với tới; refactor giữ đúng hành vi). Brief sai lệnh grep `package:image` (khớp cả `image_picker`) → kiểm `package:image/` thay thế.
+- W-403 https://github.com/seeker19110/X-Scanner/pull/19 merged squash `a7399de` sau CI xanh (job 114658987747); 0 review thread.
+- Pha 4: quét lại 12 nhóm bằng 3 auditor chỉ đọc trên `6ee3362` song song CI của #19 · loại chờ merge rồi mới quét · bậc 4 (cùng nội dung, `a7399de` = `6ee3362` cây code). Kết quả 0 Cao; mới F-043..F-058 (2 Trung) → Đợt 4.
+- Đợt 4 chia 3 PR: W-501 cổng manifest (phiên chính, nhỏ), W-502 app (worker), W-503 tài liệu sau cùng (FEATURE-MAP cần tên test mới) · loại một PR lớn · bậc 3 (mỗi PR kiểm riêng).
+- Dời F-045 (iOS), F-046 (quy ước + test), F-049 (P2, cần notice mới) · loại sửa ngay · bậc 2 (không mất dữ liệu, ngoài phạm vi/hiếm).
+- F-037: chấp nhận rủi ro dư (checkout giữ credentials khi không chạy mã bên thứ ba) · loại thêm `persist-credentials: false` + token riêng cho bước push · bậc 2.
 
 ## Lần thử / blocker
 
@@ -60,7 +65,7 @@
 
 ## Bàn giao / bước tiếp theo
 
-- Merge PR W-403; rồi Pha 4 re-audit; W-104 từ 2026-10-18; Pha 4 re-audit.
+- Merge PR W-501; W-502 (worker) → W-503; quét lại nhóm bị ảnh hưởng (2/3/4/6/8/9/12); DoC; W-104 từ 2026-10-18; Pha 4 re-audit.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 

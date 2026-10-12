@@ -47,12 +47,21 @@
 |----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
 | W-401 | F-012, F-013, F-023 | `buildPdf` chạy ngoài UI isolate; trần điểm ảnh đầu ra nắn (giữ tỷ lệ); `DEBT:` cho trần 50 MP và số trang PDF; số trang đệm theo tổng số trang | Test đỏ trước: đầu ra nắn ≤ trần; 100 trang sắp đúng; PDF vẫn đúng AC-6 | – | S | ✅ | seeker19110/X-Scanner#14 `4efd3d8`, CI xanh; đỏ 4 test (68694 > 10000 px; (1000,1) thay (100,1); 42436 > 40000 px; `trang-01` thay `trang-001`) → xanh; `flutter test` 210/210 |
 | W-402 | F-020, F-021, F-022 | Trạng thái "đang mở phiên" khi khôi phục; thumbnail lỗi được thử lại + ô lỗi có nhãn; `cacheWidth` cho thumbnail; nhãn cho thanh tiến trình | Test đỏ trước cho từng hành vi | W-302 | S | ✅ | seeker19110/X-Scanner#18 `4d07a6a`, CI xanh; đỏ: 3 widget (tooltip thử lại, `MemoryImage` thay `ResizeImage`, thiếu "Đang mở phiên…"), controller (`restoring` chưa có; future lỗi bị cache), 2 a11y ô lỗi → xanh; `flutter test` 254/254 |
-| W-403 | F-024, F-025, F-027 (test) | Một helper phần mở rộng ở `core/session_manifest.dart`; `imageSizeOf` ở `imaging/`; sửa chuỗi purity test | Refactor không đổi hành vi, test hiện có xanh; grep khuôn `[a-z0-9]{1,5}` chỉ còn 1 nơi | W-402 | S | 🔄 | hàm mới đỏ trước (chưa định nghĩa) → xanh; không assertion cũ nào đổi; grep khuôn 1 dòng; `package:image/` trong `lib/ui` 0 dòng; `flutter test` 261/261 |
+| W-403 | F-024, F-025, F-027 (test) | Một helper phần mở rộng ở `core/session_manifest.dart`; `imageSizeOf` ở `imaging/`; sửa chuỗi purity test | Refactor không đổi hành vi, test hiện có xanh; grep khuôn `[a-z0-9]{1,5}` chỉ còn 1 nơi | W-402 | S | ✅ | seeker19110/X-Scanner#19 `a7399de`, CI xanh; hàm mới đỏ trước (chưa định nghĩa) → xanh; không assertion cũ nào đổi; grep khuôn 1 dòng; `package:image/` trong `lib/ui` 0 dòng; `flutter test` 261/261 |
+
+## Đợt 4 — Phát hiện của lượt quét lại (Pha 4, bổ sung)
+
+| ID | Từ phát hiện | Việc | Tiêu chí nghiệm thu | Phụ thuộc | Ước lượng | Trạng thái | PR / bằng chứng |
+|----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
+| W-501 | F-043, F-044 | Cổng manifest: mọi giá trị `exported` khác vắng/`"false"` là exported; xoá manifest gộp cũ trước Gradle | Self-test đỏ với `True`/`TRUE`/` true`/`@bool/…` rồi xanh; gate PASS | – | S | 🔄 | đỏ "Lists differ: [] != ['exported provider not allowed…']" → xanh 8/8; gate PASS 261 |
+| W-502 | F-047, F-048, F-051, F-053, F-056 | Bỏ qua sắp xếp khi bận (cả thao tác ngữ nghĩa); thumbnail lỗi chỉ thử lại khi bấm, có spinner; mọi lỗi giải mã thử → `decodeFailed`; test LC-1 liền mạch; guideline cho trạng thái rỗng và đang mở | Test đỏ trước cho từng hành vi; gate PASS | W-501 | M | ⬜ | |
+| W-503 | F-050, F-052, F-054, F-055, F-057, F-058 | Đồng bộ FEATURE-MAP/spec AC-8/README/PROJECT/CHANGELOG; `DEBT:` một dòng; ghi phần chép sang isolate vào `DEBT:`; baseline coverage | grep FEATURE-MAP không còn ⚠️ cho phát hiện đã đóng; `maintenance-sweep` không còn cảnh báo giả; gate PASS | W-502 | S | ⬜ | |
 
 ## Nhật ký hội tụ (Pha 4)
 
 | Ngày | Phạm vi quét lại | Kết quả (phát hiện mới? đóng được gì?) |
 |------|------------------|----------------------------------------|
+| 2026-10-12 | Toàn bộ 12 nhóm trên `6ee3362` (sau W-101..W-403) | 0 Cao mở; mọi F-001..F-042 đóng hoặc dời có chủ đích; mới F-043..F-058 (0 Cao, 2 Trung, 14 Thấp) → Đợt 4 (W-501..W-503) hoặc dời có lý do. Chưa hội tụ: cần quét lại nhóm bị ảnh hưởng sau Đợt 4. |
 
 ## Phát hiện dời đợt sau (có lý do)
 
@@ -64,3 +73,6 @@
 - F-038 chặn ảnh Recents: quyết định sản phẩm (đánh đổi chụp màn hình) — Data Governance P2, 2026-10-12.
 - F-018 bản gốc phiên cách ly: giữ để phục hồi tay (spec §12) + `DEBT:` ở W-101; UI xoá/khôi phục ở Data Governance P2.
 - F-014, F-009 (bật): cần quyền repo settings của chủ repo — WAITING, không tự bật (CLAUDE.md header).
+- F-045 bản sao picker trên iOS: iOS non-goal P1; hướng lỗi là giữ file (an toàn) — backlog P2 iOS, 2026-10-12.
+- F-046 nối cổng giải mã ở `main.dart`: quy ước + test F-006 lặp đúng cách nối; xem lại khi thêm nơi giải mã mới — phiên chính, 2026-10-12.
+- F-049 thông báo sai sau `load` lỗi I/O: không mất dữ liệu đã lưu, hiếm; cần notice mới + thử load lại — Data Governance P2, 2026-10-12.
