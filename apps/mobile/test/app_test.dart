@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:x_scanner/export/file_sharer.dart';
+import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/main.dart';
 import 'package:x_scanner/storage/session_store.dart';
 import 'package:x_scanner/ui/page_source.dart';
@@ -19,6 +21,12 @@ class _NoSource implements PageSource {
   Future<String?> retrieveLost() async => null;
 }
 
+/// A [FileSharer] that shares nothing.
+class _NoSharer implements FileSharer {
+  @override
+  Future<void> share(List<File> files) async {}
+}
+
 void main() {
   late Directory tmp;
 
@@ -30,6 +38,8 @@ void main() {
     final controller = SessionController(
       store: SessionStore(tmp),
       source: _NoSource(),
+      exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
+      sharer: _NoSharer(),
     );
     await tester.pumpWidget(XScannerApp(controller: controller));
     for (var i = 0; i < 100 && controller.busy; i++) {
