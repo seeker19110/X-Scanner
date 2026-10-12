@@ -22,9 +22,9 @@
 - XS-09 PR-3 (#33, chưa nối vào app): migration phiên P1 thành một tài liệu — copy rồi so từng byte bản gốc, commit bằng
   rename, giữ phiên cũ làm bản quay lại không tự xoá, nhật ký để dừng ở bất kỳ bước nào cũng làm tiếp được; tên mặc định
   "Tài liệu dd/MM/yyyy HH:mm".
-- XS-13 PR-1: ô trang trong danh sách hiện ảnh đã cắt và xoay đúng như file xuất (F-026), dựng từ thumbnail; kết quả
+- XS-13 PR-1 (#36): ô trang trong danh sách hiện ảnh đã cắt và xoay đúng như file xuất (F-026), dựng từ thumbnail; kết quả
   của lần chỉnh cũ không bao giờ hiện thay cho lần chỉnh mới.
-- XS-13 PR-2: trình chỉnh góc hiện trang đúng hướng đã xoay, có Hoàn tác/Làm lại, hỏi "Bỏ thay đổi?" trước khi rời màn khi
+- XS-13 PR-2 (#37): trình chỉnh góc hiện trang đúng hướng đã xoay, có Hoàn tác/Làm lại, hỏi "Bỏ thay đổi?" trước khi rời màn khi
   còn thay đổi, kính lúp khi kéo góc, và trình đọc màn hình dịch được từng góc ("Dịch lên/xuống/sang trái/sang phải") (F-032).
 - P0 nền (#1, #2): app Flutter `apps/mobile`, lõi `PageQuad`/`ScanPage`, gate APK debug/analyze/format/test.
 
