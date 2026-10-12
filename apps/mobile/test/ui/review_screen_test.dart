@@ -298,6 +298,44 @@ void main() {
     expect([for (final p in controller.session.pages) p.id], [b, a]);
   });
 
+  testWidgets('dragging a page while busy does not reorder (F-007)', (
+    tester,
+  ) async {
+    await start(tester, pages: 2);
+    final before = [for (final p in controller.session.pages) p.id];
+    // Keep the controller busy with an export held at the share step.
+    final gate = sharer.gate = Completer<void>();
+    await tester.tap(find.byTooltip('Xuất'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('PNG'));
+    for (var i = 0; i < 500 && sharer.shared.isEmpty; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 5)),
+      );
+    }
+    await tester.pump();
+    expect(controller.busy, isTrue);
+
+    final first = tester.getCenter(find.text('Trang 1'));
+    final second = tester.getCenter(find.text('Trang 2'));
+    final gesture = await tester.startGesture(first);
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 100));
+    final step = Offset(0, (second.dy - first.dy) * 1.5 / 10);
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(step);
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await gesture.up();
+    // Let any drop animation, and so any reorder callback, finish.
+    for (var i = 0; i < 50; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    gate.complete();
+    await settle(tester);
+    expect([for (final p in controller.session.pages) p.id], before);
+  });
+
   testWidgets('export is only offered when there are pages', (tester) async {
     await start(tester);
     expect(find.byTooltip('Xuất'), findsNothing);

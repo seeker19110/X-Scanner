@@ -7,6 +7,7 @@ import '../core/scan_page.dart';
 import '../core/scan_session.dart';
 import '../export/file_sharer.dart';
 import '../export/page_exporter.dart';
+import '../imaging/decode_gate.dart';
 import '../imaging/page_render.dart';
 import '../storage/session_store.dart';
 import 'page_source.dart';
@@ -23,19 +24,23 @@ class SessionController extends ChangeNotifier {
   /// Creates a controller; [thumbnailer] decodes an image file into a
   /// preview and throws [ImageDecodeFailure] for unreadable images. The
   /// exporter's directory is cleared on [restore] and after every share.
+  /// Thumbnails and decode checks run through [decodeGate]; pass the gate
+  /// the exporter's renderer uses so only one original is decoded at once.
   SessionController({
     required this._store,
     required this._source,
     required this._exporter,
     required this._sharer,
     this._thumbnailer = thumbnail,
-  });
+    DecodeGate? decodeGate,
+  }) : _decodeGate = decodeGate ?? DecodeGate();
 
   final SessionStore _store;
   final PageSource _source;
   final PageExporter _exporter;
   final FileSharer _sharer;
   final Future<Uint8List> Function(String path) _thumbnailer;
+  final DecodeGate _decodeGate;
 
   static final RegExp _extensionPattern = RegExp(r'^[a-z0-9]{1,5}$');
   static const String _defaultExtension = 'jpg';
@@ -48,9 +53,6 @@ class SessionController extends ChangeNotifier {
 
   /// Tail of the write queue; never completes with an error.
   Future<void> _writeTail = Future<void>.value();
-
-  /// Tail of the decode queue so at most one image is decoded at a time.
-  Future<void> _decodeTail = Future<void>.value();
 
   /// The current session.
   ScanSession get session => _session;
@@ -239,12 +241,9 @@ class SessionController extends ChangeNotifier {
     return true;
   }
 
-  /// Runs [_thumbnailer] on the path from [path] after earlier decodes.
-  Future<Uint8List> _decode(String Function() path) {
-    final result = _decodeTail.then((_) => _thumbnailer(path()));
-    _decodeTail = result.then<void>((_) {}, onError: (Object _) {});
-    return result;
-  }
+  /// Runs [_thumbnailer] on the path from [path] through the decode gate.
+  Future<Uint8List> _decode(String Function() path) =>
+      _decodeGate.run(() => _thumbnailer(path()));
 
   Future<void> _enqueue(Future<void> Function() operation) {
     _pending++;

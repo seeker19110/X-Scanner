@@ -204,6 +204,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 : ReorderableListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: pages.length,
+                    // Off while busy like every button: a queued move would
+                    // run later with indices that may no longer match.
+                    buildDefaultDragHandles: !busy,
                     onReorderItem: (from, to) =>
                         unawaited(_controller.move(from, to)),
                     itemBuilder: (context, i) =>
