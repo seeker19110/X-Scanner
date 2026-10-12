@@ -7,6 +7,7 @@
 - Hồ sơ dự án áp dụng (KHUNG-3 PHẦN C): mobile native (Flutter, Android trước), offline, dữ liệu tài liệu nhạy cảm, không server.
 - Cách quét: 3 auditor chỉ đọc chạy song song (A: nhóm 1/3/10/12; B: 2/7/11; C: 4/5/6/8/9); phiên chính gộp trùng, kiểm lại phát hiện mức Cao/Trung trên code thật (vd F-001 lần theo `session_store.dart` `_load`/`_save` và `session_controller.dart` `restore`).
 - Lệnh đo đã chạy: `dart analyze` (0 vấn đề); `flutter pub outdated`; `flutter pub deps`; OSV querybatch 86 package (0 advisory); grep bí mật trên `git ls-files` và `git log --all -p` (0); `spec-compiler.py --trace` (AC-1..8 MAPPED, AC-9 PENDING); PoC giải mã `image` 4.10.1 bằng ảnh tổng hợp (EXIF IFD lặp: treo, bị dừng ở 10 s; PNG 1 MB header 1×1: maxRSS 2061 MB).
+- **Quét lại toàn bộ 12 nhóm (Pha 4):** 2026-10-12 trên `6ee3362` (= `main` `a7399de` sau #19), cùng 3 cụm auditor chỉ đọc. Mọi phát hiện cũ: đóng (có file:dòng + test chốt chặn) hoặc dời có chủ đích (F-004 EX-1 tới 2026-10-18; F-009, F-014 WAITING chủ repo; F-018, F-026, F-030..F-033, F-036, F-038). Phát hiện mới F-043..F-058: 0 Cao · 2 Trung (F-051, F-052) · 14 Thấp. OSV 86 package hosted: 0 advisory; bí mật: 0. F-037: gate trong workflow adopt không còn chạy khi giữ token, nhưng bước checkout vẫn giữ credentials (rủi ro dư, chấp nhận: chỉ checkout + `command -v` chạy khi `FRAMEWORK-VERSION` có).
 
 | # | Nhóm | Trạng thái | Tóm tắt phát hiện (số lượng theo mức độ) | Cập nhật lần cuối |
 |---|------|-----------|-------------------------------------------|---------------------|
@@ -71,6 +72,22 @@ Mức: Cao = mất/hỏng dữ liệu, rò riêng tư, crash luồng chính, tà
 | F-040 | 9 | Thấp | gốc repo | Chưa có `TRAPS.md` cho 3 khuôn lỗi đã sửa ở P1 | Lỗi cùng khuôn tái phát | W-201 |
 | F-041 | 9 | Thấp | `apps/mobile/README.md` | README app chỉ có tiêu đề | Người mới không biết bắt đầu | W-201 |
 | F-042 | 9 | Thấp | `docs/adr/` | Không có ADR cho lựa chọn P1 (camera hệ thống, homography Dart, pdf/share_plus) | `docs/adr/` không phản ánh kiến trúc đang chạy | W-201 (ADR-0003) |
+| F-043 | 2/8 | Thấp | `scripts/check-release-manifest.py` | Chỉ coi `exported="true"` là exported; `True`/`TRUE`/`@bool/…` lọt cổng (re-audit) | Plugin mới lộ component mà gate xanh | W-501 |
+| F-044 | 7/8 | Thấp | `.claude/project-commands.sh` `build` | Không xoá manifest gộp cũ trước Gradle; gate cục bộ có thể đọc file cũ (CI checkout sạch nên vẫn chặn) | Pre-commit xanh sai | W-501 |
+| F-045 | 2 | Thấp | `lib/main.dart`; `page_source.dart` `discard` | iOS: picker ghi `NSTemporaryDirectory`, còn `getTemporaryDirectory` là Caches → không xoá bản sao (giữ file, an toàn) | Bản sao còn trên iOS | Dời P2 iOS (iOS non-goal P1) |
+| F-046 | 1 | Thấp | `session_controller.dart`, `page_exporter.dart`, `main.dart` | "Một cổng giải mã" chỉ đúng nhờ `main.dart` nối tay hai chỗ tiêm | Quên nối → F-006 quay lại mà vẫn biên dịch | Dời: quy ước ghi ở CONVENTIONS + test F-006 lặp đúng cách nối; xem lại khi thêm nơi giải mã |
+| F-047 | 3/6 | Thấp | `review_screen.dart` ô lỗi; `session_controller.dart` `thumbnailFor` | Thumbnail lỗi giải mã lại ở mọi lần dựng lại dòng (chen vào hàng đợi giải mã); bấm thử lại không có spinner | Tốn giải mã, không phản hồi | W-502 |
+| F-048 | 3/12 | Thấp | `session_controller.dart` `_addFromPath` | Lỗi khác `ImageDecodeFailure`/`FileSystemException` khi giải mã thử thoát ra không báo (vd isolate `RemoteError`, hết bộ nhớ với file rất lớn) | Người dùng không thấy gì | W-502 |
+| F-049 | 10/12 | Thấp | `session_store.dart` `_save`; `session_controller.dart` | Sau `load` lỗi I/O, mọi lần thêm trang báo "Không lưu được (bộ nhớ đầy)" sai nguyên nhân và chép bản gốc mồ côi (lần load sau dọn) | Thông báo sai; không mất dữ liệu đã lưu | Dời P2 Data Governance (cần notice mới + thử load lại); hiếm (lỗi I/O khi đọc) |
+| F-050 | 12 | Thấp | `lib/ui/quad_editor_screen.dart` dấu `DEBT:` | Dấu trải 3 dòng, `maintenance-sweep.sh` báo sai thiếu "xem lại khi:" | Cảnh báo giả | W-503 |
+| F-051 | 6/3 | Trung | `review_screen.dart` `onReorderItem` | Khi bận vẫn sắp xếp được bằng thao tác ngữ nghĩa (TalkBack Move up/down) → `move` chỉ số cũ (F-007 qua đường khác) | Thứ tự trang sai | W-502 |
+| F-052 | 9 | Trung | `docs/FEATURE-MAP.md` | Còn ⚠️ trỏ phát hiện đã đóng; thiếu test mới; LC chưa ghi tên test | Bản đồ khai sai trạng thái (bi quan) | W-503 |
+| F-053 | 4 | Thấp | `test/ui/review_screen_test.dart` | LC-1 chưa có một test đi liền chụp → kéo góc → lưu → xuất PDF | Hồi quy ở chỗ nối các bước | W-502 |
+| F-054 | 9 | Thấp | spec P1 §16 AC-8; `README.md`; `PROJECT.md` | Ghi manifest release "kiểm tay", gate đã tự kiểm từ W-301 | Tài liệu lệch | W-503 |
+| F-055 | 9 | Thấp | `CHANGELOG.md` | Unreleased thiếu các sửa #11–#19 | Lịch sử thiếu | W-503 |
+| F-056 | 6/4 | Thấp | `test/ui/accessibility_test.dart` | Guideline chưa phủ trạng thái rỗng và "Đang mở phiên…" | Lỗi a11y lọt | W-502 |
+| F-057 | 5 | Thấp | `page_exporter.dart` `DEBT:` PDF | `Isolate.run` chép mọi JPEG sang isolate (đỉnh ~2×), trần trong `DEBT:` chưa tính | Ước lượng trần sai | W-503 (ghi vào `DEBT:`) |
+| F-058 | 4 | Thấp | `.claude/project-commands.sh` `test` | Không có số coverage baseline | Không biết vùng chưa test | W-503 (baseline một lần; ngưỡng dời P2) |
 
 ## Ghi chú điểm dừng
 
