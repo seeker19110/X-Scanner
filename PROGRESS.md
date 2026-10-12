@@ -1,5 +1,7 @@
 # X-Scanner — Tiến độ
 
+Ngày cập nhật: 2026-10-12
+
 ## 2026-10-11: lưu gợi ý và áp dụng bộ khung
 
 Lưu nghiên cứu ở docs/research/2026-10-11-scanner-product-suggestions.md.
@@ -21,10 +23,12 @@ D3 tắt backup, D4 UAT emulator do chủ repo chạy); ADR-0003. Chuẩn bị: 
 PR seeker19110/X-Scanner#6 (`a1549c5`), #7 (`df902de`), #8 (`1cc15e3`), #9 (`99027ba`), #10 (`6177e29`). AC-1..8 có test trên `main`.
 Spike camera/ARCore depth trên thiết bị thật vẫn cần thiết bị.
 
-## Đang làm: hoàn thiện P1 (`/completion`, 2026-10-12)
+## Chờ điều kiện: hoàn thiện P1 (`/completion`, 2026-10-12)
 
 Hồ sơ `docs/work/2026-10-12-p1-completion/working.md` · kế hoạch `docs/ops/COMPLETION-PLAN.md` · audit `docs/ops/COMPREHENSIVE-AUDIT-STATUS.md`
-(62 phát hiện sau hai lượt quét lại Pha 4: 3 Cao, 16 Trung, 43 Thấp; lần quét đầu 42). Nợ có chủ đích: mục "Phát hiện dời đợt sau" của kế hoạch; exception `docs/ops/supply-chain-exceptions.md`.
+(62 phát hiện sau ba lượt quét lại Pha 4: 3 Cao, 16 Trung, 43 Thấp; lần quét đầu 42). Nợ có chủ đích: mục "Phát hiện dời đợt sau" của kế hoạch; exception `docs/ops/supply-chain-exceptions.md`.
+PR seeker19110/X-Scanner#11–#22, #24 (`0327ab7`) merged; quét lại hội tụ, Definition of Complete có bằng chứng.
+WAITING: W-104 nâng `image` từ 2026-10-18 (EX-1); branch protection/dependency review (F-014, F-009) và UAT AC-9 cần chủ repo.
 
 ## Chưa thực hiện
 
@@ -39,7 +43,7 @@ Chỉ xác nhận repository/framework, không xác nhận app.
 
 ## 2026-10-12: kế hoạch phát triển toàn diện
 
-Hồ sơ: [2026-10-12-comprehensive-development-plan](docs/work/2026-10-12-comprehensive-development-plan/working.md).
+Hồ sơ: [2026-10-12-comprehensive-development-plan](docs/work/2026-10-12-comprehensive-development-plan/done.md).
 Tài liệu: [Kế hoạch M0–M5 và nhánh depth](docs/plans/2026-10-12-comprehensive-development-plan.md), gồm 33 đầu việc XS-01..XS-33.
-Phạm vi được yêu cầu ở lượt này: lưu bản kế hoạch, commit và tạo PR vào `main`; không merge hoặc triển khai ứng dụng.
+Chủ repo merge seeker19110/X-Scanner#23 (`ac2c435`); M0 trùng việc đang làm: XS-01 = W-502 (#22), XS-02 = W-504 (#24), XS-03 = W-104.
 Kế hoạch giữ trạng thái DRAFT/đề xuất, các chỉ tiêu là mục tiêu chưa nghiệm thu; không thay thế trạng thái thực trong hồ sơ P1.

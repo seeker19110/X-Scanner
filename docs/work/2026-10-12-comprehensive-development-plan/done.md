@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-comprehensive-development-plan
 - Yêu cầu / outcome: chủ repo yêu cầu "commit tạo pr đi" sau khi nhận kế hoạch phát triển toàn diện; lưu đúng bản đã gửi và mở một PR vào main.
-- Trạng thái: Active — bàn giao thay đổi tài liệu qua PR; chưa nghiệm thu merge.
+- Trạng thái: Done — chủ repo merge seeker19110/X-Scanner#23 (`ac2c435`) 2026-10-12T08:13:56Z, CI xanh.
 - Chủ trì / writer: phiên ChatGPT hiện tại, một writer; không có subagent cho PR tài liệu đơn lẻ.
 - Mức rủi ro / số PR: S / 1 PR, chỉ Markdown, không đổi hành vi sản phẩm.
 - Scope: thêm kế hoạch, liên kết README, checkpoint PROGRESS và hồ sơ này.
@@ -39,4 +39,6 @@ Các tính năng trong kế hoạch là công việc tiếp theo, không đượ
 
 ## Nghiệm thu cuối
 
-Chưa nghiệm thu merge. Trạng thái PR, review và CI xem trực tiếp trên GitHub; không ghi Done hoặc PASS sản phẩm từ việc lưu kế hoạch.
+- PR seeker19110/X-Scanner#23 MERGED bởi chủ repo, merge commit `ac2c435` trên `main`; check "Framework and Android app gate" success (job 114716558346); 0 review.
+- Đóng hồ sơ: phiên Claude Code của Work ID `2026-10-12-p1-completion`, 2026-10-12, khi đối chiếu `main` (hồ sơ còn ghi Active sau merge).
+- Chỉ là lưu kế hoạch: không có XS nào được coi là xong vì PR này; kế hoạch vẫn DRAFT.
