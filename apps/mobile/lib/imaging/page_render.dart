@@ -24,6 +24,15 @@ class ImageDecodeFailure implements Exception {
   String toString() => 'ImageDecodeFailure';
 }
 
+/// Width and height of the image in [bytes], read from its header only
+/// (no pixels are decoded), or `null` for an unknown format, an unreadable
+/// header or a non-positive side.
+({int width, int height})? imageSizeOf(Uint8List bytes) {
+  final info = img.findDecoderForData(bytes)?.startDecode(bytes);
+  if (info == null || info.width <= 0 || info.height <= 0) return null;
+  return (width: info.width, height: info.height);
+}
+
 /// Decodes the first frame of [bytes] and bakes its EXIF orientation in.
 ///
 /// Throws [ImageDecodeFailure] for unknown formats, invalid or oversized

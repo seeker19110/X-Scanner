@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('core library does not import Flutter (spec FR-3)', () {
+  test('core library does not import Flutter (P0 spec FR-3)', () {
     final files = Directory('lib/core')
         .listSync(recursive: true)
         .whereType<File>()

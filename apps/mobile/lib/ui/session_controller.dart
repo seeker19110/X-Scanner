@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import '../core/scan_page.dart';
 import '../core/scan_session.dart';
+import '../core/session_manifest.dart';
 import '../export/file_sharer.dart';
 import '../export/page_exporter.dart';
 import '../imaging/decode_gate.dart';
@@ -42,7 +43,6 @@ class SessionController extends ChangeNotifier {
   final Future<Uint8List> Function(String path) _thumbnailer;
   final DecodeGate _decodeGate;
 
-  static final RegExp _extensionPattern = RegExp(r'^[a-z0-9]{1,5}$');
   static const String _defaultExtension = 'jpg';
 
   ScanSession _session = ScanSession.empty;
@@ -295,10 +295,7 @@ class SessionController extends ChangeNotifier {
   /// Lowercased text after the last dot of the file name, or `jpg` when
   /// that is missing or not 1–5 letters/digits.
   static String _extensionOf(String path) {
-    final name = path.split(RegExp(r'[/\\]')).last;
-    final dot = name.lastIndexOf('.');
-    if (dot < 0) return _defaultExtension;
-    final ext = name.substring(dot + 1).toLowerCase();
-    return _extensionPattern.hasMatch(ext) ? ext : _defaultExtension;
+    final ext = fileExtension(path);
+    return ext != null && isValidExtension(ext) ? ext : _defaultExtension;
   }
 }

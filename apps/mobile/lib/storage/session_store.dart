@@ -45,7 +45,6 @@ class SessionStore {
   static const String _partSuffix = '.part';
   static const String _tmpSuffix = '.tmp';
 
-  static final RegExp _extensionPattern = RegExp(r'^[a-z0-9]{1,5}$');
   static final RegExp _quarantinePattern = RegExp(
     r'^session\.corrupt-\d+\.json$',
   );
@@ -99,7 +98,7 @@ class SessionStore {
     if (!isValidPageId(id)) {
       throw ArgumentError('id must be 32 lowercase hex characters');
     }
-    if (!_extensionPattern.hasMatch(ext)) {
+    if (!isValidExtension(ext)) {
       throw ArgumentError('extension must be 1-5 letters or digits');
     }
     final relative = '$_originalsDir/$id.$ext';

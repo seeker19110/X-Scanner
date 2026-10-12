@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:share_plus/share_plus.dart';
 
+import '../core/session_manifest.dart';
+
 /// Hands exported files to the user, e.g. through the system share sheet.
 abstract interface class FileSharer {
   /// Shares [files]; completes once the platform is done with them.
@@ -35,11 +37,8 @@ const Map<String, String> _mimeTypes = {
 ///
 /// Throws [ArgumentError] for anything other than `.pdf`, `.jpg`, `.png`.
 String mimeTypeFor(String path) {
-  final name = path.split(RegExp(r'[/\\]')).last;
-  final dot = name.lastIndexOf('.');
-  final type = dot < 0
-      ? null
-      : _mimeTypes[name.substring(dot + 1).toLowerCase()];
+  final ext = fileExtension(path);
+  final type = ext == null ? null : _mimeTypes[ext];
   if (type == null) {
     throw ArgumentError('not an exported file name', 'path');
   }

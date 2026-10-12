@@ -3,11 +3,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
-import 'package:image/image.dart' as img;
 
 import '../core/page_quad.dart';
 import '../core/quad_editing.dart';
 import '../core/scan_page.dart';
+import '../imaging/page_render.dart';
 
 /// Lets the user drag the four crop corners of [page] over its thumbnail
 /// and rotate it. Pops the edited [ScanPage] on "Lưu", or `null` on back.
@@ -47,11 +47,9 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
 
   /// Image size from the header only; falls back to a square if unknown.
   static Size _readImageSize(Uint8List bytes) {
-    final info = img.findDecoderForData(bytes)?.startDecode(bytes);
-    if (info == null || info.width <= 0 || info.height <= 0) {
-      return const Size(1, 1);
-    }
-    return Size(info.width.toDouble(), info.height.toDouble());
+    final size = imageSizeOf(bytes);
+    if (size == null) return const Size(1, 1);
+    return Size(size.width.toDouble(), size.height.toDouble());
   }
 
   /// Where the image is drawn (contain-fitted) inside an area of [area].
