@@ -38,6 +38,6 @@ PR thứ hai (`/auto-complete`): duyệt spec + ADR-0004, đóng hồ sơ.
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
 - Outcome: spec XS-08 Approved for implementation (phiên chính theo ủy quyền §3d, 2026-10-12) + ADR-0004.
-- PR: #26 `f227a4d` (spec Draft) · PR duyệt — SHA ghi ở `PROGRESS.md`/CHANGELOG sau khi merge.
+- PR: #26 `f227a4d` (spec Draft) · #27 `8d7c356` (duyệt + ADR-0004).
 - Bằng chứng: `scripts/spec-compiler.sh --trace` không BROKEN; gate xanh trên PR duyệt (chỉ tài liệu).
 - Giới hạn còn lại: AC-1..AC-8 "chưa có" tới khi consumer đầu tiên merge (ADR-0004 Hệ quả).

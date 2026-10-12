@@ -28,7 +28,7 @@ Spike camera/ARCore depth trên thiết bị thật vẫn cần thiết bị.
 Hồ sơ `docs/work/2026-10-12-p1-completion/working.md` · kế hoạch `docs/ops/COMPLETION-PLAN.md` · audit `docs/ops/COMPREHENSIVE-AUDIT-STATUS.md`
 (62 phát hiện sau ba lượt quét lại Pha 4: 3 Cao, 16 Trung, 43 Thấp; lần quét đầu 42). Nợ có chủ đích: mục "Phát hiện dời đợt sau" của kế hoạch; exception `docs/ops/supply-chain-exceptions.md`.
 PR seeker19110/X-Scanner#11–#22, #24 (`0327ab7`) merged; quét lại hội tụ, Definition of Complete có bằng chứng.
-W-104a hàng rào ảnh đầu vào (JPEG/PNG/WebP theo nội dung, trần 64 MiB, ngân sách 60 s có kill isolate): PR mở 2026-10-12. WAITING: W-104b nâng `image` từ 2026-10-18 (EX-1); branch protection/dependency review (F-014, F-009) và UAT AC-9 cần chủ repo.
+W-104a hàng rào ảnh đầu vào (JPEG/PNG/WebP theo nội dung, trần 64 MiB, ngân sách 60 s có kill isolate; WebP động bị từ chối): merged #28 `474fa28`. WAITING: W-104b nâng `image` từ 2026-10-18 (EX-1); branch protection/dependency review (F-014, F-009) và UAT AC-9 cần chủ repo.
 
 ## Chưa thực hiện
 
@@ -47,4 +47,4 @@ Hồ sơ: [2026-10-12-comprehensive-development-plan](docs/work/2026-10-12-compr
 Tài liệu: [Kế hoạch M0–M5 và nhánh depth](docs/plans/2026-10-12-comprehensive-development-plan.md), gồm 33 đầu việc XS-01..XS-33.
 Chủ repo merge seeker19110/X-Scanner#23 (`ac2c435`); M0 trùng việc đang làm: XS-01 = W-502 (#22), XS-02 = W-504 (#24), XS-03 = W-104.
 Kế hoạch giữ trạng thái DRAFT/đề xuất, các chỉ tiêu là mục tiêu chưa nghiệm thu; không thay thế trạng thái thực trong hồ sơ P1.
-XS-08: spec [hợp đồng tài liệu, revision và xuất](docs/specs/2026-10-12-document-revision-export-contract.md) Approved 2026-10-12 theo ủy quyền §3d, D-1 = A ([ADR-0004](docs/adr/0004-document-revision-export-contract.md): code đi cùng consumer đầu tiên); hồ sơ `docs/work/2026-10-12-xs08-document-contract-spec/done.md`. XS-09+ chưa được giao.
+XS-08: spec [hợp đồng tài liệu, revision và xuất](docs/specs/2026-10-12-document-revision-export-contract.md) Approved 2026-10-12 theo ủy quyền §3d (#27 `8d7c356`), D-1 = A ([ADR-0004](docs/adr/0004-document-revision-export-contract.md): code đi cùng consumer đầu tiên); hồ sơ `docs/work/2026-10-12-xs08-document-contract-spec/done.md`. XS-09: spec nháp [thư viện nhiều tài liệu + migration P1](docs/specs/2026-10-12-document-library-migration.md) chờ chủ repo duyệt (D-2..D-5); hồ sơ `docs/work/2026-10-12-xs09-document-library-spec/`.
