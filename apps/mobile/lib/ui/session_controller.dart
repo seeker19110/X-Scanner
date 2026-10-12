@@ -7,6 +7,7 @@ import '../core/page_quad.dart';
 import '../core/scan_page.dart';
 import '../core/scan_session.dart';
 import '../core/session_manifest.dart';
+import '../export/export_job.dart';
 import '../export/file_sharer.dart';
 import '../export/page_exporter.dart';
 import '../imaging/decode_gate.dart';
@@ -15,7 +16,13 @@ import '../storage/session_store.dart';
 import 'page_source.dart';
 
 /// User-facing outcomes the UI reports as a message.
-enum SessionNotice { restoreFailed, decodeFailed, saveFailed, exportFailed }
+enum SessionNotice {
+  restoreFailed,
+  decodeFailed,
+  saveFailed,
+  exportFailed,
+  exportCancelled,
+}
 
 /// Owns the open scan session for the UI.
 ///
@@ -65,6 +72,7 @@ class SessionController extends ChangeNotifier {
 
   /// Cropped previews by page id, each for one revision of that page only.
   final Map<String, _CroppedPreview> _previews = {};
+  ExportJob? _exportJob;
   int _pending = 0;
   int _restoring = 0;
   bool _disposed = false;
@@ -80,6 +88,10 @@ class SessionController extends ChangeNotifier {
 
   /// Whether a [restore] has been called and has not finished yet.
   bool get restoring => _restoring > 0;
+
+  /// The export [exportAndShare] is running, from the moment it starts
+  /// until its job ends, before any sharing; `null` otherwise.
+  ExportJob? get exportJob => _exportJob;
 
   /// Returns the oldest pending notice and removes it, or `null`.
   SessionNotice? takeNotice() =>
@@ -242,15 +254,37 @@ class SessionController extends ChangeNotifier {
     if (await _commit(ScanSession.empty)) _forgetThumbnails();
   });
 
-  /// Exports the pages as [format], shares the files and then deletes
-  /// them. An empty session does nothing; any failure reports
-  /// [SessionNotice.exportFailed] and leaves the session and originals as
-  /// they were.
+  /// Exports the pages as [format] through an [ExportJob] published as
+  /// [exportJob], shares the files and then deletes them. Listeners are
+  /// notified on every change of the job. An empty session does nothing;
+  /// a cancel through [cancelExport] reports
+  /// [SessionNotice.exportCancelled] and any failure
+  /// [SessionNotice.exportFailed], both sharing nothing and leaving the
+  /// session and originals as they were. Edits queued meanwhile do not
+  /// reach the job, which exports the pages as they were when it started.
   Future<void> exportAndShare(ExportFormat format) => _enqueue(() async {
     final pages = _session.pages;
     if (pages.isEmpty) return;
+    final job = ExportJob(pages, format)..addListener(_notify);
+    _exportJob = job;
+    _notify();
     try {
-      await _sharer.share(await _exporter.export(pages, originalFile, format));
+      try {
+        await _exporter.run(job, originalFile);
+      } finally {
+        // The job has ended: from here on there is nothing to cancel.
+        _endExportJob(job);
+      }
+      switch (job.state) {
+        case ExportState.succeeded:
+          await _sharer.share(job.files!);
+        case ExportState.cancelled:
+          _report(SessionNotice.exportCancelled);
+        // A job still queued or running after run() is a bug; it shares
+        // nothing either.
+        case ExportState.failed || ExportState.queued || ExportState.running:
+          _report(SessionNotice.exportFailed);
+      }
     } catch (_) {
       // Render, PDF, file system and platform share errors all mean the
       // same to the user; none of their details are shown or logged.
@@ -260,8 +294,20 @@ class SessionController extends ChangeNotifier {
     }
   });
 
+  void _endExportJob(ExportJob job) {
+    job.removeListener(_notify);
+    _exportJob = null;
+    _notify();
+  }
+
+  /// Asks the running export to stop at its next page; does nothing when
+  /// there is none. Not queued, as the queue is busy with that export.
+  void cancelExport() => _exportJob?.cancel();
+
   @override
   void dispose() {
+    // Nobody is left to share with.
+    _exportJob?.cancel();
     _disposed = true;
     super.dispose();
   }

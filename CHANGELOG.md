@@ -26,6 +26,8 @@
   của lần chỉnh cũ không bao giờ hiện thay cho lần chỉnh mới.
 - XS-13 PR-2 (#37): trình chỉnh góc hiện trang đúng hướng đã xoay, có Hoàn tác/Làm lại, hỏi "Bỏ thay đổi?" trước khi rời màn khi
   còn thay đổi, kính lúp khi kéo góc, và trình đọc màn hình dịch được từng góc ("Dịch lên/xuống/sang trái/sang phải") (F-032).
+- XS-12a PR-1 (#40): khi xuất hiện "Đang xuất trang i/N" với thanh tiến độ và nút "Huỷ"; huỷ dừng ở trang kế tiếp, không để lại
+  file dở và báo "Đã huỷ xuất." (F-033). File xuất luôn là các trang lúc bắt đầu xuất.
 - P0 nền (#1, #2): app Flutter `apps/mobile`, lõi `PageQuad`/`ScanPage`, gate APK debug/analyze/format/test.
 
 ## 2026-10-11

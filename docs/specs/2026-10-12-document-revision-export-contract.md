@@ -234,8 +234,8 @@ renderer giả có thể chặn và làm lỗi theo trang (AC-7, AC-8). Mỗi h�
 | AC-4 | chưa có — viết ở XS-09 cùng lớp lưu trữ | `test/storage/` |
 | AC-5 | chưa có — như AC-1 | `test/core/scan_page_test.dart` |
 | AC-6 | chưa có — XS-13 hoặc XS-22 | |
-| AC-7 | chưa có — XS-12 | |
-| AC-8 | chưa có — XS-12 | |
+| AC-7 | `apps/mobile/test/export/page_exporter_test.dart::export uses the snapshot taken when the job was created (AC-5)` | XS-12a AC-5 (`docs/specs/2026-10-12-export-progress-cancel.md`); snapshot là `ScanPage` bất biến, chưa có `documentId` |
+| AC-8 | `apps/mobile/test/export/page_exporter_test.dart::cancel stops at the next page (AC-3)` | + `render failure fails the job (AC-4)`, `write failure fails the job`; XS-12a AC-3, AC-4 |
 
 ## 17. Slice/PR plan
 
