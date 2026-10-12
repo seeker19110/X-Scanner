@@ -131,7 +131,7 @@ app trừ khi người dùng chủ động chia sẻ. Cần Data Governance ng�
 | AC-2 | `apps/mobile/test/storage/session_store_test.dart::a new store on the same root restores pages and edits` | |
 | AC-3 | `apps/mobile/test/storage/session_store_test.dart::garbage manifest` | + schemaVersion 2, bản gốc thiếu, UTF-8 sai, bản gốc của phiên bị cách ly |
 | AC-4 | chưa có — widget test editor | |
-| AC-5 | chưa có — test nắn ảnh tổng hợp (không dùng ảnh thật) | |
+| AC-5 | `apps/mobile/test/imaging/page_render_test.dart::re-decodes to the rectified size (AC-5)` | + `renderPage renders from a file and keeps the original intact` |
 | AC-6 | chưa có — test PDF (đếm trang, kích thước) | |
 | AC-7 | chưa có — test luồng huỷ/lỗi với picker giả | |
 | AC-8 | chưa có — kiểm manifest Android không có INTERNET/CAMERA ở release | |
@@ -155,7 +155,7 @@ Chưa phát hành. Mỗi PR revert được độc lập theo thứ tự ngượ
 | D2 Thêm 5 dependency ở §3 | License đã ghi; ghim phiên bản ở §3 | Chủ repo | Trước code | **Đồng ý** (2026-10-11) |
 | D3 `android:allowBackup` cho dữ liệu tài liệu | Tắt backup + chuyển máy | Chủ repo | PR-3 | **Tắt** (2026-10-11) |
 | D4 Cách kiểm AC-9 (máy thật hay emulator) | Container AI không có `/dev/kvm` nên không chạy được emulator | Chủ repo | Sau PR-4 | **Emulator**, chủ repo chạy; máy thật sau |
-| Hiệu năng `copyRectify` thuần Dart trên ảnh 12 MP | Đo ở PR-2; vượt ngân sách → ADR cho native/OpenCV | Phiên chính | PR-2 | Theo dõi |
+| Hiệu năng nắn thuần Dart trên ảnh 12 MP | Đo PR-2 (ảnh tổng hợp 4000×3000, Dart JIT, x86): nắn 2,8–3,5 s, thumbnail 1,2 s, chạy trong isolate nên không chặn UI | Phiên chính | P2 | Chấp nhận cho P1; đo lại trên thiết bị ở P2, vượt ngân sách → ADR native/OpenCV |
 
 Mọi quyết định chặn đã đóng.
 
