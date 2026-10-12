@@ -121,6 +121,27 @@ void main() {
     expect(files.last.path.endsWith('X-Scanner-trang-10.jpg'), isTrue);
   });
 
+  test('100 pages get three-digit numbers that sort in page order', () async {
+    final page = threePages().last;
+    final pages = [
+      for (var i = 0; i < 100; i++)
+        ScanPage(id: 'q$i', originalPath: page.originalPath),
+    ];
+    final files = await PageExporter(
+      exportDir: exportDir,
+      renderer: (path, quad, turns, {format = RenderFormat.jpeg}) async =>
+          Uint8List(1),
+    ).export(pages, originalOf, ExportFormat.jpeg);
+    final names = [for (final f in files) f.path.split('/').last];
+    expect(names, [
+      for (var i = 1; i <= 100; i++)
+        'X-Scanner-trang-${'$i'.padLeft(3, '0')}.jpg',
+    ]);
+    expect(names.first, 'X-Scanner-trang-001.jpg');
+    expect(names.last, 'X-Scanner-trang-100.jpg');
+    expect([...names]..sort(), names);
+  });
+
   test('pages render one at a time with the matching format', () async {
     var active = 0;
     var maxActive = 0;
