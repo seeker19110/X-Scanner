@@ -283,6 +283,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
     return Card(
       key: ValueKey(page.id),
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      // The editor works on the uncropped thumbnail (FR-4); the tile shows
+      // the cropped preview rendered from it.
       child: FutureBuilder<Uint8List>(
         future: _controller.thumbnailFor(page),
         builder: (context, snapshot) {
@@ -293,7 +295,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
               children: [
                 SizedBox.square(
                   dimension: _thumbSide,
-                  child: _thumbnail(snapshot, page, number, busy),
+                  child: FutureBuilder<Uint8List>(
+                    // A new revision starts from an empty snapshot, so the
+                    // previous revision's preview is never shown meanwhile.
+                    key: ValueKey((page.id, page.revision)),
+                    future: _controller.croppedPreviewFor(page),
+                    builder: (context, preview) =>
+                        _thumbnail(preview, page, number, busy),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -346,9 +355,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
     );
   }
 
-  /// Preview rotated like the page and decoded at the tile's pixel size;
-  /// a small spinner while loading and, if the original cannot be decoded,
-  /// an error tile that asks the controller to decode it again.
+  /// Preview cropped and rotated like the export, decoded at the tile's
+  /// pixel size; a small spinner while loading and, if the original or the
+  /// preview cannot be decoded, an error tile that asks the controller to
+  /// decode both again.
   Widget _thumbnail(
     AsyncSnapshot<Uint8List> snapshot,
     ScanPage page,
@@ -358,18 +368,15 @@ class _ReviewScreenState extends State<ReviewScreen> {
     final bytes = snapshot.data;
     if (bytes != null) {
       final px = (_thumbSide * MediaQuery.devicePixelRatioOf(context)).ceil();
-      return RotatedBox(
-        quarterTurns: page.quarterTurns,
-        child: Image(
-          image: ResizeImage(
-            MemoryImage(bytes),
-            width: px,
-            height: px,
-            policy: ResizeImagePolicy.fit,
-          ),
-          fit: BoxFit.contain,
-          gaplessPlayback: true,
+      return Image(
+        image: ResizeImage(
+          MemoryImage(bytes),
+          width: px,
+          height: px,
+          policy: ResizeImagePolicy.fit,
         ),
+        fit: BoxFit.contain,
+        gaplessPlayback: true,
       );
     }
     // A retry keeps the old error in the snapshot while it decodes again.

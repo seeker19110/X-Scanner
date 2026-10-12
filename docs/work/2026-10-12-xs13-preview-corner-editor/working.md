@@ -25,6 +25,13 @@
 - Kính lúp bằng `RawMagnifier` có sẵn · loại tự vẽ · bậc 2 (đã kiểm có trong SDK Flutter 3.47.7: `widgets/magnifier.dart`).
 - Không làm phóng to hai ngón · loại làm luôn · bậc 2 (kính lúp đủ cho độ chính xác; xem lại khi UAT thiết bị/XS-20).
 - Chỉnh góc không cần kéo qua thao tác trợ năng, thu hẹp `DEBT:` · loại bảng nút dịch hiển thị cho mọi người · bậc 2 (XS-20 làm a11y đầy đủ).
+- Spec merged #35 `29e868f` (CI xanh trên `2a9c88c`).
+- PR-1 worker: đỏ-trước (compile đỏ `+29 -5`: thiếu `croppedPreview`/`previewer`/`croppedPreviewFor`), xanh `test/ui/ test/imaging/` +155, gate worker PASS +466 trên `f5218a2` + diff. AC-2 (cùng hình học) xanh cả trên code cũ vì chỉ dùng `renderPageSync`/`thumbnailSync` có sẵn — nó chứng minh tính chất, phần đỏ-trước nằm ở AC-1/AC-3/AC-4.
+- PR-1: một mục cache mỗi id, chỉ giữ revision đang có trong phiên; yêu cầu cho revision cũ được dựng riêng cho caller, không vào cache · loại map `(id, revision)` nhiều mục · bậc 2 (không cần dọn mục cũ; chỉ một nhánh).
+- PR-1: nút "Chỉnh góc" lấy thumbnail chưa cắt từ `FutureBuilder` ngoài, ô 72×72 là `FutureBuilder` lồng · loại await khi bấm · bậc 2 (giữ hành vi tắt nút khi chưa có thumbnail).
+- PR-1: ảnh xem trước lỗi mà thumbnail ổn vẫn cho "Chỉnh góc" · bậc 1 (FR-4: trình chỉnh dùng thumbnail, không phụ thuộc ảnh cắt).
+- Review PR-1 (`reviewer`): 0 Cao. F1 Trung bình — `FutureBuilder` của ô không khoá theo revision nên có thể giữ ảnh revision cũ khi chờ ảnh mới: test widget mới `the preview of an older revision is not shown while the new one renders (XS-13 AC-3)` **không đỏ** trên code worker (in debug: ô hiện spinner) vì mỗi thao tác bật/tắt `busy` đổi tay kéo của `ReorderableListView` nên ô được dựng lại từ đầu — lỗi không xảy ra hôm nay; vẫn thêm `key: ValueKey((page.id, page.revision))` để không dựa vào chi tiết ngẫu nhiên đó, test giữ làm hồi quy · bậc 1. F2 — `updatePage` xoá mục cache cũ không có test chứng minh và thừa (mục cũ bị thay khi hỏi revision mới) → gỡ · bậc 2. F3 Thấp — trang đã xoá giải mã lại cả ảnh gốc mỗi lần hỏi → trả `StateError`, không giải mã (test sửa trước, đỏ rồi xanh) · bậc 1 + 2. F4 (quét O(n) mỗi ô) giữ: số trang nhỏ; F5 (gộp mẫu `catchError`) không làm: chỉ hai chỗ.
+- Sau sửa: `flutter test test/ui/ test/imaging/` +156, `flutter analyze --fatal-infos` sạch.
 
 ## Lần thử / blocker
 

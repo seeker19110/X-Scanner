@@ -314,6 +314,85 @@ void main() {
     });
   });
 
+  group('preview matches export geometry (XS-13 AC-2)', () {
+    // Each quadrant of a 400×300 original is one clearly different colour.
+    const colours = [
+      [230, 30, 30], // top left
+      [30, 200, 30], // top right
+      [30, 30, 230], // bottom right
+      [230, 210, 30], // bottom left
+    ];
+    img.Image quadrants() {
+      final image = solid(400, 300, 0, 0, 0);
+      void block(int x1, int y1, List<int> c) => img.fillRect(
+        image,
+        x1: x1,
+        y1: y1,
+        x2: x1 + 199,
+        y2: y1 + 149,
+        color: img.ColorRgb8(c[0], c[1], c[2]),
+      );
+      block(0, 0, colours[0]);
+      block(200, 0, colours[1]);
+      block(200, 150, colours[2]);
+      block(0, 150, colours[3]);
+      return image;
+    }
+
+    /// Index in [colours] nearest to the pixel at ([x], [y]).
+    int colourAt(img.Image image, int x, int y) {
+      final p = image.getPixel(x, y);
+      var best = 0;
+      var bestDistance = double.infinity;
+      for (var i = 0; i < colours.length; i++) {
+        final c = colours[i];
+        final d =
+            pow(p.r - c[0], 2) + pow(p.g - c[1], 2) + pow(p.b - c[2], 2) + 0.0;
+        if (d < bestDistance) {
+          bestDistance = d;
+          best = i;
+        }
+      }
+      return best;
+    }
+
+    /// Colour indices a few pixels inside the four corners of [image]:
+    /// top left, top right, bottom right, bottom left as displayed.
+    List<int> cornerColours(img.Image image) {
+      final dx = max(2, image.width ~/ 10);
+      final dy = max(2, image.height ~/ 10);
+      final r = image.width - 1 - dx;
+      final b = image.height - 1 - dy;
+      return [
+        colourAt(image, dx, dy),
+        colourAt(image, r, dy),
+        colourAt(image, r, b),
+        colourAt(image, dx, b),
+      ];
+    }
+
+    for (var turns = 0; turns < 4; turns++) {
+      test('for $turns quarter turns', () {
+        final original = pngOf(quadrants());
+        final thumb = thumbnailSync(original, maxSide: 100);
+        final quad = ac5Quad();
+
+        final export = img.decodeJpg(renderPageSync(original, quad, turns))!;
+        final preview = img.decodeJpg(renderPageSync(thumb, quad, turns))!;
+
+        expect(preview.width, lessThan(export.width), reason: 'smaller');
+        expect(
+          (preview.width - export.width * preview.height / export.height).abs(),
+          lessThanOrEqualTo(1),
+          reason: 'same aspect within one preview pixel',
+        );
+        final corners = cornerColours(export);
+        expect(corners.toSet(), hasLength(4), reason: 'four distinct blocks');
+        expect(cornerColours(preview), corners);
+      });
+    }
+  });
+
   group('thumbnailSync', () {
     test('scales the long side down to maxSide', () {
       final out = thumbnailSync(
@@ -383,6 +462,23 @@ void main() {
       );
       final atCap = await thumbnail(file.path, maxBytes: bytes.length);
       expect(img.decodeJpg(atCap)!.width, 40);
+    });
+
+    test('croppedPreview renders like renderPageSync (XS-13 FR-1)', () async {
+      final thumb = thumbnailSync(pngOf(solid(400, 300, 50, 60, 70)));
+
+      final out = await croppedPreview(thumb, ac5Quad(), 1);
+
+      expect(out, renderPageSync(thumb, ac5Quad(), 1));
+      final decoded = img.decodeJpg(out)!;
+      expect((decoded.width, decoded.height), (ac5Height, ac5Width));
+    });
+
+    test('croppedPreview reports undecodable bytes as the failure', () async {
+      await expectLater(
+        croppedPreview(Uint8List(3), PageQuad.fullFrame, 0),
+        throwsA(isA<ImageDecodeFailure>()),
+      );
     });
 
     test('thumbnail renders from a file', () async {

@@ -252,6 +252,19 @@ Future<Uint8List> renderPage(
   decodeBudget,
 );
 
+/// Renders [thumbnailBytes] cropped by [quad] and rotated by [quarterTurns]
+/// exactly as [renderPageSync] renders an export, in a background isolate
+/// within [decodeBudget]. Throws [ImageDecodeFailure] if the bytes cannot be
+/// decoded.
+Future<Uint8List> croppedPreview(
+  Uint8List thumbnailBytes,
+  PageQuad quad,
+  int quarterTurns,
+) => runWithinBudget(
+  () => renderPageSync(thumbnailBytes, quad, quarterTurns),
+  decodeBudget,
+);
+
 /// Decodes [originalBytes] and encodes a JPEG whose longer side is at most
 /// [maxSide], keeping the aspect ratio.
 ///

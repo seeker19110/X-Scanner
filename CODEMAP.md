@@ -28,6 +28,7 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Đổi cách chia sẻ / MIME | `lib/export/file_sharer.dart` | `flutter test test/export/page_exporter_test.dart` |
 | Thêm thao tác người dùng lên phiên | `lib/ui/session_controller.dart` (hàng đợi, `SessionNotice`) | `flutter test test/ui/session_controller_test.dart` |
 | Đổi màn danh sách trang / nút / thông báo | `lib/ui/review_screen.dart` | `flutter test test/ui/review_screen_test.dart test/app_test.dart` |
+| Đổi ảnh xem trước đã cắt trong danh sách (cache theo `(pageId, revision)`, XS-13) | `lib/ui/session_controller.dart` (`croppedPreviewFor`), `lib/imaging/page_render.dart` (`croppedPreview`) | `flutter test test/ui/session_controller_test.dart test/ui/review_screen_test.dart test/imaging/page_render_test.dart` |
 | Đổi màn chỉnh góc | `lib/ui/quad_editor_screen.dart` | `flutter test test/ui/quad_editor_screen_test.dart` |
 | Đổi nguồn ảnh (camera hệ thống / thư viện) | `lib/ui/page_source.dart` | `flutter test test/ui` |
 | Đổi theme Dark/Light | `lib/app/theme.dart` | `flutter test test/app_test.dart test/ui/accessibility_test.dart` (vùng chạm, nhãn, tương phản ở cả hai theme) |

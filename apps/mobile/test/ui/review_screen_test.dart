@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/gestures.dart' show kLongPressTimeout;
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:x_scanner/imaging/page_render.dart';
 import 'package:x_scanner/main.dart';
 import 'package:x_scanner/storage/session_store.dart';
 import 'package:x_scanner/ui/page_source.dart';
+import 'package:x_scanner/ui/quad_editor_screen.dart';
 import 'package:x_scanner/ui/session_controller.dart';
 
 /// Scripted [PageSource]: each call takes the next queued result;
@@ -88,6 +90,9 @@ void main() {
       sharer: sharer,
       // Decoded in the test isolate; real file I/O runs under runAsync.
       thumbnailer: (path) async => thumbnailSync(File(path).readAsBytesSync()),
+      // Isolates do not run under the fake clock of widget tests.
+      previewer: (bytes, quad, turns) async =>
+          renderPageSync(bytes, quad, turns),
     );
   });
 
@@ -190,6 +195,8 @@ void main() {
       exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
       sharer: sharer,
       thumbnailer: (_) async => throw const ImageDecodeFailure(),
+      previewer: (bytes, quad, turns) async =>
+          renderPageSync(bytes, quad, turns),
     );
     await tester.pumpWidget(const SizedBox());
     await start(tester);
@@ -221,6 +228,8 @@ void main() {
       thumbnailer: (path) async => fail
           ? throw const ImageDecodeFailure()
           : thumbnailSync(File(path).readAsBytesSync()),
+      previewer: (bytes, quad, turns) async =>
+          renderPageSync(bytes, quad, turns),
     );
     await tester.pumpWidget(const SizedBox());
     await start(tester);
@@ -277,6 +286,8 @@ void main() {
         }
         return thumbnailSync(File(path).readAsBytesSync());
       },
+      previewer: (bytes, quad, turns) async =>
+          renderPageSync(bytes, quad, turns),
     );
     await tester.pumpWidget(const SizedBox());
     await start(tester);
@@ -325,6 +336,133 @@ void main() {
     );
     expect(crop.onPressed, isNotNull);
     expect(failCalls, 2);
+  });
+
+  /// Replaces [controller] with one that reads the same session and
+  /// renders previews with [previewer], and shows it.
+  Future<void> restartWith(
+    WidgetTester tester,
+    Future<Uint8List> Function(Uint8List bytes, PageQuad quad, int turns)
+    previewer,
+  ) async {
+    controller = SessionController(
+      store: SessionStore(Directory('${tmp.path}/session')),
+      source: source,
+      exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
+      sharer: sharer,
+      thumbnailer: (path) async => thumbnailSync(File(path).readAsBytesSync()),
+      previewer: previewer,
+    );
+    await tester.pumpWidget(const SizedBox());
+    await start(tester);
+  }
+
+  testWidgets('list shows the cropped preview (XS-13 AC-1)', (tester) async {
+    await start(tester, pages: 1);
+    await tester.runAsync(
+      () => controller.updatePage(
+        controller.session.pages.single.rotatedClockwise(),
+      ),
+    );
+    // A recognisable 2 × 1 PNG stands in for the rendered preview.
+    final marker = img.encodePng(img.Image(width: 2, height: 1));
+    final turnsSeen = <int>[];
+    await restartWith(tester, (bytes, quad, turns) async {
+      turnsSeen.add(turns);
+      return marker;
+    });
+
+    final image = tester.widget<Image>(find.byType(Image)).image;
+    expect(
+      image,
+      isA<ResizeImage>().having(
+        (r) => (r.imageProvider as MemoryImage).bytes,
+        'bytes',
+        same(marker),
+      ),
+    );
+    expect(turnsSeen, [1]);
+    expect(
+      find.descendant(of: find.byType(Card), matching: find.byType(RotatedBox)),
+      findsNothing,
+      reason: 'the rotation is inside the preview',
+    );
+
+    final thumbnail = await tester.runAsync(
+      () => controller.thumbnailFor(controller.session.pages.single),
+    );
+    await tester.tap(find.byTooltip('Chỉnh góc'));
+    await tester.pumpAndSettle();
+    final editor = tester.widget<QuadEditorScreen>(
+      find.byType(QuadEditorScreen),
+    );
+    expect(editor.thumbnailBytes, same(thumbnail));
+    expect(editor.thumbnailBytes, isNot(marker));
+  });
+
+  testWidgets('the preview of an older revision is not shown while the new '
+      'one renders (XS-13 AC-3)', (tester) async {
+    await start(tester, pages: 1);
+    final upright = img.encodePng(img.Image(width: 2, height: 1));
+    final turned = img.encodePng(img.Image(width: 1, height: 2));
+    final pending = Completer<Uint8List>();
+    await restartWith(
+      tester,
+      (bytes, quad, turns) =>
+          turns == 0 ? Future<Uint8List>.value(upright) : pending.future,
+    );
+    Uint8List? shown() {
+      final images = find.descendant(
+        of: find.byType(Card),
+        matching: find.byType(Image),
+      );
+      if (images.evaluate().isEmpty) return null;
+      final image = tester.widget<Image>(images).image as ResizeImage;
+      return (image.imageProvider as MemoryImage).bytes;
+    }
+
+    expect(shown(), same(upright));
+
+    await tester.tap(find.byTooltip('Xoay 90°'));
+    // Not settle(): the tile's spinner keeps animating while it waits.
+    for (var i = 0; i < 100 && (controller.busy || i < 5); i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 5)),
+      );
+      await tester.pump();
+    }
+    expect(controller.busy, isFalse);
+    expect(shown(), isNull, reason: 'revision 0 must not stand in for 1');
+
+    pending.complete(turned);
+    await tester.pump();
+    await tester.pump();
+    expect(shown(), same(turned));
+  });
+
+  testWidgets('a failed cropped preview shows the error tile and is '
+      'rendered again on retry (XS-13 AC-4)', (tester) async {
+    await start(tester, pages: 1);
+    var fail = true;
+    var calls = 0;
+    await restartWith(tester, (bytes, quad, turns) async {
+      calls++;
+      if (fail) throw const ImageDecodeFailure();
+      return renderPageSync(bytes, quad, turns);
+    });
+
+    final retry = find.byTooltip('Tải lại ảnh xem trước trang 1');
+    expect(retry, findsOneWidget);
+    expect(find.byType(Image), findsNothing);
+    expect(calls, 1);
+
+    fail = false;
+    await tester.tap(retry);
+    await settle(tester);
+
+    expect(find.byIcon(Icons.broken_image_outlined), findsNothing);
+    expect(find.byType(Image), findsOneWidget);
+    expect(calls, 2);
   });
 
   testWidgets('the thumbnail is decoded at the size of its tile (F-022)', (
