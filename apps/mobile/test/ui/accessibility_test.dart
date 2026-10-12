@@ -7,12 +7,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:x_scanner/app/theme.dart';
 import 'package:x_scanner/core/page_quad.dart';
+import 'package:x_scanner/core/scan_document.dart';
 import 'package:x_scanner/core/scan_page.dart';
+import 'package:x_scanner/core/session_manifest.dart';
 import 'package:x_scanner/export/export_job.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/imaging/page_render.dart';
+import 'package:x_scanner/storage/library_store.dart';
 import 'package:x_scanner/storage/session_store.dart';
+import 'package:x_scanner/ui/library_controller.dart';
+import 'package:x_scanner/ui/library_screen.dart';
 import 'package:x_scanner/ui/page_source.dart';
 import 'package:x_scanner/ui/quad_editor_screen.dart';
 import 'package:x_scanner/ui/review_screen.dart';
@@ -325,6 +330,97 @@ void main() {
       expect(controller.exportJob, isNull);
       await tester.pumpAndSettle();
       expect(find.text('Chụp'), findsOneWidget);
+      handle.dispose();
+    });
+
+    /// Opens the library under `tmp/documents` and waits for its listing.
+    Future<void> openLibrary(WidgetTester tester) async {
+      final controller = LibraryController(
+        library: LibraryStore(Directory('${tmp.path}/documents')),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(brightness),
+          home: LibraryScreen(
+            controller: controller,
+            documentScreen: (context, store, document) => const SizedBox(),
+            themeMode: themeMode,
+            onToggleTheme: () {},
+          ),
+        ),
+      );
+      for (
+        var i = 0;
+        i < 500 && controller.status == LibraryStatus.loading;
+        i++
+      ) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 5)),
+        );
+        await tester.pump();
+      }
+      expect(controller.status, LibraryStatus.ready);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('library with documents meets the a11y guidelines in '
+        '${brightness.name} theme (XS-09 AC-11)', (tester) async {
+      final handle = tester.ensureSemantics();
+      final documents = Directory('${tmp.path}/documents');
+      for (final (n, title) in [(1, 'Hoá đơn'), (2, 'Hợp đồng thuê nhà')]) {
+        final id = '$n' * 32;
+        final dir = Directory('${documents.path}/$id')
+          ..createSync(recursive: true);
+        final time = DateTime.utc(2026, 10, n);
+        File('${dir.path}/document.json').writeAsStringSync(
+          encodeDocument(
+            ScanDocument(
+              id: id,
+              title: title,
+              createdAt: time,
+              updatedAt: time,
+            ),
+          ),
+        );
+      }
+      for (final (n, json) in [(3, '{"schemaVersion":9}'), (4, '{garbage')]) {
+        final dir = Directory('${documents.path}/${'$n' * 32}')
+          ..createSync(recursive: true);
+        File('${dir.path}/document.json').writeAsStringSync(json);
+      }
+      await openLibrary(tester);
+      expect(find.text('Hoá đơn'), findsOneWidget);
+      expect(find.text('Cần cập nhật app để mở'), findsOneWidget);
+      expect(find.text('Không mở được tài liệu này'), findsOneWidget);
+      for (final finder in [
+        find
+            .ancestor(
+              of: find.byTooltip('Đổi tên'),
+              matching: find.byType(IconButton),
+            )
+            .first,
+        find.ancestor(
+          of: find.text('Tài liệu mới'),
+          matching: find.byType(FloatingActionButton),
+        ),
+      ]) {
+        final size = tester.getSize(finder);
+        expect(size.width, greaterThanOrEqualTo(48));
+        expect(size.height, greaterThanOrEqualTo(48));
+      }
+
+      await _expectGuidelines(tester);
+      handle.dispose();
+    });
+
+    testWidgets('empty library meets the a11y guidelines in '
+        '${brightness.name} theme (XS-09 AC-11)', (tester) async {
+      final handle = tester.ensureSemantics();
+      await openLibrary(tester);
+      expect(find.text('Chưa có tài liệu'), findsOneWidget);
+      expect(find.text('Tài liệu mới'), findsOneWidget);
+
+      await _expectGuidelines(tester);
       handle.dispose();
     });
 

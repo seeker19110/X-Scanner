@@ -228,10 +228,10 @@ vi có test đỏ trước (ADR-0005).
 | AC-6 | `apps/mobile/test/storage/p1_migration_test.dart::AC-6 migrates P1 data into one document` | k = 0, 1, 3; thư viện, quad/xoay, byte, `session.migrated/` |
 | AC-7 | `apps/mobile/test/storage/p1_migration_test.dart::at every disk operation` | 19 lệnh đổi đĩa × (bị kill, lỗi I/O); `the clean run covers steps 2 to 7` |
 | AC-8 | `apps/mobile/test/storage/p1_migration_test.dart::one byte short fails and changes nothing` | + `exactly enough succeeds` |
-| AC-9 | `apps/mobile/test/storage/p1_migration_test.dart::AC-9 unreadable P1 data` | JSON rác, UTF-8 sai, bản gốc thiếu hoặc là link; thông báo UI ở PR-4 |
+| AC-9 | `apps/mobile/test/storage/p1_migration_test.dart::AC-9 unreadable P1 data` | JSON rác, UTF-8 sai, bản gốc thiếu hoặc là link; thông báo UI: `apps/mobile/test/ui/library_screen_test.dart` "unreadable P1 data shows a message (AC-9)" (PR-4a) |
 | AC-10 | `apps/mobile/test/storage/library_store_test.dart::a garbage manifest and a mismatched id are unreadable` | + thiếu `document.json`, UTF-8 sai; `apps/mobile/test/storage/document_store_test.dart` cách ly id khác tên thư mục |
-| AC-11 | chưa có — PR-4a | widget test |
-| AC-12 | chưa có — PR-4a | |
+| AC-11 | `apps/mobile/test/ui/library_screen_test.dart::library shows every state (AC-11)` | đang tải (có/không migration), rỗng, lỗi + "Thử lại", có dữ liệu mới nhất trước + mục hỏng/cần cập nhật không mở được; `accessibility_test.dart` thư viện có dữ liệu/rỗng Dark+Light (PR-4a) |
+| AC-12 | `apps/mobile/test/ui/library_screen_test.dart::rename shows errors in place and saves (AC-12)` | + `new document opens the document screen (AC-12)`, `a failed rename keeps the old title`; `library_controller_test.dart` tên mặc định, giờ UTC, đổi tên không ghi gì khi sai/mục hỏng (PR-4a) |
 | AC-13 | chưa có — PR-4b | test P1 chạy trên màn tài liệu |
 | AC-14 | `apps/mobile/test/storage/p1_migration_test.dart::later runs are not needed and change nothing` | + bản quay lại cũ không bị thay (`session.migrated-2`) |
 

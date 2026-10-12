@@ -28,6 +28,8 @@
   còn thay đổi, kính lúp khi kéo góc, và trình đọc màn hình dịch được từng góc ("Dịch lên/xuống/sang trái/sang phải") (F-032).
 - XS-12a PR-1 (#40): khi xuất hiện "Đang xuất trang i/N" với thanh tiến độ và nút "Huỷ"; huỷ dừng ở trang kế tiếp, không để lại
   file dở và báo "Đã huỷ xuất." (F-033). File xuất luôn là các trang lúc bắt đầu xuất.
+- XS-09 PR-4a (#43, chưa nối vào app): màn "Thư viện" — danh sách tài liệu mới sửa trước (tên, số trang, ngày), "Tài liệu mới",
+  "Đổi tên" báo lỗi tại chỗ, thông báo khi nâng cấp dữ liệu thiếu bộ nhớ hoặc không chuyển được phiên cũ, kèm "Thử lại".
 - P0 nền (#1, #2): app Flutter `apps/mobile`, lõi `PageQuad`/`ScanPage`, gate APK debug/analyze/format/test.
 
 ## 2026-10-11
