@@ -9,6 +9,8 @@
   của picker sau khi lưu, một cổng giải mã cho thumbnail và render xuất, tắt kéo-thả khi bận, PDF dựng trong
   isolate có trần điểm ảnh, trạng thái "Đang mở phiên…" và thử lại thumbnail lỗi, kiểm a11y Dark/Light,
   gate tự kiểm manifest release đã gộp, tài liệu trạng thái, ADR-0003, `TRAPS.md`.
+- Sửa sau quét lại (#21, #22): khi app bận, thao tác TalkBack Move up/down không đổi thứ tự trang; ảnh xem
+  trước lỗi chỉ giải mã lại khi bấm "Tải lại" (có vòng quay); mọi lỗi khi kiểm ảnh mới đều báo "không đọc được".
 - P0 nền (#1, #2): app Flutter `apps/mobile`, lõi `PageQuad`/`ScanPage`, gate APK debug/analyze/format/test.
 
 ## 2026-10-11

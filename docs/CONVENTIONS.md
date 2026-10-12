@@ -7,7 +7,7 @@
 | Pattern | Cách đúng duy nhất | File ví dụ chuẩn | Ghi chú |
 |---------|--------------------|------------------|---------|
 | Thay đổi phiên | Mọi thao tác ghi đi qua hàng đợi `_enqueue`; trạng thái trong RAM chỉ đổi **sau** khi `SessionStore.save` thành công (`_commit`) | `lib/ui/session_controller.dart` | |
-| Báo lỗi cho người dùng | Bắt kiểu lỗi cụ thể → `SessionNotice` → câu tiếng Việt ở một `switch` duy nhất; không đưa đường dẫn/nội dung, không log | `session_controller.dart` `_report`, `lib/ui/review_screen.dart` `_message` | Thêm notice mới = thêm nhánh `switch` (analyzer bắt thiếu) |
+| Báo lỗi cho người dùng | Bắt kiểu lỗi cụ thể → `SessionNotice`; bắt mọi lỗi (`catch (_)`) chỉ khi mọi lỗi cùng nghĩa với người dùng và ra đúng một notice (giải mã thử ở `_addFromPath`, `exportAndShare`) (F-059) → câu tiếng Việt ở một `switch` duy nhất; không đưa đường dẫn/nội dung, không log | `session_controller.dart` `_report`, `lib/ui/review_screen.dart` `_message` | Thêm notice mới = thêm nhánh `switch` (analyzer bắt thiếu) |
 | Validate dữ liệu ngoài | Biên đọc file ném `FormatException` chỉ nêu tên trường; constructor lõi ném `ArgumentError` | `lib/core/session_manifest.dart`, `lib/core/page_quad.dart` | |
 | Kiểu lõi | Bất biến, thao tác trả bản mới, không I/O, không import Flutter | `lib/core/scan_session.dart`, `lib/core/scan_page.dart` | `test/core/core_purity_test.dart` |
 | Ghi file bền | Ghi `.tmp`/`.part` → flush/fsync → rename; không ghi đè bản gốc | `lib/storage/session_store.dart` `importOriginal`, `_save` | |

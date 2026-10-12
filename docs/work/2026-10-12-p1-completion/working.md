@@ -64,6 +64,10 @@
 - W-502: chấp nhận gộp hai catch thành `catch (_)` ở giải mã thử · loại thêm nhánh `on Object` thứ ba · bậc 2 (ít code, cùng hành vi cho người dùng; brief cho phép bắt `Object`).
 - W-502: test F-020 cũ đổi sang hành vi mới (giải mã lại chỉ sau `retryThumbnail`) · loại giữ thử lại tự động mỗi lần dựng lại · bậc 1 (không chen giải mã hỏng vào hàng đợi trước render xuất).
 - Đĩa phiên đầy chặn gate W-502 → người dùng duyệt xoá 8 worktree worker cũ (đã merge, patch lưu scratchpad), giải phóng ~15 GB · loại tự xoá khi bị chặn quyền · bậc 1.
+- Pha 4 lần 2: 2 auditor (X 3/4/6/12, Y 2/8/9) trên `da7cae8` song song CI #22 · loại 3 cụm 12 nhóm · bậc 2 (chỉ nhóm bị Đợt 4 chạm). 0 Cao/Trung; 4 Thấp mới.
+- F-059/F-070/F-072 sửa trong PR W-502 (tài liệu đi cùng thay đổi) · loại PR dọn dẹp riêng · bậc 2. F-071 → W-504 riêng (đổi cổng cần test đỏ trước) · loại gộp vào W-502 · bậc 3.
+- F-071 sửa bằng FAIL khi targetSdk < 31 hoặc thiếu · loại suy luận exported ngầm theo intent-filter · bậc 2 (một kiểm, chặn cả lớp lỗi).
+- Quan sát auditor không tính phát hiện (thao tác Move up/down khi bận im lặng; `_HeldStore` lặp; nút theme bật khi bận) · giữ nguyên · bậc 2.
 - F-058 chỉ ghi baseline coverage (94,6 %), không thêm cổng ngưỡng · loại thêm `--coverage` + ngưỡng vào gate · bậc 2 (đã ghi dời P2 trong kế hoạch; vùng thấp là phần nối nền tảng).
 
 ## Lần thử / blocker
