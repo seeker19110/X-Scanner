@@ -161,6 +161,58 @@ void main() {
     expect(controller.session.pages, hasLength(1));
   });
 
+  testWidgets('a page whose thumbnail fails shows the error tile (F-028)', (
+    tester,
+  ) async {
+    await start(tester, pages: 1);
+    expect(find.byIcon(Icons.broken_image_outlined), findsNothing);
+    // A fresh controller has no cached preview, and its decoder fails.
+    controller = SessionController(
+      store: SessionStore(Directory('${tmp.path}/session')),
+      source: source,
+      exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
+      sharer: sharer,
+      thumbnailer: (_) async => throw const ImageDecodeFailure(),
+    );
+    await tester.pumpWidget(const SizedBox());
+    await start(tester);
+
+    expect(find.text('Trang 1'), findsOneWidget);
+    expect(find.byIcon(Icons.broken_image_outlined), findsOneWidget);
+    expect(find.byType(Image), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    final crop = tester.widget<IconButton>(
+      find.ancestor(
+        of: find.byIcon(Icons.crop),
+        matching: find.byType(IconButton),
+      ),
+    );
+    expect(crop.onPressed, isNull, reason: 'no preview to edit on');
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('a failed save shows the saveFailed message (F-028)', (
+    tester,
+  ) async {
+    await start(tester, pages: 1);
+    // Make the next save fail: the store refuses a page whose original is
+    // missing, so remove the original of the page before rotating it.
+    await tester.runAsync(
+      () => controller.originalFile(controller.session.pages.single).delete(),
+    );
+    await tester.tap(find.byTooltip('Xoay 90°'));
+    await settle(tester);
+
+    expect(
+      find.text(
+        'Không lưu được (có thể bộ nhớ đầy). Phiên giữ nguyên như trước.',
+      ),
+      findsOneWidget,
+    );
+    expect(controller.session.pages.single.quarterTurns, 0);
+    expect(find.text('Trang 1'), findsOneWidget);
+  });
+
   testWidgets('a corrupt saved session shows restoreFailed', (tester) async {
     File('${tmp.path}/session/session.json')
         .writeAsStringSync('{"schemaVersion": 99}');
@@ -341,7 +393,9 @@ void main() {
     expect(find.byTooltip('Xuất'), findsNothing);
   });
 
-  testWidgets('exporting as PDF shares one .pdf file (AC-6)', (tester) async {
+  testWidgets('exporting as PDF shares one X-Scanner.pdf (AC-6) (F-029)', (
+    tester,
+  ) async {
     await start(tester, pages: 2);
     await tester.tap(find.byTooltip('Xuất'));
     await tester.pumpAndSettle();
@@ -352,21 +406,24 @@ void main() {
     await tester.tap(find.text('PDF'));
     await settle(tester);
     expect(sharer.shared, hasLength(1));
-    expect(sharer.shared.single, hasLength(1));
-    expect(sharer.shared.single.single, endsWith('.pdf'));
+    expect(sharer.shared.single, ['X-Scanner.pdf']);
     expect(find.byType(SnackBar), findsNothing);
     expect(find.text('PDF'), findsNothing, reason: 'sheet closed');
   });
 
-  testWidgets('choosing JPG or PNG shares one image per page', (tester) async {
+  testWidgets('choosing JPG or PNG shares one named image per page (F-029)', (
+    tester,
+  ) async {
     await start(tester, pages: 2);
-    for (final (label, ext) in [('JPG', '.jpg'), ('PNG', '.png')]) {
+    for (final (label, ext) in [('JPG', 'jpg'), ('PNG', 'png')]) {
       await tester.tap(find.byTooltip('Xuất'));
       await tester.pumpAndSettle();
       await tester.tap(find.text(label));
       await settle(tester);
-      expect(sharer.shared.last, hasLength(2));
-      expect(sharer.shared.last, everyElement(endsWith(ext)));
+      expect(sharer.shared.last, [
+        'X-Scanner-trang-01.$ext',
+        'X-Scanner-trang-02.$ext',
+      ]);
     }
   });
 
