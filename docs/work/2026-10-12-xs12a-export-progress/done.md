@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-xs12a-export-progress
 - Yêu cầu / outcome: `/auto-complete` (2026-10-12): sau XS-13, làm việc kế tiếp không bị chặn của kế hoạch M1 — XS-12 phần tiến độ/huỷ xuất (F-033).
-- Trạng thái: In progress — spec #39 `484cd1a`; PR-1 đang làm.
+- Trạng thái: Done — spec #39 `484cd1a`, PR-1 #40 `614b5b4`.
 - Chủ trì / writer: phiên chính (spec, review, tích hợp, cổng); PR code một worker `complex-implementer`.
 - Mức rủi ro / số PR: M (đổi cách chạy xuất + UI; không đổi dữ liệu lưu/định dạng/dependency); 1 PR spec + 1 PR code.
 - Scope / non-goal: FR-1..FR-5, AC-1..AC-7 của spec. Non-goal: tiếp tục sau khi app đóng, vòng đời file chia sẻ, chọn nơi lưu, profile/khổ giấy/chọn trang/tên file, writer PDF theo luồng (XS-11), ngắt isolate dựng PDF.
@@ -28,6 +28,7 @@
 - Worker tự quyết (giữ): `ExportFormat` chuyển sang `export_job.dart`, `page_exporter.dart` export lại · bậc 2 (import cũ không đổi); `succeed` đòi `done == total`, `fail(cancelled)` ném · bậc 1 (chặn trạng thái sai); hàng "Đang xuất" `minHeight: 48` cùng `SafeArea`/`Padding` · bậc 1 (không nhảy bố cục).
 - Tầng 1 đổi: `exportJob` về null ngay khi job kết thúc, trước khi chia sẻ (test đỏ → xanh "the job is gone while sharing") · loại giữ tới `finally` như brief · bậc 1 (worker báo: khi share sheet mở vẫn hiện nút "Huỷ" bấm không có tác dụng).
 - Review PR-1 (`reviewer`, 159 test): 0 Cao. Sửa đỏ-trước (3 test đỏ → xanh, `test/export/ test/ui/` +161): F1 `run` lại job đã chạy xoá file của nó trước khi ném → kiểm trạng thái trước khi xoá · bậc 1 (không mất dữ liệu); F2 bấm "Huỷ" không phản hồi tới hết trang → "Đang huỷ…" + tắt nút · bậc 1; F3 `dispose` không huỷ tác vụ, share sheet mở sau khi màn đóng → `dispose` huỷ · bậc 1. F4 ca AC-5 ở controller chỉ chứng minh hàng đợi → sửa ghi chú bảng AC, bằng chứng chính là test exporter · bậc 3. Không làm: F5 nhãn trợ năng trùng giữa thanh tiến độ và chữ (spec không đòi; xem lại ở XS-20 a11y) · bậc 2; gom `HeldRenderer` ba file test, view chỉ-đọc cho `ExportJob` · bậc 2 (ít code hơn, spec §11 chấp nhận hợp đồng).
+- PR-1 merged #40 `614b5b4` (CI xanh trên `30ad806`; gate trước commit PASS +515).
 
 ## Lần thử / blocker
 
@@ -35,10 +36,10 @@
 
 ## Bàn giao / bước tiếp theo
 
-- Sau khi #38 merge: commit spec + hồ sơ qua cổng, mở PR spec; merge xong thì viết brief PR-1 (`route: complex`) và giao worker.
+- Hồ sơ xong. Phần còn lại của XS-12 (tiếp tục sau khi app đóng, vòng đời file chia sẻ, writer theo luồng) chờ XS-11/corpus XS-06; nhãn trợ năng trùng giữa thanh tiến độ và chữ → XS-20.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
-<DoD, mọi PR MERGED + merge SHA và main đã đối chiếu, giới hạn/rủi ro còn lại,
-ngày và người nghiệm thu theo ủy quyền. Khi đủ điều kiện rename working.md → done.md
-trong cùng thư mục; không overwrite lịch sử. Chưa có PR/merge thì giữ working.md.>
+- Outcome đạt: F-033 đóng; spec XS-12a AC-1..AC-7 có test (`spec-compiler --trace`: TRACE COMPLETE), hợp đồng XS-08 §9 tiêu chí 7, 8 có bằng chứng. Spec #39 `484cd1a`, PR-1 #40 `614b5b4`, mỗi PR CI "Framework and Android app gate" xanh trước khi merge. `main` đã đối chiếu 2026-10-12T17:10Z.
+- Giới hạn còn lại: huỷ trong lúc dựng PDF trong isolate chỉ có hiệu lực sau khi dựng xong (non-goal); chưa chạy trên thiết bị/TalkBack.
+- Nghiệm thu: phiên chính theo ủy quyền §3d, 2026-10-12.

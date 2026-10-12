@@ -65,7 +65,7 @@ Mức: Cao = mất/hỏng dữ liệu, rò riêng tư, crash luồng chính, tà
 | F-030 | 5 | Thấp | `session_controller.dart` thumbnails | Thumbnail chỉ trong RAM, mỗi lần mở app giải mã lại | Khởi động chậm với phiên dài | Dời P2 (cần số đo thiết bị) |
 | F-031 | 6 | Thấp | `lib/main.dart` | Không có `flutter_localizations`: chuỗi framework (Back, Move up…) tiếng Anh | TalkBack đọc lẫn Anh–Việt | Dời P2 (thêm dependency ngoài D2) |
 | F-032 | 6 | Thấp | `quad_editor_screen.dart` | Trình chỉnh góc hiện ảnh chưa xoay; Back bỏ thay đổi không hỏi | Chỉnh nhầm, mất công | Đóng 2026-10-12: XS-13 PR-2 #37 `9fbe2fd` |
-| F-033 | 6 | Thấp | `review_screen.dart` | Xuất nhiều trang không có tiến trình i/N, không huỷ | Tưởng app treo | Dời P2 (UX) |
+| F-033 | 6 | Thấp | `review_screen.dart` | Xuất nhiều trang không có tiến trình i/N, không huỷ | Tưởng app treo | Đóng 2026-10-12: XS-12a PR-1 #40 `614b5b4` |
 | F-034 | 8 | Thấp | `.github/workflows/ci.yml` concurrency | `cancel-in-progress` áp cả push `main` | Mất kết quả CI của commit trên `main` | W-301 |
 | F-035 | 7 | Thấp | `.claude/project-commands.sh` | Gate không `flutter pub get --enforce-lockfile` | Build/test với lock khác bản đã review | W-301 |
 | F-036 | 7 | Thấp | `apps/mobile/android/` | Không có Gradle verification metadata | Artifact Maven bị thay không phát hiện | Dời trước release |
