@@ -4,11 +4,13 @@
 | --- | --- |
 | Issue / Goal | XS-09 của `docs/plans/2026-10-12-comprehensive-development-plan.md` (§6.1, §13) · Work ID `2026-10-12-xs09-document-library-spec` |
 | Spec owner | Phiên chính (Claude Code) |
-| State | **Draft** — chờ chủ repo duyệt; chưa được code |
-| Approver / date | |
+| State | **Approved for implementation** — phạm vi PR-1..PR-3 (§17); PR-4 chờ chủ repo |
+| Approver / date | Phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12 — chỉ PR-1..PR-3 |
 | Last updated | 2026-10-12 |
 
-> Mức **L**: đổi bố cục lưu trữ dữ liệu thật của người dùng (migration) → không tự duyệt theo §3d; chủ repo duyệt.
+> Mức **L**: đổi bố cục lưu trữ dữ liệu thật của người dùng (migration). PR-1..PR-3 chỉ thêm code không nối vào app, không
+> chạm dữ liệu thật → phiên chính duyệt theo §3d. **PR-4** (công tắc chạy migration trên dữ liệu thật) không tự duyệt:
+> chờ chủ repo (§3d "không bao giờ tự quyết").
 > Tuân hợp đồng XS-08 (`docs/specs/2026-10-12-document-revision-export-contract.md`, ADR-0004): spec này là consumer
 > đầu tiên, nên mang AC-1..AC-5 và FR-7 của hợp đồng.
 
@@ -98,8 +100,8 @@ chừng dữ liệu nằm ở cả hai bố cục, phục hồi phải lần the
   5. Kiểm: đọc lại `document.json` bằng codec, cùng số trang, cùng thứ tự id, cùng `quad`/`quarterTurns`, từng bản gốc có
      **cùng kích thước và cùng byte** với bản P1 (D-3: so byte, không hash).
   6. Rename `documents/{docId}.part` → `documents/{docId}` (commit), rồi nhật ký `committed`.
-  7. Rename `session/` → `session.migrated/` (bản quay lại) rồi xoá nhật ký. `session.migrated/` bị xoá ở lần mở app **sau**
-     khi tài liệu đã migrate được tải thành công (D-5).
+  7. Rename `session/` → `session.migrated/` (bản quay lại) rồi xoá nhật ký. `session.migrated/` được **giữ**, không code nào
+     tự xoá (D-5); xoá bản quay lại là quyết định của chủ repo cùng XS-10.
 - **FR-7 Phục hồi migration.** Lúc khởi động, theo nhật ký: `copying` + chỉ có `.part` → xoá `.part`, chạy lại từ bước 3 với
   cùng `docId`; `copying` + đã có `documents/{docId}` (đã kiểm trước khi rename) → coi là `committed`; `committed` → làm bước
   7. Không bao giờ tạo tài liệu thứ hai cho cùng dữ liệu P1, không xoá `session/` trước bước 6.
@@ -144,8 +146,8 @@ chừng dữ liệu nằm ở cả hai bố cục, phục hồi phải lần the
   báo lỗi tại chỗ, tên cũ giữ nguyên; given đổi tên hợp lệ, then tên + `updatedAt` mới được lưu và hiện ở thư viện.
 - **AC-13** Given một tài liệu, when chạy lại các luồng P1 (AC-1..AC-8 của spec P1) trong tài liệu đó, then hành vi như P1;
   sửa tài liệu này không đổi tài liệu khác.
-- **AC-14** Given lần mở app sau một migration thành công, when tài liệu migrate được tải thành công, then `session.migrated/`
-  bị xoá (D-5); tải lỗi thì giữ.
+- **AC-14** Given một migration thành công, when mở lại app (kể cả nhiều lần) và tài liệu migrate được tải, then
+  `session.migrated/` còn nguyên, cùng mọi bản gốc trong đó (D-5: không tự xoá).
 
 ## 10. UX/content/accessibility
 
@@ -159,7 +161,7 @@ này", "Cần cập nhật app để mở", "{n} trang". Màu qua theme hiện c
 | Thay đổi | File |
 | --- | --- |
 | `ScanDocument`, `revision` | `lib/core/scan_document.dart` (mới), `lib/core/scan_page.dart`, `lib/core/scan_session.dart` (thay bằng `ScanDocument` hoặc bọc) |
-| Codec schema 1/2, "cần cập nhật app" | `lib/core/session_manifest.dart` → `lib/core/document_manifest.dart` |
+| Codec schema 1/2, "cần cập nhật app" | `lib/core/session_manifest.dart` (PR-1 thêm schema 2 vào file này; đổi tên thành `document_manifest.dart` ở PR-4, khi `SessionStore` được thay) |
 | Lưu trữ theo tài liệu | `lib/storage/session_store.dart` → `lib/storage/document_store.dart` (gốc = thư mục tài liệu) |
 | Thư viện + tạo/đổi tên | `lib/storage/library_store.dart` (mới), `lib/ui/library_controller.dart` (mới), `lib/ui/library_screen.dart` (mới) |
 | Migration + nhật ký + phục hồi | `lib/storage/p1_migration.dart` (mới) |
@@ -192,11 +194,11 @@ Không có API mạng. Lỗi trả về là enum đóng, không mang đường d
 ## 13. Data contract/migration
 
 - Schema: `document.json` schema 2 đúng XS-08 §13. `migration.json`: `{"version":1,"state":"copying"|"committed","docId":"<32 hex>"}`.
-- Bố cục sau migration: `documents/{docId}/document.json`, `documents/{docId}/originals/*`, `session.migrated/` (tạm).
-- Ownership/retention: tài liệu tồn tại tới khi XS-10 cho xoá; `session.migrated/` xoá theo AC-14.
+- Bố cục sau migration: `documents/{docId}/document.json`, `documents/{docId}/originals/*`, `session.migrated/` (bản quay lại, giữ — D-5).
+- Ownership/retention: tài liệu tồn tại tới khi XS-10 cho xoá; `session.migrated/` giữ tới khi chủ repo quyết cùng XS-10 (D-5, AC-14).
 - Verify: so số trang, thứ tự id, recipe, kích thước + byte từng bản gốc (FR-6 bước 5).
 - Compatibility: bản app chỉ biết P1 sẽ không thấy dữ liệu sau migration (`session/` đã đổi tên) — chấp nhận vì P1 chưa
-  phân phối; bản quay lại `session.migrated/` có thể đổi tên tay về `session/` cho tới AC-14.
+  phân phối; bản quay lại `session.migrated/` có thể đổi tên tay về `session/`.
 - Recovery: FR-7; không bao giờ xoá dữ liệu người dùng để giải quyết lỗi migration (kế hoạch §10).
 
 ## 14. Security/privacy/abuse cases
@@ -240,36 +242,37 @@ Tuần tự (cùng lớp lưu trữ), mỗi PR một outcome, app vẫn chạy b
 - PR-1: mô hình + codec schema 1/2 + revision (AC-1, AC-2, AC-3, AC-5). Không nối vào app.
 - PR-2: `DocumentStore` + `LibraryStore` (AC-4, AC-10). Không nối vào app.
 - PR-3: migration + nhật ký + phục hồi + tiêm lỗi (AC-6..AC-9, AC-14). Không nối vào app.
-- PR-4: màn thư viện + màn tài liệu + nối `main.dart` (AC-11..AC-13). **Chỉ PR này đổi hành vi**.
+- PR-4: màn thư viện + màn tài liệu + nối `main.dart` (AC-11..AC-13). **Chỉ PR này đổi hành vi** — chờ chủ repo duyệt (Approval).
 
 ## 18. Rollout/rollback
 
 Bản nội bộ (P1 chưa phân phối). PR-4 là công tắc duy nhất; revert PR-4 trước khi có ai chạy bản mới thì không có migration.
-Sau khi đã migrate, quay về bản P1 cần đổi tên tay `session.migrated/` → `session/` (còn tới AC-14). Không feature flag
+Sau khi đã migrate, quay về bản P1 cần đổi tên tay `session.migrated/` → `session/` (D-5: thư mục này được giữ). Không feature flag
 (ít cấu hình hơn; chưa phân phối).
 
 ## 19. Risk, assumptions và open decisions
 
 | Item | Verification/mitigation | Owner | Due | Decision |
 | --- | --- | --- | --- | --- |
-| D-2 Tên mặc định: "Tài liệu {dd/MM/yyyy HH:mm}" theo giờ máy lúc tạo; tài liệu migrate dùng thời điểm sửa của `session.json` | AC-12, AC-6 | Chủ repo | Khi duyệt | Đề xuất như trên |
-| D-3 Kiểm bản gốc khi migrate: so kích thước + byte, không hash | FR-6 bước 5; không cần `package:crypto` | Chủ repo | Khi duyệt | Đề xuất so byte (không dependency mới) |
-| D-4 Xoá tài liệu: để XS-10 (thùng rác có hạn giữ) hay thêm "xoá vĩnh viễn có xác nhận" ngay ở XS-09 | Kế hoạch §6.1 đòi thùng rác thấy được | Chủ repo | Khi duyệt | Đề xuất để XS-10, phát hành cùng XS-10 |
-| D-5 Giữ `session.migrated/` tới lần mở sau khi tài liệu migrate tải được, rồi xoá | AC-14; tốn gấp đôi dung lượng trong thời gian ngắn | Chủ repo | Khi duyệt | Đề xuất như trên |
-| Bố cục mỗi tài liệu một thư mục (§4 A) | AC-10 | Phiên chính | — | Đề xuất |
-| Copy rồi kiểm thay vì rename | AC-7, AC-8; cần dung lượng gấp đôi lúc migrate | Phiên chính | — | Đề xuất |
-| Giả định: P1 chưa phân phối nên không cần đường downgrade tự động | §18 | Chủ repo | Khi duyệt | Cần xác nhận |
+| D-2 Tên mặc định: "Tài liệu {dd/MM/yyyy HH:mm}" theo giờ máy lúc tạo; tài liệu migrate dùng thời điểm sửa của `session.json` | AC-12, AC-6 | Phiên chính | 2026-10-12 | **Chốt** như trên (bậc 2: không cần chuỗi định dạng mới; đổi được ở PR-4 nếu chủ repo muốn) |
+| D-3 Kiểm bản gốc khi migrate: so kích thước + byte, không hash | FR-6 bước 5; không cần `package:crypto` | Phiên chính | 2026-10-12 | **Chốt** so byte (bậc 2: không dependency mới; chặt hơn hash cho mục đích kiểm copy) |
+| D-4 Xoá tài liệu: để XS-10 (thùng rác có hạn giữ) hay thêm "xoá vĩnh viễn có xác nhận" ngay ở XS-09 | Kế hoạch §6.1 đòi thùng rác thấy được | Phiên chính | 2026-10-12 | **Chốt** để XS-10 (bậc 1: xoá là thao tác phá dữ liệu; bậc 2: ít code hơn) |
+| D-5 Bản quay lại `session.migrated/`: giữ, không tự xoá (thay đề xuất nháp "xoá ở lần mở sau") | AC-14; tốn gấp đôi dung lượng tới khi chủ repo quyết | Phiên chính | 2026-10-12 | **Chốt** giữ (bậc 1: tự xoá dữ liệu thật là việc §3d không tự quyết; bậc 2: bớt một nhánh code). Xoá → chủ repo, cùng XS-10 |
+| Bố cục mỗi tài liệu một thư mục (§4 A) | AC-10 | Phiên chính | 2026-10-12 | Chốt (ADR-0011) |
+| Copy rồi kiểm thay vì rename | AC-7, AC-8; cần dung lượng gấp đôi lúc migrate | Phiên chính | 2026-10-12 | Chốt (ADR-0011) |
+| Giả định: P1 chưa phân phối nên không cần đường downgrade tự động | §18 | Chủ repo | Trước PR-4 | Mở — chặn PR-4, không chặn PR-1..PR-3 (không nối vào app) |
 
-Không Approved khi D-2..D-5 còn mở.
+D-2..D-5 đã chốt. Giả định downgrade và việc bật migration trên dữ liệu thật (PR-4) chờ chủ repo.
 
 ## Approval
 
-- [ ] Product/scope
-- [ ] UX/a11y
-- [ ] Architecture/API/data
-- [ ] Security/privacy/cost
-- [ ] Test/telemetry/rollout/rollback
-- [ ] Blocking decisions closed (D-2..D-5)
+- [x] Product/scope — PR-1..PR-3
+- [ ] UX/a11y — PR-4, chủ repo
+- [x] Architecture/API/data — ADR-0011
+- [x] Security/privacy/cost — §14; không dependency, không chi phí
+- [x] Test/telemetry/rollout/rollback — §16; PR-4 là công tắc duy nhất (§18)
+- [x] Blocking decisions closed (D-2..D-5) — cho PR-1..PR-3
 
-**Conclusion:** Draft
-**Approver/date:**
+**Conclusion:** **Approved for implementation** — phạm vi PR-1..PR-3 (không nối vào app, không chạm dữ liệu thật); PR-4 chờ
+chủ repo
+**Approver/date:** Phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12
