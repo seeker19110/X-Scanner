@@ -48,6 +48,9 @@ class SessionController extends ChangeNotifier {
   ScanSession _session = ScanSession.empty;
   final Queue<SessionNotice> _notices = Queue<SessionNotice>();
   final Map<String, Future<Uint8List>> _thumbnails = {};
+
+  /// Ids whose cached preview in [_thumbnails] completed with an error.
+  final Set<String> _failedThumbnails = {};
   int _pending = 0;
   int _restoring = 0;
   bool _disposed = false;
@@ -72,21 +75,31 @@ class SessionController extends ChangeNotifier {
   File originalFile(ScanPage page) => _store.resolve(page.originalPath);
 
   /// The preview of [page], cached by page id. Decoding is queued behind
-  /// any other decode; a failure is rethrown to the caller and dropped
-  /// from the cache, so the next call decodes again.
+  /// any other decode. A failure is rethrown to the caller and stays
+  /// cached, so rebuilding the page list never decodes a broken original
+  /// again; only [retryThumbnail] does.
   Future<Uint8List> thumbnailFor(ScanPage page) =>
       _thumbnails.putIfAbsent(page.id, () {
         late final Future<Uint8List> decoding;
         decoding = _decode(() => originalFile(page).path)
             .catchError((Object error, StackTrace stack) {
-              // Only this attempt: a newer preview for the page stays cached.
+              // Only this attempt: a newer preview for the page is not marked.
               if (identical(_thumbnails[page.id], decoding)) {
-                _thumbnails.remove(page.id);
+                _failedThumbnails.add(page.id);
               }
               return Future<Uint8List>.error(error, stack);
             });
         return decoding;
       });
+
+  /// Drops the cached preview of [page] if it failed and notifies, so the
+  /// next [thumbnailFor] decodes it again. A preview still decoding or
+  /// already decoded is kept.
+  void retryThumbnail(ScanPage page) {
+    if (!_failedThumbnails.contains(page.id)) return;
+    _forgetThumbnail(page.id);
+    _notify();
+  }
 
   /// Removes export files and share-sheet copies left by an earlier run,
   /// loads the saved session,
@@ -122,7 +135,7 @@ class SessionController extends ChangeNotifier {
       _session = ScanSession.empty;
       failed = true;
     }
-    _thumbnails.clear();
+    _forgetThumbnails();
     if (failed) _notices.add(SessionNotice.restoreFailed);
     _notify();
     final lost = await _source.retrieveLost();
@@ -154,14 +167,14 @@ class SessionController extends ChangeNotifier {
     final path = await _source.capture();
     if (path != null) {
       await _addFromPath(path, (page) => _session.replaced(id, page));
-      if (!_contains(id)) _thumbnails.remove(id);
+      if (!_contains(id)) _forgetThumbnail(id);
     }
   });
 
   /// Removes the page [id]; a page that is already gone is ignored.
   Future<void> remove(String id) => _enqueue(() async {
     if (!_contains(id)) return;
-    if (await _commit(_session.removed(id))) _thumbnails.remove(id);
+    if (await _commit(_session.removed(id))) _forgetThumbnail(id);
   });
 
   /// Moves the page at [from] to [to]; stale indices are ignored.
@@ -181,7 +194,7 @@ class SessionController extends ChangeNotifier {
 
   /// Removes every page.
   Future<void> clearAll() => _enqueue(() async {
-    if (await _commit(ScanSession.empty)) _thumbnails.clear();
+    if (await _commit(ScanSession.empty)) _forgetThumbnails();
   });
 
   /// Exports the pages as [format], shares the files and then deletes
@@ -210,6 +223,16 @@ class SessionController extends ChangeNotifier {
 
   bool _contains(String id) => _session.pages.any((p) => p.id == id);
 
+  void _forgetThumbnail(String id) {
+    _thumbnails.remove(id);
+    _failedThumbnails.remove(id);
+  }
+
+  void _forgetThumbnails() {
+    _thumbnails.clear();
+    _failedThumbnails.clear();
+  }
+
   /// Checks that [path] decodes, copies it in as a new page, saves the
   /// session built by [apply] and only then shows it and lets the source
   /// discard its copy at [path].
@@ -220,11 +243,11 @@ class SessionController extends ChangeNotifier {
     final Uint8List preview;
     try {
       preview = await _decode(() => path);
-    } on ImageDecodeFailure {
-      _report(SessionNotice.decodeFailed);
-      return;
-    } on FileSystemException {
-      // The picked file vanished or is unreadable: same outcome for the user.
+    } catch (_) {
+      // Not only ImageDecodeFailure: a vanished or unreadable file
+      // (FileSystemException), a RemoteError from the decode isolate or
+      // running out of memory on a very large file all mean the image cannot
+      // be added. The session and the source's copy stay as they were.
       _report(SessionNotice.decodeFailed);
       return;
     }

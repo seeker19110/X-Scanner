@@ -16,7 +16,7 @@
 | Xử lý ảnh nặng | Giải mã trong `Isolate.run` ở `lib/imaging/`; lỗi giải mã → `ImageDecodeFailure` không mang nội dung; có trần `maxDecodedPixels` | `lib/imaging/page_render.dart` | Mọi lần giải mã bản gốc đi qua **một** `DecodeGate` (`lib/imaging/decode_gate.dart`), tạo ở `main.dart` |
 | Phụ thuộc nền tảng | Interface + adapter tiêm qua constructor để test dùng fake | `lib/ui/page_source.dart`, `lib/export/file_sharer.dart` | Nối thật ở `lib/main.dart` |
 | Hành động phá huỷ | Luôn qua hộp xác nhận `_confirm(question, label)` | `review_screen.dart` | |
-| Trạng thái bận | Khi `controller.busy`, mọi nút **và kéo-thả** đều tắt; một `LinearProgressIndicator` cố định 4 dp | `review_screen.dart` `build` | `buildDefaultDragHandles: !busy` |
+| Trạng thái bận | Khi `controller.busy`, mọi nút **và kéo-thả** đều tắt, `onReorderItem` bỏ qua (thao tác ngữ nghĩa Move up/down vẫn gọi nó); một `LinearProgressIndicator` cố định 4 dp | `review_screen.dart` `build` | `buildDefaultDragHandles: !busy` |
 | Trạng thái màn | Đủ 4 trạng thái: đang tải / rỗng / lỗi (SnackBar) / có dữ liệu | `review_screen.dart` | Đang tải khi khôi phục: `controller.restoring` → "Đang mở phiên…" |
 | Màu / theme | Chỉ `Theme.of(context).colorScheme`; seed duy nhất ở `lib/app/theme.dart`; mặc định Dark | `lib/app/theme.dart` | |
 | Nút icon | Có `tooltip` (là nhãn trình đọc màn hình); vùng chạm ≥ 48 dp | `review_screen.dart` | |
