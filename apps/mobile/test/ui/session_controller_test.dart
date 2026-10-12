@@ -30,11 +30,18 @@ class FakeSource implements PageSource {
       lost.isEmpty ? null : lost.removeAt(0);
 }
 
-/// [SessionStore] whose [save] can be made to fail like a full disk.
+/// [SessionStore] whose [save] can be made to fail like a full disk and
+/// whose [load] like an unreadable disk.
 class FlakyStore extends SessionStore {
   FlakyStore(super.root);
 
   bool failSave = false;
+  bool failLoad = false;
+
+  @override
+  Future<SessionLoadResult> load() => failLoad
+      ? Future<SessionLoadResult>.error(const FileSystemException('io'))
+      : super.load();
 
   @override
   Future<void> save(session) => failSave
@@ -241,6 +248,37 @@ void main() {
     await controller.restore();
     expect(controller.session.pages, isEmpty);
     expect(controller.takeNotice(), SessionNotice.restoreFailed);
+  });
+
+  test('(F-001) restore failing with an I/O error, then capture, keeps the '
+      'saved session', () async {
+    await addPages(2);
+    final manifest = File('${root.path}/session.json');
+    final onDisk = manifest.readAsBytesSync();
+    final originals = Directory('${root.path}/originals')
+        .listSync()
+        .map((e) => e.path)
+        .toList();
+
+    final failing = FlakyStore(root)..failLoad = true;
+    final other = SessionController(
+      store: failing,
+      source: source,
+      exporter: exporter,
+      sharer: sharer,
+    );
+    await other.restore();
+    expect(other.takeNotice(), SessionNotice.restoreFailed);
+    final before = other.session;
+
+    source.captures.add(png());
+    await other.capture();
+    expect(other.takeNotice(), SessionNotice.saveFailed);
+    expect(other.session, same(before));
+    expect(manifest.readAsBytesSync(), onDisk);
+    for (final path in originals) {
+      expect(File(path).existsSync(), isTrue);
+    }
   });
 
   test('restore adds a photo recovered after the app was killed', () async {
