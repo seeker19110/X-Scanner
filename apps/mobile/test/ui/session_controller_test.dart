@@ -397,6 +397,40 @@ void main() {
     expect(source.discarded, isEmpty);
   });
 
+  test('(F-048) any other error of the decode check reports decodeFailed '
+      'and keeps the session', () async {
+    await addPages(1);
+    source.discarded.clear();
+    final before = controller.session;
+    final onDisk = disk();
+    final path = png();
+    final other = SessionController(
+      store: store,
+      source: source,
+      exporter: exporter,
+      sharer: sharer,
+      thumbnailer: (_) async => throw StateError('isolate failed'),
+    );
+    await other.restore();
+    final restored = other.session;
+
+    source.captures.add(path);
+    await other.capture();
+
+    expect(other.takeNotice(), SessionNotice.decodeFailed);
+    expect(other.takeNotice(), isNull);
+    expect(other.session, same(restored));
+    expect(
+      [for (final p in restored.pages) p.id],
+      [for (final p in before.pages) p.id],
+    );
+    expect(disk().manifest, onDisk.manifest);
+    expect(disk().originals, onDisk.originals);
+    expect(source.discarded, isEmpty);
+    expect(File(path).existsSync(), isTrue);
+    expect(other.busy, isFalse);
+  });
+
   test('save failing with a StateError reports saveFailed and keeps the '
       'session (F-028)', () async {
     await addPages(1);
@@ -667,35 +701,99 @@ void main() {
     );
   });
 
-  test(
-    '(F-020) a failed thumbnail is decoded again on the next call',
-    () async {
-      await addPages(1);
-      var calls = 0;
-      final other = SessionController(
-        store: SessionStore(root),
-        source: source,
-        exporter: exporter,
-        sharer: sharer,
-        thumbnailer: (path) async {
-          calls++;
-          if (calls == 1) throw const ImageDecodeFailure();
-          return Uint8List.fromList([7]);
-        },
-      );
-      await other.restore();
-      final page = other.session.pages.single;
+  SessionController countingController(
+    Future<Uint8List> Function(String path) thumbnailer,
+  ) => SessionController(
+    store: SessionStore(root),
+    source: source,
+    exporter: exporter,
+    sharer: sharer,
+    thumbnailer: thumbnailer,
+  );
 
+  test('(F-020) (F-047) a failed thumbnail is decoded again only after '
+      'retryThumbnail', () async {
+    await addPages(1);
+    var calls = 0;
+    var notified = 0;
+    final other = countingController((path) async {
+      calls++;
+      if (calls == 1) throw const ImageDecodeFailure();
+      return Uint8List.fromList([7]);
+    });
+    await other.restore();
+    other.addListener(() => notified++);
+    final page = other.session.pages.single;
+
+    for (var i = 0; i < 2; i++) {
       await expectLater(
         other.thumbnailFor(page),
         throwsA(isA<ImageDecodeFailure>()),
       );
-      expect(await other.thumbnailFor(page), [7]);
-      expect(calls, 2);
-      await other.thumbnailFor(page);
-      expect(calls, 2, reason: 'a successful preview stays cached');
+    }
+    expect(calls, 1, reason: 'a failed preview stays cached');
+
+    other.retryThumbnail(page);
+    expect(notified, 1);
+    expect(await other.thumbnailFor(page), [7]);
+    expect(calls, 2);
+    await other.thumbnailFor(page);
+    expect(calls, 2, reason: 'a successful preview stays cached');
+  });
+
+  test(
+    '(F-047) retryThumbnail keeps a running or successful preview',
+    () async {
+      await addPages(1);
+      var calls = 0;
+      var notified = 0;
+      final hold = Completer<void>();
+      final other = countingController((path) async {
+        calls++;
+        await hold.future;
+        return Uint8List.fromList([9]);
+      });
+      await other.restore();
+      other.addListener(() => notified++);
+      final page = other.session.pages.single;
+
+      // Never asked for yet: nothing to retry.
+      other.retryThumbnail(page);
+      final running = other.thumbnailFor(page);
+      other.retryThumbnail(page);
+      expect(other.thumbnailFor(page), same(running));
+
+      hold.complete();
+      expect(await running, [9]);
+      other.retryThumbnail(page);
+      expect(other.thumbnailFor(page), same(running));
+      expect(calls, 1);
+      expect(notified, 0);
     },
   );
+
+  test('(F-047) restore forgets which previews failed', () async {
+    await addPages(2);
+    var fail = true;
+    final other = countingController((path) async {
+      if (fail) throw const ImageDecodeFailure();
+      return Uint8List.fromList([5]);
+    });
+    await other.restore();
+    final page = other.session.pages.first;
+    await expectLater(
+      other.thumbnailFor(page),
+      throwsA(isA<ImageDecodeFailure>()),
+    );
+    fail = false;
+    // Restoring again drops every cached preview, failed ones included, so
+    // a later retry does not throw away the new preview.
+    await other.restore();
+    final fresh = other.thumbnailFor(other.session.pages.first);
+    other.retryThumbnail(other.session.pages.first);
+    expect(other.thumbnailFor(other.session.pages.first), same(fresh));
+    expect(await fresh, [5]);
+  });
 
   group('(F-021) restoring', () {
     test('is false before restore is ever called', () {

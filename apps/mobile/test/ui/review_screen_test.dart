@@ -5,6 +5,8 @@ import 'package:flutter/gestures.dart' show kLongPressTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
+import 'package:flutter/semantics.dart';
+import 'package:x_scanner/core/page_quad.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/imaging/page_render.dart';
@@ -253,6 +255,78 @@ void main() {
     expect(crop().onPressed, isNotNull);
   });
 
+  testWidgets('a retried thumbnail shows a spinner until it decodes, and '
+      'only the retry decodes it again (F-047)', (tester) async {
+    await start(tester, pages: 2);
+    final failPath = controller
+        .originalFile(controller.session.pages.first)
+        .path;
+    var fail = true;
+    var failCalls = 0;
+    final slow = Completer<void>();
+    controller = SessionController(
+      store: SessionStore(Directory('${tmp.path}/session')),
+      source: source,
+      exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
+      sharer: sharer,
+      thumbnailer: (path) async {
+        if (path == failPath) {
+          failCalls++;
+          if (fail) throw const ImageDecodeFailure();
+          await slow.future;
+        }
+        return thumbnailSync(File(path).readAsBytesSync());
+      },
+    );
+    await tester.pumpWidget(const SizedBox());
+    await start(tester);
+
+    final retry = find.byTooltip('Tải lại ảnh xem trước trang 1');
+    expect(retry, findsOneWidget);
+    expect(failCalls, 1);
+
+    // Another change rebuilds every row; the failed page is not decoded.
+    await tester.tap(find.byTooltip('Xoay 90°').last);
+    await settle(tester);
+    expect(controller.session.pages.last.quarterTurns, 1);
+    expect(failCalls, 1);
+    expect(retry, findsOneWidget);
+
+    fail = false;
+    await tester.tap(retry);
+    for (var i = 0; i < 5; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 5)),
+      );
+      await tester.pump();
+    }
+    expect(failCalls, 2);
+    final firstRow = find.ancestor(
+      of: find.text('Trang 1'),
+      matching: find.byType(Card),
+    );
+    expect(
+      find.descendant(
+        of: firstRow,
+        matching: find.byType(CircularProgressIndicator),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byIcon(Icons.broken_image_outlined), findsNothing);
+
+    slow.complete();
+    await settle(tester);
+    expect(find.byType(Image), findsNWidgets(2));
+    final crop = tester.widget<IconButton>(
+      find.ancestor(
+        of: find.descendant(of: firstRow, matching: find.byIcon(Icons.crop)),
+        matching: find.byType(IconButton),
+      ),
+    );
+    expect(crop.onPressed, isNotNull);
+    expect(failCalls, 2);
+  });
+
   testWidgets('the thumbnail is decoded at the size of its tile (F-022)', (
     tester,
   ) async {
@@ -498,6 +572,73 @@ void main() {
     expect([for (final p in controller.session.pages) p.id], before);
   });
 
+  /// Runs the "Move down" accessibility action of the row of page 1, as
+  /// TalkBack does.
+  void moveFirstPageDownBySemantics(WidgetTester tester) {
+    final label = WidgetsLocalizations.of(tester.element(find.text('Trang 1')))
+        .reorderItemDown;
+    final action = CustomSemanticsAction.getIdentifier(
+      CustomSemanticsAction(label: label),
+    );
+    // With two pages only the row of page 1 can move down.
+    final row = find.semantics.byPredicate(
+      (node) =>
+          node.getSemanticsData().customSemanticsActionIds?.contains(action) ??
+          false,
+    );
+    expect(row, findsOne, reason: 'row of page 1 offers "$label"');
+    tester.semantics.performAction(
+      row,
+      SemanticsAction.customAction,
+      args: action,
+    );
+  }
+
+  testWidgets('the Move down accessibility action reorders when idle '
+      '(F-051)', (tester) async {
+    final handle = tester.ensureSemantics();
+    await start(tester, pages: 2);
+    final [a, b] = [for (final p in controller.session.pages) p.id];
+
+    moveFirstPageDownBySemantics(tester);
+    await settle(tester);
+
+    expect([for (final p in controller.session.pages) p.id], [b, a]);
+    handle.dispose();
+  });
+
+  testWidgets('the Move down accessibility action does nothing while busy '
+      '(F-051)', (tester) async {
+    final handle = tester.ensureSemantics();
+    await start(tester, pages: 2);
+    final before = [for (final p in controller.session.pages) p.id];
+    // Keep the controller busy with an export held at the share step.
+    final gate = sharer.gate = Completer<void>();
+    await tester.tap(find.byTooltip('Xuất'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('PNG'));
+    for (var i = 0; i < 500 && sharer.shared.isEmpty; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 5)),
+      );
+    }
+    // Lets the format sheet finish closing so the rows are reachable again.
+    for (var i = 0; i < 20; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('PNG'), findsNothing);
+    expect(sharer.shared, hasLength(1));
+    expect(controller.busy, isTrue);
+
+    moveFirstPageDownBySemantics(tester);
+    await tester.pump();
+
+    gate.complete();
+    await settle(tester);
+    expect([for (final p in controller.session.pages) p.id], before);
+    handle.dispose();
+  });
+
   testWidgets('export is only offered when there are pages', (tester) async {
     await start(tester);
     expect(find.byTooltip('Xuất'), findsNothing);
@@ -590,5 +731,43 @@ void main() {
     gate.complete();
     await settle(tester);
     expect(exportButton().onPressed, isNotNull);
+  });
+
+  testWidgets('LC-1: capture, move a corner, save and export as PDF in one '
+      'flow (F-053)', (tester) async {
+    await start(tester);
+    source.captures.add(png());
+    await tester.tap(find.text('Chụp'));
+    await settle(tester);
+    expect(find.text('Trang 1'), findsOneWidget);
+    expect(controller.session.pages.single.quad, PageQuad.fullFrame);
+
+    await tester.tap(find.byTooltip('Chỉnh góc'));
+    await tester.pumpAndSettle();
+    final corner = find.bySemanticsLabel('Góc trên trái');
+    final start0 = tester.getCenter(corner);
+    final gesture = await tester.startGesture(start0);
+    await gesture.moveTo(start0 + const Offset(20, 30));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.text('Góc này làm khung không hợp lệ.'), findsNothing);
+    await tester.tap(find.text('Lưu'));
+    await settle(tester);
+
+    expect(find.text('Trang 1'), findsOneWidget);
+    final quad = controller.session.pages.single.quad;
+    expect(quad, isNot(PageQuad.fullFrame));
+    expect(quad.topLeft.x, greaterThan(0));
+    expect(quad.topLeft.y, greaterThan(0));
+
+    await tester.tap(find.byTooltip('Xuất'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('PDF'));
+    await settle(tester);
+    expect(sharer.shared, [
+      ['X-Scanner.pdf'],
+    ]);
+    expect(find.byType(SnackBar), findsNothing);
   });
 }

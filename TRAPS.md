@@ -34,10 +34,14 @@ và chép ảnh chọn từ thư viện vào `cache/{uuid}/`; app chép sang `or
 
 **Thao tác theo chỉ số vẫn nhận được khi app bận.** Mọi nút tắt khi `busy` nhưng kéo-thả vẫn bật; `move(from, to)`
 vào hàng đợi ghi sau các thao tác đang chờ và chạy với chỉ số cũ, nên chuyển nhầm trang (F-007). *Cách rà*: mỗi
-cử chỉ/nút tạo một thao tác mang chỉ số hoặc id — nó có bị tắt cùng các nút khi bận không. *Chốt chặn*: test
-"(F-007)" trong `apps/mobile/test/ui/review_screen_test.dart`. (2026-10-12, W-103)
+cử chỉ/nút tạo một thao tác mang chỉ số hoặc id — nó có bị tắt cùng các nút khi bận không. **Tái phát (F-051):**
+tắt tay kéo không tắt thao tác ngữ nghĩa Move up/down mà `ReorderableListView` gắn cho mỗi dòng; chúng gọi thẳng
+`onReorderItem`. Chặn ở callback (`if (busy) return`), không chỉ ở widget nhập liệu. *Chốt chặn*: test "(F-007)" và
+"(F-051)" trong `apps/mobile/test/ui/review_screen_test.dart`. (2026-10-12, W-103; W-502)
 
 **Cache một `Future` lỗi.** `thumbnailFor` cache future theo id trang; một lần giải mã lỗi (file tạm thời không đọc
 được) bị giữ mãi nên trang không chỉnh góc được tới khi mở lại app (F-020). *Cách rà*: mọi map cache `Future` —
-nhánh lỗi có gỡ đúng future đó (`identical`) khỏi map không. *Chốt chặn*: test "(F-020)" trong
-`apps/mobile/test/ui/session_controller_test.dart` và `review_screen_test.dart`. (2026-10-12, W-402)
+nhánh lỗi có cho thử lại không. **Đính chính (F-047):** gỡ future lỗi khỏi map ngay khi lỗi làm MỌI lần dựng lại
+widget giải mã lại bản gốc hỏng; giữ future lỗi trong cache, đánh dấu id lỗi (so `identical`) và chỉ gỡ khi người dùng
+bấm thử lại (`retryThumbnail`). *Chốt chặn*: test "(F-020)"/"(F-047)" trong
+`apps/mobile/test/ui/session_controller_test.dart` và `review_screen_test.dart`. (2026-10-12, W-402; W-502)

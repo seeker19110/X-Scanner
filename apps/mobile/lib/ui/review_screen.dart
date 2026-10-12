@@ -210,8 +210,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     // Off while busy like every button: a queued move would
                     // run later with indices that may no longer match.
                     buildDefaultDragHandles: !busy,
-                    onReorderItem: (from, to) =>
-                        unawaited(_controller.move(from, to)),
+                    onReorderItem: (from, to) {
+                      // The list still offers the Move up/down accessibility
+                      // actions while the drag handles are off, and they
+                      // call this directly.
+                      if (_controller.busy) return;
+                      unawaited(_controller.move(from, to));
+                    },
                     itemBuilder: (context, i) =>
                         _pageRow(pages[i], i + 1, busy),
                   ),
@@ -367,7 +372,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
         ),
       );
     }
-    if (snapshot.hasError) {
+    // A retry keeps the old error in the snapshot while it decodes again.
+    if (snapshot.connectionState != ConnectionState.waiting &&
+        snapshot.hasError) {
       final colors = Theme.of(context).colorScheme;
       return ColoredBox(
         color: colors.errorContainer,
@@ -376,9 +383,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
             tooltip: 'Tải lại ảnh xem trước trang $number',
             icon: const Icon(Icons.broken_image_outlined),
             color: colors.onErrorContainer,
-            // The failed preview is no longer cached, so rebuilding the
-            // row makes thumbnailFor decode it again.
-            onPressed: busy ? null : () => setState(() {}),
+            onPressed: busy ? null : () => _controller.retryThumbnail(page),
           ),
         ),
       );

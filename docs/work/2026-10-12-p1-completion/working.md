@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-p1-completion
 - Yêu cầu / outcome: `/auto-complete` lần 4, bước 2: `/completion` (`docs/framework/project-completion.md` Pha 0–4) sau khi P1 PR-0..4 merged (#6..#10). Outcome: Definition of Complete có bằng chứng hoặc BLOCKED/WAITING đúng §8.
-- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 merged (#18 `4d07a6a`); W-403 merged (#19 `a7399de`); Pha 4 quét lại xong → Đợt 4: W-501 merged (#20 `673ed97`); W-503 PR mở; W-502 worker đang làm.
+- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 merged (#18 `4d07a6a`); W-403 merged (#19 `a7399de`); Pha 4 quét lại xong → Đợt 4: W-501 merged (#20 `673ed97`); W-503 merged (#21 `0e45794`); W-502 PR mở.
 - Chủ trì / writer: phiên chính (kế hoạch, duyệt, tích hợp); audit giao 3 subagent chỉ đọc; sửa giao worker theo số PR.
 - Mức rủi ro / số PR: M; PR-A tài liệu Pha 0–2, rồi một PR mỗi việc W-xxx theo kế hoạch.
 - Scope / non-goal: app `apps/mobile` P1 + tài liệu dự án. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release, bật branch protection/auto-merge (cần quyền chủ repo).
@@ -60,6 +60,14 @@
 - F-037: chấp nhận rủi ro dư (checkout giữ credentials khi không chạy mã bên thứ ba) · loại thêm `persist-credentials: false` + token riêng cho bước push · bậc 2.
 - W-501 https://github.com/seeker19110/X-Scanner/pull/20 merged squash `673ed97` sau CI xanh; 0 review thread.
 - W-503 làm trước W-502 (đảo phụ thuộc trong kế hoạch) · loại chờ worker W-502 xong · bậc 4 (file rời nhau trừ FEATURE-MAP; W-502 tự thêm test mới của nó vào FEATURE-MAP).
+- W-503 https://github.com/seeker19110/X-Scanner/pull/21 merged squash `0e45794` sau CI xanh; 0 review thread.
+- W-502: chấp nhận gộp hai catch thành `catch (_)` ở giải mã thử · loại thêm nhánh `on Object` thứ ba · bậc 2 (ít code, cùng hành vi cho người dùng; brief cho phép bắt `Object`).
+- W-502: test F-020 cũ đổi sang hành vi mới (giải mã lại chỉ sau `retryThumbnail`) · loại giữ thử lại tự động mỗi lần dựng lại · bậc 1 (không chen giải mã hỏng vào hàng đợi trước render xuất).
+- Đĩa phiên đầy chặn gate W-502 → người dùng duyệt xoá 8 worktree worker cũ (đã merge, patch lưu scratchpad), giải phóng ~15 GB · loại tự xoá khi bị chặn quyền · bậc 1.
+- Pha 4 lần 2: 2 auditor (X 3/4/6/12, Y 2/8/9) trên `da7cae8` song song CI #22 · loại 3 cụm 12 nhóm · bậc 2 (chỉ nhóm bị Đợt 4 chạm). 0 Cao/Trung; 4 Thấp mới.
+- F-059/F-070/F-072 sửa trong PR W-502 (tài liệu đi cùng thay đổi) · loại PR dọn dẹp riêng · bậc 2. F-071 → W-504 riêng (đổi cổng cần test đỏ trước) · loại gộp vào W-502 · bậc 3.
+- F-071 sửa bằng FAIL khi targetSdk < 31 hoặc thiếu · loại suy luận exported ngầm theo intent-filter · bậc 2 (một kiểm, chặn cả lớp lỗi).
+- Quan sát auditor không tính phát hiện (thao tác Move up/down khi bận im lặng; `_HeldStore` lặp; nút theme bật khi bận) · giữ nguyên · bậc 2.
 - F-058 chỉ ghi baseline coverage (94,6 %), không thêm cổng ngưỡng · loại thêm `--coverage` + ngưỡng vào gate · bậc 2 (đã ghi dời P2 trong kế hoạch; vùng thấp là phần nối nền tảng).
 
 ## Lần thử / blocker
@@ -68,7 +76,7 @@
 
 ## Bàn giao / bước tiếp theo
 
-- PR W-503 (đang mở); W-502 (worker) cherry-pick sau khi W-503 merge; quét lại nhóm bị ảnh hưởng (2/3/4/6/8/9/12); DoC; W-104 từ 2026-10-18; Pha 4 re-audit.
+- Merge PR W-502; quét lại nhóm bị ảnh hưởng (2/3/4/6/8/9/12); DoC; W-104 từ 2026-10-18; Pha 4 re-audit.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 

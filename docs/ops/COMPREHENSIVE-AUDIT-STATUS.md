@@ -8,21 +8,22 @@
 - Cách quét: 3 auditor chỉ đọc chạy song song (A: nhóm 1/3/10/12; B: 2/7/11; C: 4/5/6/8/9); phiên chính gộp trùng, kiểm lại phát hiện mức Cao/Trung trên code thật (vd F-001 lần theo `session_store.dart` `_load`/`_save` và `session_controller.dart` `restore`).
 - Lệnh đo đã chạy: `dart analyze` (0 vấn đề); `flutter pub outdated`; `flutter pub deps`; OSV querybatch 86 package (0 advisory); grep bí mật trên `git ls-files` và `git log --all -p` (0); `spec-compiler.py --trace` (AC-1..8 MAPPED, AC-9 PENDING); PoC giải mã `image` 4.10.1 bằng ảnh tổng hợp (EXIF IFD lặp: treo, bị dừng ở 10 s; PNG 1 MB header 1×1: maxRSS 2061 MB).
 - **Quét lại toàn bộ 12 nhóm (Pha 4):** 2026-10-12 trên `6ee3362` (= `main` `a7399de` sau #19), cùng 3 cụm auditor chỉ đọc. Mọi phát hiện cũ: đóng (có file:dòng + test chốt chặn) hoặc dời có chủ đích (F-004 EX-1 tới 2026-10-18; F-009, F-014 WAITING chủ repo; F-018, F-026, F-030..F-033, F-036, F-038). Phát hiện mới F-043..F-058: 0 Cao · 2 Trung (F-051, F-052) · 14 Thấp. OSV 86 package hosted: 0 advisory; bí mật: 0. F-037: gate trong workflow adopt không còn chạy khi giữ token, nhưng bước checkout vẫn giữ credentials (rủi ro dư, chấp nhận: chỉ checkout + `command -v` chạy khi `FRAMEWORK-VERSION` có).
+- **Quét lại nhóm bị ảnh hưởng (Pha 4, lần 2):** 2026-10-12 trên `da7cae8` (W-501 #20, W-503 #21, W-502), 2 auditor chỉ đọc: X nhóm 3/4/6/12 (thêm mutation test 7 đột biến, 6 bị test bắt; đột biến bỏ `identical` không gây lỗi thấy được), Y nhóm 2/8/9. F-043, F-044, F-047, F-048, F-050..F-058 đóng; mới F-059, F-070..F-072: 0 Cao · 0 Trung · 4 Thấp. Tổng 62 phát hiện: 3 Cao · 16 Trung · 43 Thấp.
 
-| # | Nhóm | Trạng thái | Tóm tắt phát hiện (số lượng theo mức độ) | Cập nhật lần cuối |
+| # | Nhóm | Trạng thái | Tóm tắt phát hiện (số lượng theo mức độ; phát hiện nhiều nhóm tính ở mọi nhóm của nó) | Cập nhật lần cuối |
 |---|------|-----------|-------------------------------------------|---------------------|
-| 1 | Kiến trúc & thiết kế | ✅ | 0 Cao · 0 Trung · 2 Thấp (F-025, F-027) — hướng phụ thuộc sạch, khớp ADR-0002 §2 | 2026-10-12 |
-| 2 | Bảo mật | ✅ | 0 Cao · 2 Trung (F-004, F-005) · 2 Thấp (F-018, F-038) — không log, chống path traversal, provider không exported, backup tắt | 2026-10-12 |
-| 3 | Chất lượng mã & chống lỗi logic | ✅ | 0 Cao · 2 Trung (F-006, F-007) · 3 Thấp (F-013 phần rectify, F-019, F-020) | 2026-10-12 |
-| 4 | Kiểm thử & coverage | ✅ | 0 Cao · 2 Trung (F-008, F-010) · 2 Thấp (F-028, F-029) — AC-1..8 có test thật | 2026-10-12 |
-| 5 | Hiệu năng | ✅ | 0 Cao · 2 Trung (F-012, F-013) · 2 Thấp (F-022, F-030) — p95 trên thiết bị để P2 (spec §2) | 2026-10-12 |
-| 6 | Accessibility & UI/UX | ✅ | 0 Cao · 1 Trung (F-011) · 5 Thấp (F-020, F-021, F-031, F-032, F-033) | 2026-10-12 |
-| 7 | Dependency & chuỗi cung ứng | ✅ | 0 Cao · 1 Trung (F-009) · 2 Thấp (F-035, F-036) — license MIT/BSD-3/Apache-2.0, lock khớp ghim | 2026-10-12 |
-| 8 | CI/CD & vận hành/observability | ✅ | 0 Cao · 2 Trung (F-014, F-015) · 2 Thấp (F-034, F-037) | 2026-10-12 |
-| 9 | Tài liệu & đồng bộ | ✅ | 2 Cao (F-002, F-003) · 2 Trung (F-016, F-017) · 5 Thấp (F-027, F-039, F-040, F-041, F-042) | 2026-10-12 |
-| 10 | Dữ liệu & migration | ✅ | 1 Cao (F-001) · 0 Trung · 2 Thấp (F-018, F-019) — ghi nguyên tử, `schemaVersion`, cách ly manifest hỏng | 2026-10-12 |
+| 1 | Kiến trúc & thiết kế | ✅ | 0 Cao · 0 Trung · 3 Thấp (F-025, F-027, F-046) — hướng phụ thuộc sạch, khớp ADR-0002 §2 | 2026-10-12 |
+| 2 | Bảo mật | ✅ | 0 Cao · 3 Trung (F-004, F-005, F-008) · 5 Thấp (F-018, F-038, F-043, F-045, F-071) — không log, chống path traversal, provider không exported, backup tắt | 2026-10-12 |
+| 3 | Chất lượng mã & chống lỗi logic | ✅ | 0 Cao · 4 Trung (F-006, F-007, F-013, F-051) · 3 Thấp (F-020, F-047, F-048) | 2026-10-12 |
+| 4 | Kiểm thử & coverage | ✅ | 0 Cao · 2 Trung (F-008, F-010) · 5 Thấp (F-028, F-029, F-053, F-056, F-058) — AC-1..8 có test thật | 2026-10-12 |
+| 5 | Hiệu năng | ✅ | 0 Cao · 3 Trung (F-006, F-012, F-013) · 3 Thấp (F-022, F-030, F-057) — p95 trên thiết bị để P2 (spec §2) | 2026-10-12 |
+| 6 | Accessibility & UI/UX | ✅ | 0 Cao · 2 Trung (F-011, F-051) · 7 Thấp (F-020, F-021, F-031, F-032, F-033, F-047, F-056) | 2026-10-12 |
+| 7 | Dependency & chuỗi cung ứng | ✅ | 0 Cao · 1 Trung (F-009) · 3 Thấp (F-035, F-036, F-044) — license MIT/BSD-3/Apache-2.0, lock khớp ghim | 2026-10-12 |
+| 8 | CI/CD & vận hành/observability | ✅ | 0 Cao · 2 Trung (F-014, F-015) · 5 Thấp (F-034, F-037, F-043, F-044, F-071) | 2026-10-12 |
+| 9 | Tài liệu & đồng bộ | ✅ | 2 Cao (F-002, F-003) · 4 Trung (F-015, F-016, F-017, F-052) · 9 Thấp (F-027, F-039, F-040, F-041, F-042, F-054, F-055, F-070, F-072) | 2026-10-12 |
+| 10 | Dữ liệu & migration | ✅ | 1 Cao (F-001) · 1 Trung (F-005) · 3 Thấp (F-018, F-019, F-049) — ghi nguyên tử, `schemaVersion`, cách ly manifest hỏng | 2026-10-12 |
 | 11 | Cấu hình môi trường & bí mật | ✅ | 0 Cao · 0 Trung · 1 Thấp (F-037) — không bí mật, `.gitignore` phủ keystore/`local.properties`/`.env` | 2026-10-12 |
-| 12 | Thống nhất chéo tính năng | ✅ | 0 Cao · 0 Trung · 4 Thấp (F-021, F-024, F-025, F-026) | 2026-10-12 |
+| 12 | Thống nhất chéo tính năng | ✅ | 0 Cao · 0 Trung · 8 Thấp (F-021, F-023, F-024, F-026, F-048, F-049, F-050, F-059) | 2026-10-12 |
 
 ## Phát hiện (ID cố định; W-xxx ở `docs/ops/COMPLETION-PLAN.md`)
 
@@ -88,6 +89,10 @@ Mức: Cao = mất/hỏng dữ liệu, rò riêng tư, crash luồng chính, tà
 | F-056 | 6/4 | Thấp | `test/ui/accessibility_test.dart` | Guideline chưa phủ trạng thái rỗng và "Đang mở phiên…" | Lỗi a11y lọt | W-502 |
 | F-057 | 5 | Thấp | `page_exporter.dart` `DEBT:` PDF | `Isolate.run` chép mọi JPEG sang isolate (đỉnh ~2×), trần trong `DEBT:` chưa tính | Ước lượng trần sai | W-503 (ghi vào `DEBT:`) |
 | F-058 | 4 | Thấp | `.claude/project-commands.sh` `test` | Không có số coverage baseline | Không biết vùng chưa test | W-503 (baseline một lần; ngưỡng dời P2) |
+| F-059 | 12 | Thấp | `docs/CONVENTIONS.md` "Báo lỗi cho người dùng"; `session_controller.dart` `_addFromPath`, `exportAndShare` | Quy ước ghi "bắt kiểu lỗi cụ thể" trong khi hai chỗ cố ý bắt mọi lỗi (re-audit 2) | Ai đó "sửa" lại thành bắt kiểu cụ thể → F-048 quay lại | W-502 (sửa quy ước) |
+| F-070 | 9 | Thấp | `PROGRESS.md`; `COMPLETION-PLAN.md` đầu; bảng theo nhóm của file này | Số phát hiện và bảng theo nhóm còn đếm F-001..F-042 | Reconcile đọc sai số lượng | W-502 (tài liệu) |
+| F-071 | 2/8 | Thấp | `scripts/check-release-manifest.py` | Coi component không khai `exported` là không exported — chỉ đúng khi targetSdk ≥ 31; không gì chốt targetSdk | Hạ targetSdk → component có intent-filter exported ngầm mà gate xanh | W-504 |
+| F-072 | 9 | Thấp | `CHANGELOG.md` | Chưa có dòng cho các sửa W-502 | Lịch sử thiếu (khuôn F-055) | W-502 |
 
 ## Ghi chú điểm dừng
 

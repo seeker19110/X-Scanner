@@ -24,7 +24,7 @@ Spike camera/ARCore depth trên thiết bị thật vẫn cần thiết bị.
 ## Đang làm: hoàn thiện P1 (`/completion`, 2026-10-12)
 
 Hồ sơ `docs/work/2026-10-12-p1-completion/working.md` · kế hoạch `docs/ops/COMPLETION-PLAN.md` · audit `docs/ops/COMPREHENSIVE-AUDIT-STATUS.md`
-(42 phát hiện: 3 Cao, 14 Trung, 25 Thấp). Nợ có chủ đích: mục "Phát hiện dời đợt sau" của kế hoạch; exception `docs/ops/supply-chain-exceptions.md`.
+(62 phát hiện sau hai lượt quét lại Pha 4: 3 Cao, 16 Trung, 43 Thấp; lần quét đầu 42). Nợ có chủ đích: mục "Phát hiện dời đợt sau" của kế hoạch; exception `docs/ops/supply-chain-exceptions.md`.
 
 ## Chưa thực hiện
 

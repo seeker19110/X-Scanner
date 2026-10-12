@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -36,6 +37,21 @@ class _Source implements PageSource {
 class _Sharer implements FileSharer {
   @override
   Future<void> share(List<File> files) async {}
+}
+
+/// [SessionStore] whose [load] waits for [hold] once [loading] completes.
+class _HeldStore extends SessionStore {
+  _HeldStore(super.root);
+
+  final Completer<void> hold = Completer<void>();
+  final Completer<void> loading = Completer<void>();
+
+  @override
+  Future<SessionLoadResult> load() async {
+    loading.complete();
+    await hold.future;
+    return super.load();
+  }
 }
 
 /// A synthetic 40 × 30 PNG used as every thumbnail; no real images.
@@ -152,6 +168,78 @@ void main() {
       expect(find.byTooltip('Tải lại ảnh xem trước trang 1'), findsOneWidget);
 
       await _expectGuidelines(tester);
+      handle.dispose();
+    });
+
+    Widget screen(SessionController controller) => MaterialApp(
+      theme: buildTheme(brightness),
+      home: ReviewScreen(
+        controller: controller,
+        themeMode: themeMode,
+        onToggleTheme: () {},
+      ),
+    );
+
+    testWidgets('empty review screen meets the a11y guidelines in '
+        '${brightness.name} theme (F-056)', (tester) async {
+      final handle = tester.ensureSemantics();
+      final controller = SessionController(
+        store: SessionStore(Directory('${tmp.path}/session')..createSync()),
+        source: _Source(),
+        exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
+        sharer: _Sharer(),
+        thumbnailer: (_) async => _thumb,
+      );
+
+      await tester.pumpWidget(screen(controller));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Chưa có trang nào. Chụp hoặc nhập ảnh để bắt đầu.'),
+        findsOneWidget,
+      );
+      expect(find.text('Chụp'), findsOneWidget);
+      expect(find.text('Nhập ảnh'), findsOneWidget);
+
+      await _expectGuidelines(tester);
+      handle.dispose();
+    });
+
+    testWidgets('review screen while the session is opening meets the a11y '
+        'guidelines in ${brightness.name} theme (F-056)', (tester) async {
+      final handle = tester.ensureSemantics();
+      final store = _HeldStore(Directory('${tmp.path}/session')..createSync());
+      final controller = SessionController(
+        store: store,
+        source: _Source(),
+        exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
+        sharer: _Sharer(),
+        thumbnailer: (_) async => _thumb,
+      );
+      await tester.pumpWidget(screen(controller));
+      unawaited(controller.restore());
+      // Real I/O runs until the store holds the load.
+      for (var i = 0; i < 500 && !store.loading.isCompleted; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 5)),
+        );
+      }
+      // The spinners never settle, so frames are pumped one at a time.
+      await tester.pump();
+      expect(store.loading.isCompleted, isTrue);
+      expect(find.text('Đang mở phiên…'), findsOneWidget);
+      expect(find.text('Chụp'), findsNothing);
+
+      await _expectGuidelines(tester);
+
+      store.hold.complete();
+      for (var i = 0; i < 500 && controller.busy; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 5)),
+        );
+        await tester.pump();
+      }
+      expect(controller.busy, isFalse);
+      await tester.pumpAndSettle();
       handle.dispose();
     });
 

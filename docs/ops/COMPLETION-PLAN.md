@@ -4,7 +4,7 @@
 > Trạng thái việc: ⬜ chưa làm · 🔄 đang làm · ✅ xong (kèm bằng chứng) · ➖ hủy (kèm lý do) · ⏳ chờ điều kiện.
 
 - Ngày lập: 2026-10-12 · **Approved for implementation — phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12.**
-- Nguồn phát hiện: `docs/ops/COMPREHENSIVE-AUDIT-STATUS.md` (2026-10-12, `main` @ `6177e29`), 42 phát hiện: 3 Cao · 14 Trung · 25 Thấp.
+- Nguồn phát hiện: `docs/ops/COMPREHENSIVE-AUDIT-STATUS.md` (2026-10-12, `main` @ `6177e29`), 42 phát hiện: 3 Cao · 14 Trung · 25 Thấp; sau hai lượt quét lại Pha 4 tổng 62: 3 Cao · 16 Trung · 43 Thấp (Đợt 4, Đợt 5).
 - Work ID: `2026-10-12-p1-completion`. Mỗi W một PR từ nhánh `claude/upbeat-ramanujan-mwmwtt`, tuần tự (một nhánh push được); worker chuẩn bị song song trong worktree khi file không giao nhau.
 
 ## Definition of Complete (bản chỉnh cho app mobile offline, không server)
@@ -54,14 +54,23 @@
 | ID | Từ phát hiện | Việc | Tiêu chí nghiệm thu | Phụ thuộc | Ước lượng | Trạng thái | PR / bằng chứng |
 |----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
 | W-501 | F-043, F-044 | Cổng manifest: mọi giá trị `exported` khác vắng/`"false"` là exported; xoá manifest gộp cũ trước Gradle | Self-test đỏ với `True`/`TRUE`/` true`/`@bool/…` rồi xanh; gate PASS | – | S | ✅ | seeker19110/X-Scanner#20 `673ed97`, CI xanh; đỏ "Lists differ: [] != ['exported provider not allowed…']" → xanh 8/8; gate PASS 261 |
-| W-502 | F-047, F-048, F-051, F-053, F-056 | Bỏ qua sắp xếp khi bận (cả thao tác ngữ nghĩa); thumbnail lỗi chỉ thử lại khi bấm, có spinner; mọi lỗi giải mã thử → `decodeFailed`; test LC-1 liền mạch; guideline cho trạng thái rỗng và đang mở; thêm test mới vào FEATURE-MAP | Test đỏ trước cho từng hành vi; gate PASS | W-503 (cùng FEATURE-MAP) | M | 🔄 | worker đang làm |
-| W-503 | F-050, F-052, F-054, F-055, F-057, F-058 | Đồng bộ FEATURE-MAP/spec AC-8/README/PROJECT/CHANGELOG; `DEBT:` một dòng; ghi phần chép sang isolate vào `DEBT:`; baseline coverage | grep FEATURE-MAP không còn ⚠️ cho phát hiện đã đóng; `maintenance-sweep` không còn cảnh báo giả; gate PASS | W-501 | S | 🔄 | ⚠️ FEATURE-MAP chỉ còn F-004, F-018, F-026, F-032, F-033, F-047, F-048, F-049, F-051, AC-9 (mở hoặc dời); `DEBT:` thiếu "xem lại khi:" 1 → 0; coverage baseline `flutter test --coverage` 853/902 dòng = 94,6 % (thấp nhất `lib/export/file_sharer.dart` 4/10, `lib/main.dart` 17/35, `lib/ui/page_source.dart` 19/32 — phần nối nền tảng), đo trên nội dung `a7399de`; ngưỡng coverage dời P2 |
+| W-502 | F-047, F-048, F-051, F-053, F-056 | Bỏ qua sắp xếp khi bận (cả thao tác ngữ nghĩa); thumbnail lỗi chỉ thử lại khi bấm, có spinner; mọi lỗi giải mã thử → `decodeFailed`; test LC-1 liền mạch; guideline cho trạng thái rỗng và đang mở; thêm test mới vào FEATURE-MAP | Test đỏ trước cho từng hành vi; gate PASS | W-503 (cùng FEATURE-MAP) | M | 🔄 | đỏ: "(F-048) Bad state: isolate failed", "(F-047) Expected: <1> Actual: <3>", "(F-051) thứ tự đổi khi bận" → xanh; LC-1, 4 ca a11y mới, F-051 lúc rảnh xanh từ đầu (che hành vi sẵn có); test F-020 đổi có chủ đích (thử lại chỉ khi bấm) |
+| W-503 | F-050, F-052, F-054, F-055, F-057, F-058 | Đồng bộ FEATURE-MAP/spec AC-8/README/PROJECT/CHANGELOG; `DEBT:` một dòng; ghi phần chép sang isolate vào `DEBT:`; baseline coverage | grep FEATURE-MAP không còn ⚠️ cho phát hiện đã đóng; `maintenance-sweep` không còn cảnh báo giả; gate PASS | W-501 | S | ✅ | seeker19110/X-Scanner#21 `0e45794`, CI xanh;  ⚠️ FEATURE-MAP chỉ còn F-004, F-018, F-026, F-032, F-033, F-047, F-048, F-049, F-051, AC-9 (mở hoặc dời); `DEBT:` thiếu "xem lại khi:" 1 → 0; coverage baseline `flutter test --coverage` 853/902 dòng = 94,6 % (thấp nhất `lib/export/file_sharer.dart` 4/10, `lib/main.dart` 17/35, `lib/ui/page_source.dart` 19/32 — phần nối nền tảng), đo trên nội dung `a7399de`; ngưỡng coverage dời P2 |
+
+## Đợt 5 — Phát hiện của lượt quét lại lần 2
+
+| ID | Từ phát hiện | Việc | Tiêu chí nghiệm thu | Phụ thuộc | Ước lượng | Trạng thái | PR / bằng chứng |
+|----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
+| W-504 | F-071 | Cổng manifest FAIL khi `targetSdkVersion` của manifest gộp < 31 hoặc thiếu (khi đó component không khai `exported` mà có intent-filter là exported ngầm) | Self-test đỏ với targetSdk 30 / thiếu `<uses-sdk>` rồi xanh; manifest thật (36) PASS; gate PASS | W-502 | S | ⬜ | |
+
+F-059, F-070, F-072 (tài liệu) đi cùng PR W-502 theo `pr-flow` (0).
 
 ## Nhật ký hội tụ (Pha 4)
 
 | Ngày | Phạm vi quét lại | Kết quả (phát hiện mới? đóng được gì?) |
 |------|------------------|----------------------------------------|
 | 2026-10-12 | Toàn bộ 12 nhóm trên `6ee3362` (sau W-101..W-403) | 0 Cao mở; mọi F-001..F-042 đóng hoặc dời có chủ đích; mới F-043..F-058 (0 Cao, 2 Trung, 14 Thấp) → Đợt 4 (W-501..W-503) hoặc dời có lý do. Chưa hội tụ: cần quét lại nhóm bị ảnh hưởng sau Đợt 4. |
+| 2026-10-12 | Nhóm 2/3/4/6/8/9/12 trên `da7cae8` (sau W-501, W-503, W-502) | 0 Cao · 0 Trung; F-043..F-058 (trừ dời) đóng; mới 4 Thấp: F-059, F-070, F-072 sửa trong PR W-502; F-071 → W-504. Chưa hội tụ: còn W-504 (một file, nhóm 2/8). |
 
 ## Phát hiện dời đợt sau (có lý do)
 
