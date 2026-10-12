@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -30,6 +31,9 @@ img.Image solid(int width, int height, int r, int g, int b) =>
     img.Image(width: width, height: height)..clear(img.ColorRgb8(r, g, b));
 
 Uint8List pngOf(img.Image image) => img.encodePng(image);
+
+/// A 3×2 lossless WebP filled with RGB (10, 20, 30), made with Pillow.
+const String webp3x2 = 'UklGRh4AAABXRUJQVlA4TBEAAAAvAkAAAAdQiirUo/+BiOh/AAA=';
 
 Directory tempDir() {
   final dir = Directory.systemTemp.createTempSync('page_render_test');
@@ -137,6 +141,30 @@ void main() {
         maxPixels: 400,
       );
       expect(decoded.width * decoded.height, 400);
+    });
+
+    test('rejects formats other than JPEG, PNG and WebP by content', () {
+      final image = solid(8, 6, 1, 2, 3);
+      for (final bytes in [
+        img.encodeBmp(image),
+        img.encodeGif(image),
+        img.encodeTiff(image),
+        img.encodeTga(image),
+      ]) {
+        expect(() => decodeOriented(bytes), throwsA(isA<ImageDecodeFailure>()));
+        expect(imageSizeOf(bytes), isNull);
+      }
+    });
+
+    test('recognises a PNG by its content, not its name', () {
+      final decoded = decodeOriented(pngOf(solid(8, 6, 1, 2, 3)));
+      expect((decoded.width, decoded.height), (8, 6));
+    });
+
+    test('decodes a lossless WebP', () {
+      final decoded = decodeOriented(base64Decode(webp3x2));
+      expect((decoded.width, decoded.height), (3, 2));
+      expectRgb(decoded, 2, 1, [10, 20, 30]);
     });
 
     test('failure carries no path or content', () {
@@ -313,6 +341,29 @@ void main() {
         renderPage(file.path, PageQuad.fullFrame, 0),
         throwsA(isA<ImageDecodeFailure>()),
       );
+    });
+
+    test('thumbnail and renderPage refuse a file above the byte cap '
+        'before decoding it', () async {
+      final bytes = pngOf(solid(40, 30, 1, 2, 3));
+      final file = File('${tempDir().path}/original.png')
+        ..writeAsBytesSync(bytes);
+
+      await expectLater(
+        thumbnail(file.path, maxBytes: bytes.length - 1),
+        throwsA(isA<ImageDecodeFailure>()),
+      );
+      await expectLater(
+        renderPage(
+          file.path,
+          PageQuad.fullFrame,
+          0,
+          maxBytes: bytes.length - 1,
+        ),
+        throwsA(isA<ImageDecodeFailure>()),
+      );
+      final atCap = await thumbnail(file.path, maxBytes: bytes.length);
+      expect(img.decodeJpg(atCap)!.width, 40);
     });
 
     test('thumbnail renders from a file', () async {

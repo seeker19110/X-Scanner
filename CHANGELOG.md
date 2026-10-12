@@ -13,6 +13,8 @@
   trước lỗi chỉ giải mã lại khi bấm "Tải lại" (có vòng quay); mọi lỗi khi kiểm ảnh mới đều báo "không đọc được".
 - Gate manifest release (W-504): chặn khi `targetSdkVersion` < 31, thiếu hoặc không phải số — dưới 31 component có
   intent-filter mà không khai `exported` vẫn bị exported ngầm.
+- Hàng rào ảnh đầu vào (W-104a): chỉ nhận JPEG/PNG/WebP nhận dạng theo nội dung, từ chối bản gốc trên 64 MiB
+  trước khi đọc, và dừng hẳn thumbnail/render quá 60 giây; các trường hợp này báo "không đọc được", không mất trang.
 - P0 nền (#1, #2): app Flutter `apps/mobile`, lõi `PageQuad`/`ScanPage`, gate APK debug/analyze/format/test.
 
 ## 2026-10-11
