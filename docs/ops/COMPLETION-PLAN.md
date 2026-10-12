@@ -31,7 +31,7 @@
 |----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
 | W-101 | F-001, F-019, F-018 | `SessionStore` từ chối `save` khi `session.json` còn trên đĩa mà `load` chưa hoàn tất; `importOriginal` tuần tự với `load`; dấu `DEBT:` cho bản gốc cách ly | Test đỏ trước: load lỗi I/O → save ném lỗi, manifest + bản gốc cũ còn nguyên, lần load sau còn đủ trang; test load ∥ import không mất file | – | S | ✅ | seeker19110/X-Scanner#12 `faf89a0`, CI xanh; đỏ 5 test → xanh; `flutter test` 211/211 |
 | W-102 | F-005 | Sau khi lưu trang thành công, xoá bản sao của picker nếu đường dẫn nằm trong thư mục tạm của app (chuẩn hoá, không bao giờ xoá ngoài) | Test đỏ trước: file nguồn trong temp bị xoá sau capture/import thành công; còn nguyên khi lưu lỗi; file ngoài temp không bị đụng | W-101 | S | ✅ | seeker19110/X-Scanner#15 `e7d265c`, CI xanh; đỏ 7 test → xanh; khuôn ghi `TRAPS.md` |
-| W-103 | F-006, F-007 | Một cổng giải mã tuần tự cho thumbnail và render khi xuất; tắt kéo-thả khi bận | Test đỏ trước: `maxActive == 1` giữa thumbnail và render khi xuất; kéo khi bận không đổi thứ tự | W-102 | M | 🔄 | đỏ 4 test (gate 2, controller `maxActive` 2 thay 1, kéo khi bận đổi thứ tự) → xanh |
+| W-103 | F-006, F-007 | Một cổng giải mã tuần tự cho thumbnail và render khi xuất; tắt kéo-thả khi bận | Test đỏ trước: `maxActive == 1` giữa thumbnail và render khi xuất; kéo khi bận không đổi thứ tự | W-102 | M | ✅ | seeker19110/X-Scanner#16 `43f24d9`, CI xanh; đỏ 4 test (gate 2, controller `maxActive` 2 thay 1, kéo khi bận đổi thứ tự) → xanh |
 | W-104 | F-004 | Nâng `image` ≥ 4.12.0 khi đủ 7 ngày (từ 2026-10-18) + test hồi quy 2 ảnh tổng hợp (EXIF IFD lặp, PNG bom) | Test hồi quy xanh với bản mới, đỏ với 4.10.1; gate PASS; manifest release sạch | – | S | ⏳ 2026-10-18 | Exception ở `docs/ops/supply-chain-exceptions.md` |
 
 ## Đợt 2 — Hàng rào & test
@@ -39,7 +39,7 @@
 | ID | Từ phát hiện | Việc | Tiêu chí nghiệm thu | Phụ thuộc | Ước lượng | Trạng thái | PR / bằng chứng |
 |----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
 | W-301 | F-008, F-034, F-035, F-037 | Gate kiểm quyền + component exported trong manifest release đã gộp; `flutter pub get --enforce-lockfile`; CI chỉ huỷ run cũ trên PR; workflow adopt không giữ token khi chạy gate | Thêm thử `INTERNET` vào manifest → gate đỏ; bỏ ra → xanh; CI xanh | – | S | ✅ | seeker19110/X-Scanner#13 `ba3d5a9`, CI xanh; gate đỏ "uses-permission not allowed: android.permission.INTERNET" → khôi phục byte → PASS; self-test 7/7 |
-| W-302 | F-010, F-011, F-028, F-029 | Test: lỗi chép bản gốc ở controller; `meetsGuideline` (vùng chạm Android, nhãn, tương phản) cho 2 màn × Dark/Light; các nhánh lỗi còn thiếu; siết test yếu (48 dp, kích thước trang PDF nén) | Test mới xanh; guideline đỏ thì sửa UI trong cùng PR | W-103 | M | ⬜ | |
+| W-302 | F-010, F-011, F-028, F-029 | Test: lỗi chép bản gốc ở controller; `meetsGuideline` (vùng chạm Android, nhãn, tương phản) cho 2 màn × Dark/Light; các nhánh lỗi còn thiếu; siết test yếu (48 dp, kích thước trang PDF nén) | Test mới xanh; guideline đỏ thì sửa UI trong cùng PR | W-103 | M | 🔄 | 8 test hồi quy mới + 4 test guideline (2 màn × Dark/Light) xanh, không guideline nào đỏ nên không đổi UI; test 48 dp đỏ khi hạ vùng chạm về 44 |
 
 ## Đợt 3 — Hiệu năng, trạng thái UI, thống nhất
 
