@@ -81,6 +81,7 @@
 - DoC đối chiếu trên `0327ab7`: `maintenance-sweep` 🔴 0 · 🟡 3 (thiếu "Ngày cập nhật" PROGRESS → sửa ở PR này; thiếu `dependabot.yml` = F-009, WAITING chủ repo; radar 53/100 là chỉ số khung, không phải phát hiện); OSV 86 package hosted 0 advisory; bí mật 0.
 - Đóng hồ sơ `2026-10-12-comprehensive-development-plan` (working → done, merge #23 `ac2c435`) trong PR tài liệu này · loại để nguyên "Active" · bậc 1 (hồ sơ khai sai trạng thái sau merge; DoD của chính hồ sơ đó đã đạt).
 - Không đổi `docs/work/2026-10-11-p1-scan-export/working.md`: còn chờ AC-9 UAT (chủ repo) · bậc 1.
+- W-104 mở rộng: thêm trần byte đầu vào, nhận dạng theo nội dung, ngân sách thời gian có dừng thật tác vụ (kế hoạch #23 §5.1) · chủ repo duyệt 2026-10-12 · cùng khuôn lỗi F-004 (ảnh độc hại treo/ngốn RAM), không thêm dependency. Lịch `trig_01UaZ2bXtK9AAmy4NXAKLgzr` (2026-10-18T02:00Z) đã cập nhật prompt.
 
 ## Lần thử / blocker
 
