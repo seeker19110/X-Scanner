@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -8,6 +9,7 @@ import 'package:image/image.dart' as img;
 import 'package:x_scanner/core/page_quad.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
+import 'package:x_scanner/imaging/decode_gate.dart';
 import 'package:x_scanner/imaging/page_render.dart';
 import 'package:x_scanner/storage/session_store.dart';
 import 'package:x_scanner/ui/page_source.dart';
@@ -536,6 +538,54 @@ void main() {
       other.thumbnailFor(other.session.pages.single),
       throwsA(isA<ImageDecodeFailure>()),
     );
+  });
+
+  test('a thumbnail asked for during an export waits for the render, as '
+      'both share one decode gate (F-006)', () async {
+    await addPages(1);
+    var active = 0;
+    var maxActive = 0;
+    final rendering = Completer<void>();
+    final release = Completer<void>();
+    // Wired like lib/main.dart: one gate for the controller and exporter.
+    final gate = DecodeGate();
+    final c = SessionController(
+      store: SessionStore(root),
+      source: source,
+      exporter: PageExporter(
+        exportDir: exports,
+        renderer: (path, quad, turns, {format = RenderFormat.jpeg}) =>
+            gate.run(() async {
+              active++;
+              maxActive = max(maxActive, active);
+              if (!rendering.isCompleted) rendering.complete();
+              await release.future;
+              active--;
+              return Uint8List.fromList([1, 2, 3]);
+            }),
+      ),
+      sharer: sharer,
+      thumbnailer: (path) async {
+        active++;
+        maxActive = max(maxActive, active);
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+        active--;
+        return Uint8List.fromList([4, 5, 6]);
+      },
+      decodeGate: gate,
+    );
+    await c.restore();
+    final export = c.exportAndShare(ExportFormat.png);
+    await rendering.future;
+
+    final preview = c.thumbnailFor(c.session.pages.single);
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    release.complete();
+    await Future.wait([export, preview]);
+
+    expect(maxActive, 1, reason: 'one decoded original at a time');
+    expect(sharer.shared.single, ['X-Scanner-trang-01.png']);
+    expect(c.takeNotice(), isNull);
   });
 
   test('exportAndShare shares the export, then removes it (FR-7)', () async {

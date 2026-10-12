@@ -18,6 +18,7 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Đổi cách lưu/khôi phục/cách ly phiên, giữ bản gốc | `lib/storage/session_store.dart` | `flutter test test/storage` — mọi ca mất dữ liệu phải có test đỏ trước |
 | Đổi thuật toán nắn phối cảnh | `lib/imaging/homography.dart` | `flutter test test/imaging` |
 | Đổi giải mã/EXIF/giới hạn điểm ảnh/thumbnail | `lib/imaging/page_render.dart` | `flutter test test/imaging test/export` |
+| Đổi cách giới hạn giải mã đồng thời (thumbnail + render khi xuất) | `lib/imaging/decode_gate.dart`; nối một cổng duy nhất ở `lib/main.dart` | `flutter test test/imaging/decode_gate_test.dart test/ui/session_controller_test.dart` |
 | Đổi khổ trang PDF | `lib/export/pdf_export.dart` (`pdfLongSidePoints`, `pageFormatFor`) | `flutter test test/export/pdf_export_test.dart` (AC-6) |
 | Đổi tên file xuất, định dạng, dọn file tạm | `lib/export/page_exporter.dart` | `flutter test test/export test/ui/session_controller_test.dart` |
 | Đổi cách chia sẻ / MIME | `lib/export/file_sharer.dart` | `flutter test test/export/page_exporter_test.dart` |

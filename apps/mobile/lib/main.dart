@@ -7,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'app/theme.dart';
 import 'export/file_sharer.dart';
 import 'export/page_exporter.dart';
+import 'imaging/decode_gate.dart';
+import 'imaging/page_render.dart';
 import 'storage/session_store.dart';
 import 'ui/page_source.dart';
 import 'ui/review_screen.dart';
@@ -18,6 +20,8 @@ Future<void> main() async {
   final temp = await getTemporaryDirectory();
   final dir = await Directory('${support.path}/session')
       .create(recursive: true);
+  // One gate for every decode of an original: thumbnails and export renders.
+  final decodeGate = DecodeGate();
   runApp(
     XScannerApp(
       controller: SessionController(
@@ -28,8 +32,13 @@ Future<void> main() async {
           exportDir: Directory('${temp.path}/exports'),
           // share_plus copies shared files here and keeps the last ones.
           leftoverDirs: [Directory('${temp.path}/share_plus')],
+          renderer: (path, quad, turns, {format = RenderFormat.jpeg}) =>
+              decodeGate.run(
+                () => renderPage(path, quad, turns, format: format),
+              ),
         ),
         sharer: const SharePlusFileSharer(),
+        decodeGate: decodeGate,
       ),
     ),
   );

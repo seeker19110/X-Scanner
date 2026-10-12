@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-p1-completion
 - Yêu cầu / outcome: `/auto-complete` lần 4, bước 2: `/completion` (`docs/framework/project-completion.md` Pha 0–4) sau khi P1 PR-0..4 merged (#6..#10). Outcome: Definition of Complete có bằng chứng hoặc BLOCKED/WAITING đúng §8.
-- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 PR mở; W-103 sẵn trong worktree (`c7b5b20`); W-302 worker đang chạy.
+- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 PR mở; W-302 worker đang chạy.
 - Chủ trì / writer: phiên chính (kế hoạch, duyệt, tích hợp); audit giao 3 subagent chỉ đọc; sửa giao worker theo số PR.
 - Mức rủi ro / số PR: M; PR-A tài liệu Pha 0–2, rồi một PR mỗi việc W-xxx theo kế hoạch.
 - Scope / non-goal: app `apps/mobile` P1 + tài liệu dự án. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release, bật branch protection/auto-merge (cần quyền chủ repo).
@@ -43,6 +43,7 @@
 
 - W-401 https://github.com/seeker19110/X-Scanner/pull/14 merged squash `4efd3d8` sau CI xanh (job 114642488928); 0 review thread.
 - W-302 giao worker trước khi W-102/W-103 merge (brief `PLAN-c4.md`, `--check-plan` OK, worker cherry-pick hai commit đó trước) · loại chờ tuần tự · bậc 4 (chung nhánh nền, không chung file với PR đang mở ngoài test đã có).
+- W-102 https://github.com/seeker19110/X-Scanner/pull/15 merged squash `e7d265c` sau CI xanh (job 114644429204); 0 review thread.
 
 ## Lần thử / blocker
 
@@ -50,7 +51,7 @@
 
 ## Bàn giao / bước tiếp theo
 
-- Merge PR W-102; rồi tích hợp W-103 (`c7b5b20`, worktree agent-a735438779c74e8b3) mỗi W một PR; rồi W-302 → W-402 → W-403; W-104 từ 2026-10-18; Pha 4 re-audit.
+- Merge PR W-103; rồi W-302 (worker, brief `PLAN-c4.md`) → W-402 → W-403; W-104 từ 2026-10-18; Pha 4 re-audit.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
