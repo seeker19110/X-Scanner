@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:x_scanner/core/page_quad.dart';
@@ -16,6 +18,74 @@ final PageQuad _skewed = PageQuad(
 
 /// Synthetic, distinct bytes for page [n]; no real images are used.
 List<int> _bytes(int n) => List<int>.generate(64 + n, (i) => (i * 7 + n) % 256);
+
+/// Gives access to the real [File] constructor inside an override zone.
+final class _RealIO extends IOOverrides {}
+
+/// The manifest as seen through a failing disk: [readAsBytes] (when
+/// [failRead]) and [rename] throw like an I/O error; [exists] is real.
+class _FailingManifest implements File {
+  _FailingManifest(this._real, {required this.failRead});
+
+  final File _real;
+  final bool failRead;
+
+  @override
+  String get path => _real.path;
+
+  @override
+  Future<bool> exists() => _real.exists();
+
+  @override
+  Future<Uint8List> readAsBytes() => failRead
+      ? Future<Uint8List>.error(const FileSystemException('read failed'))
+      : _real.readAsBytes();
+
+  @override
+  Future<File> rename(String newPath) =>
+      Future<File>.error(const FileSystemException('rename failed'));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnsupportedError('not used by SessionStore.load');
+}
+
+/// Runs [body] with every `session.json` failing as [_FailingManifest].
+Future<T> _withFailingManifest<T>(
+  Future<T> Function() body, {
+  required bool failRead,
+}) {
+  final real = _RealIO();
+  return IOOverrides.runZoned(
+    body,
+    createFile: (path) => path.endsWith('/session.json')
+        ? _FailingManifest(real.createFile(path), failRead: failRead)
+        : real.createFile(path),
+  );
+}
+
+/// A source whose copy pauses after writing until [release] completes,
+/// so other store calls can run while the copy is unfinished.
+class _PausedCopySource implements File {
+  _PausedCopySource(this._real, this.release);
+
+  final File _real;
+  final Future<void> release;
+
+  @override
+  String get path => _real.path;
+
+  @override
+  Future<File> copy(String newPath) async {
+    final copied = await _real.copy(newPath);
+    await release;
+    return copied;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnsupportedError('not used by SessionStore.importOriginal');
+}
 
 void main() {
   late Directory tmp;
@@ -363,5 +433,92 @@ void main() {
         expect(store.resolve(p1.originalPath).existsSync(), isFalse);
       },
     );
+  });
+
+  group('(F-001) load failing with an I/O error', () {
+    Future<void> expectOriginalsKept({required bool failRead}) async {
+      final a = await importPage(1);
+      final b = await importPage(2);
+      await store.save(ScanSession(pages: [a, b]));
+      final savedManifest = manifest().readAsBytesSync();
+      if (!failRead) {
+        // Undecodable, so load quarantines it and the rename fails.
+        manifest().writeAsStringSync('{garbage');
+      }
+      final onDisk = manifest().readAsBytesSync();
+      final savedOriginals = originalBytes();
+
+      final broken = SessionStore(root);
+      await _withFailingManifest(
+        () => expectLater(broken.load(), throwsA(isA<FileSystemException>())),
+        failRead: failRead,
+      );
+      final c = await importPage(3);
+      await expectLater(broken.save(ScanSession(pages: [c])), throwsStateError);
+      expect(manifest().readAsBytesSync(), onDisk);
+      expect(File('${root.path}/session.json.tmp').existsSync(), isFalse);
+
+      final next = await SessionStore(root).load();
+      if (failRead) {
+        expect(next, isA<SessionLoaded>());
+        final pages = (next as SessionLoaded).session.pages;
+        expect(pages.map((p) => p.id), [a.id, b.id]);
+        expect(manifest().readAsBytesSync(), savedManifest);
+      } else {
+        expect(next, isA<SessionUnrecoverable>());
+      }
+      for (final entry in savedOriginals.entries) {
+        expect(File(entry.key).readAsBytesSync(), entry.value);
+      }
+    }
+
+    test('(F-001) unreadable manifest: save refuses and A,B survive', () {
+      return expectOriginalsKept(failRead: true);
+    });
+
+    test('(F-001) failed quarantine rename: save refuses, originals kept', () {
+      return expectOriginalsKept(failRead: false);
+    });
+
+    test('(F-001) a store that loaded successfully may save', () async {
+      final a = await importPage(1);
+      await store.save(ScanSession(pages: [a]));
+      final fresh = SessionStore(root);
+      expect(await fresh.load(), isA<SessionLoaded>());
+      final b = await importPage(2);
+      await fresh.save(ScanSession(pages: [a, b]));
+      expect(manifest().readAsStringSync(), contains(b.id));
+    });
+
+    test('(F-001) after quarantine the same store never deletes the '
+        'quarantined originals', () async {
+      final lost = await importPage(1);
+      await store.save(ScanSession(pages: [lost]));
+      manifest().writeAsStringSync('{garbage');
+      expect(await store.load(), isA<SessionUnrecoverable>());
+      final kept = await importPage(2);
+      await store.save(ScanSession(pages: [kept]));
+      expect(store.resolve(lost.originalPath).readAsBytesSync(), _bytes(1));
+    });
+  });
+
+  group('(F-019) importOriginal and load', () {
+    test('(F-019) overlapping calls never lose the imported file', () async {
+      final a = await importPage(1);
+      await store.save(ScanSession(pages: [a]));
+      final fresh = SessionStore(root);
+
+      final loadDone = Completer<void>();
+      final loading = fresh.load().whenComplete(loadDone.complete);
+      final importing = fresh.importOriginal(
+        _PausedCopySource(source(2), loadDone.future),
+        id: newPageId(Random(77)),
+        extension: 'jpg',
+      );
+      expect(await loading, isA<SessionLoaded>());
+      final path = await importing;
+      expect(fresh.resolve(path).readAsBytesSync(), _bytes(2));
+      expect(store.resolve(a.originalPath).readAsBytesSync(), _bytes(1));
+    });
   });
 }

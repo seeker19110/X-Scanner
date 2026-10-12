@@ -19,17 +19,17 @@
 - [ ] Hiệu năng: số đo trên máy host ghi trong spec §19; trần bộ nhớ có `DEBT:` rõ; p95 trên thiết bị dời P2 theo spec §2 (đã duyệt).
 - [ ] `PROGRESS.md` phản ánh đúng trạng thái + nợ còn lại có chủ đích.
 
-## Đợt 0 — Tài liệu khai sai trạng thái (✅ cùng PR kế hoạch)
+## Đợt 0 — Tài liệu khai sai trạng thái (✅)
 
 | ID | Từ phát hiện | Việc | Tiêu chí nghiệm thu | Phụ thuộc | Ước lượng | Trạng thái | PR / bằng chứng |
 |----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
-| W-201 | F-002, F-003, F-009 (exception), F-014 (tài liệu), F-015, F-016, F-017, F-027 (spec), F-039, F-040, F-041, F-042 | Đồng bộ README, PROJECT, PROGRESS, CHANGELOG, goal/working P1, header CLAUDE/AGENTS, adoption README, spec §11, `TRAPS.md`, ADR-0003, README app, bảng bằng chứng X-Scanner, exception supply-chain | grep không còn "chưa có chức năng chụp"/"Chưa có camera…PDF engine"; `check-adoption.py` PASS; gate PASS | – | S | 🔄 | PR kế hoạch |
+| W-201 | F-002, F-003, F-009 (exception), F-014 (tài liệu), F-015, F-016, F-017, F-027 (spec), F-039, F-040, F-041, F-042 | Đồng bộ README, PROJECT, PROGRESS, CHANGELOG, goal/working P1, header CLAUDE/AGENTS, adoption README, spec §11, `TRAPS.md`, ADR-0003, README app, bảng bằng chứng X-Scanner, exception supply-chain | grep không còn "chưa có chức năng chụp"/"Chưa có camera…PDF engine"; `check-adoption.py` PASS; gate PASS | – | S | ✅ | seeker19110/X-Scanner#11 `97deb76`, CI xanh; `check-adoption` PASS |
 
 ## Đợt 1 — Dữ liệu & bảo mật
 
 | ID | Từ phát hiện | Việc | Tiêu chí nghiệm thu | Phụ thuộc | Ước lượng | Trạng thái | PR / bằng chứng |
 |----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
-| W-101 | F-001, F-019, F-018 | `SessionStore` từ chối `save` khi `session.json` còn trên đĩa mà `load` chưa hoàn tất; `importOriginal` tuần tự với `load`; dấu `DEBT:` cho bản gốc cách ly | Test đỏ trước: load lỗi I/O → save ném lỗi, manifest + bản gốc cũ còn nguyên, lần load sau còn đủ trang; test load ∥ import không mất file | – | S | ⬜ | |
+| W-101 | F-001, F-019, F-018 | `SessionStore` từ chối `save` khi `session.json` còn trên đĩa mà `load` chưa hoàn tất; `importOriginal` tuần tự với `load`; dấu `DEBT:` cho bản gốc cách ly | Test đỏ trước: load lỗi I/O → save ném lỗi, manifest + bản gốc cũ còn nguyên, lần load sau còn đủ trang; test load ∥ import không mất file | – | S | 🔄 | đỏ 5 test → xanh; `flutter test` 211/211 |
 | W-102 | F-005 | Sau khi lưu trang thành công, xoá bản sao của picker nếu đường dẫn nằm trong thư mục tạm của app (chuẩn hoá, không bao giờ xoá ngoài) | Test đỏ trước: file nguồn trong temp bị xoá sau capture/import thành công; còn nguyên khi lưu lỗi; file ngoài temp không bị đụng | W-101 | S | ⬜ | |
 | W-103 | F-006, F-007 | Một cổng giải mã tuần tự cho thumbnail và render khi xuất; tắt kéo-thả khi bận | Test đỏ trước: `maxActive == 1` giữa thumbnail và render khi xuất; kéo khi bận không đổi thứ tự | W-102 | M | ⬜ | |
 | W-104 | F-004 | Nâng `image` ≥ 4.12.0 khi đủ 7 ngày (từ 2026-10-18) + test hồi quy 2 ảnh tổng hợp (EXIF IFD lặp, PNG bom) | Test hồi quy xanh với bản mới, đỏ với 4.10.1; gate PASS; manifest release sạch | – | S | ⏳ 2026-10-18 | Exception ở `docs/ops/supply-chain-exceptions.md` |
