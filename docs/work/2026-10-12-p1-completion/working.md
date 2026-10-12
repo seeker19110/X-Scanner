@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-p1-completion
 - Yêu cầu / outcome: `/auto-complete` lần 4, bước 2: `/completion` (`docs/framework/project-completion.md` Pha 0–4) sau khi P1 PR-0..4 merged (#6..#10). Outcome: Definition of Complete có bằng chứng hoặc BLOCKED/WAITING đúng §8.
-- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 PR mở; W-301, W-401 đã sẵn trong worktree (commit cục bộ `5cc5154`, `afcc67a`).
+- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 PR mở; W-401, W-102 sẵn trong worktree (`afcc67a`, `e3c3197`).
 - Chủ trì / writer: phiên chính (kế hoạch, duyệt, tích hợp); audit giao 3 subagent chỉ đọc; sửa giao worker theo số PR.
 - Mức rủi ro / số PR: M; PR-A tài liệu Pha 0–2, rồi một PR mỗi việc W-xxx theo kế hoạch.
 - Scope / non-goal: app `apps/mobile` P1 + tài liệu dự án. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release, bật branch protection/auto-merge (cần quyền chủ repo).
@@ -34,6 +34,8 @@
 - W-301: giữ kiểm thêm `uses-permission-sdk-23` và `activity-alias` (chặt hơn brief) · loại gỡ cho đúng nguyên văn · bậc 1 (cùng là đường cấp quyền/mở component).
 - W-401: nhận nhánh phòng vệ khi công thức thu nhỏ vẫn vượt trần (cạnh 1 px) · bậc 1 (không vượt trần bộ nhớ); `buildPdf` qua `Isolate.run` không có test đỏ riêng · ngoại lệ (2) §3.6 (chỉ đổi nơi chạy, hành vi giữ nguyên, test PDF/PdfException cũ bảo vệ).
 - Worker không ghi được file báo cáo (harness chặn); phiên chính ghi `REPORT-w101/w301/w401.md` + patch vào scratchpad.
+- W-101 https://github.com/seeker19110/X-Scanner/pull/12 merged squash `faf89a0` sau CI xanh (job 114638363016); 0 review thread.
+- W-102 (worker): `PageSource.discard` — nguồn tự xoá bản sao của nó, chỉ trong `cacheDir` sau `resolveSymbolicLinks`, chỉ sau khi lưu thành công · loại controller tự xoá theo tiền tố thư mục tạm · bậc 2 (kiến thức "bản sao picker nằm ở cache" ở đúng adapter) và bậc 3 (test bằng fake). Đỏ 7 → xanh; gate PASS 219.
 
 ## Lần thử / blocker
 
