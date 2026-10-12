@@ -41,13 +41,25 @@ class FakeSource implements PageSource {
   }
 }
 
-/// [SessionStore] whose [save] can be made to fail like a full disk and
-/// whose [load] like an unreadable disk.
+/// [SessionStore] whose [save] can be made to fail like a full disk (or
+/// with a [StateError]), whose [importOriginal] like a full disk and whose
+/// [load] like an unreadable disk.
 class FlakyStore extends SessionStore {
   FlakyStore(super.root);
 
   bool failSave = false;
+  bool failSaveState = false;
+  bool failImport = false;
   bool failLoad = false;
+
+  @override
+  Future<String> importOriginal(
+    File source, {
+    required String id,
+    required String extension,
+  }) => failImport
+      ? Future<String>.error(const FileSystemException('disk full'))
+      : super.importOriginal(source, id: id, extension: extension);
 
   @override
   Future<SessionLoadResult> load() => failLoad
@@ -57,6 +69,8 @@ class FlakyStore extends SessionStore {
   @override
   Future<void> save(session) => failSave
       ? Future<void>.error(const FileSystemException('disk full'))
+      : failSaveState
+      ? Future<void>.error(StateError('original of a page is missing'))
       : super.save(session);
 }
 
@@ -324,6 +338,119 @@ void main() {
     expect(controller.session, same(before));
     expect(manifestPages(), onDisk);
     expect(controller.busy, isFalse);
+  });
+
+  /// The saved manifest bytes and original file names, to show a failed
+  /// add left the disk exactly as it was.
+  ({List<int> manifest, List<String> originals}) disk() => (
+    manifest: File('${root.path}/session.json').readAsBytesSync(),
+    originals: [
+      for (final e in Directory('${root.path}/originals').listSync())
+        e.path.split('/').last,
+    ]..sort(),
+  );
+
+  test('copying the original failing like a full disk reports saveFailed, '
+      'keeps the session and the source image (F-010)', () async {
+    await addPages(1);
+    source.discarded.clear();
+    final before = controller.session;
+    final onDisk = disk();
+    store.failImport = true;
+
+    final captured = png();
+    final picked = png();
+    source.captures.add(captured);
+    source.gallery.add(picked);
+    await controller.capture();
+    await controller.importFromGallery();
+
+    expect(controller.takeNotice(), SessionNotice.saveFailed);
+    expect(controller.takeNotice(), SessionNotice.saveFailed);
+    expect(controller.takeNotice(), isNull);
+    expect(controller.session, same(before));
+    expect(disk().manifest, onDisk.manifest);
+    expect(disk().originals, onDisk.originals);
+    expect(source.discarded, isEmpty);
+    expect(File(captured).existsSync(), isTrue);
+    expect(File(picked).existsSync(), isTrue);
+    expect(controller.busy, isFalse);
+  });
+
+  test('a source file deleted before the decode check reports decodeFailed '
+      'and keeps the session (F-028)', () async {
+    await addPages(1);
+    source.discarded.clear();
+    final before = controller.session;
+    final onDisk = disk();
+    final gone = png();
+    File(gone).deleteSync();
+
+    source.captures.add(gone);
+    await controller.capture();
+
+    expect(controller.takeNotice(), SessionNotice.decodeFailed);
+    expect(controller.takeNotice(), isNull);
+    expect(controller.session, same(before));
+    expect(disk().manifest, onDisk.manifest);
+    expect(disk().originals, onDisk.originals);
+    expect(source.discarded, isEmpty);
+  });
+
+  test('save failing with a StateError reports saveFailed and keeps the '
+      'session (F-028)', () async {
+    await addPages(1);
+    source.discarded.clear();
+    final before = controller.session;
+    final onDisk = disk();
+    store.failSaveState = true;
+
+    final path = png();
+    source.captures.add(path);
+    await controller.capture();
+    await controller.remove(before.pages.single.id);
+
+    expect(controller.takeNotice(), SessionNotice.saveFailed);
+    expect(controller.takeNotice(), SessionNotice.saveFailed);
+    expect(controller.takeNotice(), isNull);
+    expect(controller.session, same(before));
+    expect(disk().manifest, onDisk.manifest);
+    expect(source.discarded, isEmpty);
+    expect(File(path).existsSync(), isTrue);
+  });
+
+  test('an unreadable photo recovered on restore reports decodeFailed and '
+      'keeps the restored session (F-028)', () async {
+    await addPages(2);
+    final saved = ids();
+    final onDisk = disk();
+    final lost = png();
+    final other = SessionController(
+      store: SessionStore(root),
+      source: source,
+      exporter: exporter,
+      sharer: sharer,
+      thumbnailer: (path) => path == lost
+          ? Future<Uint8List>.error(const ImageDecodeFailure())
+          : thumbnail(path),
+    );
+    source.discarded.clear();
+    source.lost.add(lost);
+
+    await other.restore();
+
+    expect(other.takeNotice(), SessionNotice.decodeFailed);
+    expect(other.takeNotice(), isNull);
+    expect([for (final p in other.session.pages) p.id], saved);
+    expect(disk().manifest, onDisk.manifest);
+    expect(disk().originals, onDisk.originals);
+    expect(source.discarded, isEmpty);
+    expect(File(lost).existsSync(), isTrue);
+    // The restored session still works: its pages decode and edits save.
+    await other.thumbnailFor(other.session.pages.first);
+    await other.move(0, 1);
+    expect([for (final p in other.session.pages) p.id], saved.reversed);
+    expect(other.takeNotice(), isNull);
   });
 
   test('move, remove, updatePage, retake and clearAll update the session '

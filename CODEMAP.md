@@ -26,7 +26,7 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Đổi màn danh sách trang / nút / thông báo | `lib/ui/review_screen.dart` | `flutter test test/ui/review_screen_test.dart test/app_test.dart` |
 | Đổi màn chỉnh góc | `lib/ui/quad_editor_screen.dart` | `flutter test test/ui/quad_editor_screen_test.dart` |
 | Đổi nguồn ảnh (camera hệ thống / thư viện) | `lib/ui/page_source.dart` | `flutter test test/ui` |
-| Đổi theme Dark/Light | `lib/app/theme.dart` | `flutter test test/app_test.dart` |
+| Đổi theme Dark/Light | `lib/app/theme.dart` | `flutter test test/app_test.dart test/ui/accessibility_test.dart` (vùng chạm, nhãn, tương phản ở cả hai theme) |
 | Nối dependency, thư mục lưu | `lib/main.dart` | `flutter test test/app_test.dart` + gate |
 | Đổi quyền / backup Android | `android/app/src/main/AndroidManifest.xml`, `android/app/src/main/res/xml/data_extraction_rules.xml` | `flutter test test/android_manifest_test.dart`; gate (bước build gộp manifest release và chạy `scripts/check-release-manifest.py`, AC-8) |
 | Thêm/nâng dependency | `pubspec.yaml` (ghim chính xác), `pubspec.lock` (sinh bởi `flutter pub get`) | gate + kiểm manifest release đã gộp; spec §3 yêu cầu bản phát hành ≥ 7 ngày |

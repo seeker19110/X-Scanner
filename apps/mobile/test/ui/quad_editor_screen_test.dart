@@ -79,7 +79,7 @@ Future<ScanPage?> _save(WidgetTester tester, List<ScanPage?> results) async {
 }
 
 void main() {
-  testWidgets('shows four labelled handles with 48 dp touch targets', (
+  testWidgets('shows four labelled handles with 48 dp touch targets (F-029)', (
     tester,
   ) async {
     await _open(tester);
@@ -92,8 +92,8 @@ void main() {
     ]) {
       expect(_handle(label), findsOneWidget, reason: label);
       final size = tester.getSize(_handle(label));
-      expect(size.width, greaterThanOrEqualTo(44), reason: label);
-      expect(size.height, greaterThanOrEqualTo(44), reason: label);
+      expect(size.width, greaterThanOrEqualTo(48), reason: label);
+      expect(size.height, greaterThanOrEqualTo(48), reason: label);
     }
   });
 

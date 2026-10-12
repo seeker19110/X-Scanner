@@ -76,6 +76,30 @@ void main() {
       expect(sizes[2].h, closeTo(842, 0.01));
     });
 
+    test('default compressed output keeps every page size and orientation '
+        '(AC-6) (F-029)', () async {
+      final bytes = await buildPdf([
+        jpeg(300, 400),
+        jpeg(400, 300),
+        jpeg(200, 200),
+      ]);
+      // The writer only compresses stream contents, not the page
+      // dictionaries, so each /MediaBox is readable as plain text.
+      final pdf = latin1.decode(bytes);
+      expect(pdf.startsWith('%PDF-'), isTrue);
+      expect(pdf, contains('/FlateDecode'), reason: 'output is compressed');
+
+      final boxes = mediaBoxes(pdf);
+      expect(boxes, hasLength(3));
+      final sizes = [for (final b in boxes) (w: b[2] - b[0], h: b[3] - b[1])];
+      expect(sizes[0].w, closeTo(631.5, 0.01));
+      expect(sizes[0].h, closeTo(842, 0.01));
+      expect(sizes[1].w, closeTo(842, 0.01));
+      expect(sizes[1].h, closeTo(631.5, 0.01));
+      expect(sizes[2].w, closeTo(842, 0.01));
+      expect(sizes[2].h, closeTo(842, 0.01));
+    });
+
     test('a PNG page is accepted', () async {
       final png = img.encodePng(img.Image(width: 10, height: 20));
       final pdf = latin1.decode(await buildPdf([png], compress: false));
