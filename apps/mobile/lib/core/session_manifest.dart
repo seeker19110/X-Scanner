@@ -8,9 +8,13 @@ import 'scan_session.dart';
 /// Version of the `session.json` layout written by [encodeManifest].
 const int manifestSchemaVersion = 1;
 
+/// Allowed original file extension: 1–5 lowercase letters or digits.
+const String _extension = '[a-z0-9]{1,5}';
+
 final RegExp _pageIdPattern = RegExp(r'^[0-9a-f]{32}$');
+final RegExp _extensionPattern = RegExp('^$_extension\$');
 final RegExp _originalPathPattern = RegExp(
-  r'^originals/([0-9a-f]{32})\.([a-z0-9]{1,5})$',
+  '^originals/([0-9a-f]{32})\\.($_extension)\$',
 );
 
 /// Number of coordinates in a serialized quad (x, y for TL, TR, BR, BL).
@@ -18,6 +22,20 @@ const int _quadLength = 8;
 
 /// Whether [id] is a valid page id (32 lowercase hex characters).
 bool isValidPageId(String id) => _pageIdPattern.hasMatch(id);
+
+/// Whether [extension] is an allowed original file extension: 1–5
+/// lowercase letters `a`–`z` or digits, without the dot.
+bool isValidExtension(String extension) =>
+    _extensionPattern.hasMatch(extension);
+
+/// Lowercased text after the last dot of the file name in [path], or `null`
+/// when the name has no dot. Directories are split on both `/` and `\`, so
+/// a dot in a directory name is ignored; a trailing dot gives `''`.
+String? fileExtension(String path) {
+  final name = path.split(RegExp(r'[/\\]')).last;
+  final dot = name.lastIndexOf('.');
+  return dot < 0 ? null : name.substring(dot + 1).toLowerCase();
+}
 
 /// Whether [path] is the canonical relative original path
 /// `originals/{id}.{ext}` for page [id].

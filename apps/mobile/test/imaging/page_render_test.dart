@@ -325,4 +325,17 @@ void main() {
       expect((decoded.width, decoded.height), (300, 100));
     });
   });
+
+  group('imageSizeOf (F-025)', () {
+    test('reads width and height from a PNG header', () {
+      expect(imageSizeOf(pngOf(solid(40, 30, 0, 0, 0))), (
+        width: 40,
+        height: 30,
+      ));
+    });
+
+    test('is null for bytes that are not an image', () {
+      expect(imageSizeOf(Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8])), isNull);
+    });
+  });
 }

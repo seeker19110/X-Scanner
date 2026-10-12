@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-p1-completion
 - Yêu cầu / outcome: `/auto-complete` lần 4, bước 2: `/completion` (`docs/framework/project-completion.md` Pha 0–4) sau khi P1 PR-0..4 merged (#6..#10). Outcome: Definition of Complete có bằng chứng hoặc BLOCKED/WAITING đúng §8.
-- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 PR mở.
+- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 merged (#18 `4d07a6a`); W-403 PR mở.
 - Chủ trì / writer: phiên chính (kế hoạch, duyệt, tích hợp); audit giao 3 subagent chỉ đọc; sửa giao worker theo số PR.
 - Mức rủi ro / số PR: M; PR-A tài liệu Pha 0–2, rồi một PR mỗi việc W-xxx theo kế hoạch.
 - Scope / non-goal: app `apps/mobile` P1 + tài liệu dự án. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release, bật branch protection/auto-merge (cần quyền chủ repo).
@@ -51,6 +51,8 @@
 - W-402 giao worker (brief `PLAN-c5.md`, `--check-plan` OK): `restoring` đặt đồng bộ khi gọi `restore()` · loại cờ "đã khôi phục" mặc định false · bậc 1 (test cũ dựng màn không gọi `restore` không bị kẹt ở trạng thái tải). Thumbnail lỗi bỏ khỏi cache + nút thử lại, không tự thử lại · bậc 2. `ResizeImage` policy `fit` · loại `cacheWidth` (méo khi ảnh xoay/không vuông) · bậc 1.
 - W-403 chờ W-402 (chung `session_controller.dart`) · loại song song · CLAUDE.md header (song song cần file rời nhau).
 - W-402 (worker): thumbnail lỗi bỏ khỏi cache nên mọi lần dựng lại dòng (notify khác, đổi theme, bấm nút) đều giải mã lại · loại màn tự giữ future để chỉ thử lại khi bấm · bậc 2 (không phải vòng tự động: giải mã lỗi không notify nên không tự kích hoạt; giữ trong controller). `restoring` dùng bộ đếm (hai lần `restore` vẫn đúng), về false trong `finally`.
+- W-402 https://github.com/seeker19110/X-Scanner/pull/18 merged squash `4d07a6a` sau CI xanh (job 114657046253); 0 review thread.
+- W-403 (worker): phiên chính gỡ `try/catch` toàn bộ trong `imageSizeOf` · loại giữ · bậc 2 (chỉ đọc thumbnail do app tự mã hoá nên nhánh bắt lỗi không với tới; refactor giữ đúng hành vi). Brief sai lệnh grep `package:image` (khớp cả `image_picker`) → kiểm `package:image/` thay thế.
 
 ## Lần thử / blocker
 
@@ -58,7 +60,7 @@
 
 ## Bàn giao / bước tiếp theo
 
-- Merge PR W-402; rồi W-403 (brief mới, chờ W-402 vì chung `session_controller.dart`); W-104 từ 2026-10-18; Pha 4 re-audit.
+- Merge PR W-403; rồi Pha 4 re-audit; W-104 từ 2026-10-18; Pha 4 re-audit.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 

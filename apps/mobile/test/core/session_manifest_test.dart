@@ -253,4 +253,34 @@ void main() {
       expect(isValidOriginalPath('abc', 'originals/abc.jpg'), isFalse);
     });
   });
+
+  group('fileExtension (F-024)', () {
+    test('lowercases the text after the last dot of the file name', () {
+      expect(fileExtension('a/b.JPG'), 'jpg');
+      expect(fileExtension(r'a\b.png'), 'png');
+    });
+
+    test('is null when the file name has no dot', () {
+      expect(fileExtension('a.b/c'), isNull);
+      expect(fileExtension('noext'), isNull);
+    });
+
+    test('is empty for a trailing dot', () {
+      expect(fileExtension('x.'), '');
+    });
+  });
+
+  group('isValidExtension (F-024)', () {
+    test('accepts 1-5 lowercase letters or digits', () {
+      for (final ext in ['jpg', 'heic', 'jpeg2']) {
+        expect(isValidExtension(ext), isTrue, reason: ext);
+      }
+    });
+
+    test('rejects empty, too long, uppercase and other characters', () {
+      for (final ext in ['', 'jpegxl', 'JPG', 'j-g']) {
+        expect(isValidExtension(ext), isFalse, reason: ext);
+      }
+    });
+  });
 }

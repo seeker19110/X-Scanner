@@ -21,11 +21,10 @@
 | Màu / theme | Chỉ `Theme.of(context).colorScheme`; seed duy nhất ở `lib/app/theme.dart`; mặc định Dark | `lib/app/theme.dart` | |
 | Nút icon | Có `tooltip` (là nhãn trình đọc màn hình); vùng chạm ≥ 48 dp | `review_screen.dart` | |
 | Chuỗi UI | Tiếng Việt inline, `static const` khi dùng lại | `review_screen.dart` | Chưa có l10n (F-031, P2) |
-| Phần mở rộng / đường dẫn bản gốc | Một helper ở `core/session_manifest.dart` | `lib/core/session_manifest.dart` | Hợp nhất ở W-403 |
+| Phần mở rộng / đường dẫn bản gốc | `fileExtension` + `isValidExtension` ở `core/session_manifest.dart`; khuôn viết một lần | `lib/core/session_manifest.dart` | |
 | Trần cố ý | `DEBT: … \| trần: … \| xem lại khi: …` ngay tại chỗ | `lib/ui/quad_editor_screen.dart` | CLAUDE.md §3.7 |
 | Test sửa lỗi | Test tái hiện đỏ trước, ở lại làm hồi quy; khuôn lỗi ghi `TRAPS.md` | `test/storage/session_store_test.dart` | |
 
 ## Đang có NHIỀU KIỂU — cần hợp nhất
 
-- Khuôn phần mở rộng `[a-z0-9]{1,5}` viết 3 nơi; tách đuôi file viết 2 nơi (F-024) → một helper ở `core/session_manifest.dart`, W-403.
-- Đọc kích thước ảnh: `ui/quad_editor_screen.dart` import thẳng `package:image` (F-025) → `imaging/page_render.dart`, W-403.
+- Không còn mục nào (F-006 hợp nhất ở W-103, F-024/F-025 ở W-403).
