@@ -9,7 +9,8 @@ import '../core/page_quad.dart';
 import 'homography.dart';
 
 /// Largest decoded image (width × height) accepted, checked from the header
-/// before any pixel buffer is allocated.
+/// before any pixel buffer is allocated, and largest rectified output.
+// DEBT: 50 MP decode limit chosen without device memory measurement | trần: about 150 MB per decoded original | xem lại khi: P2 device benchmark (spec §2, §19).
 const int maxDecodedPixels = 50000000;
 
 /// The bytes could not be decoded into an image within limits.
@@ -57,15 +58,37 @@ img.Image decodeOriented(Uint8List bytes, {int maxPixels = maxDecodedPixels}) {
 /// Output size of [rectify]: the longer of each pair of opposite edges of
 /// [quad] measured in pixels of an [imageWidth] × [imageHeight] image,
 /// rounded and at least 1.
+///
+/// A skewed [quad] can measure more pixels than the image holds; a size
+/// above [maxPixels] is scaled down by the same factor on both sides,
+/// rounded down, so the aspect stays within one pixel. When a side is held
+/// at 1 the other is shortened to [maxPixels].
 ({int width, int height}) rectifiedSize(
   PageQuad quad,
   int imageWidth,
-  int imageHeight,
-) {
+  int imageHeight, {
+  int maxPixels = maxDecodedPixels,
+}) {
   final c = _pixelCorners(quad, imageWidth, imageHeight);
-  final width = max(c.tr.distanceTo(c.tl), c.br.distanceTo(c.bl));
-  final height = max(c.bl.distanceTo(c.tl), c.br.distanceTo(c.tr));
-  return (width: max(1, width.round()), height: max(1, height.round()));
+  var width = max(1, max(c.tr.distanceTo(c.tl), c.br.distanceTo(c.bl)).round());
+  var height = max(
+    1,
+    max(c.bl.distanceTo(c.tl), c.br.distanceTo(c.tr)).round(),
+  );
+  if (width * height > maxPixels) {
+    final scale = sqrt(maxPixels / (width * height));
+    width = max(1, (width * scale).floor());
+    height = max(1, (height * scale).floor());
+    // Left over only by a side held at 1 or by floating-point rounding.
+    if (width * height > maxPixels) {
+      if (width >= height) {
+        width = max(1, maxPixels ~/ height);
+      } else {
+        height = max(1, maxPixels ~/ width);
+      }
+    }
+  }
+  return (width: width, height: height);
 }
 
 /// Perspective-corrects the [quad] region of [source] into a new upright
@@ -75,12 +98,16 @@ img.Image decodeOriented(Uint8List bytes, {int maxPixels = maxDecodedPixels}) {
 /// Sample positions are clamped to the outermost pixel centres so border
 /// samples never blend in out-of-range (black) pixels. Non-8-bit or
 /// palette sources are first converted to 8-bit so channel values are
-/// rescaled rather than truncated.
-img.Image rectify(img.Image source, PageQuad quad) {
+/// rescaled rather than truncated. The output holds at most [maxPixels].
+img.Image rectify(
+  img.Image source,
+  PageQuad quad, {
+  int maxPixels = maxDecodedPixels,
+}) {
   final src = source.format == img.Format.uint8 && !source.hasPalette
       ? source
       : source.convert(format: img.Format.uint8, noAnimation: true);
-  final size = rectifiedSize(quad, src.width, src.height);
+  final size = rectifiedSize(quad, src.width, src.height, maxPixels: maxPixels);
   final c = _pixelCorners(quad, src.width, src.height);
   final homography = Homography.unitSquareTo(
     topLeft: c.tl,
@@ -117,7 +144,8 @@ img.Image rectify(img.Image source, PageQuad quad) {
 enum RenderFormat { jpeg, png }
 
 /// Decodes [originalBytes], rectifies [quad], rotates clockwise by
-/// [quarterTurns] × 90° and encodes as [format].
+/// [quarterTurns] × 90° and encodes as [format]. Both the decoded original
+/// and the rectified page hold at most [maxPixels].
 ///
 /// Throws [ImageDecodeFailure] if the original cannot be decoded.
 Uint8List renderPageSync(
@@ -127,7 +155,11 @@ Uint8List renderPageSync(
   RenderFormat format = RenderFormat.jpeg,
   int maxPixels = maxDecodedPixels,
 }) {
-  var page = rectify(decodeOriented(originalBytes, maxPixels: maxPixels), quad);
+  var page = rectify(
+    decodeOriented(originalBytes, maxPixels: maxPixels),
+    quad,
+    maxPixels: maxPixels,
+  );
   if (quarterTurns != 0) {
     page = img.copyRotate(page, angle: 90 * quarterTurns);
   }

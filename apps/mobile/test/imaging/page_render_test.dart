@@ -60,6 +60,32 @@ void main() {
       final size = rectifiedSize(tiny, 1, 1);
       expect((size.width, size.height), (1, 1));
     });
+
+    test('scales an output above the ceiling down, keeping the aspect', () {
+      // Unlimited: 321 × 214 = 68694 px (AC-5).
+      final size = rectifiedSize(ac5Quad(), 400, 300, maxPixels: 10000);
+      expect(size.width * size.height, lessThanOrEqualTo(10000));
+      expect((size.width, size.height), (122, 81));
+      expect(
+        (size.width * ac5Height / ac5Width - size.height).abs(),
+        lessThanOrEqualTo(1),
+      );
+    });
+
+    test('leaves an output exactly at the ceiling unchanged', () {
+      final size = rectifiedSize(
+        ac5Quad(),
+        400,
+        300,
+        maxPixels: ac5Width * ac5Height,
+      );
+      expect((size.width, size.height), (ac5Width, ac5Height));
+    });
+
+    test('a side held at one pixel shortens the other to the ceiling', () {
+      final size = rectifiedSize(PageQuad.fullFrame, 1000, 1, maxPixels: 100);
+      expect((size.width, size.height), (100, 1));
+    });
   });
 
   group('decodeOriented', () {
@@ -207,6 +233,30 @@ void main() {
       expect((decoded.width, decoded.height), (40, 20));
       expectRgb(decoded, 10, 10, [255, 0, 0]);
       expectRgb(decoded, 30, 10, [0, 0, 255]);
+    });
+
+    test('a skewed quad cannot render above the pixel ceiling', () {
+      // A diamond on a 400×100 image has four edges of √(200²+50²) ≈ 206 px,
+      // so its unlimited output (206 × 206 = 42436 px) is larger than the
+      // 40000 px original that is itself exactly at the ceiling.
+      final diamond = quadOf([0, 0.5, 0.5, 0, 1, 0.5, 0.5, 1]);
+      final unlimited = rectifiedSize(diamond, 400, 100);
+      expect(unlimited.width * unlimited.height, greaterThan(40000));
+
+      final out = renderPageSync(
+        pngOf(solid(400, 100, 50, 60, 70)),
+        diamond,
+        0,
+        format: RenderFormat.png,
+        maxPixels: 40000,
+      );
+      final decoded = img.decodePng(out)!;
+      expect(decoded.width * decoded.height, lessThanOrEqualTo(40000));
+      expect(
+        (decoded.width * unlimited.height / unlimited.width - decoded.height)
+            .abs(),
+        lessThanOrEqualTo(1),
+      );
     });
 
     test('propagates decode failures', () {

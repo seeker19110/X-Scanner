@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:math';
 import 'dart:typed_data';
 
 import '../core/page_quad.dart';
@@ -41,9 +43,10 @@ class PageExporter {
   static const String _baseName = 'X-Scanner';
 
   /// Renders [pages] in order, one at a time, from the originals given by
-  /// [originalOf] and writes them as [format]: one `X-Scanner.pdf`, or one
-  /// `X-Scanner-trang-NN.jpg`/`.png` per page. Returns the files in page
-  /// order.
+  /// [originalOf] and writes them as [format]: one `X-Scanner.pdf`, built
+  /// in a background isolate, or one `X-Scanner-trang-NN.jpg`/`.png` per
+  /// page, numbered with at least two digits and as many as the page count
+  /// needs so names sort in page order. Returns the files in page order.
   ///
   /// Throws [ArgumentError] for an empty [pages]. Any other failure removes
   /// the exported files and is rethrown.
@@ -52,6 +55,7 @@ class PageExporter {
     File Function(ScanPage page) originalOf,
     ExportFormat format,
   ) async {
+    // DEBT: a PDF holds every rendered page in memory | trần: about 100 pages of 12 MP on a 4 GB device, not measured | xem lại khi: P2 measures export on devices (spec §2).
     if (pages.isEmpty) {
       throw ArgumentError.value(pages, 'pages', 'must not be empty');
     }
@@ -96,8 +100,13 @@ class PageExporter {
     for (final page in pages) {
       images.add(await _render(page, originalOf, RenderFormat.jpeg));
     }
-    return _write('$_baseName.pdf', await buildPdf(images));
+    return _write('$_baseName.pdf', await _buildPdfInIsolate(images));
   }
+
+  /// Runs [buildPdf] off the UI isolate. Static so the closure captures
+  /// only [images]; a [PdfException] is rethrown here as it was raised.
+  static Future<Uint8List> _buildPdfInIsolate(List<Uint8List> images) =>
+      Isolate.run(() => buildPdf(images));
 
   Future<List<File>> _writeImages(
     List<ScanPage> pages,
@@ -107,10 +116,11 @@ class PageExporter {
     final (renderFormat, extension) = format == ExportFormat.png
         ? (RenderFormat.png, 'png')
         : (RenderFormat.jpeg, 'jpg');
+    final digits = max(2, '${pages.length}'.length);
     final files = <File>[];
     for (var i = 0; i < pages.length; i++) {
       final bytes = await _render(pages[i], originalOf, renderFormat);
-      final number = '${i + 1}'.padLeft(2, '0');
+      final number = '${i + 1}'.padLeft(digits, '0');
       files.add(await _write('$_baseName-trang-$number.$extension', bytes));
     }
     return List.unmodifiable(files);
