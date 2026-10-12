@@ -131,8 +131,17 @@ class P1Migration {
     final docId = journal.docId;
     if (journal.state == _State.committed ||
         await _isDirectory(_document(docId))) {
-      // The folder is only renamed into place after verification.
-      return _finish(docId);
+      // The folder is only renamed into place after verification, but the
+      // disk may not have kept the renames in order: check it again.
+      if (await _isComplete(docId)) {
+        return _finish(docId);
+      }
+      if (!await _exists(_sessionManifest)) {
+        // Never guess: the P1 data may now be only in a rollback copy.
+        return const MigrationFailed(MigrationFailure.io);
+      }
+      // Copies again; step 6 never replaces an existing folder.
+      return _migrate(docId);
     }
     if (!await _exists(_sessionManifest)) {
       await _abandon(docId);
@@ -203,7 +212,7 @@ class P1Migration {
   /// Step 1: `null` when the manifest is not a readable schema 1 file or a
   /// referenced original is not a regular file.
   Future<_Source?> _readSource() async {
-    if (!await _isFile(_sessionManifest)) {
+    if (!await _isDirectory(_session) || !await _isFile(_sessionManifest)) {
       return null;
     }
     final manifest = File(_sessionManifest);
@@ -211,6 +220,10 @@ class P1Migration {
     try {
       session = decodeManifest(utf8.decode(await manifest.readAsBytes()));
     } on FormatException {
+      return null;
+    }
+    if (session.pages.isNotEmpty &&
+        !await _isDirectory('$_session/originals')) {
       return null;
     }
     var total = 0;
@@ -287,6 +300,7 @@ class P1Migration {
         await Directory(_session).rename(await _freeRollbackPath());
       }
       await File(_journal).delete();
+      await _deleteJournalTmp();
     } on FileSystemException {
       // The journal (or `session/`) remains; the next run completes step 7.
     }
@@ -359,6 +373,42 @@ class P1Migration {
   Future<void> _abandon(String docId) async {
     await _deleteQuietly(Directory(_part(docId)));
     await _deleteQuietly(File(_journal));
+    await _deleteJournalTmp();
+  }
+
+  /// Removes a `migration.json.tmp` left by a stop inside [_writeJournal].
+  Future<void> _deleteJournalTmp() async {
+    final tmp = '$_journal$_tmpSuffix';
+    if (await _exists(tmp)) {
+      await _deleteQuietly(File(tmp));
+    }
+  }
+
+  /// Whether `documents/{docId}` is a folder whose `document.json` reads as
+  /// document [docId] and whose originals are all regular files.
+  Future<bool> _isComplete(String docId) async {
+    final folder = _document(docId);
+    final manifest = '$folder/$_manifestName';
+    if (!await _isDirectory(folder) || !await _isFile(manifest)) {
+      return false;
+    }
+    final DocumentDecodeResult decoded;
+    try {
+      decoded = decodeDocument(utf8.decode(await File(manifest).readAsBytes()));
+    } on FormatException {
+      return false;
+    } on FileSystemException {
+      return false;
+    }
+    if (decoded is! DecodedDocument || decoded.document.id != docId) {
+      return false;
+    }
+    for (final page in decoded.document.pages) {
+      if (!await _isFile('$folder/${page.originalPath}')) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// Step 8 (FR-4): deletes `documents/{id}.part` folders left by an

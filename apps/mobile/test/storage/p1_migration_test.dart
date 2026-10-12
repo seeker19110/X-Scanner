@@ -418,12 +418,13 @@ void main() {
       String label,
     ) async {
       expectNoOriginalLost(pages, p1, label);
-      if (last is MigrationNotNeeded && session().existsSync()) {
-        expect(tree(session()), p1, reason: label);
-        expect(documentFolders(), isEmpty, reason: label);
-        return;
-      }
+      // The recovery runs inject nothing, so they must finish.
       expect(last, isA<MigrationDone>(), reason: label);
+      expect(
+        File(at('migration.json.tmp')).existsSync(),
+        isFalse,
+        reason: label,
+      );
       final docId = documentFolders().single;
       await expectMigrated(docId, pages, p1);
       expect(session().existsSync(), isFalse, reason: label);
@@ -586,6 +587,15 @@ void main() {
       expect(documents().existsSync(), isFalse);
     });
 
+    test('session/originals that is a link', () async {
+      writeP1(1);
+      Directory(at('session/originals')).renameSync(at('outside'));
+      Link(at('session/originals')).createSync(at('outside'));
+      final before = tree(root);
+      expect(await migration().run(), isA<MigrationSourceUnreadable>());
+      expect(tree(root), before);
+    });
+
     test('a copying journal and its .part are removed', () async {
       writeP1(1);
       File(at('session/session.json')).writeAsStringSync('[]');
@@ -724,6 +734,60 @@ void main() {
         expect(journal().existsSync(), isFalse);
       });
     }
+
+    test('committed whose folder is missing copies again and keeps '
+        'session/ until the copy is committed', () async {
+      final pages = writeP1(3);
+      final p1 = await afterCommit('committed');
+      Directory(at('documents/$_docA')).renameSync(at('documents/$_docA.part'));
+      final outcome = await migration(newDocId: () => _docB).run();
+      expect((outcome as MigrationDone).docId, _docA);
+      await expectMigrated(_docA, pages, p1);
+      expect(tree(Directory(at('session.migrated'))), p1);
+      expect(journal().existsSync(), isFalse);
+    });
+
+    test(
+      'copying with an empty document folder never moves session/',
+      () async {
+        final pages = writeP1(2);
+        final p1 = tree(session());
+        journal().writeAsStringSync(
+          jsonEncode({'version': 1, 'state': 'copying', 'docId': _docA}),
+        );
+        Directory(at('documents/$_docA')).createSync(recursive: true);
+        final first = await migration().run();
+        expect((first as MigrationFailed).reason, MigrationFailure.io);
+        expect(tree(session()), p1);
+        expect(rollbacks(), isEmpty);
+        final next = await migration(newDocId: () => _docB).run();
+        expect((next as MigrationDone).docId, _docB);
+        expect(tree(Directory(at('session.migrated'))), p1);
+        for (final page in pages) {
+          expect(
+            File(at('documents/$_docB/${page.originalPath}')).readAsBytesSync(),
+            p1[page.originalPath],
+          );
+        }
+      },
+    );
+
+    test('committed whose document is incomplete and without session/ '
+        'changes nothing', () async {
+      writeP1(1);
+      expect(
+        await migration(newDocId: () => _docA).run(),
+        isA<MigrationDone>(),
+      );
+      File(at('documents/$_docA/document.json')).deleteSync();
+      journal().writeAsStringSync(
+        jsonEncode({'version': 1, 'state': 'committed', 'docId': _docA}),
+      );
+      final before = tree(root);
+      final outcome = await migration().run();
+      expect((outcome as MigrationFailed).reason, MigrationFailure.io);
+      expect(tree(root), before);
+    });
 
     test('committed without session/ only removes the journal', () async {
       final pages = writeP1(1);
