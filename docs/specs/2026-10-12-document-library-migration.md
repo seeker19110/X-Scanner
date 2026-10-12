@@ -4,8 +4,8 @@
 | --- | --- |
 | Issue / Goal | XS-09 của `docs/plans/2026-10-12-comprehensive-development-plan.md` (§6.1, §13) · Work ID `2026-10-12-xs09-document-library-spec` |
 | Spec owner | Phiên chính (Claude Code) |
-| State | **Approved for implementation** — phạm vi PR-1..PR-3 (§17); PR-4 chờ chủ repo |
-| Approver / date | Phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12 — chỉ PR-1..PR-3 |
+| State | **Approved for implementation** — PR-1..PR-3 (§3d), PR-4a (chủ repo); PR-4b chờ chủ repo |
+| Approver / date | Phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12 — PR-1..PR-3; chủ repo duyệt PR-4a 2026-10-12 |
 | Last updated | 2026-10-12 |
 
 > Mức **L**: đổi bố cục lưu trữ dữ liệu thật của người dùng (migration). PR-1..PR-3 chỉ thêm code không nối vào app, không
@@ -230,9 +230,9 @@ vi có test đỏ trước (ADR-0005).
 | AC-8 | `apps/mobile/test/storage/p1_migration_test.dart::one byte short fails and changes nothing` | + `exactly enough succeeds` |
 | AC-9 | `apps/mobile/test/storage/p1_migration_test.dart::AC-9 unreadable P1 data` | JSON rác, UTF-8 sai, bản gốc thiếu hoặc là link; thông báo UI ở PR-4 |
 | AC-10 | `apps/mobile/test/storage/library_store_test.dart::a garbage manifest and a mismatched id are unreadable` | + thiếu `document.json`, UTF-8 sai; `apps/mobile/test/storage/document_store_test.dart` cách ly id khác tên thư mục |
-| AC-11 | chưa có — PR-4 | widget test |
-| AC-12 | chưa có — PR-4 | |
-| AC-13 | chưa có — PR-4 | test P1 chạy trên màn tài liệu |
+| AC-11 | chưa có — PR-4a | widget test |
+| AC-12 | chưa có — PR-4a | |
+| AC-13 | chưa có — PR-4b | test P1 chạy trên màn tài liệu |
 | AC-14 | `apps/mobile/test/storage/p1_migration_test.dart::later runs are not needed and change nothing` | + bản quay lại cũ không bị thay (`session.migrated-2`) |
 
 ## 17. Slice/PR plan
@@ -242,7 +242,12 @@ Tuần tự (cùng lớp lưu trữ), mỗi PR một outcome, app vẫn chạy b
 - PR-1: mô hình + codec schema 1/2 + revision (AC-1, AC-2, AC-3, AC-5). Không nối vào app.
 - PR-2: `DocumentStore` + `LibraryStore` (AC-4, AC-10). Không nối vào app.
 - PR-3: migration + nhật ký + phục hồi + tiêm lỗi (AC-6..AC-9, AC-14). Không nối vào app.
-- PR-4: màn thư viện + màn tài liệu + nối `main.dart` (AC-11..AC-13). **Chỉ PR này đổi hành vi** — chờ chủ repo duyệt (Approval).
+- PR-4 tách hai PR:
+  - PR-4a: `LibraryController` + `LibraryScreen` (trạng thái §6, tạo, đổi tên, thông báo migration), màn tài liệu và
+    migration tiêm từ ngoài (AC-11, AC-12; phần UI của AC-8, AC-9). **Không nối vào app**, không chạm dữ liệu thật — chủ
+    repo duyệt 2026-10-12 ("chỉ làm PR đóng hồ sơ XS-12a và PR-4a").
+  - PR-4b: `SessionController`/`ReviewScreen` chạy trên `DocumentStore` (FR-8), nối `main.dart` (migration → thư viện), gỡ
+    `SessionStore` (AC-13). **Chỉ PR này đổi hành vi** — vẫn chờ chủ repo duyệt (Approval).
 
 ## 18. Rollout/rollback
 
@@ -267,12 +272,13 @@ D-2..D-5 đã chốt. Giả định downgrade và việc bật migration trên d
 ## Approval
 
 - [x] Product/scope — PR-1..PR-3
-- [ ] UX/a11y — PR-4, chủ repo
+- [x] UX/a11y — PR-4a (§6, §10), chủ repo 2026-10-12; PR-4b chờ chủ repo
 - [x] Architecture/API/data — ADR-0011
 - [x] Security/privacy/cost — §14; không dependency, không chi phí
 - [x] Test/telemetry/rollout/rollback — §16; PR-4 là công tắc duy nhất (§18)
 - [x] Blocking decisions closed (D-2..D-5) — cho PR-1..PR-3
 
-**Conclusion:** **Approved for implementation** — phạm vi PR-1..PR-3 (không nối vào app, không chạm dữ liệu thật); PR-4 chờ
-chủ repo
-**Approver/date:** Phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12
+**Conclusion:** **Approved for implementation** — phạm vi PR-1..PR-3 và PR-4a (không nối vào app, không chạm dữ liệu thật);
+PR-4b chờ chủ repo
+**Approver/date:** Phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12 — PR-1..PR-3; chủ repo duyệt PR-4a trong
+phiên, 2026-10-12
