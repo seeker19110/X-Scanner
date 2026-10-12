@@ -6,6 +6,7 @@
 ## Bắt đầu
 
 - [Gợi ý sản phẩm, repo tham khảo và depth](docs/research/2026-10-11-scanner-product-suggestions.md): ADVISORY.
+- [Kế hoạch phát triển toàn diện](docs/plans/2026-10-12-comprehensive-development-plan.md): M0–M5, depth và 33 đầu việc XS-01..XS-33; đề xuất, chưa phải phê duyệt triển khai toàn bộ.
 - [Stack: ADR-0002](docs/adr/0002-flutter-android-first-stack.md), [ADR-0003 lựa chọn P1](docs/adr/0003-p1-system-camera-dart-imaging-pdf.md), [spec P0 nền](docs/specs/2026-10-11-p0-foundation.md), [spec P1 scan và xuất](docs/specs/2026-10-11-p1-scan-export.md).
 - [Bản đồ tính năng](docs/FEATURE-MAP.md), [sửa ở đâu](CODEMAP.md), [quy ước](docs/CONVENTIONS.md), [kế hoạch hoàn thiện](docs/ops/COMPLETION-PLAN.md).
 - [Phạm vi](PROJECT.md), [tiến độ](PROGRESS.md), [hướng dẫn agent](AGENTS.md).

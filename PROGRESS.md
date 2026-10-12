@@ -36,3 +36,10 @@ Release, tự merge, dịch vụ ngoài và tác vụ định kỳ chưa bật. 
 
 Doctor/gate đã chạy thành công: https://github.com/seeker19110/X-Scanner/actions/runs/38146360953
 Chỉ xác nhận repository/framework, không xác nhận app.
+
+## 2026-10-12: kế hoạch phát triển toàn diện
+
+Hồ sơ: [2026-10-12-comprehensive-development-plan](docs/work/2026-10-12-comprehensive-development-plan/working.md).
+Tài liệu: [Kế hoạch M0–M5 và nhánh depth](docs/plans/2026-10-12-comprehensive-development-plan.md), gồm 33 đầu việc XS-01..XS-33.
+Phạm vi được yêu cầu ở lượt này: lưu bản kế hoạch, commit và tạo PR vào `main`; không merge hoặc triển khai ứng dụng.
+Kế hoạch giữ trạng thái DRAFT/đề xuất, các chỉ tiêu là mục tiêu chưa nghiệm thu; không thay thế trạng thái thực trong hồ sơ P1.
