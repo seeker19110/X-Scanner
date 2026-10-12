@@ -220,11 +220,11 @@ vi có test đỏ trước (ADR-0005).
 
 | AC | Bằng chứng | Ghi chú |
 | --- | --- | --- |
-| AC-1 | chưa có — PR-1 | `test/core/` |
-| AC-2 | chưa có — PR-1 | fixture schema 1 từ test P1 |
-| AC-3 | chưa có — PR-1 | |
+| AC-1 | `apps/mobile/test/core/session_manifest_test.dart::keeps every field of a document with 3 pages` | + `keeps a document without pages`, `decodes the documented example` |
+| AC-2 | `apps/mobile/test/core/session_manifest_test.dart::schema 1 reads as one document with revision 0 (AC-2)` | |
+| AC-3 | `apps/mobile/test/core/session_manifest_test.dart::decode rejects (AC-3)` | mỗi ca kiểm message có tên trường, không có giá trị; + `apps/mobile/test/core/scan_document_test.dart::a bad title without echoing it in the error` |
 | AC-4 | chưa có — PR-2 | `test/storage/` |
-| AC-5 | chưa có — PR-1 | |
+| AC-5 | `apps/mobile/test/core/scan_page_test.dart::every recipe edit adds 1 and keeps id, original and the old page` | + `an edit to the same value still adds 1`; chụp lại revision 0: `apps/mobile/test/ui/session_controller_test.dart::retake and clearAll` |
 | AC-6 | chưa có — PR-3 | |
 | AC-7 | chưa có — PR-3 | tiêm lỗi từng bước 2–7 |
 | AC-8 | chưa có — PR-3 | |

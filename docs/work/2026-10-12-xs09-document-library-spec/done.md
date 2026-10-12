@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-xs09-document-library-spec
 - Yêu cầu / outcome: `/auto-complete` lần 7 (2026-10-12) — phiên chính chọn viết **nháp** spec XS-09 (kế hoạch #23 §6.1, §13; consumer đầu tiên của hợp đồng XS-08/ADR-0004). Outcome: spec Draft `docs/specs/2026-10-12-document-library-migration.md` chờ chủ repo duyệt.
-- Trạng thái: Approved for implementation cho PR-1..PR-3 (phiên chính, §3d, 2026-10-12); PR-4 chờ chủ repo. Nháp đã merge ở #29 `ed06e58`; PR duyệt đang mở.
+- Trạng thái: Done — nháp #29 `ed06e58`, duyệt PR-1..PR-3 #30 `508f057`; PR-4 chờ chủ repo.
 - Chủ trì / writer: phiên chính, một writer.
 - Mức rủi ro / số PR: S cho PR này (chỉ tài liệu); XS-09 là mức L (migration dữ liệu thật), dự kiến 4 PR tuần tự (§17).
 - Scope / non-goal: thư viện (liệt kê/tạo/mở/đổi tên), lưu trữ theo tài liệu, migration P1 → một tài liệu. Non-goal: xoá/thùng rác/phục hồi (XS-10), tìm kiếm/thẻ/gộp/tách, thumbnail theo revision (XS-13), SQLite, code.
@@ -43,6 +43,6 @@ Một PR tài liệu: spec Draft + hồ sơ này + dòng trỏ ở PROGRESS. Duy
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
-<DoD, mọi PR MERGED + merge SHA và main đã đối chiếu, giới hạn/rủi ro còn lại,
-ngày và người nghiệm thu theo ủy quyền. Khi đủ điều kiện rename working.md → done.md
-trong cùng thư mục; không overwrite lịch sử. Chưa có PR/merge thì giữ working.md.>
+- Outcome đạt: spec XS-09 nháp merged #29 `ed06e58`; duyệt PR-1..PR-3 + D-2..D-5 + ADR-0011 merged #30 `508f057` (CI "Framework and Android app gate" xanh trên `8911cd7`). `main` đã đối chiếu 2026-10-12T13:32Z.
+- Còn lại (ngoài hồ sơ này): code PR-1..PR-3 ở `docs/work/2026-10-12-xs09-document-library/`; PR-4 chờ chủ repo.
+- Nghiệm thu: phiên chính theo ủy quyền §3d, 2026-10-12.

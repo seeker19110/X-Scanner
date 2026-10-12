@@ -12,9 +12,9 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 
 | Muốn | Sửa | Rồi chạy |
 | --- | --- | --- |
-| Đổi mô hình trang (quad, xoay) hoặc phiên | `lib/core/page_quad.dart`, `lib/core/scan_page.dart`, `lib/core/scan_session.dart` | `cd apps/mobile && flutter test test/core` |
+| Đổi mô hình trang (quad, xoay, `revision`), phiên hoặc tài liệu (XS-09) | `lib/core/page_quad.dart`, `lib/core/scan_page.dart`, `lib/core/scan_session.dart`, `lib/core/scan_document.dart` | `cd apps/mobile && flutter test test/core` |
 | Đổi luật kéo góc (lồi, diện tích tối thiểu, kẹp) | `lib/core/quad_editing.dart` | `flutter test test/core/quad_editing_test.dart test/ui/quad_editor_screen_test.dart` |
-| Đổi định dạng manifest phiên | `lib/core/session_manifest.dart` (tăng `schemaVersion`, giữ đọc bản cũ hoặc cách ly) | `flutter test test/core/session_manifest_test.dart test/storage` |
+| Đổi định dạng manifest phiên (schema 1) hoặc `document.json` (schema 2, XS-08 §13) | `lib/core/session_manifest.dart` (tăng `schemaVersion`, giữ đọc bản cũ; schema mới hơn → `DocumentNeedsAppUpdate`, không cách ly) | `flutter test test/core/session_manifest_test.dart test/storage` |
 | Đổi cách lưu/khôi phục/cách ly phiên, giữ bản gốc | `lib/storage/session_store.dart` | `flutter test test/storage` — mọi ca mất dữ liệu phải có test đỏ trước |
 | Đổi thuật toán nắn phối cảnh | `lib/imaging/homography.dart` | `flutter test test/imaging` |
 | Đổi giải mã/EXIF/giới hạn điểm ảnh/thumbnail | `lib/imaging/page_render.dart` | `flutter test test/imaging test/export` |

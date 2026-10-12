@@ -71,6 +71,44 @@ void main() {
     expect(fromThree.rotatedClockwise().quarterTurns, 0);
   });
 
+  group('revision (XS-08 FR-2, FR-3)', () {
+    test('defaults to 0', () {
+      expect(ScanPage(id: 'p1', originalPath: 'o').revision, 0);
+    });
+
+    test('rejects a negative revision', () {
+      expect(
+        () => ScanPage(id: 'p1', originalPath: 'o', revision: -1),
+        throwsArgumentError,
+      );
+    });
+
+    test(
+      'every recipe edit adds 1 and keeps id, original and the old page',
+      () {
+        final page = ScanPage(id: 'p1', originalPath: 'o', revision: 4);
+
+        final cropped = page.withQuad(_cropped);
+        expect(cropped.revision, 5);
+        expect(cropped.id, 'p1');
+        expect(cropped.originalPath, 'o');
+
+        final rotated = page.rotatedClockwise();
+        expect(rotated.revision, 5);
+        expect(rotated.id, 'p1');
+        expect(rotated.originalPath, 'o');
+
+        expect(cropped.rotatedClockwise().revision, 6);
+        expect(page.revision, 4);
+      },
+    );
+
+    test('an edit to the same value still adds 1', () {
+      final page = ScanPage(id: 'p1', originalPath: 'o', revision: 4);
+      expect(page.withQuad(PageQuad.fullFrame).revision, 5);
+    });
+  });
+
   test('rejects empty or blank id and originalPath', () {
     expect(() => ScanPage(id: '', originalPath: 'o'), throwsArgumentError);
     expect(() => ScanPage(id: '  \t', originalPath: 'o'), throwsArgumentError);

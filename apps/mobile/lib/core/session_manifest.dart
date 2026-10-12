@@ -2,11 +2,15 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'page_quad.dart';
+import 'scan_document.dart';
 import 'scan_page.dart';
 import 'scan_session.dart';
 
 /// Version of the `session.json` layout written by [encodeManifest].
 const int manifestSchemaVersion = 1;
+
+/// Version of the `document.json` layout written by [encodeDocument].
+const int documentSchemaVersion = 2;
 
 /// Allowed original file extension: 1–5 lowercase letters or digits.
 const String _extension = '[a-z0-9]{1,5}';
@@ -15,6 +19,11 @@ final RegExp _pageIdPattern = RegExp(r'^[0-9a-f]{32}$');
 final RegExp _extensionPattern = RegExp('^$_extension\$');
 final RegExp _originalPathPattern = RegExp(
   '^originals/([0-9a-f]{32})\\.($_extension)\$',
+);
+
+/// A stored time: ISO-8601 in UTC with `Z` and at most microseconds.
+final RegExp _utcTimePattern = RegExp(
+  r'^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d{1,6})?Z$',
 );
 
 /// Number of coordinates in a serialized quad (x, y for TL, TR, BR, BL).
@@ -53,7 +62,38 @@ String encodeManifest(ScanSession session) {
   return jsonEncode({'schemaVersion': manifestSchemaVersion, 'pages': pages});
 }
 
-Map<String, Object> _encodePage(ScanPage page) {
+/// Serializes [document] as a `document.json` (schema 2).
+///
+/// Throws [ArgumentError] if a page has an invalid id or original path, or a
+/// time cannot be written in a form [decodeDocument] accepts, so an
+/// unreadable document is never written.
+String encodeDocument(ScanDocument document) {
+  final pages = [
+    for (final page in document.pages) _encodePage(page, withRevision: true),
+  ];
+  return jsonEncode({
+    'schemaVersion': documentSchemaVersion,
+    'document': {
+      'id': document.id,
+      'title': document.title,
+      'createdAt': _encodeTime(document.createdAt),
+      'updatedAt': _encodeTime(document.updatedAt),
+    },
+    'pages': pages,
+  });
+}
+
+/// [ScanDocument] keeps times in UTC, so this always ends in `Z`; only
+/// years outside 0000–9999 do not fit the stored form.
+String _encodeTime(DateTime time) {
+  final text = time.toUtc().toIso8601String();
+  if (!_utcTimePattern.hasMatch(text)) {
+    throw ArgumentError('document has a time outside years 0000-9999');
+  }
+  return text;
+}
+
+Map<String, Object> _encodePage(ScanPage page, {bool withRevision = false}) {
   if (!isValidPageId(page.id)) {
     throw ArgumentError('page has an invalid id');
   }
@@ -71,6 +111,7 @@ Map<String, Object> _encodePage(ScanPage page) {
       ],
     ],
     'quarterTurns': page.quarterTurns,
+    if (withRevision) 'revision': page.revision,
   };
 }
 
@@ -79,39 +120,140 @@ Map<String, Object> _encodePage(ScanPage page) {
 /// Any deviation from the schema throws [FormatException] whose message
 /// names only the offending field and page index, never user content.
 ScanSession decodeManifest(String json) {
-  final Object? root;
-  try {
-    root = jsonDecode(json);
-  } on FormatException {
-    // Rethrown without the source so the manifest content is not exposed.
-    throw const FormatException('manifest is not valid JSON');
-  }
-  if (root is! Map<String, Object?>) {
-    throw const FormatException('root: must be a JSON object');
-  }
+  final root = _decodeRoot(json, 'manifest');
   final version = root['schemaVersion'];
   if (version is! int || version != manifestSchemaVersion) {
     throw const FormatException(
       'schemaVersion: must be the integer $manifestSchemaVersion',
     );
   }
-  final rawPages = root['pages'];
-  if (rawPages is! List<Object?>) {
+  return ScanSession(pages: _decodePages(root['pages']));
+}
+
+/// Result of [decodeDocument].
+sealed class DocumentDecodeResult {
+  const DocumentDecodeResult();
+}
+
+/// A valid schema 2 document.
+final class DecodedDocument extends DocumentDecodeResult {
+  const DecodedDocument(this.document);
+
+  final ScanDocument document;
+}
+
+/// The file has a newer schema than this app knows (XS-08 FR-7): it is not
+/// damaged and must be neither quarantined nor deleted.
+final class DocumentNeedsAppUpdate extends DocumentDecodeResult {
+  const DocumentNeedsAppUpdate();
+}
+
+/// Parses and validates a `document.json` (schema 2).
+///
+/// A newer integer `schemaVersion` gives [DocumentNeedsAppUpdate] without
+/// checking the rest. Any other deviation throws [FormatException] whose
+/// message names only the offending field and page index, never user
+/// content.
+DocumentDecodeResult decodeDocument(String json) {
+  final root = _decodeRoot(json, 'document');
+  final version = root['schemaVersion'];
+  if (version is int && version > documentSchemaVersion) {
+    return const DocumentNeedsAppUpdate();
+  }
+  if (version is! int || version != documentSchemaVersion) {
+    throw const FormatException(
+      'schemaVersion: must be the integer $documentSchemaVersion',
+    );
+  }
+  final raw = root['document'];
+  if (raw is! Map<String, Object?>) {
+    throw const FormatException('document: must be a JSON object');
+  }
+  final id = raw['id'];
+  if (id is! String || !isValidPageId(id)) {
+    throw const FormatException(
+      'document.id: must be 32 lowercase hex characters',
+    );
+  }
+  final title = raw['title'];
+  if (title is! String || !isValidDocumentTitle(title)) {
+    throw const FormatException(
+      'document.title: must be 1-120 characters without surrounding spaces '
+      'or control characters',
+    );
+  }
+  final createdAt = _decodeTime(raw['createdAt'], 'document.createdAt');
+  final updatedAt = _decodeTime(raw['updatedAt'], 'document.updatedAt');
+  if (updatedAt.isBefore(createdAt)) {
+    throw const FormatException(
+      'document.updatedAt: must not be before createdAt',
+    );
+  }
+  return DecodedDocument(
+    ScanDocument(
+      id: id,
+      title: title,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      pages: _decodePages(root['pages'], withRevision: true),
+    ),
+  );
+}
+
+/// Decodes [json] into a root object; [name] labels the JSON error.
+Map<String, Object?> _decodeRoot(String json, String name) {
+  final Object? root;
+  try {
+    root = jsonDecode(json);
+  } on FormatException {
+    // Rethrown without the source so the file content is not exposed.
+    throw FormatException('$name is not valid JSON');
+  }
+  if (root is! Map<String, Object?>) {
+    throw const FormatException('root: must be a JSON object');
+  }
+  return root;
+}
+
+List<ScanPage> _decodePages(Object? raw, {bool withRevision = false}) {
+  if (raw is! List<Object?>) {
     throw const FormatException('pages: must be a list');
   }
   final pages = <ScanPage>[];
   final seen = <String>{};
-  for (var i = 0; i < rawPages.length; i++) {
-    final page = _decodePage(rawPages[i], 'pages[$i]');
+  for (var i = 0; i < raw.length; i++) {
+    final page = _decodePage(raw[i], 'pages[$i]', withRevision: withRevision);
     if (!seen.add(page.id)) {
       throw FormatException('pages[$i].id: duplicate id');
     }
     pages.add(page);
   }
-  return ScanSession(pages: pages);
+  return pages;
 }
 
-ScanPage _decodePage(Object? raw, String field) {
+/// Reads a time written by [_encodeTime]. [DateTime.parse] rolls over
+/// out-of-range fields (`02-30` becomes `03-02`), so the parsed fields must
+/// equal the written ones.
+DateTime _decodeTime(Object? raw, String field) {
+  final match = raw is String ? _utcTimePattern.firstMatch(raw) : null;
+  final time = match == null ? null : DateTime.tryParse(raw! as String);
+  if (match == null ||
+      time == null ||
+      !time.isUtc ||
+      time.year != int.parse(match.group(1)!) ||
+      time.month != int.parse(match.group(2)!) ||
+      time.day != int.parse(match.group(3)!) ||
+      time.hour != int.parse(match.group(4)!) ||
+      time.minute != int.parse(match.group(5)!) ||
+      time.second != int.parse(match.group(6)!)) {
+    throw FormatException('$field: must be an ISO-8601 UTC time ending in Z');
+  }
+  return time;
+}
+
+/// Schema 1 ignores a `revision` field and gives revision 0; schema 2
+/// ([withRevision]) requires it.
+ScanPage _decodePage(Object? raw, String field, {bool withRevision = false}) {
   if (raw is! Map<String, Object?>) {
     throw FormatException('$field: must be a JSON object');
   }
@@ -130,11 +272,16 @@ ScanPage _decodePage(Object? raw, String field) {
   if (turns is! int || turns < 0 || turns > 3) {
     throw FormatException('$field.quarterTurns: must be an integer in 0..3');
   }
+  final revision = withRevision ? raw['revision'] : 0;
+  if (revision is! int || revision < 0) {
+    throw FormatException('$field.revision: must be a non-negative integer');
+  }
   return ScanPage(
     id: id,
     originalPath: original,
     quad: quad,
     quarterTurns: turns,
+    revision: revision,
   );
 }
 
