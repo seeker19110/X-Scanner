@@ -25,6 +25,7 @@
 - Giữ hai lựa chọn worker thêm ngoài brief: đọc thời điểm kiểm lịch chặt (`DateTime.tryParse` lăn `02-30` thành `03-02`) và `encodeDocument` từ chối năm ngoài 0000–9999 · loại bỏ đi cho đúng brief · bậc 1 (đọc ngày sai thành ngày khác là sai dữ liệu; ghi file không đọc lại được vi phạm "unreadable manifest is never written").
 - Ca AC-3 title 121 rune dùng `'SECRET-TITLE' + 'x'*109` thay mẫu brief (mẫu brief kết thúc bằng dấu cách nên rơi vào luật trim, không thử luật độ dài) · bậc 3 (test chứng minh đúng luật).
 - PR-1 worker: đỏ-trước có output (T1 `+48 -19`, T2 `+45 -38` với stub; compile đỏ trước đó), xanh `flutter test test/core/ test/ui/session_controller_test.dart` +191; gate worker PASS (+349) trên `d691d68` + diff; log ở scratchpad phiên.
+- Review PR-1 (`reviewer`): 0 Cao/Trung bình; 3 Thấp. F1 (thiếu ca giờ 24/phút 60/giây 60/7 chữ số thập phân + ngày nhuận hợp lệ) và F2 (title có dấu cách đầu/cuối, U+007F qua `decodeDocument`) đã thêm test; kiểm đột biến (bỏ so giờ/phút/giây) → 2 ca đỏ, ca giờ 24 vẫn bị chặn nhờ so ngày. F3 (AC-2 qua `decodeManifest` + constructor, không API riêng) giữ — đúng FR-6, ghi ở mô tả PR.
 
 ## Lần thử / blocker
 

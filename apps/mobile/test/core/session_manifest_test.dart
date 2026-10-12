@@ -546,6 +546,14 @@ void main() {
       });
     });
 
+    test('accepts a leap day', () {
+      final result = decodeDocument(
+        jsonEncode(_documentWith('createdAt', '2024-02-29T23:59:59Z')),
+      );
+      final document = (result as DecodedDocument).document;
+      expect(document.createdAt, DateTime.utc(2024, 2, 29, 23, 59, 59));
+    });
+
     group('decode rejects (AC-3)', () {
       const secret = 'SECRET-TITLE';
       // (input, field, user value that must not appear in the message)
@@ -604,6 +612,21 @@ void main() {
           'document.title',
           secret,
         ),
+        'title with a leading space': (
+          _documentWith('title', ' $secret'),
+          'document.title',
+          secret,
+        ),
+        'title with a trailing space': (
+          _documentWith('title', '$secret '),
+          'document.title',
+          secret,
+        ),
+        'title with U+007F': (
+          _documentWith('title', '$secret\u007f'),
+          'document.title',
+          secret,
+        ),
         'title not a string': (
           _documentWith('title', 7),
           'document.title',
@@ -629,6 +652,26 @@ void main() {
           _documentWith('createdAt', '2026-02-30T00:00:00Z'),
           'document.createdAt',
           '2026-02-30',
+        ),
+        'createdAt at hour 24': (
+          _documentWith('createdAt', '2026-10-12T24:00:00Z'),
+          'document.createdAt',
+          '2026-10-12T24',
+        ),
+        'createdAt at minute 60': (
+          _documentWith('createdAt', '2026-10-12T09:60:00Z'),
+          'document.createdAt',
+          '2026-10-12T09',
+        ),
+        'createdAt at second 60': (
+          _documentWith('createdAt', '2026-10-12T09:00:60Z'),
+          'document.createdAt',
+          '2026-10-12T09',
+        ),
+        'createdAt with 7 fraction digits': (
+          _documentWith('createdAt', '2026-10-12T09:00:00.1234567Z'),
+          'document.createdAt',
+          '2026-10-12T09',
         ),
         'createdAt not a string': (
           _documentWith('createdAt', 1),
