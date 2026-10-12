@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:x_scanner/app/theme.dart';
+import 'package:x_scanner/core/page_quad.dart';
 import 'package:x_scanner/core/scan_page.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
@@ -59,6 +60,11 @@ final Uint8List _thumb = img.encodePng(
   img.fill(img.Image(width: 40, height: 30), color: img.ColorRgb8(90, 90, 90)),
 );
 
+/// Renders the cropped preview in the test isolate: isolates do not run
+/// under the fake clock of widget tests.
+Future<Uint8List> _preview(Uint8List bytes, PageQuad quad, int turns) async =>
+    renderPageSync(bytes, quad, turns);
+
 /// Runs Android tap target, labelled tap target and text contrast checks.
 Future<void> _expectGuidelines(WidgetTester tester) async {
   await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
@@ -90,6 +96,7 @@ void main() {
           exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
           sharer: _Sharer(),
           thumbnailer: (_) async => _thumb,
+          previewer: _preview,
         );
         final file = File('${tmp.path}/p.png')..writeAsBytesSync(_thumb);
         source.captures.add(file.path);
@@ -110,7 +117,7 @@ void main() {
       );
       // The cached preview future completes on the real event loop.
       await tester.runAsync(
-        () => controller.thumbnailFor(controller.session.pages.single),
+        () => controller.croppedPreviewFor(controller.session.pages.single),
       );
       await tester.pumpAndSettle();
       expect(find.text('Trang 1'), findsOneWidget);
@@ -136,6 +143,7 @@ void main() {
               ),
               sharer: _Sharer(),
               thumbnailer: thumbs,
+              previewer: _preview,
             );
         Directory('${tmp.path}/session').createSync();
         final file = File('${tmp.path}/p.png')..writeAsBytesSync(_thumb);
@@ -145,7 +153,7 @@ void main() {
         await c.restore();
         // Fails on the real event loop; the screen then shows the error.
         await c
-            .thumbnailFor(c.session.pages.single)
+            .croppedPreviewFor(c.session.pages.single)
             .then<void>((_) {}, onError: (Object _) {});
         return c;
       }))!;

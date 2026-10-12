@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
+import '../core/page_quad.dart';
 import '../core/scan_page.dart';
 import '../core/scan_session.dart';
 import '../core/session_manifest.dart';
@@ -25,14 +26,18 @@ class SessionController extends ChangeNotifier {
   /// Creates a controller; [thumbnailer] decodes an image file into a
   /// preview and throws [ImageDecodeFailure] for unreadable images. The
   /// exporter's directory is cleared on [restore] and after every share.
-  /// Thumbnails and decode checks run through [decodeGate]; pass the gate
-  /// the exporter's renderer uses so only one original is decoded at once.
+  /// [previewer] renders a thumbnail cropped and rotated like an export
+  /// and throws [ImageDecodeFailure] for unreadable bytes.
+  /// Thumbnails, cropped previews and decode checks run through
+  /// [decodeGate]; pass the gate the exporter's renderer uses so only one
+  /// original is decoded at once.
   SessionController({
     required this._store,
     required this._source,
     required this._exporter,
     required this._sharer,
     this._thumbnailer = thumbnail,
+    this._previewer = croppedPreview,
     DecodeGate? decodeGate,
   }) : _decodeGate = decodeGate ?? DecodeGate();
 
@@ -41,6 +46,12 @@ class SessionController extends ChangeNotifier {
   final PageExporter _exporter;
   final FileSharer _sharer;
   final Future<Uint8List> Function(String path) _thumbnailer;
+  final Future<Uint8List> Function(
+    Uint8List thumbnail,
+    PageQuad quad,
+    int quarterTurns,
+  )
+  _previewer;
   final DecodeGate _decodeGate;
 
   static const String _defaultExtension = 'jpg';
@@ -51,6 +62,9 @@ class SessionController extends ChangeNotifier {
 
   /// Ids whose cached preview in [_thumbnails] completed with an error.
   final Set<String> _failedThumbnails = {};
+
+  /// Cropped previews by page id, each for one revision of that page only.
+  final Map<String, _CroppedPreview> _previews = {};
   int _pending = 0;
   int _restoring = 0;
   bool _disposed = false;
@@ -92,11 +106,42 @@ class SessionController extends ChangeNotifier {
         return decoding;
       });
 
-  /// Drops the cached preview of [page] if it failed and notifies, so the
-  /// next [thumbnailFor] decodes it again. A preview still decoding or
-  /// already decoded is kept.
+  /// The thumbnail of [page] cropped by its quad and rotated by its quarter
+  /// turns like an export, cached by `(page.id, page.revision)` (XS-08
+  /// FR-4). Rendering is queued behind any other decode. A failure of the
+  /// thumbnail or of the render is rethrown and stays cached like a failed
+  /// thumbnail, until [retryThumbnail].
+  ///
+  /// Only the revision of the page in the session is cached, replacing the
+  /// entry of an older one; another revision of a page in the session is
+  /// rendered for this caller alone, so its result never reaches the cache.
+  /// A page no longer in the session fails with a [StateError].
+  Future<Uint8List> croppedPreviewFor(ScanPage page) {
+    if (!_isCurrent(page)) return _renderPreview(page);
+    final cached = _previews[page.id];
+    if (cached != null && cached.revision == page.revision) {
+      return cached.preview;
+    }
+    final entry = _CroppedPreview(page.revision);
+    entry.preview = _renderPreview(page)
+        .catchError((Object error, StackTrace stack) {
+          // Only this attempt: a newer preview for the page is not marked.
+          if (identical(_previews[page.id], entry)) entry.failed = true;
+          return Future<Uint8List>.error(error, stack);
+        });
+    _previews[page.id] = entry;
+    return entry.preview;
+  }
+
+  /// Drops the cached thumbnail and cropped preview of [page] if either
+  /// failed and notifies, so the next [thumbnailFor] or [croppedPreviewFor]
+  /// decodes both again. Previews still decoding or already decoded are
+  /// kept.
   void retryThumbnail(ScanPage page) {
-    if (!_failedThumbnails.contains(page.id)) return;
+    if (!_failedThumbnails.contains(page.id) &&
+        !(_previews[page.id]?.failed ?? false)) {
+      return;
+    }
     _forgetThumbnail(page.id);
     _notify();
   }
@@ -223,14 +268,33 @@ class SessionController extends ChangeNotifier {
 
   bool _contains(String id) => _session.pages.any((p) => p.id == id);
 
+  /// Whether [page] is in the session in this revision.
+  bool _isCurrent(ScanPage page) =>
+      _session.pages.any((p) => p.id == page.id && p.revision == page.revision);
+
   void _forgetThumbnail(String id) {
     _thumbnails.remove(id);
     _failedThumbnails.remove(id);
+    _previews.remove(id);
   }
 
   void _forgetThumbnails() {
     _thumbnails.clear();
     _failedThumbnails.clear();
+    _previews.clear();
+  }
+
+  /// Renders the cropped preview of [page] from its thumbnail through the
+  /// decode gate.
+  Future<Uint8List> _renderPreview(ScanPage page) {
+    if (!_contains(page.id)) {
+      return Future<Uint8List>.error(StateError('page is not in the session'));
+    }
+    return thumbnailFor(page).then(
+      (bytes) => _decodeGate.run(
+        () => _previewer(bytes, page.quad, page.quarterTurns),
+      ),
+    );
   }
 
   /// Checks that [path] decodes, copies it in as a new page, saves the
@@ -321,4 +385,13 @@ class SessionController extends ChangeNotifier {
     final ext = fileExtension(path);
     return ext != null && isValidExtension(ext) ? ext : _defaultExtension;
   }
+}
+
+/// A cropped preview of one page revision and whether it failed.
+class _CroppedPreview {
+  _CroppedPreview(this.revision);
+
+  final int revision;
+  late final Future<Uint8List> preview;
+  bool failed = false;
 }

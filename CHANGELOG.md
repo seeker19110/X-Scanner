@@ -22,6 +22,8 @@
 - XS-09 PR-3 (#33, chưa nối vào app): migration phiên P1 thành một tài liệu — copy rồi so từng byte bản gốc, commit bằng
   rename, giữ phiên cũ làm bản quay lại không tự xoá, nhật ký để dừng ở bất kỳ bước nào cũng làm tiếp được; tên mặc định
   "Tài liệu dd/MM/yyyy HH:mm".
+- XS-13 PR-1: ô trang trong danh sách hiện ảnh đã cắt và xoay đúng như file xuất (F-026), dựng từ thumbnail; kết quả
+  của lần chỉnh cũ không bao giờ hiện thay cho lần chỉnh mới.
 - P0 nền (#1, #2): app Flutter `apps/mobile`, lõi `PageQuad`/`ScanPage`, gate APK debug/analyze/format/test.
 
 ## 2026-10-11

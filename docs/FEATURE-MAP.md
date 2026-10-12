@@ -14,7 +14,7 @@
 | FT-05 | Xoá trang (xác nhận, FR-3) | nút "Xoá trang" → `remove` | `session.json`; bản gốc xoá sau khi lưu | ✅ | `review_screen_test` deleting…; `session_store_test` AC-1 |
 | FT-06 | Chụp lại trang (xác nhận) | nút "Chụp lại" → `retake` | `originals/` mới; bản cũ xoá sau khi lưu | ✅ | `review_screen_test` retake…; `session_store_test` retake… |
 | FT-07 | Xoay 90° từ danh sách | nút "Xoay 90°" → `updatePage(rotatedClockwise())` | `session.json` | ✅ | `review_screen_test` rotate… |
-| FT-08 | Chỉnh 4 góc và xoay (FR-4, AC-4) | nút "Chỉnh góc" → `QuadEditorScreen` → pop → `updatePage` | thumbnail (RAM), `session.json` | ⚠️ (F-026, F-032 dời P2; DEBT a11y kéo góc) | `test/ui/quad_editor_screen_test.dart`, `test/core/quad_editing_test.dart`; `review_screen_test` thumbnail lỗi/thử lại (F-020, F-028, F-047), kích thước ô (F-022); `session_controller_test` retryThumbnail (F-047) |
+| FT-08 | Chỉnh 4 góc và xoay (FR-4, AC-4) | nút "Chỉnh góc" → `QuadEditorScreen` → pop → `updatePage` | thumbnail (RAM), `session.json` | ⚠️ (F-032 → XS-13 PR-2; DEBT a11y kéo góc) | `test/ui/quad_editor_screen_test.dart`, `test/core/quad_editing_test.dart`; `review_screen_test` thumbnail lỗi/thử lại (F-020, F-028, F-047), kích thước ô (F-022); `session_controller_test` retryThumbnail (F-047), xem trước đã cắt theo revision (XS-13 AC-1, AC-3, AC-4); `page_render_test` cùng hình học xem trước/xuất (XS-13 AC-2) |
 | FT-09 | Xoá tất cả (xác nhận) | nút "Xoá tất cả trang" → `clearAll` | `session.json` rỗng, xoá bản gốc đã lưu | ⚠️ (F-018 dời P2) | `review_screen_test` clearing all… |
 | FT-10 | Xuất và chia sẻ PDF/JPG/PNG (FR-6, FR-7, AC-6) | nút "Xuất" → bottom sheet → `exportAndShare` → `PageExporter.export` → `renderPage` (qua `DecodeGate`)/`buildPdf` (isolate) → `FileSharer.share` → `clear` | đọc `originals/`; ghi/xoá `temp/exports`; `temp/share_plus` | ⚠️ AC-9 chờ UAT; F-033 dời P2 | `test/export/*`, `test/imaging/*` (gồm `decode_gate_test`, F-006), `session_controller_test` export*, `review_screen_test` export* (F-029) |
 | FT-11 | Dark/Light (mặc định Dark) | icon AppBar → `_XScannerAppState._toggleTheme` | không (chỉ trong RAM) | ✅ | `test/app_test.dart`, `review_screen_test` theme…, `test/ui/accessibility_test.dart` (F-011, F-056: có trang, ô lỗi, rỗng, đang mở phiên, trình chỉnh góc; cả Dark và Light) |
@@ -28,5 +28,5 @@
 
 ## Ghi chú phạm vi
 
-- Ảnh xem trước trong danh sách là ảnh gốc đã xoay, chưa áp khung cắt (F-026, chủ ý cho P1; kết quả cắt thấy ở file xuất).
+- Ảnh xem trước trong danh sách áp khung cắt + xoay như file xuất, dựng từ thumbnail ≤ 1024 px, cache theo `(pageId, revision)` (F-026 đóng ở XS-13 PR-1).
 - Không có tự nhận mép, OCR, depth, iOS, cloud (spec P1 §5 non-goal).

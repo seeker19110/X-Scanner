@@ -118,10 +118,10 @@ trước); test controller với `previewer` giả có `Completer` (AC-3); widge
 
 | AC | Bằng chứng | Ghi chú |
 | --- | --- | --- |
-| AC-1 | chưa có — PR-1 | |
-| AC-2 | chưa có — PR-1 | |
-| AC-3 | chưa có — PR-1 | |
-| AC-4 | chưa có — PR-1 | |
+| AC-1 | `apps/mobile/test/ui/session_controller_test.dart::cropped preview renders the thumbnail with the page's quad and` | + `apps/mobile/test/ui/review_screen_test.dart` "list shows the cropped preview (XS-13 AC-1)" (không `RotatedBox`, trình chỉnh nhận thumbnail chưa cắt) |
+| AC-2 | `apps/mobile/test/imaging/page_render_test.dart::preview matches export geometry (XS-13 AC-2)` | t = 0..3; + `croppedPreview renders like renderPageSync (XS-13 FR-1)` |
+| AC-3 | `apps/mobile/test/ui/session_controller_test.dart::stale preview of an older revision is dropped (AC-3)` | `Completer` giữ kết quả cũ tới sau `updatePage` |
+| AC-4 | `apps/mobile/test/ui/session_controller_test.dart::failed preview is cached until retried (AC-4): thumbnail fails` | + ca previewer lỗi; widget `a failed cropped preview shows the error tile` |
 | AC-5 | chưa có — PR-2 | |
 | AC-6 | chưa có — PR-2 | |
 | AC-7 | chưa có — PR-2 | |

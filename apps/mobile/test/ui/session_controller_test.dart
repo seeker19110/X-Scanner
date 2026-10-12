@@ -814,6 +814,249 @@ void main() {
     expect(await fresh, [5]);
   });
 
+  group('(XS-13)', () {
+    final quad = PageQuad(
+      topLeft: const Point<double>(0.1, 0.1),
+      topRight: const Point<double>(0.9, 0.2),
+      bottomRight: const Point<double>(0.8, 0.9),
+      bottomLeft: const Point<double>(0.2, 0.8),
+    );
+
+    SessionController previewController({
+      required Future<Uint8List> Function(String path) thumbnailer,
+      required Future<Uint8List> Function(
+        Uint8List thumbnail,
+        PageQuad quad,
+        int quarterTurns,
+      )
+      previewer,
+      DecodeGate? decodeGate,
+    }) => SessionController(
+      store: SessionStore(root),
+      source: source,
+      exporter: exporter,
+      sharer: sharer,
+      thumbnailer: thumbnailer,
+      previewer: previewer,
+      decodeGate: decodeGate,
+    );
+
+    /// Lets queued futures run until [done] holds.
+    Future<void> until(bool Function() done) async {
+      for (var i = 0; i < 500 && !done(); i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+      }
+      expect(done(), isTrue);
+    }
+
+    test("cropped preview renders the thumbnail with the page's quad and "
+        'turns (AC-1)', () async {
+      await addPages(1);
+      await controller.updatePage(
+        controller.session.pages.single.withQuad(quad).rotatedClockwise(),
+      );
+      final calls = <(List<int>, PageQuad, int)>[];
+      final other = previewController(
+        thumbnailer: (_) async => Uint8List.fromList([1, 2, 3]),
+        previewer: (thumb, q, turns) async {
+          calls.add((thumb.toList(), q, turns));
+          return Uint8List.fromList([9, 8]);
+        },
+      );
+      await other.restore();
+      final page = other.session.pages.single;
+
+      expect(await other.croppedPreviewFor(page), [9, 8]);
+      expect(calls, hasLength(1));
+      final (thumb, usedQuad, turns) = calls.single;
+      expect(thumb, [1, 2, 3]);
+      expect(usedQuad, quad);
+      expect(turns, 1);
+      expect(await other.croppedPreviewFor(page), [9, 8]);
+      expect(calls, hasLength(1), reason: 'cached for (id, revision)');
+      expect(await other.thumbnailFor(page), [
+        1,
+        2,
+        3,
+      ], reason: 'the thumbnail stays the uncropped image (FR-4)');
+    });
+
+    test('stale preview of an older revision is dropped (AC-3)', () async {
+      await addPages(1);
+      var calls = 0;
+      final hold = Completer<Uint8List>();
+      final other = previewController(
+        thumbnailer: (_) async => Uint8List.fromList([1]),
+        // The first render is held; later ones answer with the turns.
+        previewer: (thumb, q, turns) {
+          calls++;
+          return calls == 1
+              ? hold.future
+              : Future<Uint8List>.value(Uint8List.fromList([turns]));
+        },
+      );
+      await other.restore();
+      final older = other.session.pages.single;
+
+      final stale = other.croppedPreviewFor(older);
+      await until(() => calls == 1);
+      await other.updatePage(older.rotatedClockwise());
+      final newer = other.session.pages.single;
+      expect(newer.revision, older.revision + 1);
+
+      hold.complete(Uint8List.fromList([0]));
+      expect(await stale, [0], reason: 'the old caller gets its revision');
+
+      expect(await other.croppedPreviewFor(newer), [1]);
+      expect(calls, 2, reason: 'the new revision renders on its own');
+      expect(await other.croppedPreviewFor(newer), [1]);
+      expect(calls, 2);
+
+      // Nothing of the old revision is cached any more, and asking for it
+      // again does not cache it either.
+      expect(await other.croppedPreviewFor(older), [0]);
+      expect(calls, 3);
+      await other.croppedPreviewFor(older);
+      expect(calls, 4);
+      expect(await other.croppedPreviewFor(newer), [1]);
+      expect(calls, 4);
+    });
+
+    test(
+      'failed preview is cached until retried (AC-4): thumbnail fails',
+      () async {
+        await addPages(1);
+        var thumbCalls = 0;
+        var previewCalls = 0;
+        var notified = 0;
+        final other = previewController(
+          thumbnailer: (_) async {
+            thumbCalls++;
+            if (thumbCalls == 1) throw const ImageDecodeFailure();
+            return Uint8List.fromList([1]);
+          },
+          previewer: (thumb, q, turns) async {
+            previewCalls++;
+            return Uint8List.fromList([2]);
+          },
+        );
+        await other.restore();
+        other.addListener(() => notified++);
+        final page = other.session.pages.single;
+
+        for (var i = 0; i < 2; i++) {
+          await expectLater(
+            other.croppedPreviewFor(page),
+            throwsA(isA<ImageDecodeFailure>()),
+          );
+        }
+        expect((thumbCalls, previewCalls), (1, 0));
+
+        other.retryThumbnail(page);
+        expect(notified, 1);
+        expect(await other.croppedPreviewFor(page), [2]);
+        expect((thumbCalls, previewCalls), (2, 1));
+      },
+    );
+
+    test(
+      'failed preview is cached until retried (AC-4): preview fails',
+      () async {
+        await addPages(1);
+        var thumbCalls = 0;
+        var previewCalls = 0;
+        var notified = 0;
+        final other = previewController(
+          thumbnailer: (_) async {
+            thumbCalls++;
+            return Uint8List.fromList([1]);
+          },
+          previewer: (thumb, q, turns) async {
+            previewCalls++;
+            if (previewCalls == 1) throw const ImageDecodeFailure();
+            return Uint8List.fromList([2]);
+          },
+        );
+        await other.restore();
+        other.addListener(() => notified++);
+        final page = other.session.pages.single;
+
+        for (var i = 0; i < 2; i++) {
+          await expectLater(
+            other.croppedPreviewFor(page),
+            throwsA(isA<ImageDecodeFailure>()),
+          );
+        }
+        expect((thumbCalls, previewCalls), (1, 1));
+        expect(await other.thumbnailFor(page), [1]);
+
+        other.retryThumbnail(page);
+        expect(notified, 1);
+        expect(await other.croppedPreviewFor(page), [2]);
+        expect((thumbCalls, previewCalls), (2, 2), reason: 'both redone');
+
+        // A successful preview is kept by a retry.
+        other.retryThumbnail(page);
+        expect(notified, 1);
+        await other.croppedPreviewFor(page);
+        expect((thumbCalls, previewCalls), (2, 2));
+      },
+    );
+
+    test('the previewer runs through the decode gate', () async {
+      await addPages(1);
+      var previewCalls = 0;
+      final gate = DecodeGate();
+      final other = previewController(
+        thumbnailer: (_) async => Uint8List.fromList([1]),
+        previewer: (thumb, q, turns) async {
+          previewCalls++;
+          return Uint8List.fromList([2]);
+        },
+        decodeGate: gate,
+      );
+      await other.restore();
+      final page = other.session.pages.single;
+      await other.thumbnailFor(page);
+
+      // Another decode holds the gate.
+      final release = Completer<void>();
+      final held = gate.run(() => release.future);
+      final preview = other.croppedPreviewFor(page);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(previewCalls, 0, reason: 'waits for the earlier decode');
+
+      release.complete();
+      await held;
+      expect(await preview, [2]);
+      expect(previewCalls, 1);
+    });
+
+    test('removing a page drops its cached preview', () async {
+      await addPages(2);
+      var previewCalls = 0;
+      final other = previewController(
+        thumbnailer: (_) async => Uint8List.fromList([1]),
+        previewer: (thumb, q, turns) async {
+          previewCalls++;
+          return Uint8List.fromList([2]);
+        },
+      );
+      await other.restore();
+      final [first, second] = other.session.pages;
+      await other.croppedPreviewFor(first);
+      await other.croppedPreviewFor(second);
+      expect(previewCalls, 2);
+
+      await other.remove(first.id);
+      await other.croppedPreviewFor(second);
+      expect(previewCalls, 2, reason: 'other pages stay cached');
+      // A removed page has no preview and its original is not decoded.
+      await expectLater(other.croppedPreviewFor(first), throwsStateError);
+      expect(previewCalls, 2);
+    });
+  });
+
   group('(F-021) restoring', () {
     test('is false before restore is ever called', () {
       expect(controller.restoring, isFalse);
