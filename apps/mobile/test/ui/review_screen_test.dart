@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/gestures.dart' show kLongPressTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
+import 'package:x_scanner/export/file_sharer.dart';
+import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/imaging/page_render.dart';
 import 'package:x_scanner/main.dart';
 import 'package:x_scanner/storage/session_store.dart';
@@ -25,12 +28,29 @@ class FakeSource implements PageSource {
   Future<String?> retrieveLost() async => null;
 }
 
+/// [FileSharer] that records shared file names and can be made to fail.
+class FakeSharer implements FileSharer {
+  final List<List<String>> shared = [];
+  bool fail = false;
+
+  /// When set, sharing waits for it to complete.
+  Completer<void>? gate;
+
+  @override
+  Future<void> share(List<File> files) async {
+    shared.add([for (final f in files) f.path.split('/').last]);
+    await gate?.future;
+    if (fail) throw StateError('share failed');
+  }
+}
+
 const String _empty = 'Chưa có trang nào. Chụp hoặc nhập ảnh để bắt đầu.';
 
 void main() {
   late Directory tmp;
   late Directory picks;
   late FakeSource source;
+  late FakeSharer sharer;
   late SessionController controller;
   var n = 0;
 
@@ -38,9 +58,12 @@ void main() {
     tmp = Directory.systemTemp.createTempSync('review_screen_test');
     picks = Directory('${tmp.path}/picks')..createSync();
     source = FakeSource();
+    sharer = FakeSharer();
     controller = SessionController(
       store: SessionStore(Directory('${tmp.path}/session')..createSync()),
       source: source,
+      exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
+      sharer: sharer,
       // Decoded in the test isolate; real file I/O runs under runAsync.
       thumbnailer: (path) async => thumbnailSync(File(path).readAsBytesSync()),
     );
@@ -268,5 +291,94 @@ void main() {
     await settle(tester);
 
     expect([for (final p in controller.session.pages) p.id], [b, a]);
+  });
+
+  testWidgets('export is only offered when there are pages', (tester) async {
+    await start(tester);
+    expect(find.byTooltip('Xuất'), findsNothing);
+  });
+
+  testWidgets('exporting as PDF shares one .pdf file (AC-6)', (tester) async {
+    await start(tester, pages: 2);
+    await tester.tap(find.byTooltip('Xuất'));
+    await tester.pumpAndSettle();
+    expect(find.text('PDF'), findsOneWidget);
+    expect(find.text('JPG'), findsOneWidget);
+    expect(find.text('PNG'), findsOneWidget);
+
+    await tester.tap(find.text('PDF'));
+    await settle(tester);
+    expect(sharer.shared, hasLength(1));
+    expect(sharer.shared.single, hasLength(1));
+    expect(sharer.shared.single.single, endsWith('.pdf'));
+    expect(find.byType(SnackBar), findsNothing);
+    expect(find.text('PDF'), findsNothing, reason: 'sheet closed');
+  });
+
+  testWidgets('choosing JPG or PNG shares one image per page', (tester) async {
+    await start(tester, pages: 2);
+    for (final (label, ext) in [('JPG', '.jpg'), ('PNG', '.png')]) {
+      await tester.tap(find.byTooltip('Xuất'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(label));
+      await settle(tester);
+      expect(sharer.shared.last, hasLength(2));
+      expect(sharer.shared.last, everyElement(endsWith(ext)));
+    }
+  });
+
+  testWidgets('a failed share shows exportFailed and keeps the pages', (
+    tester,
+  ) async {
+    await start(tester, pages: 1);
+    sharer.fail = true;
+    await tester.tap(find.byTooltip('Xuất'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('PDF'));
+    await settle(tester);
+    expect(
+      find.text('Không xuất được tài liệu. Bản gốc vẫn còn nguyên.'),
+      findsOneWidget,
+    );
+    expect(find.text('Trang 1'), findsOneWidget);
+    expect(controller.session.pages, hasLength(1));
+  });
+
+  testWidgets('dismissing the format sheet exports nothing', (tester) async {
+    await start(tester, pages: 1);
+    await tester.tap(find.byTooltip('Xuất'));
+    await tester.pumpAndSettle();
+    expect(find.text('PDF'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10));
+    await settle(tester);
+    expect(find.text('PDF'), findsNothing);
+    expect(sharer.shared, isEmpty);
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('the export button is disabled while busy', (tester) async {
+    await start(tester, pages: 1);
+    final gate = sharer.gate = Completer<void>();
+    await tester.tap(find.byTooltip('Xuất'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('PDF'));
+    for (var i = 0; i < 500 && sharer.shared.isEmpty; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 5)),
+      );
+    }
+    await tester.pump();
+    expect(controller.busy, isTrue);
+    IconButton exportButton() => tester.widget<IconButton>(
+      find.ancestor(
+        of: find.byIcon(Icons.ios_share),
+        matching: find.byType(IconButton),
+      ),
+    );
+    expect(exportButton().onPressed, isNull);
+
+    gate.complete();
+    await settle(tester);
+    expect(exportButton().onPressed, isNotNull);
   });
 }

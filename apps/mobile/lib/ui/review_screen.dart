@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import '../core/scan_page.dart';
+import '../export/page_exporter.dart';
 import 'quad_editor_screen.dart';
 import 'session_controller.dart';
 
@@ -30,6 +31,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
   static const String _emptyText =
       'Chưa có trang nào. Chụp hoặc nhập ảnh để bắt đầu.';
   static const double _thumbSide = 72;
+  static const List<(ExportFormat, String)> _exportChoices = [
+    (ExportFormat.pdf, 'PDF'),
+    (ExportFormat.jpeg, 'JPG'),
+    (ExportFormat.png, 'PNG'),
+  ];
 
   SessionController get _controller => widget.controller;
 
@@ -82,6 +88,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
       'Không đọc được ảnh này. Chưa thêm trang nào.',
     SessionNotice.saveFailed =>
       'Không lưu được (có thể bộ nhớ đầy). Phiên giữ nguyên như trước.',
+    SessionNotice.exportFailed =>
+      'Không xuất được tài liệu. Bản gốc vẫn còn nguyên.',
   };
 
   /// Asks a yes/no question; true only if [confirmLabel] was pressed.
@@ -126,6 +134,26 @@ class _ReviewScreenState extends State<ReviewScreen> {
     }
   }
 
+  /// Asks for a format and exports to it; dismissing the sheet does nothing.
+  Future<void> _export() async {
+    final format = await showModalBottomSheet<ExportFormat>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final (format, label) in _exportChoices)
+              ListTile(
+                title: Text(label),
+                onTap: () => Navigator.of(context).pop(format),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (format != null) await _controller.exportAndShare(format);
+  }
+
   Future<void> _edit(ScanPage page, Uint8List thumbnail) async {
     final edited = await Navigator.of(context).push<ScanPage>(
       MaterialPageRoute(
@@ -149,6 +177,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
             icon: Icon(dark ? Icons.light_mode : Icons.dark_mode),
             onPressed: widget.onToggleTheme,
           ),
+          if (pages.isNotEmpty)
+            IconButton(
+              tooltip: 'Xuất',
+              icon: const Icon(Icons.ios_share),
+              onPressed: busy ? null : _export,
+            ),
           if (pages.isNotEmpty)
             IconButton(
               tooltip: 'Xoá tất cả trang',

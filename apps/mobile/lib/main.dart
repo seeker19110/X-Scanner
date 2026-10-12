@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'app/theme.dart';
+import 'export/file_sharer.dart';
+import 'export/page_exporter.dart';
 import 'storage/session_store.dart';
 import 'ui/page_source.dart';
 import 'ui/review_screen.dart';
@@ -13,6 +15,7 @@ import 'ui/session_controller.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final support = await getApplicationSupportDirectory();
+  final temp = await getTemporaryDirectory();
   final dir = await Directory('${support.path}/session')
       .create(recursive: true);
   runApp(
@@ -20,6 +23,12 @@ Future<void> main() async {
       controller: SessionController(
         store: SessionStore(dir),
         source: ImagePickerPageSource(),
+        exporter: PageExporter(
+          exportDir: Directory('${temp.path}/exports'),
+          // share_plus copies shared files here and keeps the last ones.
+          leftoverDirs: [Directory('${temp.path}/share_plus')],
+        ),
+        sharer: const SharePlusFileSharer(),
       ),
     ),
   );

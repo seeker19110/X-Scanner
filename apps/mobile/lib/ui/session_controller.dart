@@ -5,12 +5,14 @@ import 'package:flutter/foundation.dart';
 
 import '../core/scan_page.dart';
 import '../core/scan_session.dart';
+import '../export/file_sharer.dart';
+import '../export/page_exporter.dart';
 import '../imaging/page_render.dart';
 import '../storage/session_store.dart';
 import 'page_source.dart';
 
 /// User-facing outcomes the UI reports as a message.
-enum SessionNotice { restoreFailed, decodeFailed, saveFailed }
+enum SessionNotice { restoreFailed, decodeFailed, saveFailed, exportFailed }
 
 /// Owns the open scan session for the UI.
 ///
@@ -19,15 +21,20 @@ enum SessionNotice { restoreFailed, decodeFailed, saveFailed }
 /// write leaves the session exactly as it was. Nothing is logged.
 class SessionController extends ChangeNotifier {
   /// Creates a controller; [thumbnailer] decodes an image file into a
-  /// preview and throws [ImageDecodeFailure] for unreadable images.
+  /// preview and throws [ImageDecodeFailure] for unreadable images. The
+  /// exporter's directory is cleared on [restore] and after every share.
   SessionController({
     required this._store,
     required this._source,
+    required this._exporter,
+    required this._sharer,
     this._thumbnailer = thumbnail,
   });
 
   final SessionStore _store;
   final PageSource _source;
+  final PageExporter _exporter;
+  final FileSharer _sharer;
   final Future<Uint8List> Function(String path) _thumbnailer;
 
   static final RegExp _extensionPattern = RegExp(r'^[a-z0-9]{1,5}$');
@@ -65,9 +72,12 @@ class SessionController extends ChangeNotifier {
     () => _decode(() => originalFile(page).path),
   );
 
-  /// Loads the saved session, then adds a photo Android may have kept after
-  /// killing the app during capture.
+  /// Removes export files and share-sheet copies left by an earlier run,
+  /// loads the saved session,
+  /// then adds a photo Android may have kept after killing the app during
+  /// capture.
   Future<void> restore() => _enqueue(() async {
+    await _exporter.clearLeftovers();
     var failed = false;
     try {
       switch (await _store.load()) {
@@ -143,6 +153,24 @@ class SessionController extends ChangeNotifier {
   /// Removes every page.
   Future<void> clearAll() => _enqueue(() async {
     if (await _commit(ScanSession.empty)) _thumbnails.clear();
+  });
+
+  /// Exports the pages as [format], shares the files and then deletes
+  /// them. An empty session does nothing; any failure reports
+  /// [SessionNotice.exportFailed] and leaves the session and originals as
+  /// they were.
+  Future<void> exportAndShare(ExportFormat format) => _enqueue(() async {
+    final pages = _session.pages;
+    if (pages.isEmpty) return;
+    try {
+      await _sharer.share(await _exporter.export(pages, originalFile, format));
+    } catch (_) {
+      // Render, PDF, file system and platform share errors all mean the
+      // same to the user; none of their details are shown or logged.
+      _report(SessionNotice.exportFailed);
+    } finally {
+      await _exporter.clear();
+    }
   });
 
   @override

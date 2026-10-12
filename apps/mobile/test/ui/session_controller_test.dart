@@ -6,6 +6,8 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:x_scanner/core/page_quad.dart';
+import 'package:x_scanner/export/file_sharer.dart';
+import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/imaging/page_render.dart';
 import 'package:x_scanner/storage/session_store.dart';
 import 'package:x_scanner/ui/page_source.dart';
@@ -40,12 +42,34 @@ class FlakyStore extends SessionStore {
       : super.save(session);
 }
 
+/// [FileSharer] that records what it was given and can be made to fail.
+class FakeSharer implements FileSharer {
+  final List<List<String>> shared = [];
+
+  /// Names of the shared files that existed while sharing.
+  final List<List<String>> existing = [];
+  bool fail = false;
+
+  @override
+  Future<void> share(List<File> files) async {
+    shared.add([for (final f in files) f.path.split('/').last]);
+    existing.add([
+      for (final f in files)
+        if (f.existsSync()) f.path.split('/').last,
+    ]);
+    if (fail) throw StateError('share failed');
+  }
+}
+
 void main() {
   late Directory tmp;
   late Directory root;
   late Directory picks;
   late FlakyStore store;
   late FakeSource source;
+  late Directory exports;
+  late PageExporter exporter;
+  late FakeSharer sharer;
   late SessionController controller;
   var n = 0;
 
@@ -55,7 +79,18 @@ void main() {
     picks = Directory('${tmp.path}/picks')..createSync();
     store = FlakyStore(root);
     source = FakeSource();
-    controller = SessionController(store: store, source: source);
+    exports = Directory('${tmp.path}/exports');
+    exporter = PageExporter(
+      exportDir: exports,
+      leftoverDirs: [Directory('${tmp.path}/share_plus')],
+    );
+    sharer = FakeSharer();
+    controller = SessionController(
+      store: store,
+      source: source,
+      exporter: exporter,
+      sharer: sharer,
+    );
   });
 
   tearDown(() => tmp.deleteSync(recursive: true));
@@ -189,7 +224,12 @@ void main() {
   test('restore loads the saved session', () async {
     await addPages(2);
     final saved = ids();
-    final other = SessionController(store: SessionStore(root), source: source);
+    final other = SessionController(
+      store: SessionStore(root),
+      source: source,
+      exporter: exporter,
+      sharer: sharer,
+    );
     await other.restore();
     expect([for (final p in other.session.pages) p.id], saved);
     expect(other.takeNotice(), isNull);
@@ -302,6 +342,8 @@ void main() {
     final c = SessionController(
       store: store,
       source: source,
+      exporter: exporter,
+      sharer: sharer,
       thumbnailer: (path) async {
         calls++;
         active++;
@@ -321,6 +363,8 @@ void main() {
     final d = SessionController(
       store: SessionStore(root),
       source: source,
+      exporter: exporter,
+      sharer: sharer,
       thumbnailer: (path) async {
         calls++;
         active++;
@@ -353,12 +397,93 @@ void main() {
   test('a failing thumbnail is reported to the caller', () async {
     await addPages(1);
     final page = controller.session.pages.single;
-    final other = SessionController(store: SessionStore(root), source: source);
+    final other = SessionController(
+      store: SessionStore(root),
+      source: source,
+      exporter: exporter,
+      sharer: sharer,
+    );
     await other.restore();
     controller.originalFile(page).writeAsBytesSync([1, 2, 3]);
     await expectLater(
       other.thumbnailFor(other.session.pages.single),
       throwsA(isA<ImageDecodeFailure>()),
     );
+  });
+
+  test('exportAndShare shares the export, then removes it (FR-7)', () async {
+    await addPages(2);
+    final before = controller.session;
+    final future = controller.exportAndShare(ExportFormat.pdf);
+    expect(controller.busy, isTrue);
+    await future;
+
+    expect(sharer.shared, [
+      ['X-Scanner.pdf'],
+    ]);
+    expect(sharer.existing, sharer.shared, reason: 'files exist while shared');
+    expect(exports.existsSync(), isFalse);
+    expect(controller.takeNotice(), isNull);
+    expect(controller.session, same(before));
+    expect(controller.busy, isFalse);
+
+    await controller.exportAndShare(ExportFormat.jpeg);
+    expect(sharer.shared.last, [
+      'X-Scanner-trang-01.jpg',
+      'X-Scanner-trang-02.jpg',
+    ]);
+    expect(exports.existsSync(), isFalse);
+  });
+
+  test('a failed share reports exportFailed and keeps the session', () async {
+    await addPages(2);
+    final before = controller.session;
+    final onDisk = manifestPages();
+    final original = controller.originalFile(before.pages.first);
+    final bytes = original.readAsBytesSync();
+    sharer.fail = true;
+
+    await controller.exportAndShare(ExportFormat.png);
+
+    expect(sharer.shared, hasLength(1));
+    expect(controller.takeNotice(), SessionNotice.exportFailed);
+    expect(controller.takeNotice(), isNull);
+    expect(exports.existsSync(), isFalse);
+    expect(controller.session, same(before));
+    expect(manifestPages(), onDisk);
+    expect(original.readAsBytesSync(), bytes);
+    expect(controller.busy, isFalse);
+  });
+
+  test('a failed export reports exportFailed without sharing', () async {
+    await addPages(2);
+    final before = controller.session;
+    controller.originalFile(before.pages.last).writeAsBytesSync([1, 2, 3]);
+
+    await controller.exportAndShare(ExportFormat.jpeg);
+
+    expect(sharer.shared, isEmpty);
+    expect(controller.takeNotice(), SessionNotice.exportFailed);
+    expect(exports.existsSync(), isFalse);
+    expect(controller.session, same(before));
+  });
+
+  test('exporting an empty session does nothing', () async {
+    await controller.exportAndShare(ExportFormat.pdf);
+    expect(sharer.shared, isEmpty);
+    expect(controller.takeNotice(), isNull);
+    expect(exports.existsSync(), isFalse);
+    expect(controller.busy, isFalse);
+  });
+
+  test('restore removes export files left behind (FR-7)', () async {
+    Directory('${exports.path}/old').createSync(recursive: true);
+    File('${exports.path}/X-Scanner.pdf').writeAsStringSync('stale');
+    final shareCopy = File('${tmp.path}/share_plus/X-Scanner.pdf')
+      ..createSync(recursive: true);
+    await controller.restore();
+    expect(exports.existsSync(), isFalse);
+    expect(shareCopy.existsSync(), isFalse);
+    expect(controller.takeNotice(), isNull);
   });
 }
