@@ -29,7 +29,7 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Thêm thao tác người dùng lên phiên | `lib/ui/session_controller.dart` (hàng đợi, `SessionNotice`) | `flutter test test/ui/session_controller_test.dart` |
 | Đổi màn danh sách trang / nút / thông báo | `lib/ui/review_screen.dart` | `flutter test test/ui/review_screen_test.dart test/app_test.dart` |
 | Đổi ảnh xem trước đã cắt trong danh sách (cache theo `(pageId, revision)`, XS-13) | `lib/ui/session_controller.dart` (`croppedPreviewFor`), `lib/imaging/page_render.dart` (`croppedPreview`) | `flutter test test/ui/session_controller_test.dart test/ui/review_screen_test.dart test/imaging/page_render_test.dart` |
-| Đổi màn chỉnh góc | `lib/ui/quad_editor_screen.dart` | `flutter test test/ui/quad_editor_screen_test.dart` |
+| Đổi màn chỉnh góc (hiển thị xoay, hoàn tác/làm lại, hỏi bỏ thay đổi, kính lúp, thao tác trợ năng dịch góc — XS-13) | `lib/ui/quad_editor_screen.dart`; quy đổi toạ độ hiển thị `toDisplay`/`fromDisplay`/`sourceCorner` ở `lib/core/quad_editing.dart`; lịch sử `lib/core/edit_history.dart` | `flutter test test/ui/quad_editor_screen_test.dart test/core/quad_editing_test.dart test/core/edit_history_test.dart test/ui/accessibility_test.dart` |
 | Đổi nguồn ảnh (camera hệ thống / thư viện) | `lib/ui/page_source.dart` | `flutter test test/ui` |
 | Đổi theme Dark/Light | `lib/app/theme.dart` | `flutter test test/app_test.dart test/ui/accessibility_test.dart` (vùng chạm, nhãn, tương phản ở cả hai theme) |
 | Nối dependency, thư mục lưu | `lib/main.dart` | `flutter test test/app_test.dart` + gate |

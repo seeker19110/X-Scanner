@@ -268,6 +268,26 @@ void main() {
       expect(find.text('Chỉnh góc'), findsOneWidget);
 
       await _expectGuidelines(tester);
+
+      // Undo/redo (XS-13 FR-6): labelled, 48 dp, and checked again enabled.
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.text('Xoay 90°'));
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(find.byTooltip('Hoàn tác'));
+      await tester.pumpAndSettle();
+      for (final label in ['Hoàn tác', 'Làm lại']) {
+        final button = find.ancestor(
+          of: find.byTooltip(label),
+          matching: find.byType(IconButton),
+        );
+        expect(button, findsOneWidget, reason: label);
+        expect(tester.widget<IconButton>(button).onPressed, isNotNull);
+        final size = tester.getSize(button);
+        expect(size.width, greaterThanOrEqualTo(48), reason: label);
+        expect(size.height, greaterThanOrEqualTo(48), reason: label);
+      }
+      await _expectGuidelines(tester);
       handle.dispose();
     });
   }

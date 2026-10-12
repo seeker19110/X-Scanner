@@ -122,12 +122,12 @@ trước); test controller với `previewer` giả có `Completer` (AC-3); widge
 | AC-2 | `apps/mobile/test/imaging/page_render_test.dart::preview matches export geometry (XS-13 AC-2)` | t = 0..3; + `croppedPreview renders like renderPageSync (XS-13 FR-1)` |
 | AC-3 | `apps/mobile/test/ui/session_controller_test.dart::stale preview of an older revision is dropped (AC-3)` | `Completer` giữ kết quả cũ tới sau `updatePage` |
 | AC-4 | `apps/mobile/test/ui/session_controller_test.dart::failed preview is cached until retried (AC-4): thumbnail fails` | + ca previewer lỗi; widget `a failed cropped preview shows the error tile` |
-| AC-5 | chưa có — PR-2 | |
-| AC-6 | chưa có — PR-2 | |
-| AC-7 | chưa có — PR-2 | |
-| AC-8 | chưa có — PR-2 | |
-| AC-9 | chưa có — PR-2 | |
-| AC-10 | chưa có — PR-2 | |
+| AC-5 | `apps/mobile/test/core/quad_editing_test.dart::display mapping round-trips for every turn` | + widget `rotated page is shown upright and drags move the right corner` |
+| AC-6 | `apps/mobile/test/ui/quad_editor_screen_test.dart::undo and redo buttons follow the history (XS-13 AC-6)` | + `one drag with many moves is one undo step`; `test/core/edit_history_test.dart` (giới hạn 100) |
+| AC-7 | `apps/mobile/test/ui/quad_editor_screen_test.dart::back with changes asks before discarding (XS-13 AC-7)` | + `no changes closes without asking`, `saving without changes returns null` |
+| AC-8 | `apps/mobile/test/ui/quad_editor_screen_test.dart::loupe shows only while dragging (XS-13 AC-8)` | |
+| AC-9 | `apps/mobile/test/ui/quad_editor_screen_test.dart::semantic nudge moves the shown corner` | t = 0 và 1; + `an invalid semantic nudge is rejected (XS-13 AC-9)` |
+| AC-10 | `apps/mobile/test/ui/quad_editor_screen_test.dart::saved page has a higher revision after undo and a new edit` | |
 
 ## 17. Slice/PR plan
 
