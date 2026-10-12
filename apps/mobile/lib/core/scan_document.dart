@@ -18,6 +18,16 @@ bool isValidDocumentTitle(String title) {
       !_controlCharacter.hasMatch(title);
 }
 
+/// The default title `Tài liệu dd/MM/yyyy HH:mm` (XS-09 D-2), built from the
+/// fields of [time] as given: no time zone conversion, so callers pass local
+/// device time. Always satisfies [isValidDocumentTitle].
+String defaultDocumentTitle(DateTime time) {
+  String two(int value) => value.toString().padLeft(2, '0');
+  final year = time.year.toString().padLeft(4, '0');
+  return 'Tài liệu ${two(time.day)}/${two(time.month)}/$year '
+      '${two(time.hour)}:${two(time.minute)}';
+}
+
 /// An immutable scanned document: metadata plus an ordered list of pages
 /// with unique ids (XS-08 FR-1).
 ///

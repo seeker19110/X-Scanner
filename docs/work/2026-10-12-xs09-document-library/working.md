@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-xs09-document-library
 - Yêu cầu / outcome: `/auto-complete` lần 8 (2026-10-12): hiện thực XS-09 PR-1..PR-3 theo spec Approved (#30 `508f057`) — mô hình + codec schema 2, `DocumentStore`/`LibraryStore`, migration P1 có nhật ký + tiêm lỗi; không nối vào app.
-- Trạng thái: In progress — PR-1 merged (#31); PR-2 (lưu trữ + thư viện) đang review.
+- Trạng thái: In progress — PR-1 (#31), PR-2 (#32) merged; PR-3 (migration) đang review.
 - Chủ trì / writer: phiên chính (kế hoạch, review, tích hợp, cổng); mỗi PR một worker `complex-implementer`, tuần tự.
 - Mức rủi ro / số PR: L (spec XS-09); 3 PR tuần tự vì cùng lớp `core`/`storage` (spec §17). PR-4 (nối app, migration dữ liệu thật) BLOCKED chờ chủ repo.
 - Scope / non-goal: AC-1..AC-10, AC-14 của spec. Non-goal: UI thư viện, `main.dart`, chạy migration trên dữ liệu thật (PR-4); xoá tài liệu/thùng rác (XS-10).
@@ -33,6 +33,14 @@
 - PR-2: các mục không đọc được xếp sau tài liệu, theo docId · loại trộn theo thời gian (không có `updatedAt`) · bậc 3 (thứ tự xác định, test được).
 - PR-2 worker: đỏ-trước với stub `UnimplementedError` (T1 `+0 -32`, T2 `+0 -16`), xanh `test/storage/` +75, gate PASS +405 trên `a5983ae` + diff; Tầng 1 đối chiếu `diff session_store.dart document_store.dart`: chỉ 4 khác biệt của brief.
 - Rà bảo mật PR-2 (`security-reviewer`): 0 Cao. Sửa đỏ-trước (3 test đỏ → xanh, `test/storage/` +78): F1 Trung bình — `open()` tạo nhiều `DocumentStore` trên cùng thư mục (hàng đợi/`_saved` tách rời → ghi đè lẫn nhau, xoá bản gốc) → một store mỗi docId, `create` trả đúng instance đó, hợp đồng "một chủ mỗi tài liệu, màn thư viện chỉ `list()`" ghi ở doc; F2 Thấp — `importOriginal` tạo thư mục tài liệu thiếu manifest → `StateError` khi thư mục chưa có; F4 Thấp — `_load` giữ `_saved` cũ khi tải lại ra NeedsUpdate/lỗi → đặt lại `{}`; F6 Thấp — doc comment nói sai về đường dẫn trong lỗi → sửa. Không sửa: F3 TOCTOU `create` (id ngẫu nhiên 128 bit, cửa sổ rất hẹp; sau F1 mọi lệnh trên một tài liệu đi qua một store), F5 symlink trong thư mục riêng của app (cần đã chiếm app; giống `SessionStore`), F7 không trần kích thước `document.json` khi liệt kê (file do app tự ghi; xem lại khi PR-4 đo thời gian mở thư viện, spec §8 `DEBT` N > 500).
+- PR-2 merged #32 `8aa493e` (CI xanh trên `29be4c7`).
+- PR-3 brief: dọn `.part` mồ côi (FR-4) đặt ở cuối `P1Migration.run` · loại trong `LibraryStore` · bậc 1 (chỉ migration biết nhật ký còn mở hay không).
+- PR-3: lỗi sau khi commit (ghi nhật ký `committed`, bước 7) trả `MigrationDone` · loại `MigrationFailed` · bậc 1 (tài liệu đã kiểm byte và commit; báo lỗi sẽ chặn thư viện vô ích, lần sau làm nốt bước 7).
+- PR-3: nhật ký hỏng → `MigrationFailed(io)`, không đổi gì · loại xoá nhật ký/đoán · bậc 1 (kế hoạch §10: không xoá dữ liệu để giải quyết lỗi); đổi lại kẹt tới khi XS-10 có màn phục hồi.
+- PR-3: bản quay lại thứ hai đặt `session.migrated-2`… · loại ghi đè/xoá `session.migrated` · bậc 1 (D-5).
+- PR-3: kiểm thử chết-giữa-chừng bằng một `Error` riêng ném ở lệnh đổi đĩa thứ i (code chỉ bắt `FileSystemException`, nên không khối dọn nào chạy) · loại hook test trong code chạy thật · bậc 2 + bậc 3.
+- PR-3 worker: đỏ-trước (T1 compile đỏ; T2 stub `+0 -36`), xanh 61 test, gate PASS +448 trên `3cc71cd` + diff; AC-7: 19 lệnh đổi đĩa × {kill, I/O} = 38 ca; kiểm đột biến 2 kiểu → 3 và 6 test đỏ. Tầng 1 đọc toàn bộ `p1_migration.dart`: mọi `catch` đúng kiểu, không nhánh nào xoá `session/`/`session.migrated*`; thay `print` trong test bằng `expect(ops, hasLength(19))`.
+- PR-3 ba chỗ worker tự chọn (giữ, bậc 1): `FileSystemException` khi đọc nguồn → `MigrationFailed(io)` không đổi gì; thiếu dung lượng cũng xoá `.part` cũ của chính migration; `freeBytes` ném lỗi khác `FileSystemException` thì ném ra (PR-4 bảo đảm hàm nền tảng chỉ ném `FileSystemException`).
 
 ## Lần thử / blocker
 
