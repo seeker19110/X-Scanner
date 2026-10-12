@@ -30,6 +30,7 @@ class ReviewScreen extends StatefulWidget {
 class _ReviewScreenState extends State<ReviewScreen> {
   static const String _emptyText =
       'Chưa có trang nào. Chụp hoặc nhập ảnh để bắt đầu.';
+  static const String _openingText = 'Đang mở phiên…';
   static const double _thumbSide = 72;
   static const List<(ExportFormat, String)> _exportChoices = [
     (ExportFormat.pdf, 'PDF'),
@@ -196,11 +197,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
           // Fixed slot so the indicator never shifts or covers content.
           SizedBox(
             height: 4,
-            child: busy ? const LinearProgressIndicator() : null,
+            child: busy
+                ? const LinearProgressIndicator(semanticsLabel: 'Đang xử lý')
+                : null,
           ),
           Expanded(
             child: pages.isEmpty
-                ? _emptyState(busy)
+                ? (_controller.restoring ? _openingState() : _emptyState(busy))
                 : ReorderableListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: pages.length,
@@ -240,6 +243,19 @@ class _ReviewScreenState extends State<ReviewScreen> {
     ),
   );
 
+  /// Shown while a saved session may still be loading, so an empty list
+  /// is not mistaken for a lost session.
+  static Widget _openingState() => const Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CircularProgressIndicator(),
+        SizedBox(height: 16),
+        Text(_openingText, textAlign: TextAlign.center),
+      ],
+    ),
+  );
+
   Widget _sourceButtons(bool busy) => Wrap(
     alignment: WrapAlignment.center,
     spacing: 12,
@@ -259,7 +275,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
   );
 
   Widget _pageRow(ScanPage page, int number, bool busy) {
-    final colors = Theme.of(context).colorScheme;
     return Card(
       key: ValueKey(page.id),
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -273,7 +288,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
               children: [
                 SizedBox.square(
                   dimension: _thumbSide,
-                  child: _thumbnail(snapshot, page, colors),
+                  child: _thumbnail(snapshot, page, number, busy),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -326,26 +341,45 @@ class _ReviewScreenState extends State<ReviewScreen> {
     );
   }
 
-  /// Preview rotated like the page; a small spinner while loading and an
-  /// error tile if the original cannot be decoded.
-  static Widget _thumbnail(
+  /// Preview rotated like the page and decoded at the tile's pixel size;
+  /// a small spinner while loading and, if the original cannot be decoded,
+  /// an error tile that asks the controller to decode it again.
+  Widget _thumbnail(
     AsyncSnapshot<Uint8List> snapshot,
     ScanPage page,
-    ColorScheme colors,
+    int number,
+    bool busy,
   ) {
     final bytes = snapshot.data;
     if (bytes != null) {
+      final px = (_thumbSide * MediaQuery.devicePixelRatioOf(context)).ceil();
       return RotatedBox(
         quarterTurns: page.quarterTurns,
-        child: Image.memory(bytes, fit: BoxFit.contain, gaplessPlayback: true),
+        child: Image(
+          image: ResizeImage(
+            MemoryImage(bytes),
+            width: px,
+            height: px,
+            policy: ResizeImagePolicy.fit,
+          ),
+          fit: BoxFit.contain,
+          gaplessPlayback: true,
+        ),
       );
     }
     if (snapshot.hasError) {
+      final colors = Theme.of(context).colorScheme;
       return ColoredBox(
         color: colors.errorContainer,
-        child: Icon(
-          Icons.broken_image_outlined,
-          color: colors.onErrorContainer,
+        child: Center(
+          child: IconButton(
+            tooltip: 'Tải lại ảnh xem trước trang $number',
+            icon: const Icon(Icons.broken_image_outlined),
+            color: colors.onErrorContainer,
+            // The failed preview is no longer cached, so rebuilding the
+            // row makes thumbnailFor decode it again.
+            onPressed: busy ? null : () => setState(() {}),
+          ),
         ),
       );
     }

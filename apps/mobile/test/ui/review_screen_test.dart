@@ -49,6 +49,21 @@ class FakeSharer implements FileSharer {
   }
 }
 
+/// [SessionStore] whose [load] waits for [hold] once [loading] completes.
+class HeldStore extends SessionStore {
+  HeldStore(super.root);
+
+  final Completer<void> hold = Completer<void>();
+  final Completer<void> loading = Completer<void>();
+
+  @override
+  Future<SessionLoadResult> load() async {
+    loading.complete();
+    await hold.future;
+    return super.load();
+  }
+}
+
 const String _empty = 'Chưa có trang nào. Chụp hoặc nhập ảnh để bắt đầu.';
 
 void main() {
@@ -189,6 +204,101 @@ void main() {
     );
     expect(crop.onPressed, isNull, reason: 'no preview to edit on');
     expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('tapping a failed thumbnail decodes it again (F-020)', (
+    tester,
+  ) async {
+    await start(tester, pages: 1);
+    var fail = true;
+    controller = SessionController(
+      store: SessionStore(Directory('${tmp.path}/session')),
+      source: source,
+      exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
+      sharer: sharer,
+      thumbnailer: (path) async => fail
+          ? throw const ImageDecodeFailure()
+          : thumbnailSync(File(path).readAsBytesSync()),
+    );
+    await tester.pumpWidget(const SizedBox());
+    await start(tester);
+
+    final retry = find.byTooltip('Tải lại ảnh xem trước trang 1');
+    expect(retry, findsOneWidget);
+    expect(find.byType(Image), findsNothing);
+    final target = tester.getRect(
+      find.ancestor(of: retry, matching: find.byType(IconButton)),
+    );
+    expect(target.width, greaterThanOrEqualTo(48));
+    expect(target.height, greaterThanOrEqualTo(48));
+    final rowTile = tester.getRect(
+      find.ancestor(of: retry, matching: find.byType(Card)),
+    );
+    expect(target.width, lessThanOrEqualTo(72));
+    expect(rowTile.contains(target.center), isTrue);
+    IconButton crop() => tester.widget<IconButton>(
+      find.ancestor(
+        of: find.byIcon(Icons.crop),
+        matching: find.byType(IconButton),
+      ),
+    );
+    expect(crop().onPressed, isNull);
+
+    fail = false;
+    await tester.tap(retry);
+    await settle(tester);
+
+    expect(find.byIcon(Icons.broken_image_outlined), findsNothing);
+    expect(find.byType(Image), findsOneWidget);
+    expect(crop().onPressed, isNotNull);
+  });
+
+  testWidgets('the thumbnail is decoded at the size of its tile (F-022)', (
+    tester,
+  ) async {
+    await start(tester, pages: 1);
+    final image = tester.widget<Image>(find.byType(Image)).image;
+    final px = (72 * tester.view.devicePixelRatio).ceil();
+    expect(
+      image,
+      isA<ResizeImage>()
+          .having((r) => r.width, 'width', px)
+          .having((r) => r.height, 'height', px)
+          .having((r) => r.policy, 'policy', ResizeImagePolicy.fit),
+    );
+  });
+
+  testWidgets('while the session is opening, a loading state replaces the '
+      'empty text (F-021)', (tester) async {
+    final handle = tester.ensureSemantics();
+    final store = HeldStore(Directory('${tmp.path}/session'));
+    controller = SessionController(
+      store: store,
+      source: source,
+      exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
+      sharer: sharer,
+    );
+    await tester.pumpWidget(XScannerApp(controller: controller));
+    for (var i = 0; i < 500 && !store.loading.isCompleted; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 5)),
+      );
+    }
+    await tester.pump();
+    expect(store.loading.isCompleted, isTrue);
+
+    expect(find.text('Đang mở phiên…'), findsOneWidget);
+    expect(find.text(_empty), findsNothing);
+    expect(find.text('Chụp'), findsNothing);
+    expect(find.text('Nhập ảnh'), findsNothing);
+    expect(find.bySemanticsLabel('Đang xử lý'), findsOneWidget);
+
+    store.hold.complete();
+    await settle(tester);
+    expect(find.text('Đang mở phiên…'), findsNothing);
+    expect(find.text(_empty), findsOneWidget);
+    expect(find.bySemanticsLabel('Đang xử lý'), findsNothing);
+    handle.dispose();
   });
 
   testWidgets('a failed save shows the saveFailed message (F-028)', (

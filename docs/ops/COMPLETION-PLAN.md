@@ -39,14 +39,14 @@
 | ID | Từ phát hiện | Việc | Tiêu chí nghiệm thu | Phụ thuộc | Ước lượng | Trạng thái | PR / bằng chứng |
 |----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
 | W-301 | F-008, F-034, F-035, F-037 | Gate kiểm quyền + component exported trong manifest release đã gộp; `flutter pub get --enforce-lockfile`; CI chỉ huỷ run cũ trên PR; workflow adopt không giữ token khi chạy gate | Thêm thử `INTERNET` vào manifest → gate đỏ; bỏ ra → xanh; CI xanh | – | S | ✅ | seeker19110/X-Scanner#13 `ba3d5a9`, CI xanh; gate đỏ "uses-permission not allowed: android.permission.INTERNET" → khôi phục byte → PASS; self-test 7/7 |
-| W-302 | F-010, F-011, F-028, F-029 | Test: lỗi chép bản gốc ở controller; `meetsGuideline` (vùng chạm Android, nhãn, tương phản) cho 2 màn × Dark/Light; các nhánh lỗi còn thiếu; siết test yếu (48 dp, kích thước trang PDF nén) | Test mới xanh; guideline đỏ thì sửa UI trong cùng PR | W-103 | M | 🔄 | 8 test hồi quy mới + 4 test guideline (2 màn × Dark/Light) xanh, không guideline nào đỏ nên không đổi UI; test 48 dp đỏ khi hạ vùng chạm về 44 |
+| W-302 | F-010, F-011, F-028, F-029 | Test: lỗi chép bản gốc ở controller; `meetsGuideline` (vùng chạm Android, nhãn, tương phản) cho 2 màn × Dark/Light; các nhánh lỗi còn thiếu; siết test yếu (48 dp, kích thước trang PDF nén) | Test mới xanh; guideline đỏ thì sửa UI trong cùng PR | W-103 | M | ✅ | seeker19110/X-Scanner#17 `63b7ef0`, CI xanh; 8 test hồi quy mới + 4 test guideline (2 màn × Dark/Light) xanh, không guideline nào đỏ nên không đổi UI; test 48 dp đỏ khi hạ vùng chạm về 44 |
 
 ## Đợt 3 — Hiệu năng, trạng thái UI, thống nhất
 
 | ID | Từ phát hiện | Việc | Tiêu chí nghiệm thu | Phụ thuộc | Ước lượng | Trạng thái | PR / bằng chứng |
 |----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
 | W-401 | F-012, F-013, F-023 | `buildPdf` chạy ngoài UI isolate; trần điểm ảnh đầu ra nắn (giữ tỷ lệ); `DEBT:` cho trần 50 MP và số trang PDF; số trang đệm theo tổng số trang | Test đỏ trước: đầu ra nắn ≤ trần; 100 trang sắp đúng; PDF vẫn đúng AC-6 | – | S | ✅ | seeker19110/X-Scanner#14 `4efd3d8`, CI xanh; đỏ 4 test (68694 > 10000 px; (1000,1) thay (100,1); 42436 > 40000 px; `trang-01` thay `trang-001`) → xanh; `flutter test` 210/210 |
-| W-402 | F-020, F-021, F-022 | Trạng thái "đang mở phiên" khi khôi phục; thumbnail lỗi được thử lại + ô lỗi có nhãn; `cacheWidth` cho thumbnail; nhãn cho thanh tiến trình | Test đỏ trước cho từng hành vi | W-302 | S | ⬜ | |
+| W-402 | F-020, F-021, F-022 | Trạng thái "đang mở phiên" khi khôi phục; thumbnail lỗi được thử lại + ô lỗi có nhãn; `cacheWidth` cho thumbnail; nhãn cho thanh tiến trình | Test đỏ trước cho từng hành vi | W-302 | S | 🔄 | đỏ: 3 widget (tooltip thử lại, `MemoryImage` thay `ResizeImage`, thiếu "Đang mở phiên…"), controller (`restoring` chưa có; future lỗi bị cache), 2 a11y ô lỗi → xanh; `flutter test` 254/254 |
 | W-403 | F-024, F-025, F-027 (test) | Một helper phần mở rộng ở `core/session_manifest.dart`; `imageSizeOf` ở `imaging/`; sửa chuỗi purity test | Refactor không đổi hành vi, test hiện có xanh; grep khuôn `[a-z0-9]{1,5}` chỉ còn 1 nơi | W-402 | S | ⬜ | |
 
 ## Nhật ký hội tụ (Pha 4)
