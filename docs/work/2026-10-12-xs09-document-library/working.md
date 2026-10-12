@@ -32,6 +32,7 @@
 - PR-2: thiếu `document.json` → `DocumentUnrecoverable(null)` · loại thêm kiểu `DocumentMissing` · bậc 2.
 - PR-2: các mục không đọc được xếp sau tài liệu, theo docId · loại trộn theo thời gian (không có `updatedAt`) · bậc 3 (thứ tự xác định, test được).
 - PR-2 worker: đỏ-trước với stub `UnimplementedError` (T1 `+0 -32`, T2 `+0 -16`), xanh `test/storage/` +75, gate PASS +405 trên `a5983ae` + diff; Tầng 1 đối chiếu `diff session_store.dart document_store.dart`: chỉ 4 khác biệt của brief.
+- Rà bảo mật PR-2 (`security-reviewer`): 0 Cao. Sửa đỏ-trước (3 test đỏ → xanh, `test/storage/` +78): F1 Trung bình — `open()` tạo nhiều `DocumentStore` trên cùng thư mục (hàng đợi/`_saved` tách rời → ghi đè lẫn nhau, xoá bản gốc) → một store mỗi docId, `create` trả đúng instance đó, hợp đồng "một chủ mỗi tài liệu, màn thư viện chỉ `list()`" ghi ở doc; F2 Thấp — `importOriginal` tạo thư mục tài liệu thiếu manifest → `StateError` khi thư mục chưa có; F4 Thấp — `_load` giữ `_saved` cũ khi tải lại ra NeedsUpdate/lỗi → đặt lại `{}`; F6 Thấp — doc comment nói sai về đường dẫn trong lỗi → sửa. Không sửa: F3 TOCTOU `create` (id ngẫu nhiên 128 bit, cửa sổ rất hẹp; sau F1 mọi lệnh trên một tài liệu đi qua một store), F5 symlink trong thư mục riêng của app (cần đã chiếm app; giống `SessionStore`), F7 không trần kích thước `document.json` khi liệt kê (file do app tự ghi; xem lại khi PR-4 đo thời gian mở thư viện, spec §8 `DEBT` N > 500).
 
 ## Lần thử / blocker
 

@@ -33,12 +33,19 @@ final class LibraryUnreadable extends LibraryEntry {
 /// The library under [root] (`documents/`): one folder per document,
 /// `{docId}/document.json` plus its originals.
 ///
-/// [list] only reads; [create] adds a folder through `{docId}.part`. Nothing
-/// is logged and no error message contains a title or a path.
+/// [list] only reads; [create] adds a folder through `{docId}.part`. Each
+/// document has one [DocumentStore] ([open]), so its calls are serialized
+/// together; the screen that edits a document is its only owner, and the
+/// library screen only uses [list]. Nothing is logged and no message made
+/// here contains a title; a rethrown [FileSystemException] carries a path
+/// under [root], so callers must not show or log it.
 class LibraryStore {
   LibraryStore(this.root);
 
   final Directory root;
+
+  /// One store per document id, shared by [open] and [create].
+  final Map<String, DocumentStore> _stores = {};
 
   static const String _manifestName = 'document.json';
   static const String _partSuffix = '.part';
@@ -67,14 +74,18 @@ class LibraryStore {
     return entries..sort(_compare);
   }
 
-  /// Returns the store of document [docId] without touching the disk.
+  /// Returns the store of document [docId] without touching the disk; the
+  /// same instance every time for the same id.
   ///
   /// Throws [ArgumentError] for an invalid id.
   DocumentStore open(String docId) {
     if (!isValidPageId(docId)) {
       throw ArgumentError('docId must be 32 lowercase hex characters');
     }
-    return DocumentStore(Directory('${root.path}/$docId'));
+    return _stores.putIfAbsent(
+      docId,
+      () => DocumentStore(Directory('${root.path}/$docId')),
+    );
   }
 
   /// Creates the folder of the empty [document] and returns its store; call
@@ -108,7 +119,7 @@ class LibraryStore {
       await _deleteQuietly(part);
       rethrow;
     }
-    return DocumentStore(target);
+    return open(document.id);
   }
 
   /// Reads the manifest of folder [dir] named [docId]; never throws.

@@ -179,6 +179,21 @@ void main() {
   });
 
   group('importOriginal', () {
+    test('refuses a document folder that does not exist', () async {
+      final missing = DocumentStore(
+        Directory('${tmp.path}/documents/${newPageId(Random(2000))}'),
+      );
+      await expectLater(
+        missing.importOriginal(
+          source(1),
+          id: newPageId(Random(1)),
+          extension: 'jpg',
+        ),
+        throwsStateError,
+      );
+      expect(missing.dir.existsSync(), isFalse);
+    });
+
     test('copies bytes and returns the relative path', () async {
       final id = newPageId(Random(1));
       final src = source(1);
@@ -440,6 +455,19 @@ void main() {
   });
 
   group('AC-4 newer schema', () {
+    test('a later load that needs an update forgets what an earlier load '
+        'referenced, so a save cannot delete those originals', () async {
+      final a = await importPage(1);
+      await store.save(doc([a]));
+      final fresh = DocumentStore(dir);
+      expect(await fresh.load(), isA<DocumentLoaded>());
+      manifest().writeAsStringSync('{"schemaVersion":3}');
+      expect(await fresh.load(), isA<DocumentNeedsUpdate>());
+      manifest().deleteSync();
+      await fresh.save(doc([]));
+      expect(fresh.resolve(a.originalPath).existsSync(), isTrue);
+    });
+
     test('needs an update: nothing renamed or deleted, save refuses', () async {
       final p1 = await importPage(1);
       await store.save(doc([p1]));

@@ -302,6 +302,14 @@ void main() {
       expect(root.existsSync(), isFalse);
     });
 
+    test('returns one store per document, also the one create returned, '
+        'so calls on a document are serialized together', () async {
+      expect(library.open(id(1)), same(library.open(id(1))));
+      expect(library.open(id(1)), isNot(same(library.open(id(2)))));
+      final created = await library.create(doc(id(3)));
+      expect(library.open(id(3)), same(created));
+    });
+
     test('returns a store for the document folder', () {
       final store = library.open(id(1));
       expect(store.docId, id(1));

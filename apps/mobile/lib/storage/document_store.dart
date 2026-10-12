@@ -93,7 +93,9 @@ class DocumentStore {
   /// relative path. [source] is never modified or deleted.
   ///
   /// Throws [ArgumentError] for an invalid id or extension and
-  /// [StateError] if the destination already exists (never overwritten).
+  /// [StateError] if the destination already exists (never overwritten) or
+  /// the document folder does not exist (only `LibraryStore.create` makes
+  /// one, so a folder named by an id always has a manifest).
   Future<String> importOriginal(
     File source, {
     required String id,
@@ -118,7 +120,10 @@ class DocumentStore {
     if (await target.exists()) {
       throw StateError('original already exists');
     }
-    await _originals.create(recursive: true);
+    if (!await dir.exists()) {
+      throw StateError('document folder does not exist');
+    }
+    await _originals.create();
     final part = File('${target.path}$_partSuffix');
     try {
       await source.copy(part.path);
@@ -160,6 +165,9 @@ class DocumentStore {
   Future<DocumentLoadResult> _load() async {
     // Any failure below leaves the store unable to replace the manifest.
     _ready = false;
+    // What an earlier load referenced is no longer known, so a later save
+    // must not delete it.
+    _saved = const {};
     if (!await _manifest.exists()) {
       // Documents are created with a manifest, so a missing one is damage;
       // there is nothing to replace, so a later save is allowed.
