@@ -13,7 +13,7 @@
 | Ghi file bền | Ghi `.tmp`/`.part` → flush/fsync → rename; không ghi đè bản gốc | `lib/storage/session_store.dart` `importOriginal`, `_save` | |
 | Không xoá bản gốc | Chỉ xoá bản gốc khi một manifest **đã lưu** không còn tham chiếu nó; khi nghi ngờ (manifest hỏng/không đọc được) thì giữ | `session_store.dart` `_load`, `_deleteUnreferencedOriginals` | CLAUDE.md: never discard scan originals |
 | Xoá best-effort | `_deleteQuietly` chỉ nuốt `FileSystemException`, dùng sau khi trạng thái chính đã bền | `session_store.dart`, `lib/export/page_exporter.dart` | |
-| Xử lý ảnh nặng | Giải mã trong `Isolate.run` ở `lib/imaging/`; lỗi giải mã → `ImageDecodeFailure` không mang nội dung; có trần `maxDecodedPixels` | `lib/imaging/page_render.dart` | Mọi lần giải mã bản gốc đi qua **một** `DecodeGate` (`lib/imaging/decode_gate.dart`), tạo ở `main.dart` |
+| Xử lý ảnh nặng | Giải mã trong isolate qua `runWithinBudget` (bị kill khi quá `decodeBudget`) ở `lib/imaging/`; chỉ JPEG/PNG/WebP tĩnh theo nội dung; lỗi giải mã → `ImageDecodeFailure` không mang nội dung; có trần `maxOriginalBytes` và `maxDecodedPixels` | `lib/imaging/page_render.dart` | Mọi lần giải mã bản gốc đi qua **một** `DecodeGate` (`lib/imaging/decode_gate.dart`), tạo ở `main.dart` |
 | Phụ thuộc nền tảng | Interface + adapter tiêm qua constructor để test dùng fake | `lib/ui/page_source.dart`, `lib/export/file_sharer.dart` | Nối thật ở `lib/main.dart` |
 | Hành động phá huỷ | Luôn qua hộp xác nhận `_confirm(question, label)` | `review_screen.dart` | |
 | Trạng thái bận | Khi `controller.busy`, mọi nút **và kéo-thả** đều tắt, `onReorderItem` bỏ qua (thao tác ngữ nghĩa Move up/down vẫn gọi nó); một `LinearProgressIndicator` cố định 4 dp | `review_screen.dart` `build` | `buildDefaultDragHandles: !busy` |

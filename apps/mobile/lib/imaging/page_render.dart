@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -7,11 +6,17 @@ import 'package:image/image.dart' as img;
 
 import '../core/page_quad.dart';
 import 'homography.dart';
+import 'isolate_budget.dart';
 
 /// Largest decoded image (width × height) accepted, checked from the header
 /// before any pixel buffer is allocated, and largest rectified output.
 // DEBT: 50 MP decode limit chosen without device memory measurement | trần: about 150 MB per decoded original | xem lại khi: P2 device benchmark (spec §2, §19).
 const int maxDecodedPixels = 50000000;
+
+/// Largest original file read into memory, checked from the file length
+/// before any byte is read.
+// DEBT: cap chosen without measuring real originals; a 50 MP PNG photo could exceed it | trần: 64 MiB per original | xem lại khi: P2 device benchmark or a user report of a refused large photo.
+const int maxOriginalBytes = 64 * 1024 * 1024;
 
 /// The bytes could not be decoded into an image within limits.
 ///
@@ -24,28 +29,75 @@ class ImageDecodeFailure implements Exception {
   String toString() => 'ImageDecodeFailure';
 }
 
+const List<int> _jpegMagic = [0xFF, 0xD8, 0xFF];
+const List<int> _pngMagic = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+const List<int> _riffMagic = [0x52, 0x49, 0x46, 0x46]; // RIFF
+const List<int> _webpMagic = [0x57, 0x45, 0x42, 0x50]; // WEBP
+
+/// The decoder for [bytes] if they start like a JPEG, PNG or WebP file, else
+/// `null`. Only these formats are accepted as originals, whatever the file
+/// is named: fewer decoders face untrusted input, and none is picked by a
+/// loose guess such as TGA.
+img.Decoder? _decoderFor(Uint8List bytes) {
+  bool startsWith(List<int> magic, [int offset = 0]) {
+    if (bytes.length < offset + magic.length) return false;
+    for (var i = 0; i < magic.length; i++) {
+      if (bytes[offset + i] != magic[i]) return false;
+    }
+    return true;
+  }
+
+  if (startsWith(_jpegMagic)) return img.JpegDecoder();
+  if (startsWith(_pngMagic)) return img.PngDecoder();
+  if (startsWith(_riffMagic) && startsWith(_webpMagic, 8)) {
+    return img.WebPDecoder();
+  }
+  return null;
+}
+
+/// The decoder for [bytes] and their header, or `null` for a format other
+/// than JPEG, PNG or WebP, an unreadable header, a non-positive side or an
+/// animated WebP.
+///
+/// An animated WebP reports its canvas, not the size of the frame that
+/// decoding allocates, so the pixel ceiling could not hold for it. (An
+/// animated PNG decodes frame 0 at its header size.)
+({img.Decoder decoder, img.DecodeInfo info})? _startDecode(Uint8List bytes) {
+  final decoder = _decoderFor(bytes);
+  final info = decoder?.startDecode(bytes);
+  if (decoder == null || info == null || info.width <= 0 || info.height <= 0) {
+    return null;
+  }
+  if (info is img.WebPInfo &&
+      (info.hasAnimation ||
+          info.format == img.WebPFormat.animated ||
+          info.frames.isNotEmpty)) {
+    return null;
+  }
+  return (decoder: decoder, info: info);
+}
+
 /// Width and height of the image in [bytes], read from its header only
-/// (no pixels are decoded), or `null` for an unknown format, an unreadable
-/// header or a non-positive side.
+/// (no pixels are decoded), or `null` when the header is not accepted (see
+/// [_startDecode]).
 ({int width, int height})? imageSizeOf(Uint8List bytes) {
-  final info = img.findDecoderForData(bytes)?.startDecode(bytes);
-  if (info == null || info.width <= 0 || info.height <= 0) return null;
+  final info = _startDecode(bytes)?.info;
+  if (info == null) return null;
   return (width: info.width, height: info.height);
 }
 
 /// Decodes the first frame of [bytes] and bakes its EXIF orientation in.
 ///
-/// Throws [ImageDecodeFailure] for unknown formats, invalid or oversized
+/// Throws [ImageDecodeFailure] for formats other than JPEG, PNG and WebP
+/// (recognised by content, not file name), animated WebP, invalid or
+/// oversized
 /// headers (more than [maxPixels] pixels) and any decoder error.
 img.Image decodeOriented(Uint8List bytes, {int maxPixels = maxDecodedPixels}) {
   try {
-    final decoder = img.findDecoderForData(bytes);
-    if (decoder == null) throw const ImageDecodeFailure();
-    final info = decoder.startDecode(bytes);
-    if (info == null ||
-        info.width <= 0 ||
-        info.height <= 0 ||
-        info.width * info.height > maxPixels) {
+    final start = _startDecode(bytes);
+    if (start == null) throw const ImageDecodeFailure();
+    final (:decoder, :info) = start;
+    if (info.width * info.height > maxPixels) {
       throw const ImageDecodeFailure();
     }
     final image = decoder.decode(bytes, frame: 0);
@@ -179,19 +231,25 @@ Uint8List renderPageSync(
 }
 
 /// Runs [renderPageSync] on the file at [originalPath] in a background
-/// isolate. The original file is only read.
+/// isolate within [decodeBudget]. The original file is only read, and not
+/// at all when it holds more than [maxBytes].
+///
+/// Throws [ImageDecodeFailure] if the original cannot be read or decoded
+/// within these limits.
 Future<Uint8List> renderPage(
   String originalPath,
   PageQuad quad,
   int quarterTurns, {
   RenderFormat format = RenderFormat.jpeg,
-}) => Isolate.run(
+  int maxBytes = maxOriginalBytes,
+}) => runWithinBudget(
   () => renderPageSync(
-    File(originalPath).readAsBytesSync(),
+    _readOriginalSync(originalPath, maxBytes),
     quad,
     quarterTurns,
     format: format,
   ),
+  decodeBudget,
 );
 
 /// Decodes [originalBytes] and encodes a JPEG whose longer side is at most
@@ -217,12 +275,36 @@ Uint8List thumbnailSync(
 }
 
 /// Runs [thumbnailSync] on the file at [originalPath] in a background
-/// isolate. The original file is only read.
-Future<Uint8List> thumbnail(String originalPath, {int maxSide = 1024}) =>
-    Isolate.run(
-      () =>
-          thumbnailSync(File(originalPath).readAsBytesSync(), maxSide: maxSide),
-    );
+/// isolate within [decodeBudget]. The original file is only read, and not
+/// at all when it holds more than [maxBytes].
+///
+/// Throws [ImageDecodeFailure] if the original cannot be read or decoded
+/// within these limits.
+Future<Uint8List> thumbnail(
+  String originalPath, {
+  int maxSide = 1024,
+  int maxBytes = maxOriginalBytes,
+}) => runWithinBudget(
+  () => thumbnailSync(
+    _readOriginalSync(originalPath, maxBytes),
+    maxSide: maxSide,
+  ),
+  decodeBudget,
+);
+
+/// Reads the file at [path], or throws [ImageDecodeFailure] without reading
+/// when it holds more than [maxBytes]. Bytes appended after the length was
+/// taken are not read.
+Uint8List _readOriginalSync(String path, int maxBytes) {
+  final file = File(path).openSync();
+  try {
+    final length = file.lengthSync();
+    if (length > maxBytes) throw const ImageDecodeFailure();
+    return file.readSync(length);
+  } finally {
+    file.closeSync();
+  }
+}
 
 /// The corners of [quad] in continuous pixel coordinates.
 ({Point<double> tl, Point<double> tr, Point<double> br, Point<double> bl})

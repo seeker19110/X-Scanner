@@ -81,6 +81,13 @@
 - DoC đối chiếu trên `0327ab7`: `maintenance-sweep` 🔴 0 · 🟡 3 (thiếu "Ngày cập nhật" PROGRESS → sửa ở PR này; thiếu `dependabot.yml` = F-009, WAITING chủ repo; radar 53/100 là chỉ số khung, không phải phát hiện); OSV 86 package hosted 0 advisory; bí mật 0.
 - Đóng hồ sơ `2026-10-12-comprehensive-development-plan` (working → done, merge #23 `ac2c435`) trong PR tài liệu này · loại để nguyên "Active" · bậc 1 (hồ sơ khai sai trạng thái sau merge; DoD của chính hồ sơ đó đã đạt).
 - Không đổi `docs/work/2026-10-11-p1-scan-export/working.md`: còn chờ AC-9 UAT (chủ repo) · bậc 1.
+- `/auto-complete` lần 6: tách W-104 thành W-104a (hàng rào đầu vào, làm ngay) và W-104b (nâng `image`, 2026-10-18) · loại chờ cả gói tới 18/10 · bậc 1 (hàng rào không phụ thuộc phiên bản `image`; giảm rủi ro F-004 sớm 6 ngày). Không mở XS-09: ngoài scope đã giao (câu hỏi cho chủ repo).
+- Định dạng nhận: JPEG/PNG/WebP theo magic bytes · loại `findDecoderForData` (11 định dạng, TGA đoán lỏng) và loại chỉ JPEG/PNG · bậc 1 (ít decoder đối mặt input không tin cậy; giữ WebP vì đang nhận được, bỏ thì thoái lui người dùng). BMP/GIF/TIFF/TGA… giờ báo "không đọc được".
+- Đuôi file lưu bản gốc vẫn lấy từ tên file · loại suy đuôi từ nội dung · bậc 2 (đuôi không quyết định giải mã; giải mã đã chọn theo nội dung).
+- Trần byte 64 MiB, kiểm bằng độ dài file mở sẵn trước khi đọc, chỉ đọc đúng độ dài đó · loại `File.lengthSync` rồi `readAsBytesSync` (file lớn lên giữa chừng vẫn đọc hết) · bậc 1. Dấu `DEBT:` (chưa đo trên máy).
+- Ngân sách 60 s mỗi job qua `Isolate.spawn` + `Isolate.kill` (`lib/imaging/isolate_budget.dart`) · loại `Isolate.run(...).timeout` (chỉ thôi chờ, isolate vẫn chạy) · bậc 1; mọi lỗi của job → `ImageDecodeFailure` (không mang nội dung ra khỏi isolate). Dấu `DEBT:` (chưa đo render 50 MP).
+- Đỏ-trước: stub (`maxBytes` bị bỏ qua, `Isolate.run(...).timeout`) → 5 test đỏ theo hành vi (BMP/GIF/TIFF/TGA được giải mã; file trên trần vẫn đọc; lỗi khác không map; job quá hạn ném `TimeoutException`; controller không báo `decodeFailed` với BMP) → cài thật → 86/86 xanh ở `test/imaging` + `session_controller_test`.
+- Rà bảo mật W-104a (subagent `security-reviewer`, #28 @ `d342ca4`): 1 Trung bình + 4 Thấp. Sửa cả 3 điểm có đường thật · bậc 1. (a) WebP động: VP8X canvas 1×1 che frame lớn → trần 50 MP bị lách, decode cấp phát theo frame (tới 16384² → OOM cả tiến trình). Từ chối mọi WebP động (`hasAnimation`/`format == animated`/`frames`); APNG an toàn vì frame 0 dùng kích thước IHDR. (b) Báo lỗi quá hạn ngay khi kill (isolate còn giữ RAM) → `DecodeGate` mở cho lần giải mã sau → tạm thời hai bản gốc trong RAM. Giờ chỉ báo lỗi khi isolate đã thoát (onExit). (c) Lỗi spawn trước đây lọt ra thô; giờ map về `ImageDecodeFailure`. Mỗi điểm có test đỏ trước: WebP động được giải mã; lỗi báo sau 54 ms dù isolate còn ngủ 600 ms; spawn lỗi ném `ArgumentError`. Sau khi sửa: 115/115. Bỏ qua: timer bắt đầu sau spawn (spawn treo là giả định xa) · bậc 2. Bản gốc BMP/GIF… do bản cũ lưu: P1 chưa phân phối, đã ghi ở PR · không mất dữ liệu.
 - W-104 mở rộng: thêm trần byte đầu vào, nhận dạng theo nội dung, ngân sách thời gian có dừng thật tác vụ (kế hoạch #23 §5.1) · chủ repo duyệt 2026-10-12 · cùng khuôn lỗi F-004 (ảnh độc hại treo/ngốn RAM), không thêm dependency. Lịch `trig_01UaZ2bXtK9AAmy4NXAKLgzr` (2026-10-18T02:00Z) đã cập nhật prompt.
 
 ## Lần thử / blocker
@@ -89,7 +96,7 @@
 
 ## Bàn giao / bước tiếp theo
 
-- WAITING (§8): W-104 từ 2026-10-18 (nâng `image` ≥ 4.12.0 + test 2 ảnh tổng hợp, rồi quét lại nhóm 2/7 và đóng EX-1); chủ repo: bật branch protection/ruleset (F-014), dependency review/Dependabot (F-009), chạy UAT AC-9 (D4). Xong W-104 → đổi `working.md` thành `done.md`.
+- W-104a: PR hàng rào đầu vào (2026-10-12). WAITING (§8): W-104b từ 2026-10-18 (nâng `image` ≥ 4.12.0 + test 2 ảnh tổng hợp, rồi quét lại nhóm 2/7 và đóng EX-1); chủ repo: bật branch protection/ruleset (F-014), dependency review/Dependabot (F-009), chạy UAT AC-9 (D4). Xong W-104b → đổi `working.md` thành `done.md`.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 

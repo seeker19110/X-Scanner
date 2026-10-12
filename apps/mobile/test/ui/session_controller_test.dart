@@ -377,6 +377,24 @@ void main() {
     expect(controller.busy, isFalse);
   });
 
+  test('an image in a format outside JPEG/PNG/WebP reports decodeFailed, '
+      'keeps the pages and the picked file (W-104)', () async {
+    await addPages(1);
+    final before = controller.session;
+    final bmp = File('${picks.path}/scan.jpg')
+      ..writeAsBytesSync(img.encodeBmp(img.Image(width: 8, height: 6)));
+
+    source.gallery.add(bmp.path);
+    await controller.importFromGallery();
+
+    expect(controller.takeNotice(), SessionNotice.decodeFailed);
+    expect(controller.takeNotice(), isNull);
+    expect(controller.session, same(before));
+    expect(manifestPages(), hasLength(1));
+    expect(source.discarded, isNot(contains(bmp.path)));
+    expect(bmp.existsSync(), isTrue);
+  });
+
   test('a source file deleted before the decode check reports decodeFailed '
       'and keeps the session (F-028)', () async {
     await addPages(1);
