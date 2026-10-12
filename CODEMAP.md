@@ -16,6 +16,7 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Đổi luật kéo góc (lồi, diện tích tối thiểu, kẹp) | `lib/core/quad_editing.dart` | `flutter test test/core/quad_editing_test.dart test/ui/quad_editor_screen_test.dart` |
 | Đổi định dạng manifest phiên (schema 1) hoặc `document.json` (schema 2, XS-08 §13) | `lib/core/session_manifest.dart` (tăng `schemaVersion`, giữ đọc bản cũ; schema mới hơn → `DocumentNeedsAppUpdate`, không cách ly) | `flutter test test/core/session_manifest_test.dart test/storage` |
 | Đổi cách lưu/khôi phục/cách ly phiên, giữ bản gốc | `lib/storage/session_store.dart` | `flutter test test/storage` — mọi ca mất dữ liệu phải có test đỏ trước |
+| Đổi lưu trữ theo tài liệu hoặc thư viện (XS-09; chưa nối vào app tới PR-4) | `lib/storage/document_store.dart` (bản chép `SessionStore` có `DEBT:` — sửa bảo đảm ở cả hai tới khi PR-4 xoá `SessionStore`), `lib/storage/library_store.dart` (`list()` chỉ đọc) | `flutter test test/storage` |
 | Đổi thuật toán nắn phối cảnh | `lib/imaging/homography.dart` | `flutter test test/imaging` |
 | Đổi giải mã/EXIF/giới hạn điểm ảnh/thumbnail | `lib/imaging/page_render.dart` | `flutter test test/imaging test/export` |
 | Đổi định dạng ảnh nhận (JPEG/PNG/WebP theo magic bytes) hoặc trần byte bản gốc | `lib/imaging/page_render.dart` (`_decoderFor`, `maxOriginalBytes`) | `flutter test test/imaging test/ui/session_controller_test.dart` |
