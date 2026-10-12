@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:x_scanner/imaging/isolate_budget.dart';
@@ -30,6 +31,31 @@ void main() {
         () => throw RangeError('secret content'),
         const Duration(seconds: 10),
       ),
+      throwsA(isA<ImageDecodeFailure>()),
+    );
+  });
+
+  test('an over-budget job is reported only once its isolate has stopped, '
+      'so the decode gate never holds two decodes at once', () async {
+    final watch = Stopwatch()..start();
+    await expectLater(
+      // A native sleep cannot be interrupted; the kill lands when it ends.
+      runWithinBudget<void>(
+        () => sleep(const Duration(milliseconds: 600)),
+        const Duration(milliseconds: 50),
+      ),
+      throwsA(isA<ImageDecodeFailure>()),
+    );
+    expect(watch.elapsedMilliseconds, greaterThanOrEqualTo(500));
+  });
+
+  test('a job that cannot be sent to an isolate fails as '
+      'ImageDecodeFailure', () async {
+    final port = ReceivePort();
+    addTearDown(port.close);
+    await expectLater(
+      // A ReceivePort cannot cross isolates, so spawning fails.
+      runWithinBudget(() => port.hashCode, const Duration(seconds: 10)),
       throwsA(isA<ImageDecodeFailure>()),
     );
   });

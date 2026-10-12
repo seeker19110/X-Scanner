@@ -55,29 +55,49 @@ img.Decoder? _decoderFor(Uint8List bytes) {
   return null;
 }
 
+/// The decoder for [bytes] and their header, or `null` for a format other
+/// than JPEG, PNG or WebP, an unreadable header, a non-positive side or an
+/// animated WebP.
+///
+/// An animated WebP reports its canvas, not the size of the frame that
+/// decoding allocates, so the pixel ceiling could not hold for it. (An
+/// animated PNG decodes frame 0 at its header size.)
+({img.Decoder decoder, img.DecodeInfo info})? _startDecode(Uint8List bytes) {
+  final decoder = _decoderFor(bytes);
+  final info = decoder?.startDecode(bytes);
+  if (decoder == null || info == null || info.width <= 0 || info.height <= 0) {
+    return null;
+  }
+  if (info is img.WebPInfo &&
+      (info.hasAnimation ||
+          info.format == img.WebPFormat.animated ||
+          info.frames.isNotEmpty)) {
+    return null;
+  }
+  return (decoder: decoder, info: info);
+}
+
 /// Width and height of the image in [bytes], read from its header only
-/// (no pixels are decoded), or `null` for a format other than JPEG, PNG or
-/// WebP, an unreadable header or a non-positive side.
+/// (no pixels are decoded), or `null` when the header is not accepted (see
+/// [_startDecode]).
 ({int width, int height})? imageSizeOf(Uint8List bytes) {
-  final info = _decoderFor(bytes)?.startDecode(bytes);
-  if (info == null || info.width <= 0 || info.height <= 0) return null;
+  final info = _startDecode(bytes)?.info;
+  if (info == null) return null;
   return (width: info.width, height: info.height);
 }
 
 /// Decodes the first frame of [bytes] and bakes its EXIF orientation in.
 ///
 /// Throws [ImageDecodeFailure] for formats other than JPEG, PNG and WebP
-/// (recognised by content, not file name), invalid or oversized
+/// (recognised by content, not file name), animated WebP, invalid or
+/// oversized
 /// headers (more than [maxPixels] pixels) and any decoder error.
 img.Image decodeOriented(Uint8List bytes, {int maxPixels = maxDecodedPixels}) {
   try {
-    final decoder = _decoderFor(bytes);
-    if (decoder == null) throw const ImageDecodeFailure();
-    final info = decoder.startDecode(bytes);
-    if (info == null ||
-        info.width <= 0 ||
-        info.height <= 0 ||
-        info.width * info.height > maxPixels) {
+    final start = _startDecode(bytes);
+    if (start == null) throw const ImageDecodeFailure();
+    final (:decoder, :info) = start;
+    if (info.width * info.height > maxPixels) {
       throw const ImageDecodeFailure();
     }
     final image = decoder.decode(bytes, frame: 0);

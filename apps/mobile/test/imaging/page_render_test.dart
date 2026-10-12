@@ -35,6 +35,14 @@ Uint8List pngOf(img.Image image) => img.encodePng(image);
 /// A 3×2 lossless WebP filled with RGB (10, 20, 30), made with Pillow.
 const String webp3x2 = 'UklGRh4AAABXRUJQVlA4TBEAAAAvAkAAAAdQiirUo/+BiOh/AAA=';
 
+/// An animated WebP of two 3×2 lossless frames whose VP8X canvas was set to
+/// 1×1 (made with Pillow, canvas bytes zeroed): the header understates the
+/// pixels that decoding a frame allocates.
+const String animatedWebp1x1Canvas =
+    'UklGRogAAABXRUJQVlA4WAoAAAACAAAAAAAAAAAAQU5JTQYAAAAAAAAAAABBTk1GKgAAAAAA'
+    'AAAAAAIAAAEAAGQAAAJWUDhMEQAAAC8CQAAAB1CKKtSj/4GI6H8AAEFOTUYqAAAAAAAAAAAA'
+    'AgAAAQAAZAAAAFZQOEwRAAAALwJAAAAHUIoi16P/gYjofwAA';
+
 Directory tempDir() {
   final dir = Directory.systemTemp.createTempSync('page_render_test');
   addTearDown(() => dir.deleteSync(recursive: true));
@@ -159,6 +167,17 @@ void main() {
     test('recognises a PNG by its content, not its name', () {
       final decoded = decodeOriented(pngOf(solid(8, 6, 1, 2, 3)));
       expect((decoded.width, decoded.height), (8, 6));
+    });
+
+    test('rejects an animated WebP whose 1×1 canvas hides larger frames, '
+        'so the pixel ceiling cannot be bypassed', () {
+      final bytes = base64Decode(animatedWebp1x1Canvas);
+      expect(
+        () => decodeOriented(bytes, maxPixels: 1),
+        throwsA(isA<ImageDecodeFailure>()),
+      );
+      expect(() => decodeOriented(bytes), throwsA(isA<ImageDecodeFailure>()));
+      expect(imageSizeOf(bytes), isNull);
     });
 
     test('decodes a lossless WebP', () {

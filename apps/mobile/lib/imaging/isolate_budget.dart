@@ -8,16 +8,20 @@ import 'page_render.dart';
 const Duration decodeBudget = Duration(seconds: 60);
 
 /// Runs [job] in a new isolate and returns its result, or throws
-/// [ImageDecodeFailure] when [job] throws or runs longer than [budget].
+/// [ImageDecodeFailure] when [job] throws, cannot be sent to an isolate or
+/// runs longer than [budget].
 ///
 /// Unlike [Future.timeout], an over-budget job is killed, so a decoder
-/// stuck in a loop on a crafted image stops using CPU and memory. Errors of
-/// [job] are not passed on, so no content they may carry leaves the isolate.
+/// stuck in a loop on a crafted image stops using CPU and memory. The
+/// failure is reported only once the isolate has exited, so a caller that
+/// queues decodes (`DecodeGate`) never has two in memory at once. Errors
+/// of [job] are not passed on, so no content they may carry leaves the
+/// isolate.
 Future<T> runWithinBudget<T>(T Function() job, Duration budget) async {
   final result = Completer<T>();
   // Set up before the isolate starts so no reply can arrive unhandled. The
   // reply is the job's record, or null for a failed job; onExit sends null
-  // too, for an isolate that died without replying.
+  // when the isolate has exited, also after a kill.
   final port = RawReceivePort((Object? message) {
     if (result.isCompleted) return;
     if (message is (T,)) {
@@ -28,18 +32,18 @@ Future<T> runWithinBudget<T>(T Function() job, Duration budget) async {
   });
   Timer? timer;
   try {
-    final isolate = await Isolate.spawn<(T Function(), SendPort)>(
-      _runJob,
-      (job, port.sendPort),
-      onExit: port.sendPort,
-      errorsAreFatal: true,
-    );
-    timer = Timer(budget, () {
-      isolate.kill(priority: Isolate.immediate);
-      if (!result.isCompleted) {
-        result.completeError(const ImageDecodeFailure());
-      }
-    });
+    final Isolate isolate;
+    try {
+      isolate = await Isolate.spawn<(T Function(), SendPort)>(
+        _runJob,
+        (job, port.sendPort),
+        onExit: port.sendPort,
+        errorsAreFatal: true,
+      );
+    } catch (_) {
+      throw const ImageDecodeFailure();
+    }
+    timer = Timer(budget, () => isolate.kill(priority: Isolate.immediate));
     return await result.future;
   } finally {
     timer?.cancel();
