@@ -13,10 +13,10 @@
 | Ghi file bền | Ghi `.tmp`/`.part` → flush/fsync → rename; không ghi đè bản gốc | `lib/storage/session_store.dart` `importOriginal`, `_save` | |
 | Không xoá bản gốc | Chỉ xoá bản gốc khi một manifest **đã lưu** không còn tham chiếu nó; khi nghi ngờ (manifest hỏng/không đọc được) thì giữ | `session_store.dart` `_load`, `_deleteUnreferencedOriginals` | CLAUDE.md: never discard scan originals |
 | Xoá best-effort | `_deleteQuietly` chỉ nuốt `FileSystemException`, dùng sau khi trạng thái chính đã bền | `session_store.dart`, `lib/export/page_exporter.dart` | |
-| Xử lý ảnh nặng | Giải mã trong `Isolate.run` ở `lib/imaging/`; lỗi giải mã → `ImageDecodeFailure` không mang nội dung; có trần `maxDecodedPixels` | `lib/imaging/page_render.dart` | Mọi lần giải mã bản gốc đi qua **một** cổng tuần tự (W-103) |
+| Xử lý ảnh nặng | Giải mã trong `Isolate.run` ở `lib/imaging/`; lỗi giải mã → `ImageDecodeFailure` không mang nội dung; có trần `maxDecodedPixels` | `lib/imaging/page_render.dart` | Mọi lần giải mã bản gốc đi qua **một** `DecodeGate` (`lib/imaging/decode_gate.dart`), tạo ở `main.dart` |
 | Phụ thuộc nền tảng | Interface + adapter tiêm qua constructor để test dùng fake | `lib/ui/page_source.dart`, `lib/export/file_sharer.dart` | Nối thật ở `lib/main.dart` |
 | Hành động phá huỷ | Luôn qua hộp xác nhận `_confirm(question, label)` | `review_screen.dart` | |
-| Trạng thái bận | Khi `controller.busy`, mọi nút **và kéo-thả** đều tắt; một `LinearProgressIndicator` cố định 4 dp | `review_screen.dart` `build` | Kéo-thả: W-103 |
+| Trạng thái bận | Khi `controller.busy`, mọi nút **và kéo-thả** đều tắt; một `LinearProgressIndicator` cố định 4 dp | `review_screen.dart` `build` | `buildDefaultDragHandles: !busy` |
 | Trạng thái màn | Đủ 4 trạng thái: đang tải / rỗng / lỗi (SnackBar) / có dữ liệu | `review_screen.dart` | Đang tải khi khôi phục: W-402 |
 | Màu / theme | Chỉ `Theme.of(context).colorScheme`; seed duy nhất ở `lib/app/theme.dart`; mặc định Dark | `lib/app/theme.dart` | |
 | Nút icon | Có `tooltip` (là nhãn trình đọc màn hình); vùng chạm ≥ 48 dp | `review_screen.dart` | |
@@ -29,4 +29,3 @@
 
 - Khuôn phần mở rộng `[a-z0-9]{1,5}` viết 3 nơi; tách đuôi file viết 2 nơi (F-024) → một helper ở `core/session_manifest.dart`, W-403.
 - Đọc kích thước ảnh: `ui/quad_editor_screen.dart` import thẳng `package:image` (F-025) → `imaging/page_render.dart`, W-403.
-- Giải mã bản gốc: thumbnail qua hàng đợi, xuất thì không (F-006) → một cổng, W-103.

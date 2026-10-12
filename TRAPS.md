@@ -31,3 +31,8 @@ và chép ảnh chọn từ thư viện vào `cache/{uuid}/`; app chép sang `or
 đường dẫn file — đọc mã nguồn plugin xem file đó nằm đâu và ai xoá nó. *Chốt chặn*:
 `apps/mobile/test/ui/page_source_test.dart` và các test "(F-005)" trong `apps/mobile/test/ui/session_controller_test.dart`.
 (2026-10-12, W-102)
+
+**Thao tác theo chỉ số vẫn nhận được khi app bận.** Mọi nút tắt khi `busy` nhưng kéo-thả vẫn bật; `move(from, to)`
+vào hàng đợi ghi sau các thao tác đang chờ và chạy với chỉ số cũ, nên chuyển nhầm trang (F-007). *Cách rà*: mỗi
+cử chỉ/nút tạo một thao tác mang chỉ số hoặc id — nó có bị tắt cùng các nút khi bận không. *Chốt chặn*: test
+"(F-007)" trong `apps/mobile/test/ui/review_screen_test.dart`. (2026-10-12, W-103)
