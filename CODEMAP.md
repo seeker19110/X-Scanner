@@ -36,6 +36,7 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Muốn | Sửa | Rồi chạy |
 | --- | --- | --- |
 | Đổi lệnh gate | `.claude/project-commands.sh` | `bash scripts/dev-task.sh doctor` rồi `gate` |
+| Hạ `targetSdk` (gate FAIL khi < 31: dưới 31 component có intent-filter không khai `exported` bị exported ngầm) | `scripts/check-release-manifest.py` (`MIN_TARGET_SDK`), `android/app/build.gradle.kts` | `python3 scripts/check-release-manifest.py --self-test` + gate |
 | Cho phép thêm quyền / component exported (cần lý do + spec) | `scripts/check-release-manifest.py` (`ALLOWED_PERMISSIONS`, `ALLOWED_EXPORTED`) | `python3 scripts/check-release-manifest.py --self-test` + gate |
 | Đổi CI | `.github/workflows/ci.yml` | `bash scripts/dev-task.sh gate`; xem run trên PR |
 | Đổi kiểm adoption / placeholder | `scripts/check-adoption.py` | `python3 scripts/check-adoption.py && python3 scripts/check-adoption.py --lint` |

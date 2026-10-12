@@ -9,15 +9,17 @@
 
 ## Definition of Complete (bản chỉnh cho app mobile offline, không server)
 
-- [ ] 0 phát hiện **Cao** còn mở; mọi Trung/Thấp còn lại có kết cục ghi ở bảng dưới (sửa ở W-xxx, hoặc dời kèm lý do).
-- [ ] Luồng chính LC-1..LC-3 (`docs/FEATURE-MAP.md`) có widget/integration test đi qua; toàn bộ test xanh trên CI. E2E trên thiết bị = AC-9 UAT (chủ repo, emulator, D4).
-- [ ] Mọi lỗi sửa trong kế hoạch có test hồi quy ở lại; khuôn lỗi ghi `TRAPS.md`.
-- [ ] Nhóm 12 sạch: không còn logic trùng lặp đã biết; `docs/CONVENTIONS.md` được tuân thủ (lệch có ghi nhận).
-- [ ] Cổng tự động chặn thật: pre-commit + CI chạy gate (gồm kiểm quyền manifest release đã gộp). **Branch protection/ruleset cần chủ repo bật** (quyền repo settings, F-014) — ghi WAITING, không tự bật.
-- [ ] Bảo mật/riêng tư: quét bí mật sạch; OSV sạch; exception cho F-004 có owner/hạn; quyền manifest release chỉ `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`. Không có server → không có ACL; kiểm "vượt quyền" thay bằng kiểm manifest/không exported/không mạng.
-- [ ] Tài liệu khớp code: README, `PROJECT.md`, header `CLAUDE.md`/`AGENTS.md`, `FEATURE-MAP`, `CODEMAP`, ADR, spec §11/§16.
-- [ ] Hiệu năng: số đo trên máy host ghi trong spec §19; trần bộ nhớ có `DEBT:` rõ; p95 trên thiết bị dời P2 theo spec §2 (đã duyệt).
-- [ ] `PROGRESS.md` phản ánh đúng trạng thái + nợ còn lại có chủ đích.
+Đối chiếu 2026-10-12 trên `main` @ `0327ab7` (sau W-504): mọi mục có bằng chứng; còn **WAITING** ngoài quyền phiên: W-104 (⏳ 2026-10-18), F-014/F-009 (settings chủ repo), AC-9 UAT (chủ repo, D4).
+
+- [x] 0 phát hiện **Cao** còn mở; mọi Trung/Thấp còn lại có kết cục ghi ở bảng dưới (sửa ở W-xxx, hoặc dời kèm lý do). — F-001..F-003 đóng; 62 phát hiện đều có W hoặc mục dời.
+- [x] Luồng chính LC-1..LC-3 (`docs/FEATURE-MAP.md`) có widget/integration test đi qua; toàn bộ test xanh trên CI. E2E trên thiết bị = AC-9 UAT (chủ repo, emulator, D4). — `flutter test` 272/272, CI #24 job 114726677983; AC-9 WAITING.
+- [x] Mọi lỗi sửa trong kế hoạch có test hồi quy ở lại; khuôn lỗi ghi `TRAPS.md`.
+- [x] Nhóm 12 sạch: không còn logic trùng lặp đã biết; `docs/CONVENTIONS.md` được tuân thủ (lệch có ghi nhận). — quét lại lần 2 (F-059 sửa ở #22).
+- [x] Cổng tự động chặn thật: pre-commit + CI chạy gate (gồm kiểm quyền manifest release đã gộp và targetSdk ≥ 31). **Branch protection/ruleset cần chủ repo bật** (quyền repo settings, F-014) — WAITING, không tự bật.
+- [x] Bảo mật/riêng tư: quét bí mật sạch; OSV sạch; exception cho F-004 có owner/hạn; quyền manifest release chỉ `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`. Không có server → không có ACL; kiểm "vượt quyền" thay bằng kiểm manifest/không exported/không mạng. — `maintenance-sweep` 🔴 0, bí mật: không; OSV querybatch 86 package hosted: 0 advisory (2026-10-12); EX-1 tới 2026-10-18; manifest gộp thật PASS.
+- [x] Tài liệu khớp code: README, `PROJECT.md`, header `CLAUDE.md`/`AGENTS.md`, `FEATURE-MAP`, `CODEMAP`, ADR, spec §11/§16. — CODEMAP thêm dòng targetSdk (W-504).
+- [x] Hiệu năng: số đo trên máy host ghi trong spec §19; trần bộ nhớ có `DEBT:` rõ; p95 trên thiết bị dời P2 theo spec §2 (đã duyệt). — `DEBT:` thiếu "xem lại khi:" 0.
+- [x] `PROGRESS.md` phản ánh đúng trạng thái + nợ còn lại có chủ đích.
 
 ## Đợt 0 — Tài liệu khai sai trạng thái (✅)
 
@@ -61,7 +63,7 @@
 
 | ID | Từ phát hiện | Việc | Tiêu chí nghiệm thu | Phụ thuộc | Ước lượng | Trạng thái | PR / bằng chứng |
 |----|--------------|------|---------------------|-----------|-----------|-----------|-----------------|
-| W-504 | F-071 | Cổng manifest FAIL khi `targetSdkVersion` của manifest gộp < 31 hoặc thiếu (khi đó component không khai `exported` mà có intent-filter là exported ngầm) | Self-test đỏ với targetSdk 30 / thiếu `<uses-sdk>` rồi xanh; manifest thật (36) PASS; gate PASS | W-502 | S | 🔄 | đỏ "Lists differ: [] != ['uses-sdk android:targetSdkVersion must be a number >= 31']" (targetSdk 30) → xanh; self-test 10/10; manifest release gộp thật `targetSdkVersion="36"` PASS; gate PASS 272 |
+| W-504 | F-071 | Cổng manifest FAIL khi `targetSdkVersion` của manifest gộp < 31 hoặc thiếu (khi đó component không khai `exported` mà có intent-filter là exported ngầm) | Self-test đỏ với targetSdk 30 / thiếu `<uses-sdk>` rồi xanh; manifest thật (36) PASS; gate PASS | W-502 | S | ✅ | seeker19110/X-Scanner#24 `0327ab7`, CI xanh; đỏ "Lists differ: [] != ['uses-sdk android:targetSdkVersion must be a number >= 31']" (targetSdk 30) → xanh; self-test 10/10; manifest release gộp thật `targetSdkVersion="36"` PASS; gate PASS 272 |
 
 F-059, F-070, F-072 (tài liệu) đi cùng PR W-502 theo `pr-flow` (0).
 
@@ -71,6 +73,7 @@ F-059, F-070, F-072 (tài liệu) đi cùng PR W-502 theo `pr-flow` (0).
 |------|------------------|----------------------------------------|
 | 2026-10-12 | Toàn bộ 12 nhóm trên `6ee3362` (sau W-101..W-403) | 0 Cao mở; mọi F-001..F-042 đóng hoặc dời có chủ đích; mới F-043..F-058 (0 Cao, 2 Trung, 14 Thấp) → Đợt 4 (W-501..W-503) hoặc dời có lý do. Chưa hội tụ: cần quét lại nhóm bị ảnh hưởng sau Đợt 4. |
 | 2026-10-12 | Nhóm 2/3/4/6/8/9/12 trên `da7cae8` (sau W-501, W-503, W-502) | 0 Cao · 0 Trung; F-043..F-058 (trừ dời) đóng; mới 4 Thấp: F-059, F-070, F-072 sửa trong PR W-502; F-071 → W-504. Chưa hội tụ: còn W-504 (một file, nhóm 2/8). |
+| 2026-10-12 | Nhóm 2/8 trên `36861e2` (= `0327ab7`, W-504) | 0 phát hiện mới; F-071 đóng (self-test 10/10, manifest gộp thật `targetSdkVersion="36"` PASS). Không còn nhóm mở: không chạy được exported ngầm (minSdk 24 → provider mặc định không exported; mọi tag component kiểm `exported`). **Hội tụ**; còn W-104 ⏳ 2026-10-18. |
 
 ## Phát hiện dời đợt sau (có lý do)
 

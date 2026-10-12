@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-p1-completion
 - Yêu cầu / outcome: `/auto-complete` lần 4, bước 2: `/completion` (`docs/framework/project-completion.md` Pha 0–4) sau khi P1 PR-0..4 merged (#6..#10). Outcome: Definition of Complete có bằng chứng hoặc BLOCKED/WAITING đúng §8.
-- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 merged (#18 `4d07a6a`); W-403 merged (#19 `a7399de`); Pha 4 quét lại xong → Đợt 4: W-501 merged (#20 `673ed97`); W-503 merged (#21 `0e45794`); W-502 merged (#22 `d219ce7`); Pha 4 lần 2 xong; W-504 đang làm (`/auto-complete` lần 5).
+- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 merged (#18 `4d07a6a`); W-403 merged (#19 `a7399de`); Pha 4 quét lại xong → Đợt 4: W-501 merged (#20 `673ed97`); W-503 merged (#21 `0e45794`); W-502 merged (#22 `d219ce7`); Pha 4 lần 2 xong; W-504 merged (#24 `0327ab7`); Pha 4 lần 3 hội tụ; DoC có bằng chứng → **WAITING** (W-104 từ 2026-10-18; F-014/F-009, AC-9 chủ repo).
 - Chủ trì / writer: phiên chính (kế hoạch, duyệt, tích hợp); audit giao 3 subagent chỉ đọc; sửa giao worker theo số PR.
 - Mức rủi ro / số PR: M; PR-A tài liệu Pha 0–2, rồi một PR mỗi việc W-xxx theo kế hoạch.
 - Scope / non-goal: app `apps/mobile` P1 + tài liệu dự án. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release, bật branch protection/auto-merge (cần quyền chủ repo).
@@ -76,13 +76,19 @@
 - Container mới: Maven Central trả 429 qua proxy → init script Gradle cục bộ `~/.gradle/init.d` trỏ mirror Google của Central · loại `--no-verify` hoặc sửa repo Gradle trong repo · bậc 1 (cổng giữ nguyên, repo không đổi). Không đổi cấu hình Git toàn cục (gỡ `safe.directory` lỡ thêm, `chown` SDK thay thế).
 - W-504 gate PASS: build + manifest gộp thật (`targetSdkVersion="36"`) PASS, analyze 0, format, `flutter test` 272/272, self-test 10/10.
 
+- W-504 https://github.com/seeker19110/X-Scanner/pull/24 merged squash `0327ab7` sau CI xanh (job 114726677983); 0 review thread. Repo chưa bật auto-merge → phiên chính squash merge sau CI xanh như #11–#22 · loại chờ chủ repo merge tay · bậc 4 (cùng quyền đã dùng ở lượt trước, cổng CI giữ nguyên).
+- Pha 4 lần 3: phiên chính tự quét nhóm 2/8 cho W-504 · loại giao auditor · bậc 2 (một file gate). 0 phát hiện mới → hội tụ.
+- DoC đối chiếu trên `0327ab7`: `maintenance-sweep` 🔴 0 · 🟡 3 (thiếu "Ngày cập nhật" PROGRESS → sửa ở PR này; thiếu `dependabot.yml` = F-009, WAITING chủ repo; radar 53/100 là chỉ số khung, không phải phát hiện); OSV 86 package hosted 0 advisory; bí mật 0.
+- Đóng hồ sơ `2026-10-12-comprehensive-development-plan` (working → done, merge #23 `ac2c435`) trong PR tài liệu này · loại để nguyên "Active" · bậc 1 (hồ sơ khai sai trạng thái sau merge; DoD của chính hồ sơ đó đã đạt).
+- Không đổi `docs/work/2026-10-11-p1-scan-export/working.md`: còn chờ AC-9 UAT (chủ repo) · bậc 1.
+
 ## Lần thử / blocker
 
 - Không.
 
 ## Bàn giao / bước tiếp theo
 
-- W-504: gate đầy đủ (container mới, đang cài Flutter 3.47.7 + Android SDK) → PR → merge; quét lại nhóm 2/8; đối chiếu DoC; W-104 ⏳ từ 2026-10-18.
+- WAITING (§8): W-104 từ 2026-10-18 (nâng `image` ≥ 4.12.0 + test 2 ảnh tổng hợp, rồi quét lại nhóm 2/7 và đóng EX-1); chủ repo: bật branch protection/ruleset (F-014), dependency review/Dependabot (F-009), chạy UAT AC-9 (D4). Xong W-104 → đổi `working.md` thành `done.md`.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
