@@ -5,7 +5,7 @@
 | Goal ID | 2026-10-11-p1-scan-export |
 | Owner | Chủ repo; thực thi: phiên chính + worker |
 | State | ACTIVE |
-| Default-branch SHA đã reconcile | `df902de` |
+| Default-branch SHA đã reconcile | `1cc15e3` |
 | Bắt đầu / review | 2026-10-11 |
 | Quyền AI | research / branch / PR / merge khi CI xanh; không deploy/release |
 | Budget | Không chi phí mới; CI runner Linux |
@@ -24,8 +24,8 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | S0 | Spec Approved, goal, hồ sơ | — | `docs/specs/2026-10-11-p1-scan-export.md` | #6 | DONE | merge `a1549c5`, CI xanh |
 | S1 | `ScanSession` + `SessionStore`, AC-1..3 | S0 | như trên | #7 | DONE | merge `df902de`, CI xanh |
-| S2 | Nắn phối cảnh, AC-5 | S1 | như trên | PR-2 | IN PROGRESS | gate cục bộ PASS |
-| S3 | UI chụp/xem lại/chỉnh góc + Dark/Light, AC-4, AC-7, AC-8 | S2 | như trên | PR-3 | TODO | |
+| S2 | Nắn phối cảnh, AC-5 | S1 | như trên | #8 | DONE | merge `1cc15e3`, CI xanh |
+| S3 | UI chụp/xem lại/chỉnh góc + Dark/Light, AC-4, AC-7, AC-8 | S2 | như trên | PR-3 | IN PROGRESS | gate cục bộ PASS 170/170 |
 | S4 | Xuất PDF/ảnh + chia sẻ, AC-6 | S3 | như trên | PR-4 | TODO | |
 | S5 | UAT AC-9 | S4 | như trên | — | WAITING chủ repo | |
 
@@ -34,6 +34,7 @@
 | Risk | Trigger | Mitigation/rollback | Owner | State |
 | --- | --- | --- | --- | --- |
 | Homography thuần Dart chậm trên ảnh 12 MP | Đo PR-2: 2,8–3,5 s/trang (JIT x86) | Isolate không chặn UI; đo trên thiết bị ở P2, vượt → ADR native | Phiên chính | Accepted cho P1 |
+| Chỉnh góc chỉ bằng kéo (WCAG 2.2 2.5.7) | Người dùng trình đọc màn hình | Dấu `DEBT:` trong `quad_editor_screen.dart`; P2 | Phiên chính | Accepted cho P1 |
 | Không chạy được emulator trong container AI | Không có `/dev/kvm` | AC-9 do chủ repo chạy (D4) | Chủ repo | Accepted |
 
 ## Current truth

@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-11-p1-scan-export
 - Yêu cầu / outcome: `/auto-complete` lần 3; chủ repo duyệt spec P1 theo đề xuất (D1 A, D2 5 dependency, D3 tắt backup, D4 emulator). Outcome: Goal DoD ở `docs/goals/2026-10-11-p1-scan-export.md`.
-- Trạng thái: In progress — PR-0 (#6 `a1549c5`) và PR-1 (#7 `df902de`) merged; PR-2 mở.
+- Trạng thái: In progress — PR-0 (#6 `a1549c5`), PR-1 (#7 `df902de`), PR-2 (#8 `1cc15e3`) merged; PR-3 mở.
 - Chủ trì / writer: phiên chính (PR-0, review/gate/tích hợp); PR-1..4 giao `complex-implementer`.
 - Mức rủi ro / số PR: L (dữ liệu tài liệu nhạy cảm, 5 dependency, nhiều màn hình); 5 PR tuần tự vì chung `pubspec.lock`.
 - Scope / non-goal: spec §5. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release.
@@ -36,6 +36,13 @@
 - PR-2 do `complex-implementer` viết (brief `--check-plan` OK; báo cáo đỏ/xanh lưu ở scratchpad `REPORT-p2.md`): T1 đỏ 7/7 → xanh; T2 đỏ 25/25 → xanh; thêm 2 ca biên có đỏ thật (viền tối do lấy mẫu pixel −1 của `getPixelLinear`; ảnh 16-bit bị cắt về 0). Gate worker PASS, 131 test.
 - Kẹp tọa độ lấy mẫu vào tâm pixel ngoài cùng · loại lấy mẫu nguyên văn p − 0,5 · bậc 1 (viền trang tối 229 thay 255).
 - Bỏ `bakeOrientation` khi không có EXIF orientation · loại luôn gọi · bậc 1 (thư viện luôn sao chép ảnh: ảnh 12 MP chiếm gấp đôi bộ nhớ, rủi ro OOM trên máy).
+- PR-2 https://github.com/seeker19110/X-Scanner/pull/8 merged squash `1cc15e3` sau CI xanh (job 114617598572); 0 review thread.
+- PR-3 do `complex-implementer` viết (brief `--check-plan` OK; báo cáo `REPORT-p3.md`): T1 đỏ 7 → xanh; T2 đỏ 13 → xanh; T3 đỏ (manifest thiếu `allowBackup`, widget test trên stub) → xanh. Gate phiên chính PASS 4/4, 170/170 test.
+- Dùng `onReorderItem` · loại `onReorder` · bậc 1 (`onReorder` deprecated từ Flutter 3.41, `analyze --fatal-infos` đỏ).
+- Lỗi đọc file ảnh vừa chọn → `decodeFailed` · loại để exception lọt lên UI · bậc 1 (không crash, cùng ý nghĩa với người dùng).
+- Thêm `/build/` vào `android/.gitignore` · loại commit `android/build/reports` · bậc 2 (Gradle 9 ghi problems-report vào thư mục chưa ignore).
+- AC-8 kiểm thêm manifest **release** đã gộp (`flutter build apk --release`): chỉ có `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` (nội bộ androidx); debug có thêm INTERNET từ `src/debug` cho công cụ dev.
+- Chỉnh góc chỉ bằng kéo · ghi `DEBT:` + rủi ro goal, để P2 · bậc 2 (thêm thao tác bàn phím/trình đọc màn hình là luồng mới ngoài spec P1; ghi rõ thay vì im lặng).
 - Đo hiệu năng PR-2 (ảnh tổng hợp 4000×3000, `dart run` JIT, x86 4 nhân): nắn 2,8–3,5 s, thumbnail 1,2 s · chấp nhận cho P1 (isolate) · cam kết p95 để P2 trên thiết bị (spec §2).
 
 ## Lần thử / blocker
@@ -44,7 +51,7 @@
 
 ## Bàn giao / bước tiếp theo
 
-- Merge PR-2 khi CI xanh, rồi viết brief PR-3 (UI + `image_picker`/`path_provider` + D3).
+- Merge PR-3 khi CI xanh, rồi viết brief PR-4 (xuất PDF/JPG/PNG + `pdf`/`share_plus`).
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 

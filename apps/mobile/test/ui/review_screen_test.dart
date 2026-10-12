@@ -1,0 +1,272 @@
+import 'dart:io';
+
+import 'package:flutter/gestures.dart' show kLongPressTimeout;
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
+import 'package:x_scanner/imaging/page_render.dart';
+import 'package:x_scanner/main.dart';
+import 'package:x_scanner/storage/session_store.dart';
+import 'package:x_scanner/ui/page_source.dart';
+import 'package:x_scanner/ui/session_controller.dart';
+
+/// Scripted [PageSource]: each call takes the next queued result.
+class FakeSource implements PageSource {
+  final List<String?> captures = [];
+  final List<String?> gallery = [];
+
+  @override
+  Future<String?> capture() async => captures.removeAt(0);
+
+  @override
+  Future<String?> pickFromGallery() async => gallery.removeAt(0);
+
+  @override
+  Future<String?> retrieveLost() async => null;
+}
+
+const String _empty = 'Chưa có trang nào. Chụp hoặc nhập ảnh để bắt đầu.';
+
+void main() {
+  late Directory tmp;
+  late Directory picks;
+  late FakeSource source;
+  late SessionController controller;
+  var n = 0;
+
+  setUp(() {
+    tmp = Directory.systemTemp.createTempSync('review_screen_test');
+    picks = Directory('${tmp.path}/picks')..createSync();
+    source = FakeSource();
+    controller = SessionController(
+      store: SessionStore(Directory('${tmp.path}/session')..createSync()),
+      source: source,
+      // Decoded in the test isolate; real file I/O runs under runAsync.
+      thumbnailer: (path) async => thumbnailSync(File(path).readAsBytesSync()),
+    );
+  });
+
+  tearDown(() => tmp.deleteSync(recursive: true));
+
+  /// Writes a synthetic PNG and returns its path.
+  String png() {
+    n++;
+    final image = img.Image(width: 6 + n, height: 4 + n);
+    return (File(
+      '${picks.path}/p$n.png',
+    )..writeAsBytesSync(img.encodePng(image))).path;
+  }
+
+  /// Lets queued controller work with real I/O finish, then settles frames.
+  Future<void> settle(WidgetTester tester) async {
+    for (var i = 0; i < 500; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 5)),
+      );
+      await tester.pump();
+      if (!controller.busy) break;
+    }
+    expect(controller.busy, isFalse);
+    // Thumbnails also decode with real I/O.
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> start(WidgetTester tester, {int pages = 0}) async {
+    await tester.runAsync(() async {
+      for (var i = 0; i < pages; i++) {
+        source.captures.add(png());
+        await controller.capture();
+      }
+    });
+    await tester.pumpWidget(XScannerApp(controller: controller));
+    await settle(tester);
+  }
+
+  testWidgets('empty session offers capture and import', (tester) async {
+    await start(tester);
+    expect(find.text('X-Scanner'), findsOneWidget);
+    expect(find.text(_empty), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Chụp'), findsOneWidget);
+    expect(find.text('Nhập ảnh'), findsOneWidget);
+  });
+
+  testWidgets('cancelled capture adds no page (AC-7)', (tester) async {
+    await start(tester);
+    source.captures.add(null);
+    await tester.tap(find.text('Chụp'));
+    await settle(tester);
+    expect(find.text(_empty), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing);
+    expect(controller.session.pages, isEmpty);
+  });
+
+  testWidgets('captured image appears as a page', (tester) async {
+    await start(tester);
+    source.captures.add(png());
+    await tester.tap(find.text('Chụp'));
+    await settle(tester);
+    expect(find.text(_empty), findsNothing);
+    expect(find.text('Trang 1'), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
+  });
+
+  testWidgets('undecodable image shows a message and keeps pages (AC-7)', (
+    tester,
+  ) async {
+    await start(tester, pages: 1);
+    expect(find.text('Trang 1'), findsOneWidget);
+    final junk = File('${picks.path}/junk.jpg')..writeAsBytesSync([1, 2, 3]);
+    source.gallery.add(junk.path);
+
+    await tester.tap(find.text('Nhập ảnh'));
+    await settle(tester);
+
+    expect(
+      find.text('Không đọc được ảnh này. Chưa thêm trang nào.'),
+      findsOneWidget,
+    );
+    expect(find.text('Trang 1'), findsOneWidget);
+    expect(find.text('Trang 2'), findsNothing);
+    expect(controller.session.pages, hasLength(1));
+  });
+
+  testWidgets('a corrupt saved session shows restoreFailed', (tester) async {
+    File('${tmp.path}/session/session.json')
+        .writeAsStringSync('{"schemaVersion": 99}');
+    await start(tester);
+    expect(
+      find.text(
+        'Không khôi phục được phiên trước. '
+        'Ảnh gốc vẫn được giữ trong bộ nhớ của app.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text(_empty), findsOneWidget);
+  });
+
+  testWidgets('theme button switches between dark and light', (tester) async {
+    await start(tester);
+    Brightness brightness() =>
+        Theme.of(tester.element(find.byType(Scaffold).first)).brightness;
+    expect(brightness(), Brightness.dark);
+
+    await tester.tap(find.byTooltip('Chế độ sáng'));
+    await tester.pumpAndSettle();
+    expect(brightness(), Brightness.light);
+    expect(find.byTooltip('Chế độ tối'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Chế độ tối'));
+    await tester.pumpAndSettle();
+    expect(brightness(), Brightness.dark);
+  });
+
+  testWidgets('deleting a page needs confirmation', (tester) async {
+    await start(tester, pages: 2);
+    final second = controller.session.pages[1].id;
+
+    await tester.tap(find.byTooltip('Xoá trang').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Xoá trang 1?'), findsOneWidget);
+    await tester.tap(find.text('Huỷ'));
+    await settle(tester);
+    expect(controller.session.pages, hasLength(2));
+    expect(find.text('Trang 2'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Xoá trang').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Xoá'));
+    await settle(tester);
+    expect([for (final p in controller.session.pages) p.id], [second]);
+    expect(find.text('Trang 1'), findsOneWidget);
+    expect(find.text('Trang 2'), findsNothing);
+  });
+
+  testWidgets('clearing all pages needs confirmation', (tester) async {
+    await start(tester, pages: 2);
+
+    await tester.tap(find.byTooltip('Xoá tất cả trang'));
+    await tester.pumpAndSettle();
+    expect(find.text('Xoá tất cả trang?'), findsOneWidget);
+    await tester.tap(find.text('Huỷ'));
+    await settle(tester);
+    expect(controller.session.pages, hasLength(2));
+
+    await tester.tap(find.byTooltip('Xoá tất cả trang'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Xoá tất cả'));
+    await settle(tester);
+    expect(controller.session.pages, isEmpty);
+    expect(find.text(_empty), findsOneWidget);
+    expect(find.byTooltip('Xoá tất cả trang'), findsNothing);
+  });
+
+  testWidgets('retake needs confirmation and replaces the page', (
+    tester,
+  ) async {
+    await start(tester, pages: 1);
+    final before = controller.session.pages.single.id;
+
+    await tester.tap(find.byTooltip('Chụp lại'));
+    await tester.pumpAndSettle();
+    expect(find.text('Chụp lại trang 1? Ảnh cũ sẽ bị thay.'), findsOneWidget);
+    await tester.tap(find.text('Huỷ'));
+    await settle(tester);
+    expect(controller.session.pages.single.id, before);
+
+    source.captures.add(png());
+    await tester.tap(find.byTooltip('Chụp lại'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Chụp lại'));
+    await settle(tester);
+    expect(controller.session.pages.single.id, isNot(before));
+  });
+
+  testWidgets('rotate button turns the page', (tester) async {
+    await start(tester, pages: 1);
+    await tester.tap(find.byTooltip('Xoay 90°'));
+    await settle(tester);
+    expect(controller.session.pages.single.quarterTurns, 1);
+  });
+
+  testWidgets('crop button opens the editor and saves its result', (
+    tester,
+  ) async {
+    await start(tester, pages: 1);
+    await tester.tap(find.byTooltip('Chỉnh góc'));
+    await tester.pumpAndSettle();
+    expect(find.text('Lưu'), findsOneWidget);
+    await tester.tap(find.text('Xoay 90°'));
+    await tester.pump();
+    await tester.tap(find.text('Lưu'));
+    await settle(tester);
+    expect(find.text('Trang 1'), findsOneWidget);
+    expect(controller.session.pages.single.quarterTurns, 1);
+  });
+
+  testWidgets('dragging a page down reorders the session', (tester) async {
+    await start(tester, pages: 2);
+    final [a, b] = [for (final p in controller.session.pages) p.id];
+    final first = tester.getCenter(find.text('Trang 1'));
+    final second = tester.getCenter(find.text('Trang 2'));
+
+    final gesture = await tester.startGesture(first);
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 100));
+    final step = Offset(0, (second.dy - first.dy) * 1.5 / 10);
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(step);
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await gesture.up();
+    // The drop animation must end before the reorder callback fires.
+    for (var i = 0; i < 50 && !controller.busy; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(controller.busy, isTrue);
+    await settle(tester);
+
+    expect([for (final p in controller.session.pages) p.id], [b, a]);
+  });
+}

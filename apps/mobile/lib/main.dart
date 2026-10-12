@@ -1,11 +1,55 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'app/theme.dart';
+import 'storage/session_store.dart';
+import 'ui/page_source.dart';
+import 'ui/review_screen.dart';
+import 'ui/session_controller.dart';
 
-void main() => runApp(const XScannerApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final support = await getApplicationSupportDirectory();
+  final dir = await Directory('${support.path}/session')
+      .create(recursive: true);
+  runApp(
+    XScannerApp(
+      controller: SessionController(
+        store: SessionStore(dir),
+        source: ImagePickerPageSource(),
+      ),
+    ),
+  );
+}
 
-class XScannerApp extends StatelessWidget {
-  const XScannerApp({super.key});
+/// The app: Dark blue theme by default with an in-memory Light switch.
+class XScannerApp extends StatefulWidget {
+  /// Creates the app around [controller], which it restores once.
+  const XScannerApp({super.key, required this.controller});
+
+  final SessionController controller;
+
+  @override
+  State<XScannerApp> createState() => _XScannerAppState();
+}
+
+class _XScannerAppState extends State<XScannerApp> {
+  ThemeMode _themeMode = ThemeMode.dark;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(widget.controller.restore());
+  }
+
+  void _toggleTheme() => setState(() {
+    _themeMode = _themeMode == ThemeMode.dark
+        ? ThemeMode.light
+        : ThemeMode.dark;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,18 +57,11 @@ class XScannerApp extends StatelessWidget {
       title: 'X-Scanner',
       theme: buildTheme(Brightness.light),
       darkTheme: buildTheme(Brightness.dark),
-      themeMode: ThemeMode.dark,
-      home: Scaffold(
-        appBar: AppBar(title: const Text('X-Scanner')),
-        body: const Center(
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text(
-              'Bản nền P0 — chưa có chức năng chụp.',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
+      themeMode: _themeMode,
+      home: ReviewScreen(
+        controller: widget.controller,
+        themeMode: _themeMode,
+        onToggleTheme: _toggleTheme,
       ),
     );
   }
