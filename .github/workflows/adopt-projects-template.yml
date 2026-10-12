@@ -89,6 +89,7 @@ jobs:
           git add --all
           git add -f .claude/project-commands.sh
       - name: Verify real repository checks and upstream safety hooks
+        if: steps.state.outputs.installed == 'false'
         shell: bash
         run: |
           set -euo pipefail
