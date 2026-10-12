@@ -135,4 +135,42 @@ void main() {
       }
     });
   });
+
+  group('defaultDocumentTitle', () {
+    test('formats the fields of the given time with leading zeros', () {
+      expect(
+        defaultDocumentTitle(DateTime(2026, 10, 12, 9, 5)),
+        'Tài liệu 12/10/2026 09:05',
+      );
+      expect(
+        defaultDocumentTitle(DateTime(2026, 1, 2, 0, 0)),
+        'Tài liệu 02/01/2026 00:00',
+      );
+    });
+
+    test('does not convert a UTC time to local time', () {
+      expect(
+        defaultDocumentTitle(DateTime.utc(2026, 12, 31, 23, 59)),
+        'Tài liệu 31/12/2026 23:59',
+      );
+    });
+
+    test('pads a short year to four digits', () {
+      expect(
+        defaultDocumentTitle(DateTime.utc(987, 3, 4, 5, 6)),
+        'Tài liệu 04/03/0987 05:06',
+      );
+    });
+
+    test('is always a valid document title', () {
+      for (final time in [
+        DateTime(2026, 10, 12, 9, 5),
+        DateTime.utc(2026, 12, 31, 23, 59),
+        DateTime.utc(1, 1, 1),
+        DateTime.utc(9999, 12, 31, 23, 59),
+      ]) {
+        expect(isValidDocumentTitle(defaultDocumentTitle(time)), isTrue);
+      }
+    });
+  });
 }

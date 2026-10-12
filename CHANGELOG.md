@@ -17,8 +17,11 @@
   trước khi đọc, và dừng hẳn thumbnail/render quá 60 giây; các trường hợp này báo "không đọc được", không mất trang.
 - XS-09 PR-1 (#31, chưa nối vào app): mô hình tài liệu `ScanDocument` (tên 1–120 ký tự, thời điểm UTC), `revision` mỗi trang
   tăng ở mọi lần chỉnh, codec `document.json` schema 2 đọc được schema 1 và báo "cần cập nhật app" với schema mới hơn.
-- XS-09 PR-2 (chưa nối vào app): lưu mỗi tài liệu một thư mục với cùng bảo đảm như phiên P1, thư viện liệt kê không
+- XS-09 PR-2 (#32, chưa nối vào app): lưu mỗi tài liệu một thư mục với cùng bảo đảm như phiên P1, thư viện liệt kê không
   đổi gì trên đĩa (tài liệu hỏng chỉ hiện "không mở được", schema mới hơn hiện "cần cập nhật app"), tạo tài liệu nguyên tử.
+- XS-09 PR-3 (chưa nối vào app): migration phiên P1 thành một tài liệu — copy rồi so từng byte bản gốc, commit bằng
+  rename, giữ phiên cũ làm bản quay lại không tự xoá, nhật ký để dừng ở bất kỳ bước nào cũng làm tiếp được; tên mặc định
+  "Tài liệu dd/MM/yyyy HH:mm".
 - P0 nền (#1, #2): app Flutter `apps/mobile`, lõi `PageQuad`/`ScanPage`, gate APK debug/analyze/format/test.
 
 ## 2026-10-11

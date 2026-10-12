@@ -225,15 +225,15 @@ vi có test đỏ trước (ADR-0005).
 | AC-3 | `apps/mobile/test/core/session_manifest_test.dart::decode rejects (AC-3)` | mỗi ca kiểm message có tên trường, không có giá trị; + `apps/mobile/test/core/scan_document_test.dart::a bad title without echoing it in the error` |
 | AC-4 | `apps/mobile/test/storage/document_store_test.dart::AC-4 newer schema` | + `apps/mobile/test/storage/library_store_test.dart::is listed as needing an update and left untouched`; codec: `apps/mobile/test/core/session_manifest_test.dart::schemaVersion 3 needs an app update` |
 | AC-5 | `apps/mobile/test/core/scan_page_test.dart::every recipe edit adds 1 and keeps id, original and the old page` | + `an edit to the same value still adds 1`; chụp lại revision 0: `apps/mobile/test/ui/session_controller_test.dart::retake and clearAll` |
-| AC-6 | chưa có — PR-3 | |
-| AC-7 | chưa có — PR-3 | tiêm lỗi từng bước 2–7 |
-| AC-8 | chưa có — PR-3 | |
-| AC-9 | chưa có — PR-3 | |
+| AC-6 | `apps/mobile/test/storage/p1_migration_test.dart::AC-6 migrates P1 data into one document` | k = 0, 1, 3; thư viện, quad/xoay, byte, `session.migrated/` |
+| AC-7 | `apps/mobile/test/storage/p1_migration_test.dart::at every disk operation` | 19 lệnh đổi đĩa × (bị kill, lỗi I/O); `the clean run covers steps 2 to 7` |
+| AC-8 | `apps/mobile/test/storage/p1_migration_test.dart::one byte short fails and changes nothing` | + `exactly enough succeeds` |
+| AC-9 | `apps/mobile/test/storage/p1_migration_test.dart::AC-9 unreadable P1 data` | JSON rác, UTF-8 sai, bản gốc thiếu hoặc là link; thông báo UI ở PR-4 |
 | AC-10 | `apps/mobile/test/storage/library_store_test.dart::a garbage manifest and a mismatched id are unreadable` | + thiếu `document.json`, UTF-8 sai; `apps/mobile/test/storage/document_store_test.dart` cách ly id khác tên thư mục |
 | AC-11 | chưa có — PR-4 | widget test |
 | AC-12 | chưa có — PR-4 | |
 | AC-13 | chưa có — PR-4 | test P1 chạy trên màn tài liệu |
-| AC-14 | chưa có — PR-3 | |
+| AC-14 | `apps/mobile/test/storage/p1_migration_test.dart::later runs are not needed and change nothing` | + bản quay lại cũ không bị thay (`session.migrated-2`) |
 
 ## 17. Slice/PR plan
 
