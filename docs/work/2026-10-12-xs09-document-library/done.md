@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-xs09-document-library
 - Yêu cầu / outcome: `/auto-complete` lần 8 (2026-10-12): hiện thực XS-09 PR-1..PR-3 theo spec Approved (#30 `508f057`) — mô hình + codec schema 2, `DocumentStore`/`LibraryStore`, migration P1 có nhật ký + tiêm lỗi; không nối vào app.
-- Trạng thái: In progress — PR-1 (#31), PR-2 (#32) merged; PR-3 (migration) đang review.
+- Trạng thái: Done — PR-1 #31 `c1bdcad`, PR-2 #32 `8aa493e`, PR-3 #33 `b77e926`; PR-4 BLOCKED chờ chủ repo (ngoài hồ sơ này).
 - Chủ trì / writer: phiên chính (kế hoạch, review, tích hợp, cổng); mỗi PR một worker `complex-implementer`, tuần tự.
 - Mức rủi ro / số PR: L (spec XS-09); 3 PR tuần tự vì cùng lớp `core`/`storage` (spec §17). PR-4 (nối app, migration dữ liệu thật) BLOCKED chờ chủ repo.
 - Scope / non-goal: AC-1..AC-10, AC-14 của spec. Non-goal: UI thư viện, `main.dart`, chạy migration trên dữ liệu thật (PR-4); xoá tài liệu/thùng rác (XS-10).
@@ -42,6 +42,7 @@
 - PR-3 worker: đỏ-trước (T1 compile đỏ; T2 stub `+0 -36`), xanh 61 test, gate PASS +448 trên `3cc71cd` + diff; AC-7: 19 lệnh đổi đĩa × {kill, I/O} = 38 ca; kiểm đột biến 2 kiểu → 3 và 6 test đỏ. Tầng 1 đọc toàn bộ `p1_migration.dart`: mọi `catch` đúng kiểu, không nhánh nào xoá `session/`/`session.migrated*`; thay `print` trong test bằng `expect(ops, hasLength(19))`.
 - PR-3 ba chỗ worker tự chọn (giữ, bậc 1): `FileSystemException` khi đọc nguồn → `MigrationFailed(io)` không đổi gì; thiếu dung lượng cũng xoá `.part` cũ của chính migration; `freeBytes` ném lỗi khác `FileSystemException` thì ném ra (PR-4 bảo đảm hàm nền tảng chỉ ném `FileSystemException`).
 - Rà bảo mật PR-3 (`security-reviewer`, có PoC): 0 Cao; không đường nào mất byte bản gốc. Sửa đỏ-trước (6 test đỏ → xanh, `test/storage/` +118): F1 Trung bình — phục hồi tin nhật ký `committed`/thư mục tồn tại mà không kiểm (đĩa không giữ thứ tự rename → `session/` bị cất, `.part` đã kiểm bị xoá, thư viện rỗng) → `_isComplete` kiểm `document.json` đúng id + mọi bản gốc là file thường; không đạt: còn `session.json` thì copy lại (bước 6 không đè), không còn thì `MigrationFailed(io)` không đổi gì; F3 Thấp — `migration.json.tmp` mồ côi → dọn ở `_finish`/`_abandon` (chỉ khi có, giữ 19 lệnh); F4 Thấp — `session/` hoặc `session/originals` là link → `MigrationSourceUnreadable`; khe test a (nhánh chết `NotNeeded` trong `expectFinal`) bỏ, khe d (kiểm `.tmp`) thêm, khe c (3 ca nhật ký/đĩa mâu thuẫn) thêm. Không làm: khe b lỗi kép (đọc mã: thứ tự `.part` rồi nhật ký an toàn; lần chạy lại idempotent).
+- PR-3 merged #33 `b77e926` (CI "Framework and Android app gate" xanh trên `c29d736`).
 - Cho PR-4 (từ rà PR-3, F5): `Storage.freeBytes` nền tảng chỉ ném `FileSystemException`; gọi `run()` qua một `Future` dùng chung (không chạy song song); `MigrationFailed` do nhật ký hỏng lặp mãi → vẫn cho vào thư viện kèm thông báo; `session/` không có `session.json` (bị cách ly ở P1) → `MigrationNotNeeded`, bản gốc nằm lại tới XS-10.
 
 ## Lần thử / blocker
@@ -50,10 +51,10 @@
 
 ## Bàn giao / bước tiếp theo
 
-- PR-1: worker đang sửa `apps/mobile/lib/core/` + `test/core/`, `test/ui/session_controller_test.dart` (chưa commit, trong cây làm việc). Xong → review diff, `reviewer`, gate, commit `feat:`, PR, CI, merge; rồi brief PR-2.
+- Hồ sơ này xong. PR-4 (nối `main.dart`, chạy migration trên dữ liệu thật, xoá `SessionStore`) mở hồ sơ mới khi chủ repo duyệt; đọc mục "Cho PR-4" ở trên trước khi viết brief.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
-<DoD, mọi PR MERGED + merge SHA và main đã đối chiếu, giới hạn/rủi ro còn lại,
-ngày và người nghiệm thu theo ủy quyền. Khi đủ điều kiện rename working.md → done.md
-trong cùng thư mục; không overwrite lịch sử. Chưa có PR/merge thì giữ working.md.>
+- Outcome đạt: AC-1..AC-10, AC-14 của spec có test (`spec-compiler --trace`: MAPPED, 0 BROKEN; AC-11..AC-13 PENDING cho PR-4). PR-1 #31 `c1bdcad`, PR-2 #32 `8aa493e`, PR-3 #33 `b77e926`, mỗi PR CI "Framework and Android app gate" xanh trước khi merge. `main` đã đối chiếu 2026-10-12T14:27Z.
+- Giới hạn còn lại: code chưa nối vào app, chưa chạy trên thiết bị; không sửa có lý do (TOCTOU `create`, symlink trong thư mục riêng của app, không trần kích thước khi liệt kê, lỗi kép chỉ đọc mã) — ghi ở mục quyết định.
+- Nghiệm thu: phiên chính theo ủy quyền §3d, 2026-10-12.
