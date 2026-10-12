@@ -24,3 +24,10 @@ xong** cùng store.
 **Ảnh 16-bit bị cắt về 0 khi mã hoá.** Ảnh PNG 16-bit/kênh mã hoá thẳng sang JPEG 8-bit cho ảnh đen.
 *Cách rà*: mọi đường mã hoá đầu ra phải chuẩn hoá về 8-bit/kênh trước. *Chốt chặn*: test ảnh 16-bit trong
 `apps/mobile/test/imaging/page_render_test.dart`. (2026-10-11, seeker19110/X-Scanner#8)
+
+**Plugin nền tảng để lại bản sao tài liệu trong cache của app.** `image_picker_android` ghi ảnh chụp vào cache
+và chép ảnh chọn từ thư viện vào `cache/{uuid}/`; app chép sang `originals/` nhưng không xoá bản của plugin, nên
+ảnh tài liệu còn trên máy sau khi người dùng xoá trang hoặc xoá tất cả (F-005). *Cách rà*: mỗi plugin trả về một
+đường dẫn file — đọc mã nguồn plugin xem file đó nằm đâu và ai xoá nó. *Chốt chặn*:
+`apps/mobile/test/ui/page_source_test.dart` và các test "(F-005)" trong `apps/mobile/test/ui/session_controller_test.dart`.
+(2026-10-12, W-102)

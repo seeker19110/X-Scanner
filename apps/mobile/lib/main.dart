@@ -22,7 +22,8 @@ Future<void> main() async {
     XScannerApp(
       controller: SessionController(
         store: SessionStore(dir),
-        source: ImagePickerPageSource(),
+        // On Android the picker leaves its copies in the app cache.
+        source: ImagePickerPageSource(cacheDir: temp),
         exporter: PageExporter(
           exportDir: Directory('${temp.path}/exports'),
           // share_plus copies shared files here and keeps the last ones.
