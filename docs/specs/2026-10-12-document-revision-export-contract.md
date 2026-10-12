@@ -4,8 +4,8 @@
 | --- | --- |
 | Issue / Goal | XS-08 của `docs/plans/2026-10-12-comprehensive-development-plan.md` (§4.2, §13) · Work ID `2026-10-12-xs08-document-contract-spec` |
 | Spec owner | Phiên chính (Claude Code) |
-| State | **Draft** — chờ chủ repo duyệt; chưa được code |
-| Approver / date | |
+| State | **Approved for implementation** — phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12; phương án A (ADR-0004): không PR code riêng, code đi cùng consumer đầu tiên |
+| Approver / date | Phiên chính theo ủy quyền §3d (`/auto-complete` của chủ repo) · 2026-10-12 |
 | Last updated | 2026-10-12 |
 
 > Kế hoạch M0–M5 là DRAFT; spec này không cho phép triển khai XS-09..XS-23. Nó chỉ chốt **hợp đồng chung** mà các
@@ -239,7 +239,8 @@ renderer giả có thể chặn và làm lỗi theo trang (AC-7, AC-8). Mỗi h�
 
 ## 17. Slice/PR plan
 
-- PR-0 (này): spec Draft + hồ sơ công việc. Không code.
+- PR-0 (#26 `f227a4d`): spec Draft + hồ sơ công việc. Không code.
+- PR-1: duyệt spec + ADR-0004 (D-1 = A). Không code.
 - Sau khi duyệt: ADR mới ghi quyết định hợp đồng (§4, D-1..D-3). Phương án A: không PR code riêng; XS-09/XS-12/XS-13 trích
   spec này và mang AC tương ứng. Phương án B: PR-1 = `ScanDocument` + `revision` + codec schema 2/đọc schema 1 + AC-1..AC-5,
   app vẫn ghi schema 1.
@@ -253,20 +254,20 @@ rollback app về bản chỉ biết schema 1 sẽ gặp FR-7 nên bản đó ph
 
 | Item | Verification/mitigation | Owner | Due | Decision |
 | --- | --- | --- | --- | --- |
-| D-1 Phương án A (hợp đồng, code theo consumer) hay B (code + test ngay) | §4 | Chủ repo | Khi duyệt | Đề xuất A (ít code chết; bậc 2) |
+| D-1 Phương án A (hợp đồng, code theo consumer) hay B (code + test ngay) | §4 | Phiên chính (§3d) | 2026-10-12 | Chốt A (ADR-0004) |
 | D-2 Tiêu đề mặc định khi tạo/migrate (ví dụ "Tài liệu 12/10/2026 09:00" theo giờ máy) | Chốt ở XS-09 cùng UI đặt tên | Chủ repo | XS-09 | Mở, không chặn hợp đồng |
 | D-3 Hash bản gốc để kiểm migration | `dart:core` không có SHA-256; cần `package:crypto` (dependency mới, D2) hoặc kiểm bằng kích thước + giải mã thử | Chủ repo | XS-09 | Mở, không chặn hợp đồng |
-| FR-7 đổi hành vi hiện tại với schema lạ (đang cách ly) | AC-4; an toàn hơn (không đổi tên, không xoá) | Phiên chính | PR đầu tiên chạm store | Đề xuất chấp nhận |
+| FR-7 đổi hành vi hiện tại với schema lạ (đang cách ly) | AC-4; an toàn hơn (không đổi tên, không xoá) | Phiên chính | PR đầu tiên chạm store | Chấp nhận (ADR-0004 §3) |
 | Revision tăng cả khi giá trị không đổi làm mất cache thừa | Chi phí: một lần giải mã thumbnail; đổi lại không so sánh số thực | Phiên chính | — | Chấp nhận |
 
 ## Approval
 
-- [ ] Product/scope
-- [ ] UX/a11y (không đổi UI ở XS-08)
-- [ ] Architecture/API/data
-- [ ] Security/privacy/cost
-- [ ] Test/telemetry/rollout/rollback
-- [ ] Blocking decisions closed (D-1)
+- [x] Product/scope
+- [x] UX/a11y (không đổi UI ở XS-08)
+- [x] Architecture/API/data
+- [x] Security/privacy/cost
+- [x] Test/telemetry/rollout/rollback
+- [x] Blocking decisions closed (D-1)
 
-**Conclusion:** Draft
-**Approver/date:**
+**Conclusion:** **Approved for implementation** — phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12. Không cho phép triển khai XS-09..XS-23; mỗi việc cần spec riêng được duyệt.
+**Approver/date:** phiên chính theo ủy quyền §3d · 2026-10-12
