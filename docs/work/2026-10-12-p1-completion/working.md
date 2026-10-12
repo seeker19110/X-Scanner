@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-p1-completion
 - Yêu cầu / outcome: `/auto-complete` lần 4, bước 2: `/completion` (`docs/framework/project-completion.md` Pha 0–4) sau khi P1 PR-0..4 merged (#6..#10). Outcome: Definition of Complete có bằng chứng hoặc BLOCKED/WAITING đúng §8.
-- Trạng thái: In progress — Pha 0–2 xong (PR kế hoạch + W-201); W-101, W-301, W-401 đang chuẩn bị song song trong worktree.
+- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 PR mở; W-301, W-401 đã sẵn trong worktree (commit cục bộ `5cc5154`, `afcc67a`).
 - Chủ trì / writer: phiên chính (kế hoạch, duyệt, tích hợp); audit giao 3 subagent chỉ đọc; sửa giao worker theo số PR.
 - Mức rủi ro / số PR: M; PR-A tài liệu Pha 0–2, rồi một PR mỗi việc W-xxx theo kế hoạch.
 - Scope / non-goal: app `apps/mobile` P1 + tài liệu dự án. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release, bật branch protection/auto-merge (cần quyền chủ repo).
@@ -29,6 +29,11 @@
 - W-201 gộp vào PR kế hoạch · loại PR tài liệu riêng · bậc 4 (cùng loại thay đổi tài liệu, bớt một vòng CI).
 - Mỗi W một PR, tích hợp tuần tự trên một nhánh push; worker song song trong worktree khi file không giao nhau (W-101 ∥ W-301 ∥ W-401) · loại song song nhiều nhánh · chỉ được push `claude/upbeat-ramanujan-mwmwtt`.
 - Brief `PLAN-c1.md` (scratchpad) `--check-plan` OK: 3 việc, mỗi việc một PR.
+- PR kế hoạch + W-201 https://github.com/seeker19110/X-Scanner/pull/11 merged squash `97deb76` sau CI xanh (job 114636563159); 0 review thread.
+- W-101 (worker, báo cáo `REPORT-w101.md`): đỏ 5 test (3 store F-001, F-019, controller F-001) → xanh; `flutter test` 211/211. Nhận lệch 1 (save thành công cũng đánh dấu store biết manifest — store vừa tự ghi nó) · bậc 1 (giữ hành vi AC-1). Nhận lệch 2 (load trả Empty/Unrecoverable thì quên danh sách bản gốc cũ) · bậc 1 (cùng khuôn mất bản gốc của phiên bị cách ly, có test đỏ).
+- W-301: giữ kiểm thêm `uses-permission-sdk-23` và `activity-alias` (chặt hơn brief) · loại gỡ cho đúng nguyên văn · bậc 1 (cùng là đường cấp quyền/mở component).
+- W-401: nhận nhánh phòng vệ khi công thức thu nhỏ vẫn vượt trần (cạnh 1 px) · bậc 1 (không vượt trần bộ nhớ); `buildPdf` qua `Isolate.run` không có test đỏ riêng · ngoại lệ (2) §3.6 (chỉ đổi nơi chạy, hành vi giữ nguyên, test PDF/PdfException cũ bảo vệ).
+- Worker không ghi được file báo cáo (harness chặn); phiên chính ghi `REPORT-w101/w301/w401.md` + patch vào scratchpad.
 
 ## Lần thử / blocker
 
