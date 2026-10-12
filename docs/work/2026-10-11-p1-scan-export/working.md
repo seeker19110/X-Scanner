@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-11-p1-scan-export
 - Yêu cầu / outcome: `/auto-complete` lần 3; chủ repo duyệt spec P1 theo đề xuất (D1 A, D2 5 dependency, D3 tắt backup, D4 emulator). Outcome: Goal DoD ở `docs/goals/2026-10-11-p1-scan-export.md`.
-- Trạng thái: In progress — PR-0 (#6 `a1549c5`), PR-1 (#7 `df902de`), PR-2 (#8 `1cc15e3`), PR-3 (#9 `99027ba`) merged; PR-4 mở.
+- Trạng thái: In progress — PR-0 (#6 `a1549c5`), PR-1 (#7 `df902de`), PR-2 (#8 `1cc15e3`), PR-3 (#9 `99027ba`), PR-4 (#10 `6177e29`) merged; chờ AC-9 (chủ repo). Phát hiện sau P1 xử lý ở `docs/work/2026-10-12-p1-completion/working.md`.
 - Chủ trì / writer: phiên chính (PR-0, review/gate/tích hợp); PR-1..4 giao `complex-implementer`.
 - Mức rủi ro / số PR: L (dữ liệu tài liệu nhạy cảm, 5 dependency, nhiều màn hình); 5 PR tuần tự vì chung `pubspec.lock`.
 - Scope / non-goal: spec §5. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release.
@@ -49,6 +49,7 @@
 - PDF nhúng nguyên byte JPEG đã nắn, trang 842 pt theo cạnh dài · loại khổ A4 cố định · bậc 1 (AC-6 đúng tỷ lệ/chiều) và bậc 2 (không resample).
 - Dọn `cache/share_plus` khi app khởi động (`clearLeftovers`) · loại chấp nhận bản sao nằm lại tới lần chia sẻ sau, loại xoá ngay sau share · bậc 1 (`share_plus` 13.3.1 chép file vào cache và chỉ xoá ở lần chia sẻ kế tiếp → tài liệu nhạy cảm nằm lại; xoá ngay có thể cắt app nhận đang đọc). Đỏ thật: đổi tạm `clearLeftovers` thành `clear` → "Expected: false Actual: <true>"; khôi phục → xanh.
 - Gate PR-4 phiên chính: `dev-task.sh gate` PASS 4/4, 205/205 test. Manifest release đã gộp sau `share_plus`: vẫn chỉ `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`; `ShareFileProvider` và receiver `exported="false"`.
+- PR-4 https://github.com/seeker19110/X-Scanner/pull/10 merged squash `6177e29` sau CI xanh (job 114631855487); 0 review thread.
 
 ## Lần thử / blocker
 
@@ -56,7 +57,7 @@
 
 ## Bàn giao / bước tiếp theo
 
-- Merge PR-4 khi CI xanh, rồi chạy `/completion` tới DoC; AC-9 (UAT emulator) chờ chủ repo.
+- Code P1 xong. AC-9 (UAT emulator) chờ chủ repo; đóng hồ sơ (`done.md`) sau AC-9. `/completion` tiếp ở `2026-10-12-p1-completion`.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 

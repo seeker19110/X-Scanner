@@ -5,7 +5,7 @@
 | Goal ID | 2026-10-11-p1-scan-export |
 | Owner | Chủ repo; thực thi: phiên chính + worker |
 | State | ACTIVE |
-| Default-branch SHA đã reconcile | `99027ba` |
+| Default-branch SHA đã reconcile | `6177e29` |
 | Bắt đầu / review | 2026-10-11 |
 | Quyền AI | research / branch / PR / merge khi CI xanh; không deploy/release |
 | Budget | Không chi phí mới; CI runner Linux |
@@ -26,7 +26,7 @@
 | S1 | `ScanSession` + `SessionStore`, AC-1..3 | S0 | như trên | #7 | DONE | merge `df902de`, CI xanh |
 | S2 | Nắn phối cảnh, AC-5 | S1 | như trên | #8 | DONE | merge `1cc15e3`, CI xanh |
 | S3 | UI chụp/xem lại/chỉnh góc + Dark/Light, AC-4, AC-7, AC-8 | S2 | như trên | #9 | DONE | merge `99027ba`, CI xanh |
-| S4 | Xuất PDF/ảnh + chia sẻ, AC-6 | S3 | như trên | PR-4 | IN PROGRESS | gate cục bộ PASS 205/205 |
+| S4 | Xuất PDF/ảnh + chia sẻ, AC-6 | S3 | như trên | #10 | DONE | merge `6177e29`, CI xanh |
 | S5 | UAT AC-9 | S4 | như trên | — | WAITING chủ repo | |
 
 ## Risk register
@@ -39,5 +39,5 @@
 
 ## Current truth
 
-- Goal gap: S1–S5.
+- Goal gap: S5 (AC-9 UAT trên emulator, chủ repo). Hoàn thiện sau P1: `docs/ops/COMPLETION-PLAN.md` (Work ID `2026-10-12-p1-completion`).
 - Blocker/open decision: không.
