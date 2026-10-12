@@ -36,3 +36,8 @@ và chép ảnh chọn từ thư viện vào `cache/{uuid}/`; app chép sang `or
 vào hàng đợi ghi sau các thao tác đang chờ và chạy với chỉ số cũ, nên chuyển nhầm trang (F-007). *Cách rà*: mỗi
 cử chỉ/nút tạo một thao tác mang chỉ số hoặc id — nó có bị tắt cùng các nút khi bận không. *Chốt chặn*: test
 "(F-007)" trong `apps/mobile/test/ui/review_screen_test.dart`. (2026-10-12, W-103)
+
+**Cache một `Future` lỗi.** `thumbnailFor` cache future theo id trang; một lần giải mã lỗi (file tạm thời không đọc
+được) bị giữ mãi nên trang không chỉnh góc được tới khi mở lại app (F-020). *Cách rà*: mọi map cache `Future` —
+nhánh lỗi có gỡ đúng future đó (`identical`) khỏi map không. *Chốt chặn*: test "(F-020)" trong
+`apps/mobile/test/ui/session_controller_test.dart` và `review_screen_test.dart`. (2026-10-12, W-402)
