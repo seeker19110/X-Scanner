@@ -24,6 +24,6 @@ bash scripts/dev-task.sh doctor
 bash scripts/dev-task.sh gate
 ```
 
-Gate chạy build APK debug, analyze, format, test của app và kiểm tra repository/hooks.
+Gate chạy build APK debug, kiểm manifest release đã gộp (`scripts/check-release-manifest.py`), analyze, format, test của app và kiểm tra repository/hooks.
 Không chứng minh build iOS, chụp/xuất trên thiết bị thật, depth, chất lượng scan hay OCR. Không commit tài liệu cá nhân hoặc khóa API.
 Giấy phép sản phẩm chưa chọn; license nguồn giữ ở `third_party/projects-template.LICENSE`.

@@ -89,9 +89,7 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
     }
   }
 
-  // DEBT: corners move only by dragging; screen-reader users can reset to
-  // the full frame but not adjust a corner | trần: WCAG 2.2 2.5.7 not met
-  // in the editor | xem lại khi: P2 adds guided capture or edge detection.
+  // DEBT: corners move only by dragging; screen-reader users can reset to the full frame but not adjust a corner | trần: WCAG 2.2 2.5.7 not met in the editor | xem lại khi: P2 adds guided capture or edge detection.
   Widget _handle(QuadCorner corner, Offset center, ColorScheme colors) {
     return Positioned(
       left: center.dx - _handleSize / 2,

@@ -37,5 +37,5 @@ OCR, giấy phép sản phẩm, threat model, Data Governance trước phát hà
 
 ## Gate hiện tại
 
-Doctor/gate qua scripts/dev-task.sh: build APK debug, `flutter analyze --fatal-infos`, `dart format`, `flutter test`
+Doctor/gate qua scripts/dev-task.sh: build APK debug, kiểm manifest release đã gộp (`scripts/check-release-manifest.py`), `flutter analyze --fatal-infos`, `dart format`, `flutter test`
 và kiểm tra repository; CI chạy cùng gate. Lệnh theo khu vực: `CODEMAP.md`. Build iOS và kiểm thử thiết bị thật: **chưa kiểm chứng**.

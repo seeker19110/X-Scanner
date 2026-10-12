@@ -137,7 +137,7 @@ app trừ khi người dùng chủ động chia sẻ. Cần Data Governance ng�
 | AC-5 | `apps/mobile/test/imaging/page_render_test.dart::re-decodes to the rectified size (AC-5)` | + `renderPage renders from a file and keeps the original intact` |
 | AC-6 | `apps/mobile/test/export/pdf_export_test.dart::3 pages keep their aspect and orientation (AC-6)` | + `test/export/page_exporter_test.dart::pdf: 3 pages become one X-Scanner.pdf with 3 pages` |
 | AC-7 | `apps/mobile/test/ui/review_screen_test.dart::undecodable image shows a message and keeps pages (AC-7)` | + `cancelled capture adds no page (AC-7)` |
-| AC-8 | `apps/mobile/test/android_manifest_test.dart::declares no network, camera or storage permission and disables backup` | manifest release đã gộp kiểm tay ở PR-3 và PR-4 (sau `share_plus`): không INTERNET/CAMERA/STORAGE |
+| AC-8 | `apps/mobile/test/android_manifest_test.dart::declares no network, camera or storage permission and disables backup` | manifest release đã gộp: gate chạy `processReleaseMainManifest` rồi `scripts/check-release-manifest.py` (W-301, W-501; trước đó kiểm tay ở PR-3, PR-4) |
 | AC-9 | chưa có — UAT thủ công trên thiết bị | cần thiết bị/emulator |
 
 ## 17. Slice/PR plan
