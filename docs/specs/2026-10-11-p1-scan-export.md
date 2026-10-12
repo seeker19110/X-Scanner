@@ -130,11 +130,11 @@ app trừ khi người dùng chủ động chia sẻ. Cần Data Governance ng�
 | AC-1 | `apps/mobile/test/storage/session_store_test.dart::keeps original bytes and cleans the deleted page after save` | + `test/core/scan_session_test.dart` |
 | AC-2 | `apps/mobile/test/storage/session_store_test.dart::a new store on the same root restores pages and edits` | |
 | AC-3 | `apps/mobile/test/storage/session_store_test.dart::garbage manifest` | + schemaVersion 2, bản gốc thiếu, UTF-8 sai, bản gốc của phiên bị cách ly |
-| AC-4 | chưa có — widget test editor | |
+| AC-4 | `apps/mobile/test/ui/quad_editor_screen_test.dart::rejects an invalid drag and keeps the previous quad (AC-4)` | + `test/core/quad_editing_test.dart` |
 | AC-5 | `apps/mobile/test/imaging/page_render_test.dart::re-decodes to the rectified size (AC-5)` | + `renderPage renders from a file and keeps the original intact` |
 | AC-6 | chưa có — test PDF (đếm trang, kích thước) | |
-| AC-7 | chưa có — test luồng huỷ/lỗi với picker giả | |
-| AC-8 | chưa có — kiểm manifest Android không có INTERNET/CAMERA ở release | |
+| AC-7 | `apps/mobile/test/ui/review_screen_test.dart::undecodable image shows a message and keeps pages (AC-7)` | + `cancelled capture adds no page (AC-7)` |
+| AC-8 | `apps/mobile/test/android_manifest_test.dart::declares no network, camera or storage permission and disables backup` | manifest release đã gộp kiểm tay ở PR-3: không INTERNET/CAMERA/STORAGE |
 | AC-9 | chưa có — UAT thủ công trên thiết bị | cần thiết bị/emulator |
 
 ## 17. Slice/PR plan
