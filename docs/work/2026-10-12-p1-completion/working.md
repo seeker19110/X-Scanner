@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-p1-completion
 - Yêu cầu / outcome: `/auto-complete` lần 4, bước 2: `/completion` (`docs/framework/project-completion.md` Pha 0–4) sau khi P1 PR-0..4 merged (#6..#10). Outcome: Definition of Complete có bằng chứng hoặc BLOCKED/WAITING đúng §8.
-- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 PR mở.
+- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 worker đang chạy.
 - Chủ trì / writer: phiên chính (kế hoạch, duyệt, tích hợp); audit giao 3 subagent chỉ đọc; sửa giao worker theo số PR.
 - Mức rủi ro / số PR: M; PR-A tài liệu Pha 0–2, rồi một PR mỗi việc W-xxx theo kế hoạch.
 - Scope / non-goal: app `apps/mobile` P1 + tài liệu dự án. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release, bật branch protection/auto-merge (cần quyền chủ repo).
@@ -47,6 +47,9 @@
 - W-103 https://github.com/seeker19110/X-Scanner/pull/16 merged squash `43f24d9` sau CI xanh (job 114646372989); 0 review thread.
 - W-302 (worker): chỉ thêm/siết test, không guideline nào đỏ nên không đổi `lib/` · loại đổi UI phòng ngừa · bậc 2. Test hồi quy cho code có sẵn xanh ngay (đúng brief); bằng chứng độ nhạy: hạ `_handleSize` về 44 → test 48 dp đỏ. Ghi nhận: `androidTapTargetGuideline` không đo tay nắm chỉ có thao tác kéo, nên test 48 dp không thay được bằng guideline.
 - Phiên chính sửa test a11y: chờ đúng future thumbnail đã cache thay vì `delayed(20 ms)` · loại giữ thời gian chờ cố định · bậc 1 (không chập chờn trên CI chậm); chạy 3 lần xanh.
+- W-302 https://github.com/seeker19110/X-Scanner/pull/17 merged squash `63b7ef0` sau CI xanh (job 114650363910); 0 review thread.
+- W-402 giao worker (brief `PLAN-c5.md`, `--check-plan` OK): `restoring` đặt đồng bộ khi gọi `restore()` · loại cờ "đã khôi phục" mặc định false · bậc 1 (test cũ dựng màn không gọi `restore` không bị kẹt ở trạng thái tải). Thumbnail lỗi bỏ khỏi cache + nút thử lại, không tự thử lại · bậc 2. `ResizeImage` policy `fit` · loại `cacheWidth` (méo khi ảnh xoay/không vuông) · bậc 1.
+- W-403 chờ W-402 (chung `session_controller.dart`) · loại song song · CLAUDE.md header (song song cần file rời nhau).
 
 ## Lần thử / blocker
 
@@ -54,7 +57,7 @@
 
 ## Bàn giao / bước tiếp theo
 
-- Merge PR W-302; rồi W-402 → W-403; W-104 từ 2026-10-18; Pha 4 re-audit.
+- Tích hợp W-402 khi worker xong; rồi W-403; W-104 từ 2026-10-18; Pha 4 re-audit.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
