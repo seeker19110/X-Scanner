@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-11-p1-scan-export
 - Yêu cầu / outcome: `/auto-complete` lần 3; chủ repo duyệt spec P1 theo đề xuất (D1 A, D2 5 dependency, D3 tắt backup, D4 emulator). Outcome: Goal DoD ở `docs/goals/2026-10-11-p1-scan-export.md`.
-- Trạng thái: In progress — PR-0 merged (#6 `a1549c5`); PR-1 mở.
+- Trạng thái: In progress — PR-0 (#6 `a1549c5`) và PR-1 (#7 `df902de`) merged; PR-2 mở.
 - Chủ trì / writer: phiên chính (PR-0, review/gate/tích hợp); PR-1..4 giao `complex-implementer`.
 - Mức rủi ro / số PR: L (dữ liệu tài liệu nhạy cảm, 5 dependency, nhiều màn hình); 5 PR tuần tự vì chung `pubspec.lock`.
 - Scope / non-goal: spec §5. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release.
@@ -32,6 +32,11 @@
 - PR-1 do `complex-implementer` viết theo brief `--check-plan` OK. Container khởi động lại nên báo cáo đỏ/xanh của worker bị mất; phiên chính đọc lại toàn bộ diff và chạy lại test.
 - Review PR-1 tìm thấy lỗi mất dữ liệu: sau khi manifest bị cách ly, lần `load` thành công kế tiếp xoá bản gốc của phiên hỏng (vì brief cho dọn mọi file không tham chiếu). Đỏ: test `a later new session never deletes the quarantined originals` → PathNotFoundException; sửa: khi còn `session.corrupt-*.json` chỉ dọn `.part`; xanh 22/22 · loại xoá bản gốc mồ côi · bậc 1.
 - Gate PR-1 cục bộ: `dev-task.sh gate` PASS 4/4, `flutter test` 99/99.
+- PR-1 https://github.com/seeker19110/X-Scanner/pull/7 merged squash `df902de` sau CI xanh (job 114606406106); 0 review thread.
+- PR-2 do `complex-implementer` viết (brief `--check-plan` OK; báo cáo đỏ/xanh lưu ở scratchpad `REPORT-p2.md`): T1 đỏ 7/7 → xanh; T2 đỏ 25/25 → xanh; thêm 2 ca biên có đỏ thật (viền tối do lấy mẫu pixel −1 của `getPixelLinear`; ảnh 16-bit bị cắt về 0). Gate worker PASS, 131 test.
+- Kẹp tọa độ lấy mẫu vào tâm pixel ngoài cùng · loại lấy mẫu nguyên văn p − 0,5 · bậc 1 (viền trang tối 229 thay 255).
+- Bỏ `bakeOrientation` khi không có EXIF orientation · loại luôn gọi · bậc 1 (thư viện luôn sao chép ảnh: ảnh 12 MP chiếm gấp đôi bộ nhớ, rủi ro OOM trên máy).
+- Đo hiệu năng PR-2 (ảnh tổng hợp 4000×3000, `dart run` JIT, x86 4 nhân): nắn 2,8–3,5 s, thumbnail 1,2 s · chấp nhận cho P1 (isolate) · cam kết p95 để P2 trên thiết bị (spec §2).
 
 ## Lần thử / blocker
 
@@ -39,7 +44,7 @@
 
 ## Bàn giao / bước tiếp theo
 
-- Merge PR-1 khi CI xanh, rồi viết brief PR-2 (nắn ảnh + `image` 4.10.1).
+- Merge PR-2 khi CI xanh, rồi viết brief PR-3 (UI + `image_picker`/`path_provider` + D3).
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
