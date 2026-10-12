@@ -49,6 +49,7 @@ class SessionController extends ChangeNotifier {
   final Queue<SessionNotice> _notices = Queue<SessionNotice>();
   final Map<String, Future<Uint8List>> _thumbnails = {};
   int _pending = 0;
+  int _restoring = 0;
   bool _disposed = false;
 
   /// Tail of the write queue; never completes with an error.
@@ -60,6 +61,9 @@ class SessionController extends ChangeNotifier {
   /// Whether a queued operation has not finished yet.
   bool get busy => _pending > 0;
 
+  /// Whether a [restore] has been called and has not finished yet.
+  bool get restoring => _restoring > 0;
+
   /// Returns the oldest pending notice and removes it, or `null`.
   SessionNotice? takeNotice() =>
       _notices.isEmpty ? null : _notices.removeFirst();
@@ -68,17 +72,40 @@ class SessionController extends ChangeNotifier {
   File originalFile(ScanPage page) => _store.resolve(page.originalPath);
 
   /// The preview of [page], cached by page id. Decoding is queued behind
-  /// any other decode; a failure is rethrown to the caller.
-  Future<Uint8List> thumbnailFor(ScanPage page) => _thumbnails.putIfAbsent(
-    page.id,
-    () => _decode(() => originalFile(page).path),
-  );
+  /// any other decode; a failure is rethrown to the caller and dropped
+  /// from the cache, so the next call decodes again.
+  Future<Uint8List> thumbnailFor(ScanPage page) =>
+      _thumbnails.putIfAbsent(page.id, () {
+        late final Future<Uint8List> decoding;
+        decoding = _decode(() => originalFile(page).path)
+            .catchError((Object error, StackTrace stack) {
+              // Only this attempt: a newer preview for the page stays cached.
+              if (identical(_thumbnails[page.id], decoding)) {
+                _thumbnails.remove(page.id);
+              }
+              return Future<Uint8List>.error(error, stack);
+            });
+        return decoding;
+      });
 
   /// Removes export files and share-sheet copies left by an earlier run,
   /// loads the saved session,
   /// then adds a photo Android may have kept after killing the app during
-  /// capture.
-  Future<void> restore() => _enqueue(() async {
+  /// capture. [restoring] is true from this call until that has finished,
+  /// whether it succeeded or not.
+  Future<void> restore() {
+    _restoring++;
+    _notify();
+    return _enqueue(() async {
+      try {
+        await _restoreSession();
+      } finally {
+        _restoring--;
+      }
+    });
+  }
+
+  Future<void> _restoreSession() async {
     await _exporter.clearLeftovers();
     var failed = false;
     try {
@@ -102,7 +129,7 @@ class SessionController extends ChangeNotifier {
     if (lost != null) {
       await _addFromPath(lost, (page) => _session.added(page));
     }
-  });
+  }
 
   /// Adds a photo from the system camera; a cancel does nothing.
   Future<void> capture() => _enqueue(() async {

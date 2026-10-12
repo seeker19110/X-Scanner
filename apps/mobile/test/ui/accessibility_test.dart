@@ -8,6 +8,7 @@ import 'package:x_scanner/app/theme.dart';
 import 'package:x_scanner/core/scan_page.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
+import 'package:x_scanner/imaging/page_render.dart';
 import 'package:x_scanner/storage/session_store.dart';
 import 'package:x_scanner/ui/page_source.dart';
 import 'package:x_scanner/ui/quad_editor_screen.dart';
@@ -98,6 +99,57 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Trang 1'), findsOneWidget);
       expect(find.byType(Image), findsOneWidget);
+
+      await _expectGuidelines(tester);
+      handle.dispose();
+    });
+
+    testWidgets('review screen with a failed thumbnail meets the a11y '
+        'guidelines in ${brightness.name} theme (F-020)', (tester) async {
+      final handle = tester.ensureSemantics();
+      final source = _Source();
+      // The page is added with a working decoder; a second controller then
+      // opens the saved session with one that fails.
+      final controller = (await tester.runAsync(() async {
+        SessionController make(Future<Uint8List> Function(String) thumbs) =>
+            SessionController(
+              store: SessionStore(Directory('${tmp.path}/session')),
+              source: source,
+              exporter: PageExporter(
+                exportDir: Directory('${tmp.path}/exports'),
+              ),
+              sharer: _Sharer(),
+              thumbnailer: thumbs,
+            );
+        Directory('${tmp.path}/session').createSync();
+        final file = File('${tmp.path}/p.png')..writeAsBytesSync(_thumb);
+        source.captures.add(file.path);
+        await make((_) async => _thumb).capture();
+        final c = make((_) async => throw const ImageDecodeFailure());
+        await c.restore();
+        // Fails on the real event loop; the screen then shows the error.
+        await c
+            .thumbnailFor(c.session.pages.single)
+            .then<void>((_) {}, onError: (Object _) {});
+        return c;
+      }))!;
+      expect(controller.session.pages, hasLength(1));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(brightness),
+          home: ReviewScreen(
+            controller: controller,
+            themeMode: themeMode,
+            onToggleTheme: () {},
+          ),
+        ),
+      );
+      // Lets any preview future made on the real event loop report.
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.broken_image_outlined), findsOneWidget);
+      expect(find.byTooltip('Tải lại ảnh xem trước trang 1'), findsOneWidget);
 
       await _expectGuidelines(tester);
       handle.dispose();

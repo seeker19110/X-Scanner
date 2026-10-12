@@ -667,6 +667,73 @@ void main() {
     );
   });
 
+  test(
+    '(F-020) a failed thumbnail is decoded again on the next call',
+    () async {
+      await addPages(1);
+      var calls = 0;
+      final other = SessionController(
+        store: SessionStore(root),
+        source: source,
+        exporter: exporter,
+        sharer: sharer,
+        thumbnailer: (path) async {
+          calls++;
+          if (calls == 1) throw const ImageDecodeFailure();
+          return Uint8List.fromList([7]);
+        },
+      );
+      await other.restore();
+      final page = other.session.pages.single;
+
+      await expectLater(
+        other.thumbnailFor(page),
+        throwsA(isA<ImageDecodeFailure>()),
+      );
+      expect(await other.thumbnailFor(page), [7]);
+      expect(calls, 2);
+      await other.thumbnailFor(page);
+      expect(calls, 2, reason: 'a successful preview stays cached');
+    },
+  );
+
+  group('(F-021) restoring', () {
+    test('is false before restore is ever called', () {
+      expect(controller.restoring, isFalse);
+    });
+
+    test('is true from the restore call until it has finished', () async {
+      await addPages(1);
+      var notified = 0;
+      final other = SessionController(
+        store: SessionStore(root),
+        source: source,
+        exporter: exporter,
+        sharer: sharer,
+      )..addListener(() => notified++);
+      final done = other.restore();
+      expect(other.restoring, isTrue);
+      expect(notified, greaterThan(0));
+      await done;
+      expect(other.restoring, isFalse);
+      expect(other.session.pages, hasLength(1));
+    });
+
+    test('ends false when load throws a FileSystemException', () async {
+      final other = SessionController(
+        store: FlakyStore(root)..failLoad = true,
+        source: source,
+        exporter: exporter,
+        sharer: sharer,
+      );
+      final done = other.restore();
+      expect(other.restoring, isTrue);
+      await done;
+      expect(other.restoring, isFalse);
+      expect(other.takeNotice(), SessionNotice.restoreFailed);
+    });
+  });
+
   test('a thumbnail asked for during an export waits for the render, as '
       'both share one decode gate (F-006)', () async {
     await addPages(1);
