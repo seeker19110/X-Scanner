@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-13-dependabot
 - Yêu cầu / outcome: chủ repo 2026-10-13: "có, duyệt thêm Dependabot" (đề xuất 2 của `docs/research/2026-10-13-goi-y-nang-cap.md`, F-009): `.github/dependabot.yml` cho `pub` và `github-actions`, cooldown 7 ngày.
-- Trạng thái: Active — PR mở
+- Trạng thái: Done — #47 `81cae78`
 - Chủ trì / writer: phiên chính
 - Mức rủi ro / số PR: S, 1 PR (một file cấu hình + tài liệu; không đổi code app)
 - Scope / non-goal: version updates cho `apps/mobile` (pub) và `.github/workflows` (actions). Non-goal: bật Dependency graph/alerts và security updates (repository settings, chủ repo — EX-2 còn mở); `dependency-review.yml`; auto-merge PR bot.
@@ -21,6 +21,7 @@
 - Một nhóm mỗi hệ sinh thái (`patterns: ["*"]`) · loại mỗi gói một PR · bậc 2 (tối đa 2 PR bot/tuần, giữ trần WIP 5).
 - PR bot `image` 4.12.0 có thể tới trước W-104b (18/10) · W-104b vẫn là nơi thêm test hồi quy 2 ảnh tổng hợp và đóng EX-1; PR bot không merge thay W-104b · bậc 1.
 - Ngoại lệ test-trước số 3 (config thuần, không nhánh logic). YAML parse bằng `python3 yaml.safe_load`.
+- #47 merged squash `81cae78` sau CI xanh: "Framework and Android app gate" success và check ".github/dependabot.yml" của Dependabot success (cấu hình hợp lệ); 0 review thread.
 
 ## Lần thử / blocker
 
@@ -28,10 +29,10 @@
 
 ## Bàn giao / bước tiếp theo
 
-- CI xanh → merge → kiểm tab Insights › Dependency graph › Dependabot không báo lỗi cấu hình → đóng hồ sơ.
+- Xong. PR bot đầu tiên theo lịch tuần; mỗi PR bot qua CI và chủ repo/phiên merge như PR thường. Chủ repo còn bật Dependency graph/alerts (EX-2).
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
-<DoD, mọi PR MERGED + merge SHA và main đã đối chiếu, giới hạn/rủi ro còn lại,
-ngày và người nghiệm thu theo ủy quyền. Khi đủ điều kiện rename working.md → done.md
-trong cùng thư mục; không overwrite lịch sử. Chưa có PR/merge thì giữ working.md.>
+- DoD: chủ repo duyệt (2026-10-13); `.github/dependabot.yml` trên `main` @ `81cae78`; Dependabot tự kiểm cấu hình hợp lệ trên PR; gate và CI xanh.
+- Giới hạn còn lại: chưa có cảnh báo lỗ hổng/PR vá bảo mật (cần chủ repo bật alerts, EX-2); PR bot `image` có thể tới trước W-104b.
+- Nghiệm thu: phiên chính theo duyệt của chủ repo, 2026-10-13.
