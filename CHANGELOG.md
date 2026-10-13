@@ -1,6 +1,9 @@
 # Changelog — X-Scanner
 
-## Unreleased — 2026-10-12
+## Unreleased — 2026-10-13
+
+- Dependabot (chủ repo duyệt 2026-10-13): nâng bản hằng tuần cho `pub` (`apps/mobile`) và GitHub Actions, chờ
+  bản phát hành đủ 7 ngày, bỏ qua bản major, mỗi hệ sinh thái một PR.
 
 - P1 scan và xuất (#6–#10): phiên nhiều trang lưu bền giữ bản gốc, chụp bằng camera hệ thống hoặc nhập ảnh,
   sắp xếp/xoá/chụp lại/xoay, chỉnh 4 góc và nắn phối cảnh, Dark/Light, tắt sao lưu Android,
