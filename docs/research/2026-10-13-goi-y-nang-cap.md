@@ -13,7 +13,7 @@
 | # | Mức | Đề xuất | Bằng chứng | Kiểm xong khi |
 |---|---|---|---|---|
 | 1 | 🟠 | Thêm `auto-complete-guard.sh` từ khung và đăng ký vào Stop | `.claude/hooks/` không có file này; Stop chỉ gọi `usage-guard.sh` và `telemetry-record.sh` (khung có thêm guard). Lỗi đã ghi từ ngày 12/10 và vẫn còn sau 39 commit | File có mặt và workflow `adopt-projects-template.yml` không báo lệch |
-| 2 | 🟠 | Thêm `.github/dependabot.yml` (ecosystem `pub` cho Flutter và `github-actions`) | Không có Dependabot; 2/2 action đã ghim SHA, nhưng không có bot thì SHA sẽ cũ dần | Dependabot mở PR đầu tiên |
+| 2 | 🟠 | Thêm `.github/dependabot.yml` (ecosystem `pub` cho Flutter và `github-actions`) | Không có Dependabot; 2/2 action đã ghim SHA, nhưng không có bot thì SHA sẽ cũ dần | Dependabot mở PR đầu tiên — **đã thêm** 2026-10-13 (chủ repo duyệt; `pub` thay `npm`, cooldown 7 ngày) |
 | 3 | 🟢 | Chọn LICENSE, hoặc ghi rõ "giữ mọi quyền" | Không có file LICENSE | Có `LICENSE` hoặc dòng tương ứng trong README |
 
 ## Giữ nguyên (điểm mạnh)
