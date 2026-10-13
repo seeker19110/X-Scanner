@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-13-dependabot-merge-rule
 - Yêu cầu / outcome: chủ repo 2026-10-13: "có, tự merge bản nâng nhỏ khi đủ các bước kiểm" — ghi luật vào repo để mọi phiên sau theo cùng một chuẩn.
-- Trạng thái: Active — PR mở
+- Trạng thái: Done — #50 `cd1f53b`
 - Chủ trì / writer: phiên chính
 - Mức rủi ro / số PR: S, 1 PR (tài liệu luật, không đổi code)
 - Scope / non-goal: luật trong `docs/ops/dependency-updates.md` + một dòng trỏ ở header CLAUDE.md/AGENTS.md. Non-goal: bật auto-merge của GitHub, workflow tự merge.
@@ -21,6 +21,7 @@
 - Security update bỏ bước tuổi khi bản vá lỗ hổng đã công bố · bậc 1 (chờ 7 ngày kéo dài lỗ hổng đã biết); vẫn báo chủ repo.
 - Ghi luật ở file dự án mới `docs/ops/dependency-updates.md` + một dòng header CLAUDE.md/AGENTS.md · loại sửa `docs/ops/supply-chain.md` (file khung: gate `check-adoption.py` test_manifest_integrity đỏ khi sửa — đã thử, đỏ đúng 1 test) · bậc 1 (header tự nạp mỗi phiên).
 - Ngoại lệ test-trước số 3 (chỉ tài liệu).
+- #50 merged squash `cd1f53b` sau CI xanh (gate success + check `.github/dependabot.yml` success); 0 review thread.
 
 ## Lần thử / blocker
 
@@ -28,10 +29,10 @@
 
 ## Bàn giao / bước tiếp theo
 
-- CI xanh → merge → đổi `done.md`.
+- Xong. PR bot sau: áp `docs/ops/dependency-updates.md` (header CLAUDE.md/AGENTS.md trỏ tới).
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
-<DoD, mọi PR MERGED + merge SHA và main đã đối chiếu, giới hạn/rủi ro còn lại,
-ngày và người nghiệm thu theo ủy quyền. Khi đủ điều kiện rename working.md → done.md
-trong cùng thư mục; không overwrite lịch sử. Chưa có PR/merge thì giữ working.md.>
+- DoD: luật ghi ở `docs/ops/dependency-updates.md` trên `main` @ `cd1f53b`, trỏ từ header CLAUDE.md/AGENTS.md và `.github/dependabot.yml`; gate + CI xanh.
+- Giới hạn còn lại: các bước kiểm do phiên AI thực hiện, không có cổng máy cưỡng chế.
+- Nghiệm thu: phiên chính theo duyệt của chủ repo, 2026-10-13.
