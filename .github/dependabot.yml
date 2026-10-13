@@ -4,6 +4,7 @@ version: 2
 # - cooldown 7 days: the same rule as EX-1 in docs/ops/supply-chain-exceptions.md (no release younger than 7 days).
 # - Major versions are ignored here; they go through /deps-upgrade (changelog, touchpoints, own PR).
 # - One grouped PR per ecosystem, so bot PRs stay within the WIP limit of 5.
+# Merging bot PRs: docs/ops/dependency-updates.md.
 # Security updates need Dependabot alerts, which the owner enables in repository settings (EX-2).
 updates:
   - package-ecosystem: pub

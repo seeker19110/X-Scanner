@@ -10,6 +10,7 @@ Inherit a live model from the operator's provider; no paid API is required. Cont
 Parallel work requires disjoint files, separate worktrees and agreed interface contracts.
 Never upload real documents/OCR, log sensitive contents, invent missing text or discard scan originals.
 Do not activate release, auto-merge, schedulers, cloud services or X-Agents from this advisory alone.
+Dependabot patch/minor PRs: the AI session merges them only after every check in `docs/ops/dependency-updates.md` passes (owner, 2026-10-13); otherwise ask.
 Each developer checkout needs `git config core.hooksPath scripts/githooks`, Bash >=4 and jq.
 Do not change global Git configuration. Repository-level branch protection is not yet verified.
 Not active here: `pr-policy.yml`, `progress-freshness`, `protection-guard`, auto-merge and the Evidence table in `docs/ops/repository-settings.md` (that table is the template repo's). Check Work ID, spec approval and PROGRESS by hand; X-Scanner evidence: `docs/adoption/README.md`.
