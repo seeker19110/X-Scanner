@@ -1,6 +1,6 @@
 # X-Scanner — Tiến độ
 
-Ngày cập nhật: 2026-10-16
+Ngày cập nhật: 2026-10-17
 
 ## 2026-10-16: nghiên cứu nâng cấp
 
@@ -17,8 +17,13 @@ Gate cục bộ trên snapshot cố định và pre-commit PASS 4/4, Flutter 546
 
 ## 2026-10-16: triển khai XS-05 sau review/merge #52
 
-Hồ sơ: [2026-10-16-xs05-repository-guards](docs/work/2026-10-16-xs05-repository-guards/working.md).
-Ruleset [25250032](https://github.com/seeker19110/X-Scanner/rules/25250032) đã active, main protected=true, 5 rule khớp JSON, không bypass; required check đúng app GitHub Actions. Alerts bật, graph 86/86 Pub khớp lockfile; [PR #53](https://github.com/seeker19110/X-Scanner/pull/53) có dependency review step SUCCESS và negative control CI cancelled→BLOCKED. CI của head hiện hành đối chiếu trên PR; EX-2 còn chờ merge workflow vào main. [Bằng chứng native](docs/ops/evidence/2026-10-16-xs05-native.json). Không bật auto-merge/release hoặc migration PR-4b.
+Hồ sơ: [2026-10-16-xs05-repository-guards](docs/work/2026-10-16-xs05-repository-guards/done.md).
+Ruleset [25250032](https://github.com/seeker19110/X-Scanner/rules/25250032) đã active, main protected=true, 5 rule khớp JSON, không bypass; required check đúng app GitHub Actions. Alerts bật, graph 86/86 Pub khớp lockfile; [PR #53](https://github.com/seeker19110/X-Scanner/pull/53) có dependency review step SUCCESS và negative control CI cancelled→BLOCKED. PR #53 đã squash merge `3f49039`; [CI cuối PR](https://github.com/seeker19110/X-Scanner/actions/runs/38930758793) trên head `51af8e0` và [CI trên main](https://github.com/seeker19110/X-Scanner/actions/runs/38931930723) đều SUCCESS. Workflow đã vào main và EX-2 đã đóng. [Bằng chứng native](docs/ops/evidence/2026-10-16-xs05-native.json). Không bật auto-merge/release hoặc migration PR-4b.
+
+## 2026-10-16: XS-06a corpus và baseline host
+
+Hồ sơ: [2026-10-16-xs06-host-baseline](docs/work/2026-10-16-xs06-host-baseline/working.md).
+Tooling nội bộ dùng ảnh hình học tổng hợp/checksum và core thumbnail/render/PDF hiện có; không đổi app/dependency. [PR #54](https://github.com/seeker19110/X-Scanner/pull/54) có 20 mẫu host AOT thành công trên source935083e; review theo yêu cầu17/10 đang chạy lại gate, execution của head cuối đối chiếu trên PR. Corpus thiết bị/120 trang/OCR và target latency/RAM vẫn chưa nghiệm thu; W-104b chờ 18/10, AC-9 cần thiết bị.
 
 ## 2026-10-11: lưu gợi ý và áp dụng bộ khung
 
@@ -46,8 +51,8 @@ Spike camera/ARCore depth trên thiết bị thật vẫn cần thiết bị.
 Hồ sơ `docs/work/2026-10-12-p1-completion/working.md` · kế hoạch `docs/ops/COMPLETION-PLAN.md` · audit `docs/ops/COMPREHENSIVE-AUDIT-STATUS.md`
 (62 phát hiện sau ba lượt quét lại Pha 4: 3 Cao, 16 Trung, 43 Thấp; lần quét đầu 42). Nợ có chủ đích: mục "Phát hiện dời đợt sau" của kế hoạch; exception `docs/ops/supply-chain-exceptions.md`.
 PR seeker19110/X-Scanner#11–#22, #24 (`0327ab7`) merged; quét lại hội tụ, Definition of Complete có bằng chứng.
-W-104a hàng rào ảnh đầu vào (JPEG/PNG/WebP theo nội dung, trần 64 MiB, ngân sách 60 s có kill isolate; WebP động bị từ chối): merged #28 `474fa28`. WAITING: W-104b nâng `image` từ 2026-10-18 (EX-1); UAT AC-9 cần chủ repo; F-014 native đã kiểm ở XS-05, F-009 alerts/graph bật và workflow review chờ merge PR #53 (EX-2).
-Dependabot (chủ repo duyệt 2026-10-13, F-009 phần version updates): `.github/dependabot.yml` cho pub + github-actions, cooldown 7 ngày; #47 `81cae78`, hồ sơ `docs/work/2026-10-13-dependabot/done.md`. Alerts/graph đã bật ở XS-05; EX-2 còn chờ workflow review merge vào main qua PR #53. #48 `f188b14` (`image_picker` 1.2.4) merge sau kiểm; luật tự merge PR bot patch/minor: `docs/ops/dependency-updates.md`, #50 `cd1f53b`, hồ sơ `docs/work/2026-10-13-dependabot-merge-rule/done.md`.
+W-104a hàng rào ảnh đầu vào (JPEG/PNG/WebP theo nội dung, trần 64 MiB, ngân sách 60 s có kill isolate; WebP động bị từ chối): merged #28 `474fa28`. WAITING: W-104b nâng `image` từ 2026-10-18 (EX-1); UAT AC-9 cần chủ repo; F-014 native đã kiểm ở XS-05, F-009 alerts/graph/review đã kiểm sau merge PR #53, EX-2 đóng16/10.
+Dependabot (chủ repo duyệt 2026-10-13, F-009 phần version updates): `.github/dependabot.yml` cho pub + github-actions, cooldown 7 ngày; #47 `81cae78`, hồ sơ `docs/work/2026-10-13-dependabot/done.md`. Alerts/graph đã bật ở XS-05; workflow review đã merge PR #53, EX-2 đóng16/10. #48 `f188b14` (`image_picker` 1.2.4) merge sau kiểm; luật tự merge PR bot patch/minor: `docs/ops/dependency-updates.md`, #50 `cd1f53b`, hồ sơ `docs/work/2026-10-13-dependabot-merge-rule/done.md`.
 
 ## Chưa thực hiện
 

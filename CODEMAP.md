@@ -47,6 +47,7 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Cho phép thêm quyền / component exported (cần lý do + spec) | `scripts/check-release-manifest.py` (`ALLOWED_PERMISSIONS`, `ALLOWED_EXPORTED`) | `python3 scripts/check-release-manifest.py --self-test` + gate |
 | Đổi CI | `.github/workflows/ci.yml` | `bash scripts/dev-task.sh gate`; xem run trên PR |
 | Đổi gói APK UAT / cách nghiệm thu AC-9 | `.github/workflows/ci.yml` (bundle sau gate, SHA build/head riêng, checksum, retention 14 ngày), `docs/ops/android-uat.md` | gate; tải artifact từ CI đúng revision, kiểm `sha256sum --check SHA256SUMS`; chạy UAT trên thiết bị |
+| Đổi corpus/harness XS-06a | apps/mobile/tool/scanner_benchmark.dart, apps/mobile/test/tool/scanner_benchmark_test.dart, docs/benchmarks/README.md | dispatcher gate; AOT smoke và case process mới theo protocol, không coi là device benchmark |
 | Đổi native policy / dependency review XS-05 | `.github/rulesets/main.json`, `.github/workflows/ci.yml`, `docs/ops/x-scanner-repository-guards.md` | gate/actionlint; đọc ruleset và applied rules live; kiểm CI không đạt bị BLOCKED; kiểm graph/compare trước khi đóng EX-2 |
 | Đổi kiểm adoption / placeholder | `scripts/check-adoption.py` | `python3 scripts/check-adoption.py && python3 scripts/check-adoption.py --lint` |
 | Mở việc mới | `bash scripts/new-work.sh <slug>` → `docs/work/<id>/working.md` | `bash scripts/test-new-work.sh` khi đổi script |

@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-16-xs05-guards-config
 - Yêu cầu / outcome: triển khai T2 từ PLAN.md của hồ sơ tổng XS-05: ruleset native riêng X-Scanner và dependency review trong cùng job CI, kèm runbook apply/readback.
-- Trạng thái: Ready for root gate — kiểm cấu hình xanh; chưa full gate/root nghiệm thu/native apply/merge.
+- Trạng thái: Done — PR #53 squash merged3f49039 sau review/gate/CI đúng head51af8e0.
 - Chủ trì / writer: worker xs05_config; phiên chính giữ hồ sơ tổng và nghiệm thu.
 - Mức rủi ro / số PR: S; phần cấu hình của PR-2 XS-05, phụ thuộc PR-1 #52 đã merge. Ngoại lệ TDD số 3: config thuần và tài liệu, không thêm logic ứng dụng.
 - Scope / non-goal: chỉ .github/rulesets/main.json, .github/workflows/ci.yml, docs/ops/x-scanner-repository-guards.md và hồ sơ đơn vị này. Không source app/dependency/lockfile, native mutation, commit/push/merge hoặc đổi hồ sơ tổng.
@@ -45,3 +45,10 @@
 
 - Root đã tích hợp/review và chạy local preapply + normal pre-commit gate PASS 4/4, Flutter 546/546. Hai default phía GitHub được root canonicalize theo readback/tài liệu, reviewer delta findings=[].
 - Native ruleset 25250032 khớp config; PR #53 mở. Negative control head bb98b4a run 38925328599 cancelled→BLOCKED; dependency review step SUCCESS, final-head CI xem PR. Không merge đơn vị này nên vẫn working.md/Ready, không dùng trạng thái worker thay nghiệm thu root.
+
+
+## Nghiệm thu sau merge — 2026-10-16
+- Chủ repo cấp quyền trực tiếp review/sửa/merge53; PR53 MERGED lúc2026-10-16T16:26:11Z, squash SHA3f49039c216b15a3827a06afb92ee25027cbf571. Main ff-only đã đối chiếu.
+- Review độc lập/root không finding tồn; sửa PROGRESS alerts lỗi thời. Local review gate và normal pre-commit PASS4/4, Flutter546/546, analyze0, format55/0. CI38930758793 trên head51af8e0 SUCCESS, required app15368, PR CLEAN và không unresolved thread trước head-guard squash.
+- Readback16:26Z: main protected, native ruleset exact/no bypass, workflow main giống reviewedhead. Alerts204, graph86/86Pub exact, final compare HTTP200/no snapshot warning; dependency-review step SUCCESS. EX2 đủ điều kiện đóng; giữ giới hạn snapshot upstream trong runbook, không suy full audit.
+- DoD XS05 đạt, đổi done.md trong PR XS06 theo contract§3e; AC9/EX1/PR4b không đóng từ gate. Không release/auto-merge/scheduler hoặc app migration.

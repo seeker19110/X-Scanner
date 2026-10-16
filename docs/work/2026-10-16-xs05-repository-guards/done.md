@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-16-xs05-repository-guards
 - Yêu cầu / outcome: sau review/sửa/merge PR #52, tiếp tục ưu tiên trong báo cáo 16/10; tự quyết kỹ thuật và chạy đủ gate. Đơn vị này xử lý F-014 và phần F-009 khả thi bằng native controls/CI.
-- Trạng thái: Ready — [PR #53](https://github.com/seeker19110/X-Scanner/pull/53) mở sau local gate/native readback; CI final head xác minh trên PR; chưa merge.
+- Trạng thái: Done — PR #53 squash merged3f49039 sau review/gate/CI đúng head51af8e0.
 - Chủ trì / writer: phiên chính; config worker ở worktree riêng; root review, tích hợp, native settings, gate và PR.
 - Mức rủi ro / số PR: S (config/tài liệu thuần), một PR mới; request gồm PR #52 hiện có rồi đơn vị này nên giao worker theo §3c, tuần tự theo dependency.
 - Scope / non-goal: ruleset main đúng job thực, dependency review vào cùng gate, bật/kiểm alerts/graph và đọc riêng secret settings; không sửa app/dependency/schema, bật auto-merge/release/scheduler/PR-4b, thêm API trả phí, tạo secret/token mới. Quyền merge trực tiếp đã cấp cho #52; PR đơn vị này để review.
@@ -66,3 +66,10 @@
 - Review độc lập review_pr53 và phiên chính trên toàn diff22file + delta3file tài liệu: không finding correctness/security chưa xử lý, review-findings/1 findings=[] và dev-task review-check CLEAN. Cleanup PROGRESS còn nói alerts chưa bật đã sửa; CI/ruleset/app/lockfile không đổi trong lượt review.
 - Fresh live readback 2026-10-16T16:05:12Z: ruleset25250032 đúng mọi rule/parameter, 5 applied rules, owner cannot bypass, main protected/f753933; alerts204, Pub86/86 exact name/version (PURL percent encoding được giải mã), secret/push protection enabled, default workflow read/cannot approve, auto-merge và automatic security updates vẫn tắt. Evidence ngoài tree pr53-review-native.json.
 - Doctor + full gate trong lượt review PASS4/4; APK/merged release manifest PASS, analyze0, format55/0, Flutter546/546, adoption7/7, manifest self-test10/10 và hook suites PASS. Log pr53-review-gate.log, dòng FAIL manifest không tồn tại là ca âm dự kiến. Actionlint/diff whitespace/check-plan3tasks PASS. Ngoại lệ TDD3: delta chỉ tài liệu, không code logic mới; normal pre-commit vẫn chạy lại gate trên snapshot commit. CI head cuối/merge được đối chiếu trên PR, không ghi tự nhận Done trước merge.
+
+
+## Nghiệm thu sau merge — 2026-10-16
+- Chủ repo cấp quyền trực tiếp review/sửa/merge53; PR53 MERGED lúc2026-10-16T16:26:11Z, squash SHA3f49039c216b15a3827a06afb92ee25027cbf571. Main ff-only đã đối chiếu.
+- Review độc lập/root không finding tồn; sửa PROGRESS alerts lỗi thời. Local review gate và normal pre-commit PASS4/4, Flutter546/546, analyze0, format55/0. CI38930758793 trên head51af8e0 SUCCESS, required app15368, PR CLEAN và không unresolved thread trước head-guard squash.
+- Readback16:26Z: main protected, native ruleset exact/no bypass, workflow main giống reviewedhead. Alerts204, graph86/86Pub exact, final compare HTTP200/no snapshot warning; dependency-review step SUCCESS. EX2 đủ điều kiện đóng; giữ giới hạn snapshot upstream trong runbook, không suy full audit.
+- DoD XS05 đạt, đổi done.md trong PR XS06 theo contract§3e; AC9/EX1/PR4b không đóng từ gate. Không release/auto-merge/scheduler hoặc app migration.

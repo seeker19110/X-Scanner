@@ -115,3 +115,12 @@ trong cùng thư mục; không overwrite lịch sử. Chưa có PR/merge thì gi
   EX-2 còn chờ workflow merge main trong PR #53; final-head CI xem PR. Các blocker settings
   chủ repo của checkpoint 12/10 là lịch sử trước yêu cầu nâng cấp/ủy quyền 16/10.
 - W-104b/EX-1 từ 18/10 và AC-9 thiết bị vẫn mở; không đổi hồ sơ này thành Done hoặc nhận P1 Complete.
+
+## Reconcile sau merge XS-05 — 2026-10-16
+
+PR #53 đã merge `3f49039` (head được review `51af8e0`, CI `38930758793` SUCCESS).
+Workflow đã vào main; CI `38931930723` SUCCESS và native rules/readback vẫn khớp.
+Alerts trả 204, graph 86/86 Pub và dependency compare cuối không warning; EX-2 đã đóng.
+Các dòng chờ owner settings/partial trước đó là lịch sử. EX-1/W-104b (18/10), AC-9
+và PR-4b vẫn mở. XS-06a chuẩn bị fixture/tooling host theo Work ID
+`2026-10-16-xs06-host-baseline`; chưa nghiệm thu thiết bị, chất lượng, OCR hoặc 100 trang.

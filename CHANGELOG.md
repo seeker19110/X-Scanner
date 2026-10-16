@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-10-16
 
+- XS-06a: tooling nội bộ tạo corpus hình học/checksum và đo core thumbnail/render/PDF, kèm protocol host/device; giữ nguyên luồng app.
+
 - XS-05: ruleset `main` bắt buộc PR/squash và check `Framework and Android app gate` từ GitHub Actions,
   không bypass; kiểm dependency theo advisory trong cùng gate. Runbook tách policy, live evidence và giới hạn snapshot.
 

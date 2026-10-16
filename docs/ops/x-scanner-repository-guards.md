@@ -3,7 +3,7 @@
 Chính sách XS-05 xử lý F-014 và phần khả thi của F-009. File này mô tả cấu hình và cách
 kiểm; **có file cấu hình trong Git chưa chứng minh control đã chạy trên GitHub**.
 Bằng chứng live do phiên chính ghi ở [bảng riêng của X-Scanner](../adoption/README.md)
-và hồ sơ `docs/work/2026-10-16-xs05-repository-guards/working.md`, kèm ngày/SHA/run thật.
+và hồ sơ `docs/work/2026-10-16-xs05-repository-guards/done.md`, kèm ngày/SHA/run thật.
 Không dùng Evidence của repo mẫu trong `repository-settings.md`.
 
 ## Chính sách đích
@@ -123,7 +123,7 @@ Một diff rỗng trên PR chỉ đổi cấu hình là hợp lệ nhưng không
 [source v5.0.0](https://github.com/actions/dependency-review-action/blob/a1d282b36b6f3519aa1f3fc636f609c47dddb294/src/main.ts#L33)
 trả comparison còn cảnh báo sau timeout. `warn-only: false` chặn vulnerability/lỗi
 action; nó không biến snapshot warning thành lỗi. Do đó CI xanh chưa chứng minh dữ
-liệu đầy đủ. DEBT: chưa có cổng fail trên snapshot thiếu sau timeout | trần: dùng hành vi upstream v5.0.0 | xem lại khi: snapshot warning xuất hiện trong CI hoặc trước khi đóng EX-2.
+liệu đầy đủ. DEBT: chưa có cổng fail trên snapshot thiếu sau timeout | trần: dùng hành vi upstream v5.0.0 | xem lại khi: snapshot warning xuất hiện trong CI hoặc trước release đầu tiên.
 
 Chỉ nhận F-009 hoàn tất và đóng EX-2 khi có readback Pub khớp lockfile **và** compare
 không snapshot warning, cùng bước action thực chạy thành công trên head CI cuối và
@@ -158,3 +158,14 @@ nhật cùng ruleset ID. Không tắt ruleset, thêm bypass hoặc bỏ qua gate
 ở head bb98b4a được cố ý huỷ: action review SUCCESS trước app gate, required check
 15368 cancelled và PR BLOCKED, không artifact. Checkpoint sau chỉ tài liệu/evidence;
 CI final-head được đối chiếu riêng, không nhận hai head là một hay nhận API merge bị từ chối.
+
+
+## Reconcile sau review/merge53 — 2026-10-16
+
+PR53 đã merge3f49039 sau CI38930758793 trên head51af8e0 SUCCESS; workflow trên main
+khớp reviewedhead. Readback đủ86/86Pub, alerts204, final compare HTTP200/no snapshot
+warning và action thực success, nên EX-2 đóng theo tiêu chí trên. Đã xem lại debt
+snapshot trước đóng: giữ hành vi action chuẩn cùng evidence đầy đủ hiện tại, xem lại
+khi warning xuất hiện hoặc trước release; không nhận graph diff là full security audit.
+[Bằng chứng](evidence/2026-10-16-xs05-native.json) giữ cả cancelled head ban đầu và
+final head riêng biệt. EX-1 và AC-9 vẫn mở.

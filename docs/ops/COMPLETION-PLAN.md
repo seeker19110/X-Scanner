@@ -100,3 +100,12 @@ CI head cuối xem PR. F-009: alerts GET 204, graph 86/86 Pub khớp lockfile, a
 compare không warning; EX-2 còn phần workflow chưa merge main. Các dòng WAITING owner settings
 ngày 12/10 là lịch sử trước ủy quyền nâng cấp ngày 16/10; hiện chỉ còn chờ merge #53, W-104b
 đủ tuổi 18/10 và AC-9 thiết bị. Không đóng EX-1 hoặc tuyên bố P1 Complete.
+
+## Reconcile sau merge XS-05 — 2026-10-16
+
+PR #53 đã merge `3f49039` (head được review `51af8e0`, CI `38930758793` SUCCESS).
+Workflow đã vào main; CI `38931930723` SUCCESS và native rules/readback vẫn khớp.
+Alerts trả 204, graph 86/86 Pub và dependency compare cuối không warning; EX-2 đã đóng.
+Các dòng chờ owner settings/partial trước đó là lịch sử. EX-1/W-104b (18/10), AC-9
+và PR-4b vẫn mở. XS-06a chuẩn bị fixture/tooling host theo Work ID
+`2026-10-16-xs06-host-baseline`; chưa nghiệm thu thiết bị, chất lượng, OCR hoặc 100 trang.

@@ -4,6 +4,14 @@
 > file này ghi lỗi đã xảy ra và khuôn của nó. Gặp triệu chứng lạ → tìm khuôn ở đây trước (`/debug` Pha 1).
 > Sửa bug xong → thêm mục mới hoặc thêm ngày/PR vào mục cũ nếu tái phát.
 
+**Fixture tên file POSIX làm test hỏng trên Windows trước khi gọi code cần kiểm.**
+Test benchmark tạo directory có newline/backslash vô điều kiện. Win32 cấm control
+characters và dùng backslash phân cách path; API Windows `Directory.CreateDirectory`
+trả `ArgumentException` trước benchmark. *Chốt*: khai `testOn: '!windows'` riêng ca
+filename POSIX bằng metadata test runner, giữ đủ 46 ca trên Linux và không tuyên bố
+đã chạy native Windows Flutter gate. Nguồn: [Win32 naming rules](https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file).
+(2026-10-17, seeker19110/X-Scanner#54; `apps/mobile/test/tool/scanner_benchmark_test.dart`)
+
 **Dọn "file không được tham chiếu" xoá bản gốc của phiên chưa đọc được.** Bước dọn của `SessionStore.load`
 xoá mọi file trong `originals/` không có trong manifest hiện tại. Khi manifest cũ bị cách ly (hỏng) hoặc không
 đọc được, "không được tham chiếu" không có nghĩa là "rác": đó là bản gốc duy nhất của phiên trước. Lỗi im lặng
