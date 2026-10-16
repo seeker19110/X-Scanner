@@ -1,0 +1,42 @@
+{
+  "repository": "seeker19110/X-Scanner",
+  "verifiedAt": "2026-10-16T15:29:37.664309+00:00",
+  "baselineMainSha": "f753933ae9f75c580266d52a585b4af18fc34acb",
+  "nativeRuleset": {
+    "repository": "seeker19110/X-Scanner",
+    "verifiedAt": "2026-10-16T15:29:37.664309+00:00",
+    "rulesetId": 25250032,
+    "rulesetUrl": "https://github.com/seeker19110/X-Scanner/rules/25250032",
+    "mainSha": "f753933ae9f75c580266d52a585b4af18fc34acb",
+    "protected": true,
+    "enforcement": "active",
+    "bypassActors": [],
+    "appliedRuleCount": 5,
+    "requiredCheck": "Framework and Android app gate",
+    "integrationId": 15368,
+    "strict": true,
+    "currentUserCanBypass": "never"
+  },
+  "dependabotAlerts": {
+    "enabled": true,
+    "getStatus": 204
+  },
+  "dependencyGraph": {
+    "expectedPub": 86,
+    "actualPub": 86,
+    "exactNameVersionMatch": true,
+    "sbomPackageCount": 91,
+    "created": "2026-10-16T15:21:26Z"
+  },
+  "secretScanning": "enabled",
+  "secretScanningPushProtection": "enabled",
+  "defaultWorkflowPermissions": "read",
+  "canApprovePullRequestReviews": false,
+  "automaticSecurityUpdates": "disabled",
+  "prVerification": {
+    "ci": null,
+    "cancelledRun": null,
+    "blockedMergeState": null,
+    "note": "CI and negative control are recorded after PR creation; native readback alone does not prove merge blocking."
+  }
+}

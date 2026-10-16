@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-16-upgrade-research
 - Yêu cầu / outcome: chủ repo yêu cầu pull và nghiên cứu nâng cấp từ repo sở hữu và internet. Đầu ra: hiện trạng đã kiểm, đối chiếu nguồn ngoài, thứ tự nâng cấp và tiêu chí nghiệm thu có thể triển khai tiếp.
-- Trạng thái: Ready — nghiên cứu và đối chiếu hoàn tất; được đưa vào đợt PR XS-04 sau yêu cầu triển khai tiếp của chủ repo, chưa merge.
+- Trạng thái: Done — nghiên cứu và XS-04 đã vào PR #52, squash merged f753933; nghiên cứu ngoài scope giữ ADVISORY.
 - Chủ trì / writer: phiên chính.
 - Mức rủi ro / số PR: S, chỉ tài liệu; một đơn vị thay đổi tài liệu, phiên chính tự làm.
 - Scope / non-goal: đọc mã/test/CI hiện có, repo công khai của chủ sở hữu và tài liệu chính thức; lưu báo cáo trong docs/research. Không sửa source, nâng dependency, bật migration PR-4b, đổi settings, merge, release hay tạo lịch.
@@ -37,9 +37,15 @@
 
 ## Bàn giao / bước tiếp theo
 
-- Nối `docs/work/2026-10-16-android-uat-artifacts/working.md` trên nhánh `chore/android-uat-artifacts`; nghiên cứu được đưa vào cùng PR để không làm rơi thay đổi đang giữ cục bộ. Không đóng hồ sơ trước khi PR merge thật.
+- Nối `docs/work/2026-10-16-android-uat-artifacts/done.md` trên nhánh `chore/android-uat-artifacts`; nghiên cứu được đưa vào cùng PR để không làm rơi thay đổi đang giữ cục bộ. Không đóng hồ sơ trước khi PR merge thật.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
 - Nghiên cứu đã vào commit `3251652` và [PR #52](https://github.com/seeker19110/X-Scanner/pull/52), chưa merge; giữ working.md. Hoàn tất nghiên cứu không đồng nghĩa P1 đã qua UAT hay roadmap được duyệt triển khai.
 - Tiêu chí nghiên cứu đạt: baseline/CI được đối chiếu, nguồn sở hữu và upstream được chỉ rõ, khuyến nghị nối ID cũ và có tiêu chí đo, không biến giả thuyết thành kết quả thực nghiệm. Phiên chính tự review theo §3d ngày 2026-10-16.
+
+## Reconcile sau merge — 2026-10-16
+
+- Chủ repo cấp quyền merge #52 trực tiếp; [PR #52](https://github.com/seeker19110/X-Scanner/pull/52) MERGED lúc 2026-10-16T15:18:22Z, squash SHA `f753933ae9f75c580266d52a585b4af18fc34acb`; main đã fast-forward và đối chiếu đúng SHA.
+- Review độc lập và phiên chính không finding tồn đọng; local gate/pre-commit PASS 4/4 và Flutter 546/546. CI head 7974fe5, [run 38921846662](https://github.com/seeker19110/X-Scanner/actions/runs/38921846662), SUCCESS; artifact 12054733682 được upload.
+- DoD của nghiên cứu/chuẩn bị gói UAT đạt; rename done.md trong PR XS-05 theo contract §3e. P1 AC-9 trên thiết bị, EX-1 và PR-4b vẫn mở trong hồ sơ riêng. Không phát hành hoặc bật auto-merge.

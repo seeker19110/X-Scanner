@@ -12,7 +12,7 @@ Never upload real documents/OCR, log sensitive contents, invent missing text or 
 Do not activate release, auto-merge, schedulers, cloud services or X-Agents from this advisory alone.
 Dependabot patch/minor PRs: the AI session merges them only after every check in `docs/ops/dependency-updates.md` passes (owner, 2026-10-13); otherwise ask.
 Each developer checkout needs `git config core.hooksPath scripts/githooks`, Bash >=4 and jq.
-Do not change global Git configuration. Repository-level branch protection is not yet verified.
+Do not change global Git configuration. Native main ruleset is active with app-bound `Framework and Android app gate`, strict checks and no bypass; see `docs/ops/x-scanner-repository-guards.md` and X-Scanner evidence in `docs/adoption/README.md`.
 Not active here: `pr-policy.yml`, `progress-freshness`, `protection-guard`, auto-merge and the Evidence table in `docs/ops/repository-settings.md` (that table is the template repo's). Check Work ID, spec approval and PROGRESS by hand; X-Scanner evidence: `docs/adoption/README.md`.
 This context governs X-Scanner over generic examples and unfilled product placeholders below.
 

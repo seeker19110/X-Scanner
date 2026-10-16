@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-16-android-uat-artifacts
 - Yêu cầu / outcome: chủ repo yêu cầu triển khai theo ưu tiên báo cáo, cài toolchain, tự quyết kỹ thuật, chạy đủ gate và mở PR. Đợt đầu tạo APK UAT kiểm chứng được sau full gate.
-- Trạng thái: Ready — full gate cục bộ/pre-commit PASS; PR #52 mở, chưa merge.
+- Trạng thái: Done — PR #52 squash merged f753933 sau review và gate/CI.
 - Chủ trì / writer: phiên chính.
 - Mức rủi ro / số PR: S (CI/config và tài liệu); một PR gồm nghiên cứu đang giữ cục bộ và phần triển khai XS-04 này. Một outcome nên phiên chính tự làm.
 - Scope / non-goal: Flutter 3.47.7/Dart 3.13.5, JDK/Android SDK cục bộ; bundle APK debug/checksum/build SHA/PR head SHA/SDK metadata sau gate; hướng dẫn UAT. Không đổi source app, schema, dependency pub, settings repo, bật migration, release hoặc merge PR.
@@ -61,3 +61,9 @@
 - Review độc lập `review_pr52` trên worktree riêng và review phiên chính: `review-findings/1` findings=[]; đã đối chiếu toàn bộ diff, TRAPS, source action tại SHA ghim, env/shell, thứ tự gate/upload, giới hạn EX-1/AC-9. Không có finding correctness/security phải sửa.
 - Tái kiểm gói CI run 38918903197 trên head 9b5572b trong phiên review: bốn checksum OK, metadata khớp head/Flutter 3.47.7, apksigner v2 hợp lệ; không lấy lời khai lượt trước làm bằng chứng mới.
 - Full gate trong phiên review: PASS 4/4, Flutter 546/546, analyze 0 issues, format 55/0 changed, release manifest PASS; adoption 7/7, manifest self-test 10/10, hai hook suites PASS. Log đầy đủ ngoài repo: pr52-review-gate.log; các ca âm manifest/secret/giá trị -1 là test dự kiến, không phải lỗi cổng. Commit checkpoint vẫn đi qua pre-commit gate, CI sẽ kiểm head mới trước merge.
+
+## Reconcile sau merge — 2026-10-16
+
+- Chủ repo cấp quyền merge #52 trực tiếp; [PR #52](https://github.com/seeker19110/X-Scanner/pull/52) MERGED lúc 2026-10-16T15:18:22Z, squash SHA `f753933ae9f75c580266d52a585b4af18fc34acb`; main đã fast-forward và đối chiếu đúng SHA.
+- Review độc lập và phiên chính không finding tồn đọng; local gate/pre-commit PASS 4/4 và Flutter 546/546. CI head 7974fe5, [run 38921846662](https://github.com/seeker19110/X-Scanner/actions/runs/38921846662), SUCCESS; artifact 12054733682 được upload.
+- DoD của nghiên cứu/chuẩn bị gói UAT đạt; rename done.md trong PR XS-05 theo contract §3e. P1 AC-9 trên thiết bị, EX-1 và PR-4b vẫn mở trong hồ sơ riêng. Không phát hành hoặc bật auto-merge.

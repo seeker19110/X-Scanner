@@ -45,3 +45,11 @@ nhánh lỗi có cho thử lại không. **Đính chính (F-047):** gỡ future 
 widget giải mã lại bản gốc hỏng; giữ future lỗi trong cache, đánh dấu id lỗi (so `identical`) và chỉ gỡ khi người dùng
 bấm thử lại (`retryThumbnail`). *Chốt chặn*: test "(F-020)"/"(F-047)" trong
 `apps/mobile/test/ui/session_controller_test.dart` và `review_screen_test.dart`. (2026-10-12, W-402; W-502)
+
+**So sánh ruleset thiếu mặc định phía GitHub báo drift giả.** Sau POST cấu hình XS-05, GitHub
+trả thêm `required_reviewers: []` và `require_extra_approval_for_unattributed_changes: true`,
+làm so sánh nguyên rule đỏ dù các giá trị đã yêu cầu khớp. *Cách rà*: đọc nguyên readback,
+đối chiếu tài liệu chính thức trước khi bỏ qua field hoặc hạ rule; extra approval không tăng
+count khi required approvals=0. *Chốt*: khai rõ mặc định đã kiểm trong `.github/rulesets/main.json`,
+so JSON với readback thật và kiểm CI không đạt bị BLOCKED; không nuốt mọi field lạ.
+(2026-10-16, Work ID `2026-10-16-xs05-repository-guards`; evidence trong hồ sơ)

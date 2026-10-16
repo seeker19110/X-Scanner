@@ -2,6 +2,9 @@
 
 ## Unreleased — 2026-10-16
 
+- XS-05: ruleset `main` bắt buộc PR/squash và check `Framework and Android app gate` từ GitHub Actions,
+  không bypass; kiểm dependency theo advisory trong cùng gate. Runbook tách policy, live evidence và giới hạn snapshot.
+
 - XS-04: CI cung cấp APK debug cho UAT sau full gate, kèm checksum, SHA checkout/PR head và phiên bản Flutter;
   artifact giữ 14 ngày, hướng dẫn tải/kiểm/cài và ghi bằng chứng AC-9 tại `docs/ops/android-uat.md`.
 

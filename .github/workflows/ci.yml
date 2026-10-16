@@ -46,6 +46,19 @@ jobs:
           set -euo pipefail
           git config core.hooksPath scripts/githooks
           bash scripts/dev-task.sh doctor
+      - name: Review dependency changes
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: low
+          fail-on-scopes: runtime,development,unknown
+          vulnerability-check: 'true'
+          license-check: 'false'
+          warn-only: 'false'
+          comment-summary-in-pr: never
+          show-openssf-scorecard: 'false'
+          retry-on-snapshot-warnings: 'true'
+          retry-on-snapshot-warnings-timeout: '120'
       - name: Run app build, analyze, format, tests and repository checks
         shell: bash
         run: |

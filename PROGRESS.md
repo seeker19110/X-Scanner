@@ -4,16 +4,21 @@ Ngày cập nhật: 2026-10-16
 
 ## 2026-10-16: nghiên cứu nâng cấp
 
-Hồ sơ: [2026-10-16-upgrade-research](docs/work/2026-10-16-upgrade-research/working.md).
+Hồ sơ: [2026-10-16-upgrade-research](docs/work/2026-10-16-upgrade-research/done.md).
 Kết quả: [nghiên cứu từ code, repo sở hữu và nguồn chính thức](docs/research/2026-10-16-upgrade-research.md), đối chiếu trên `cda650f`.
 Giai đoạn nghiên cứu chỉ thay tài liệu; chưa sửa app, dependency, settings hoặc bật XS-09 PR-4b. Khi nghiên cứu, full gate cục bộ thiếu Flutter; phần triển khai dưới đây đã cài toolchain để chạy lại.
 
 ## 2026-10-16: triển khai ưu tiên XS-04
 
-Hồ sơ: [2026-10-16-android-uat-artifacts](docs/work/2026-10-16-android-uat-artifacts/working.md).
+Hồ sơ: [2026-10-16-android-uat-artifacts](docs/work/2026-10-16-android-uat-artifacts/done.md).
 Theo yêu cầu triển khai tiếp của chủ repo: cài toolchain đúng pin, bổ sung APK UAT kiểm chứng được sau gate CI và [hướng dẫn AC-9](docs/ops/android-uat.md).
 W-104b giữ mốc đủ tuổi từ 18/10 theo EX-1; chưa bật migration XS-09 PR-4b. Kết quả gate/PR cập nhật trong hồ sơ.
-Gate cục bộ trên snapshot cố định và pre-commit PASS 4/4, Flutter 546/546, analyze sạch và format 55 file/0 thay đổi; AC-9 vẫn chờ UAT thật. [PR #52](https://github.com/seeker19110/X-Scanner/pull/52) đã mở, chưa merge; kết quả CI của head cuối xem trên PR.
+Gate cục bộ trên snapshot cố định và pre-commit PASS 4/4, Flutter 546/546, analyze sạch và format 55 file/0 thay đổi; AC-9 vẫn chờ UAT thật. [PR #52](https://github.com/seeker19110/X-Scanner/pull/52) đã squash merge `f753933` sau review độc lập, local gate và CI head cuối xanh (run 38921846662).
+
+## 2026-10-16: triển khai XS-05 sau review/merge #52
+
+Hồ sơ: [2026-10-16-xs05-repository-guards](docs/work/2026-10-16-xs05-repository-guards/working.md).
+Ruleset [25250032](https://github.com/seeker19110/X-Scanner/rules/25250032) đã active, main protected=true, 5 rule khớp JSON, không bypass; required check đúng app GitHub Actions. Alerts bật, graph86/86 Pub khớp lockfile; dependency review/negative control đang chờ CI của PR mới. [Bằng chứng native](docs/ops/evidence/2026-10-16-xs05-native.json). Không bật auto-merge/release hoặc migration PR-4b.
 
 ## 2026-10-11: lưu gợi ý và áp dụng bộ khung
 
@@ -47,8 +52,8 @@ Dependabot (chủ repo duyệt 2026-10-13, F-009 phần version updates): `.gith
 ## Chưa thực hiện
 
 Chưa build iOS; chưa chạy chụp/xuất trên thiết bị (AC-9 chờ chủ repo), OCR, depth hoặc benchmark trên thiết bị.
-Branch protection/ruleset và security gates theo stack chưa xác minh áp dụng.
-Release, tự merge, dịch vụ ngoài và tác vụ định kỳ chưa bật. P0–P4 chỉ là gợi ý.
+Ruleset/alerts native đã được kiểm ở XS-05; CI dependency review và phép kiểm trạng thái chặn merge xem hồ sơ XS-05. Không suy ra full security audit từ các controls này.
+Release, auto-merge, cloud ứng dụng và tác vụ định kỳ chưa bật. P0–P4 chỉ là gợi ý.
 
 ## Bằng chứng bộ khung
 
