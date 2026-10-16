@@ -46,6 +46,7 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Hạ `targetSdk` (gate FAIL khi < 31: dưới 31 component có intent-filter không khai `exported` bị exported ngầm) | `scripts/check-release-manifest.py` (`MIN_TARGET_SDK`), `android/app/build.gradle.kts` | `python3 scripts/check-release-manifest.py --self-test` + gate |
 | Cho phép thêm quyền / component exported (cần lý do + spec) | `scripts/check-release-manifest.py` (`ALLOWED_PERMISSIONS`, `ALLOWED_EXPORTED`) | `python3 scripts/check-release-manifest.py --self-test` + gate |
 | Đổi CI | `.github/workflows/ci.yml` | `bash scripts/dev-task.sh gate`; xem run trên PR |
+| Đổi gói APK UAT / cách nghiệm thu AC-9 | `.github/workflows/ci.yml` (bundle sau gate, SHA build/head riêng, checksum, retention 14 ngày), `docs/ops/android-uat.md` | gate; tải artifact từ CI đúng revision, kiểm `sha256sum --check SHA256SUMS`; chạy UAT trên thiết bị |
 | Đổi kiểm adoption / placeholder | `scripts/check-adoption.py` | `python3 scripts/check-adoption.py && python3 scripts/check-adoption.py --lint` |
 | Mở việc mới | `bash scripts/new-work.sh <slug>` → `docs/work/<id>/working.md` | `bash scripts/test-new-work.sh` khi đổi script |
 | Spec / goal / ADR | `docs/specs/`, `docs/goals/`, `docs/adr/` (ADR mới, không sửa ADR cũ) | `bash scripts/spec-compiler.sh --trace <spec>` |
