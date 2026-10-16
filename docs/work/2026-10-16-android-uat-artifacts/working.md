@@ -51,3 +51,13 @@
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
 - PR #52 đã mở, chưa merge; giữ working.md. Nghiệm thu phần chuẩn bị UAT theo bằng chứng gate/bundle; AC-9 không đóng từ artifact.
+
+## Review và quyền merge bổ sung — 2026-10-16
+
+- Chủ repo yêu cầu review kỹ PR #52, xử lý mọi vấn đề, merge khi đủ điều kiện, rồi nâng cấp tiếp theo ưu tiên báo cáo; quyền merge #52 được cấp trực tiếp trong phiên. Không cấp quyền release hay migration dữ liệu thật PR-4b.
+- Reconcile: origin/main vẫn cda650f, PR #52 head 9b5572b, CI success, không comment/review tồn đọng; working tree sạch trước checkpoint.
+- Kế hoạch: review độc lập ở worktree chỉ đọc, phiên chính review bảo mật/luồng artifact và chạy lại full gate; sửa nếu có finding được chứng minh; squash merge đúng head sau mọi cổng; reconcile hồ sơ vào PR ưu tiên kế tiếp.
+- Phân công: reviewer không sửa file/không commit/merge; worktree riêng pr52-review ở head 9b5572b. Phiên chính là writer duy nhất của hồ sơ tổng, chịu trách nhiệm gate và merge. Các đơn vị PR phụ thuộc chạy tuần tự theo §3c.
+- Review độc lập `review_pr52` trên worktree riêng và review phiên chính: `review-findings/1` findings=[]; đã đối chiếu toàn bộ diff, TRAPS, source action tại SHA ghim, env/shell, thứ tự gate/upload, giới hạn EX-1/AC-9. Không có finding correctness/security phải sửa.
+- Tái kiểm gói CI run 38918903197 trên head 9b5572b trong phiên review: bốn checksum OK, metadata khớp head/Flutter 3.47.7, apksigner v2 hợp lệ; không lấy lời khai lượt trước làm bằng chứng mới.
+- Full gate trong phiên review: PASS 4/4, Flutter 546/546, analyze 0 issues, format 55/0 changed, release manifest PASS; adoption 7/7, manifest self-test 10/10, hai hook suites PASS. Log đầy đủ ngoài repo: pr52-review-gate.log; các ca âm manifest/secret/giá trị -1 là test dự kiến, không phải lỗi cổng. Commit checkpoint vẫn đi qua pre-commit gate, CI sẽ kiểm head mới trước merge.
