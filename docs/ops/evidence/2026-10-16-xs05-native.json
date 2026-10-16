@@ -56,7 +56,46 @@
       "dependencyReviewStep": "success before intentional cancellation of full gate",
       "artifactCount": 0
     },
-    "finalCi": null,
-    "note": "CI on the final documentation handoff head is verified on PR #53. Cancelled head is recorded explicitly; no claim of a rejected merge API or deliberately failing test."
+    "finalCi": {
+      "verifiedAt": "2026-10-16T16:25:34.694225+00:00",
+      "head": "51af8e0efb69c914b9aefb3c500899a254d3c705",
+      "url": "https://github.com/seeker19110/X-Scanner/actions/runs/38930758793",
+      "conclusion": "success",
+      "requiredCheckApp": 15368,
+      "gatePassed": 4,
+      "flutterTestsPassed": 546,
+      "compareSnapshotWarnings": [],
+      "artifact": {
+        "id": 12059527051,
+        "name": "x-scanner-android-debug-b3296305734db2d8a23af0ecbb3fc94c1cd5be09-1",
+        "buildSha": "b3296305734db2d8a23af0ecbb3fc94c1cd5be09",
+        "parents": [
+          "f753933ae9f75c580266d52a585b4af18fc34acb",
+          "51af8e0efb69c914b9aefb3c500899a254d3c705"
+        ]
+      }
+    },
+    "note": "Initial cancelled head remains explicit. Final reviewed head51af8e0 passed CI; no claim of a deliberately failing code test or rejected merge API."
+  },
+  "postMergeVerification": {
+    "headRefOid": "51af8e0efb69c914b9aefb3c500899a254d3c705",
+    "mergeCommit": {
+      "oid": "3f49039c216b15a3827a06afb92ee25027cbf571"
+    },
+    "mergedAt": "2026-10-16T16:26:11Z",
+    "state": "MERGED",
+    "url": "https://github.com/seeker19110/X-Scanner/pull/53",
+    "verifiedAt": "2026-10-16T16:26:51.144207+00:00",
+    "mainSha": "3f49039c216b15a3827a06afb92ee25027cbf571",
+    "protected": true,
+    "workflowOnMainMatchesReviewedHead": true,
+    "nativeRulesExact": true,
+    "mainCi": {
+      "head": "3f49039c216b15a3827a06afb92ee25027cbf571",
+      "url": "https://github.com/seeker19110/X-Scanner/actions/runs/38931930723",
+      "conclusion": "success",
+      "gateJob": "success",
+      "dependencyReviewStep": "skipped on push, as configured; succeeded on final PR head"
+    }
   }
 }

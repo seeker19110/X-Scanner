@@ -105,6 +105,15 @@ Mức: Cao = mất/hỏng dữ liệu, rò riêng tư, crash luồng chính, tà
 F-014 đã có native control/evidence: ruleset 25250032/no bypass, required app 15368 strict,
 CI cố ý cancelled làm PR #53 BLOCKED (run 38925328599, không thử merge). F-009 partial:
 alerts/graph 86/86 Pub bật, dependency review step SUCCESS trên PR; EX-2 giữ tới khi
-workflow merge main. Bằng chứng [XS-05](../work/2026-10-16-xs05-repository-guards/working.md)
+workflow merge main. Bằng chứng [XS-05](../work/2026-10-16-xs05-repository-guards/done.md)
 và [PR #53](https://github.com/seeker19110/X-Scanner/pull/53). Các thống kê audit 12/10 giữ
 nguyên lịch sử; đây không phải một full audit mới hoặc bằng chứng decoder F-004 đã an toàn.
+
+## Reconcile sau merge XS-05 — 2026-10-16
+
+PR #53 đã merge `3f49039` (head được review `51af8e0`, CI `38930758793` SUCCESS).
+Workflow đã vào main; CI `38931930723` SUCCESS và native rules/readback vẫn khớp.
+Alerts trả 204, graph 86/86 Pub và dependency compare cuối không warning; EX-2 đã đóng.
+Các dòng chờ owner settings/partial trước đó là lịch sử. EX-1/W-104b (18/10), AC-9
+và PR-4b vẫn mở. XS-06a chuẩn bị fixture/tooling host theo Work ID
+`2026-10-16-xs06-host-baseline`; chưa nghiệm thu thiết bị, chất lượng, OCR hoặc 100 trang.
