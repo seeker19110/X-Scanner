@@ -55,3 +55,14 @@
 
 - Native settings, roundtrip, graph và negative control đạt; local gates/normal pre-commit PASS. PR #53 giữ mở để review; final-head CI đối chiếu trên PR. Chỉ Done sau merge thật của đơn vị này; không đóng AC-9 hoặc EX-1 từ gate.
 - Native readback 2026-10-16T15:20Z: alerts 204, SBOM 200 (initial Pub 0/86), dependency compare cda650f...7974fe5 trả HTTP200; kiểm snapshot warning trên PR mới sau khi graph cập nhật. Trước bật compare là403 và alerts404. Chỉ bật alerts/graph, không bật security-update tự tạo PR hoặc auto-merge.
+
+
+## Review/merge theo yêu cầu mới — 2026-10-16
+
+- Chủ repo cấp quyền trực tiếp review, sửa và merge PR #53 khi đủ điều kiện; thay giới hạn bàn giao PR mở ở checkpoint trước. Sau merge, tiếp tục ưu tiên báo cáo, một outcome/PR và reconcile từ main.
+- Head review ban đầu f46eb755cc6ca287e92814a23670131de90785c8, base f753933ae9f75c580266d52a585b4af18fc34acb. Phiên chính đọc lại diff/control thật, reviewer độc lập ở worktree riêng chỉ đọc; gate chạy lại trong lượt này, không dùng kết quả lượt trước thay bằng chứng.
+- Phạm vi tiếp: W-104b chưa đủ tuổi tới 18/10, AC-9 chưa có thiết bị. XS-06 chuẩn bị corpus/protocol + harness baseline là ưu tiên có thể làm ngay; chưa chọn engine/đổi runtime hoặc kích hoạt PR-4b. Phân loại S cho tooling/thử nghiệm tổng hợp, không thay hành vi app; nếu có feature app sẽ cần spec trước source.
+
+- Review độc lập review_pr53 và phiên chính trên toàn diff22file + delta3file tài liệu: không finding correctness/security chưa xử lý, review-findings/1 findings=[] và dev-task review-check CLEAN. Cleanup PROGRESS còn nói alerts chưa bật đã sửa; CI/ruleset/app/lockfile không đổi trong lượt review.
+- Fresh live readback 2026-10-16T16:05:12Z: ruleset25250032 đúng mọi rule/parameter, 5 applied rules, owner cannot bypass, main protected/f753933; alerts204, Pub86/86 exact name/version (PURL percent encoding được giải mã), secret/push protection enabled, default workflow read/cannot approve, auto-merge và automatic security updates vẫn tắt. Evidence ngoài tree pr53-review-native.json.
+- Doctor + full gate trong lượt review PASS4/4; APK/merged release manifest PASS, analyze0, format55/0, Flutter546/546, adoption7/7, manifest self-test10/10 và hook suites PASS. Log pr53-review-gate.log, dòng FAIL manifest không tồn tại là ca âm dự kiến. Actionlint/diff whitespace/check-plan3tasks PASS. Ngoại lệ TDD3: delta chỉ tài liệu, không code logic mới; normal pre-commit vẫn chạy lại gate trên snapshot commit. CI head cuối/merge được đối chiếu trên PR, không ghi tự nhận Done trước merge.
