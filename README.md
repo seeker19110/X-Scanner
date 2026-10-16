@@ -5,6 +5,7 @@
 
 ## Bắt đầu
 
+- [Nghiên cứu nâng cấp ngày 16/10/2026](docs/research/2026-10-16-upgrade-research.md): hiện trạng code/CI, đối chiếu repo sở hữu và nguồn chính thức, ưu tiên và tiêu chí kiểm chứng; ADVISORY.
 - [Gợi ý sản phẩm, repo tham khảo và depth](docs/research/2026-10-11-scanner-product-suggestions.md): ADVISORY.
 - [Kế hoạch phát triển toàn diện](docs/plans/2026-10-12-comprehensive-development-plan.md): M0–M5, depth và 33 đầu việc XS-01..XS-33; đề xuất, chưa phải phê duyệt triển khai toàn bộ.
 - [Stack: ADR-0002](docs/adr/0002-flutter-android-first-stack.md), [ADR-0003 lựa chọn P1](docs/adr/0003-p1-system-camera-dart-imaging-pdf.md), [spec P0 nền](docs/specs/2026-10-11-p0-foundation.md), [spec P1 scan và xuất](docs/specs/2026-10-11-p1-scan-export.md).
@@ -26,5 +27,6 @@ bash scripts/dev-task.sh gate
 ```
 
 Gate chạy build APK debug, kiểm manifest release đã gộp (`scripts/check-release-manifest.py`), analyze, format, test của app và kiểm tra repository/hooks.
+CI xanh cung cấp [APK UAT kèm checksum và commit SHA](docs/ops/android-uat.md), giữ 14 ngày trong Artifacts của run; đây là bản debug để thử nghiệm.
 Không chứng minh build iOS, chụp/xuất trên thiết bị thật, depth, chất lượng scan hay OCR. Không commit tài liệu cá nhân hoặc khóa API.
 Giấy phép sản phẩm chưa chọn; license nguồn giữ ở `third_party/projects-template.LICENSE`.

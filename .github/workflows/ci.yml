@@ -51,11 +51,39 @@ jobs:
         run: |
           set -euo pipefail
           bash scripts/dev-task.sh gate
+      - name: Prepare verifiable Android UAT bundle
+        shell: bash
+        env:
+          UAT_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/x-scanner-uat"
+          install -m 644 apps/mobile/build/app/outputs/flutter-apk/app-debug.apk \
+            "$RUNNER_TEMP/x-scanner-uat/X-Scanner-debug.apk"
+          git rev-parse HEAD > "$RUNNER_TEMP/x-scanner-uat/BUILD_COMMIT"
+          printf '%s\n' "$UAT_SOURCE_SHA" > "$RUNNER_TEMP/x-scanner-uat/SOURCE_COMMIT"
+          flutter --version --machine > "$RUNNER_TEMP/x-scanner-uat/FLUTTER.json"
+          cd "$RUNNER_TEMP/x-scanner-uat"
+          sha256sum X-Scanner-debug.apk BUILD_COMMIT SOURCE_COMMIT FLUTTER.json > SHA256SUMS
+      - name: Upload Android UAT bundle
+        id: uat-upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: x-scanner-android-debug-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/x-scanner-uat/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
       - name: State verification scope
         shell: bash
+        env:
+          UAT_ARTIFACT_URL: ${{ steps.uat-upload.outputs.artifact-url }}
         run: |
           {
             echo '## X-Scanner repository checks'
             echo 'PASS: Android debug APK build, flutter analyze, dart format, flutter test and repository checks.'
+            printf '\n[Download the debug APK and checksums](%s) (14-day retention).\n' "$UAT_ARTIFACT_URL"
+            echo 'Verify SHA256SUMS before installing; BUILD_COMMIT is the tested checkout and SOURCE_COMMIT is the PR head (equal on main).'
+            echo 'UAT instructions: docs/ops/android-uat.md. This debug APK is for testing; it is not a production release.'
             echo 'Not verified here: iOS build, physical-device camera/depth, scan quality, OCR or release readiness.'
           } >> "$GITHUB_STEP_SUMMARY"

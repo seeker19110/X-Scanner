@@ -1,6 +1,9 @@
 # Changelog — X-Scanner
 
-## Unreleased — 2026-10-13
+## Unreleased — 2026-10-16
+
+- XS-04: CI cung cấp APK debug cho UAT sau full gate, kèm checksum, SHA checkout/PR head và phiên bản Flutter;
+  artifact giữ 14 ngày, hướng dẫn tải/kiểm/cài và ghi bằng chứng AC-9 tại `docs/ops/android-uat.md`.
 
 - Dependabot (chủ repo duyệt 2026-10-13): nâng bản hằng tuần cho `pub` (`apps/mobile`) và GitHub Actions, chờ
   bản phát hành đủ 7 ngày, bỏ qua bản major, mỗi hệ sinh thái một PR.
