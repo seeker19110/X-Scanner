@@ -10,7 +10,7 @@ Sau PR #53 merge, XS-06 là việc tiếp có thể làm: W-104b chờ 18/10, AC
 - Cổng: worker dart format, flutter analyze và targeted flutter test; root full scripts/dev-task.sh gate và compile/run AOT sau tích hợp. Root sửa config lint/format để bao gồm tool. Không chạy full gate worker đồng thời root.
 
 ## Nhóm PR (đơn vị mở PR)
-- **PR-1** (XS-06a tooling): gồm việc T1 — phụ thuộc PR53 MERGED/main reconcile, worker worktree riêng; root giữ hồ sơ tổng/maps/config/evidence, mở PR mới và giữ OPEN.
+- **PR-1** (XS-06a tooling): gồm việc T1 và review T2 — phụ thuộc PR53 MERGED/main reconcile, worker worktree riêng; root giữ hồ sơ tổng/maps/config/evidence, mở PR mới; checkpoint đầu giữ OPEN, chủ repo đã cấp quyền review/merge54 ngày17/10 qua T2.
 
 ## Danh sách việc
 ### T1 — Corpus và harness host   `route: complex`
@@ -18,6 +18,12 @@ Sau PR #53 merge, XS-06 là việc tiếp có thể làm: W-104b chờ 18/10, AC
 - Đặc tả: CLI/manifest/record/guardrails trên. Tự chọn helper và vẽ fixture nhỏ dễ test; JPEG từng trang khác checksum để không PDF dedup thành một ảnh. Không tải ảnh/font/model. README có lệnh generate/compile AOT/run process mới/checksum, protocol cold/warm,1/10/30/100 trang và12/24/48MP, >=30 mẫu nếu p95, private holdout theo physical doc, groundtruth OCR kiểm tay/NFC, unknown=null; phân biệt host/PDF-core với app/UAT/quality/corpus120trang còn mở. Nguồn chính thức Dart ProcessInfo/Stopwatch và Flutter profile. Không nâng image hoặc thay production code.
 - Phụ thuộc: none
 - Tiêu chí chấp nhận: đỏ-trước rồi xanh cho invalid dimensions/pages/SHA/CLI, từ chối overwrite, deterministic/distinct corpus, corrupt checksum bị chặn trước decode, tiny measurements dùng production core thành công, original/manifest giữ hash, record/error không lộ path. Nộp log đỏ/xanh và format/analyze/targeted test thật. Root chạy AOT smoke + baseline12MP1/10trang, ghi sample count/limitations; full gate/CI. Không nhận XS06 toàn bộ hoặc AC9 complete.
+
+### T2 — Review kỹ PR #54 theo yêu cầu 17/10   `route: complex`
+- Điểm chạm: đọc toàn diff PR54 trong /home/liend/.local/share/x-scanner/review-pr54; không sửa file. Root giữ PLAN/working/PROGRESS và sửa vấn đề nếu có trong cùng PR.
+- Đặc tả: kiểm CLI/guardrails/checksum/byte/header/core reuse/timing/RSS/provenance/tests, source đã pin935083e, base3f49039; đối chiếu docs thật và quy tắc không làm mất dữ liệu, không giả UAT. Không mở quyền/scheduler/paid API/source mới.
+- Phụ thuộc: T1
+- Tiêu chí chấp nhận: findings có path/line/trigger thực hoặc review-findings/1 findings=[]; không commit/push/merge hoặc fullgate; root verify và chạy fullgate/CI finalhead + guarded squash khi đủ điều kiện.
 
 ## Luật chung cho mọi việc
 1. Chỉ sửa Điểm chạm; cần file khác thì dừng báo root.
@@ -31,7 +37,7 @@ Sau PR #53 merge, XS-06 là việc tiếp có thể làm: W-104b chờ 18/10, AC
 Merge53 → main ff-only → root branch codex/xs06-host-baseline + worker worktree → review/test/integrate → gate/PR. Không migration/release.
 
 ## Duyệt cuối (Tầng 1)
-Root đọc diff, red evidence, guards và ý nghĩa measurements; chạy AOT/full gate/CI trên head cuối. Chưa có quyền merge PR mới thì giữ OPEN.
+Root đọc diff, red evidence, guards và ý nghĩa measurements; chạy AOT/full gate/CI trên head cuối. Quyền review/merge54 đã cấp ngày17/10; PR nâng cấp sau54 vẫn giữ OPEN khi chưa có quyền merge riêng.
 
 ## Root review trước giao việc
 Checksum preflight đọc fixture trước timing: chỉ nhận process mới, I/O cache chưa kiểm soát, không gọi cold disk. Corpus hình học nén tốt không chứng minh ảnh thật hoặc PDF100trang/RAM device. Metadata chỉ OS/architecture/runtime, không hostname/user/path. Manifest/file chỉ nhận tên page index do generator tạo, không đường dẫn tùy ý hoặc symlink; hash preflight bị giới hạn byte. Dùng sha256sum --zero qua stdin của buffer đã giới hạn byte, không shell/eval hoặc truyền đường dẫn vào checksum output. Các giới hạn này phải có trong README/record phù hợp.

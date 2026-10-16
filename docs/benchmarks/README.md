@@ -40,6 +40,9 @@ Generation/compilation chạy riêng, không nằm trong thời gian xử lý tr
 đo mở **một process mới cho một case**. Test tiny gọi API nhiều lần trong Flutter test
 chỉ kiểm hành vi; số thời gian/RSS từ test không dùng làm baseline. `dart run` cũng
 có thể smoke CLI nhưng phải ghi rõ JIT, không trộn với AOT.
+Ca test tên thư mục chứa newline/backslash chỉ chạy ngoài Windows vì Win32 không
+cho các ký tự đó trong tên; Linux CI vẫn chạy đủ 46 ca. Điều này không xác nhận
+CLI hoặc toàn bộ app gate đã được kiểm trên Windows.
 
 `APP_SHA` phải đúng 40 ký tự hex, không whitespace/newline. Tool chỉ kiểm cú pháp,
 không chứng thực binary build từ SHA đó. Freeze source trước baseline; bằng chứng

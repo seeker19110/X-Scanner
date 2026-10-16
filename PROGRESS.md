@@ -1,6 +1,6 @@
 # X-Scanner — Tiến độ
 
-Ngày cập nhật: 2026-10-16
+Ngày cập nhật: 2026-10-17
 
 ## 2026-10-16: nghiên cứu nâng cấp
 
@@ -23,7 +23,7 @@ Ruleset [25250032](https://github.com/seeker19110/X-Scanner/rules/25250032) đã
 ## 2026-10-16: XS-06a corpus và baseline host
 
 Hồ sơ: [2026-10-16-xs06-host-baseline](docs/work/2026-10-16-xs06-host-baseline/working.md).
-Tooling nội bộ dùng ảnh hình học tổng hợp/checksum và core thumbnail/render/PDF hiện có; không đổi app/dependency. Bằng chứng TDD, AOT và gate của head bàn giao nằm trên PR của Work ID này. Corpus thiết bị/120 trang/OCR và target latency/RAM vẫn chưa nghiệm thu; W-104b chờ 18/10, AC-9 cần thiết bị.
+Tooling nội bộ dùng ảnh hình học tổng hợp/checksum và core thumbnail/render/PDF hiện có; không đổi app/dependency. [PR #54](https://github.com/seeker19110/X-Scanner/pull/54) có 20 mẫu host AOT thành công trên source935083e; review theo yêu cầu17/10 đang chạy lại gate, execution của head cuối đối chiếu trên PR. Corpus thiết bị/120 trang/OCR và target latency/RAM vẫn chưa nghiệm thu; W-104b chờ 18/10, AC-9 cần thiết bị.
 
 ## 2026-10-11: lưu gợi ý và áp dụng bộ khung
 

@@ -359,6 +359,8 @@ void main() {
         expect(result.errors, isEmpty);
         expect(jsonDecode(result.output), isA<Map<String, dynamic>>());
       },
+      // Win32 forbids control characters and reserves backslash in names.
+      testOn: '!windows',
     );
   });
 
