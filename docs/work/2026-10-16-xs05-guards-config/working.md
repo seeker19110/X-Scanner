@@ -40,3 +40,8 @@
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
 - Chưa nghiệm thu cuối; giữ working.md. Chỉ root đổi Done sau đủ DoD và merge thật.
+
+## Root reconcile — 2026-10-16
+
+- Root đã tích hợp/review và chạy local preapply + normal pre-commit gate PASS 4/4, Flutter 546/546. Hai default phía GitHub được root canonicalize theo readback/tài liệu, reviewer delta findings=[].
+- Native ruleset 25250032 khớp config; PR #53 mở. Negative control head bb98b4a run 38925328599 cancelled→BLOCKED; dependency review step SUCCESS, final-head CI xem PR. Không merge đơn vị này nên vẫn working.md/Ready, không dùng trạng thái worker thay nghiệm thu root.

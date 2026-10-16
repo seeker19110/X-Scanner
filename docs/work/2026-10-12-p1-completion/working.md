@@ -105,3 +105,13 @@
 <DoD, mọi PR MERGED + merge SHA và main đã đối chiếu, giới hạn/rủi ro còn lại,
 ngày và người nghiệm thu theo ủy quyền. Khi đủ điều kiện rename working.md → done.md
 trong cùng thư mục; không overwrite lịch sử. Chưa có PR/merge thì giữ working.md.>
+
+## Reconcile XS-05 — 2026-10-16
+
+- PR #52 đã merged f753933 sau review/gate; hồ sơ nghiên cứu/XS-04 được chốt done trong PR kế.
+- F-014 native: ruleset 25250032 active/no bypass, check app 15368/strict đúng, PUT/GET readback
+  khớp. PR #53 negative control head bb98b4a/run 38925328599 cancelled→BLOCKED.
+- F-009: alerts/graph 86/86 Pub đã bật/khớp; review step SUCCESS và compare không warning.
+  EX-2 còn chờ workflow merge main trong PR #53; final-head CI xem PR. Các blocker settings
+  chủ repo của checkpoint 12/10 là lịch sử trước yêu cầu nâng cấp/ủy quyền 16/10.
+- W-104b/EX-1 từ 18/10 và AC-9 thiết bị vẫn mở; không đổi hồ sơ này thành Done hoặc nhận P1 Complete.

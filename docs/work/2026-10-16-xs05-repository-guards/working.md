@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-16-xs05-repository-guards
 - Yêu cầu / outcome: sau review/sửa/merge PR #52, tiếp tục ưu tiên trong báo cáo 16/10; tự quyết kỹ thuật và chạy đủ gate. Đơn vị này xử lý F-014 và phần F-009 khả thi bằng native controls/CI.
-- Trạng thái: Active — PR #52 merged f753933; triển khai T2 ở worktree riêng.
+- Trạng thái: Ready — [PR #53](https://github.com/seeker19110/X-Scanner/pull/53) mở sau local gate/native readback; CI final head xác minh trên PR; chưa merge.
 - Chủ trì / writer: phiên chính; config worker ở worktree riêng; root review, tích hợp, native settings, gate và PR.
 - Mức rủi ro / số PR: S (config/tài liệu thuần), một PR mới; request gồm PR #52 hiện có rồi đơn vị này nên giao worker theo §3c, tuần tự theo dependency.
 - Scope / non-goal: ruleset main đúng job thực, dependency review vào cùng gate, bật/kiểm alerts/graph và đọc riêng secret settings; không sửa app/dependency/schema, bật auto-merge/release/scheduler/PR-4b, thêm API trả phí, tạo secret/token mới. Quyền merge trực tiếp đã cấp cho #52; PR đơn vị này để review.
@@ -30,22 +30,28 @@
 
 - Sau khi GitHub ingest xong: SBOM 91 packages, **86/86 hosted Pub khớp chính xác name/version trong pubspec.lock**, không thiếu/thừa. Lần root-only ban đầu là snapshot đang cập nhật; vẫn cần dependency-review chạy thật/compare không warning trên PR mới trước đóng EX-2.
 
-- T2 worker bàn giao Ready, root đã đọc cả 4 file và tích hợp sau freeze. JSON/YAML/exact5rules/1check app15368/actionlint/12 Bash blocks/link/scope PASS ở worker; root chạy lại kiểm cấu hình và full Android gate trước native ruleset apply. Ngoại lệ TDD3 config/tài liệu, không source app hoặc lockfile.
+- T2 worker bàn giao Ready, root đã đọc cả 4 file và tích hợp sau freeze. JSON/YAML/exact5rules/1check app 15368/actionlint/12 Bash blocks/link/scope PASS ở worker; root chạy lại kiểm cấu hình và full Android gate trước native ruleset apply. Ngoại lệ TDD3 config/tài liệu, không source app hoặc lockfile.
 
-- Full gate trước apply: PASS4/4, Flutter546/546, analyze0, format55/0, merged release manifest/adoption/manifest self-test/hook suites PASS. Root review và reviewer độc lập findings=[]; source app/lockfile không đổi.
-- Native POST đã tạo ruleset25250032 active, bypass=[]/current_user_can_bypass=never. So sánh full rule lần đầu dừng vì GitHub thêm required_reviewers=[] và require_extra_approval_for_unattributed_changes=true. Giữ hai mặc định và khai rõ vào JSON · loại bỏ qua mọi unknown field hoặc tắt bảo vệ mặc định · bậc1. Official ruleset docs xác nhận extra approval không ảnh hưởng count0; author/committer của commit review được liên kết owner. Ghi TRAPS để tránh tái phát drift giả.
+- Full gate trước apply: PASS 4/4, Flutter 546/546, analyze 0, format 55/0, merged release manifest/adoption/manifest self-test/hook suites PASS. Root review và reviewer độc lập findings=[]; source app/lockfile không đổi.
+- Native POST đã tạo ruleset 25250032 active, bypass=[]/current_user_can_bypass=never. So sánh full rule lần đầu dừng vì GitHub thêm required_reviewers=[] và require_extra_approval_for_unattributed_changes=true. Giữ hai mặc định và khai rõ vào JSON · loại bỏ qua mọi unknown field hoặc tắt bảo vệ mặc định · bậc1. Official ruleset docs xác nhận extra approval không ảnh hưởng count 0; author/committer của commit review được liên kết owner. Ghi TRAPS để tránh tái phát drift giả.
 
-- Readback sau canonical defaults: ruleset25250032 active, protected=true, owner cannot bypass, đúng5rule và mọi parameter khớp JSON, duy nhất context/app15368 strict=true. Lần gọi lại chỉ GET readback, không POST trùng hoặc hạ rule. Evidence docs/ops/evidence/2026-10-16-xs05-native.json; source app/lockfile giữ nguyên.
+- Readback sau canonical defaults: ruleset 25250032 active, protected=true, owner cannot bypass, đúng 5 rule và mọi parameter khớp JSON, duy nhất context/app 15368 strict=true. Lần gọi lại chỉ GET readback, không POST trùng hoặc hạ rule. Evidence docs/ops/evidence/2026-10-16-xs05-native.json; source app/lockfile giữ nguyên.
+
+- Commit bb98b4a qua normal pre-commit PASS 4/4, Flutter 546/546, analyze 0, format 55/0, release manifest/adoption/manifest self-test/hook suites PASS; không bỏ hook. [PR #53](https://github.com/seeker19110/X-Scanner/pull/53) đã mở và gắn chat.
+- Negative control thật trên head bb98b4a: [run 38925328599](https://github.com/seeker19110/X-Scanner/actions/runs/38925328599) cố ý bị huỷ, check app 15368 conclusion=cancelled và PR mergeStateStatus=BLOCKED; không gọi API merge. Không artifact được upload (0), vì app gate chưa hoàn tất. Đây không phải test code đỏ hoặc bằng chứng merge API từ chối.
+- Bước dependency review trong run bị huỷ đã SUCCESS trước khi app gate bị cancel. API compare f753933...bb98b4a trả200, một thay đổi đúng action/SHA mới, snapshot warning rỗng. Graph86/86 Pub khớp lockfile. EX-2 còn mở vì workflow chưa merge main; không nói full CI run bị huỷ đã pass.
+- Tối giản vòng xác minh · chọn commit bàn giao chỉ docs/evidence rồi CI trên head cuối · loại rerun đầy đủ trên head sắp được thay bằng checkpoint tài liệu · bậc2+4, không giảm cổng. Config workflow/ruleset và app giữ nguyên giữa head negative control và head bàn giao; không nhận hai head là một. Kết quả final-head CI/CLEAN đối chiếu trên PR #53 sau push.
+- Canonical JSON đã roundtrip PUT cùng ID25250032 và GET/diff toàn rule khớp; không POST trùng hoặc hạ bảo vệ. Reviewer delta findings=[]; official extra approval/count 0 và native defaults đã kiểm.
 
 ## Lần thử / blocker
 
-- Lần đọc ngay sau bật alerts chỉ có root package; sau ingest đã khớp86/86 Pub. Không dùng response rỗng làm coverage. Còn chờ action/compare và phép kiểm CI cancelled→BLOCKED→success; W-104b/AC-9/PR-4b giữ giới hạn riêng.
+- Lần đọc ngay sau bật alerts chỉ có root package; sau ingest đã khớp 86/86 Pub. Không dùng response rỗng làm coverage. Còn chờ action/compare và phép kiểm CI cancelled→BLOCKED→success; W-104b/AC-9/PR-4b giữ giới hạn riêng.
 
 ## Bàn giao / bước tiếp theo
 
-- T2 đã tích hợp và review; local preapply gate PASS4/4/546. Ruleset25250032 active được readback khớp đầy đủ sau canonical defaults; alerts/graph đã kiểm. Commit qua normal hook, mở PR nhánh codex/xs05-repository-guards, kiểm CI cancelled→BLOCKED rồi rerun success, chốt EX-2 theo bằng chứng thật. Không merge PR mới.
+- Đẩy checkpoint tài liệu qua normal pre-commit/full gate; chờ CI head cuối của PR #53 và kiểm app 15368/SUCCESS/CLEAN, compare không warning. Bằng chứng GitHub execution hiện hành nằm trên PR; không tạo commit chỉ để tự ghi SHA/CI của chính commit đó. Giữ PR mở, EX-2 chờ merge workflow, EX-1 từ 18/10/AC-9/PR-4b vẫn giữ giới hạn riêng.
 
 ## Nghiệm thu cuối
 
-- Native settings và local preapply gate đã kiểm; CI/action/negative control/PR còn chờ. Giữ working.md; chỉ Done sau merge thật của đơn vị này.
+- Native settings, roundtrip, graph và negative control đạt; local gates/normal pre-commit PASS. PR #53 giữ mở để review; final-head CI đối chiếu trên PR. Chỉ Done sau merge thật của đơn vị này; không đóng AC-9 hoặc EX-1 từ gate.
 - Native readback 2026-10-16T15:20Z: alerts 204, SBOM 200 (initial Pub 0/86), dependency compare cda650f...7974fe5 trả HTTP200; kiểm snapshot warning trên PR mới sau khi graph cập nhật. Trước bật compare là403 và alerts404. Chỉ bật alerts/graph, không bật security-update tự tạo PR hoặc auto-merge.

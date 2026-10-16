@@ -126,7 +126,9 @@ action; nó không biến snapshot warning thành lỗi. Do đó CI xanh chưa c
 liệu đầy đủ. DEBT: chưa có cổng fail trên snapshot thiếu sau timeout | trần: dùng hành vi upstream v5.0.0 | xem lại khi: snapshot warning xuất hiện trong CI hoặc trước khi đóng EX-2.
 
 Chỉ nhận F-009 hoàn tất và đóng EX-2 khi có readback Pub khớp lockfile **và** compare
-không snapshot warning, cùng bước action thực chạy thành công trên head CI cuối.
+không snapshot warning, cùng bước action thực chạy thành công trên head CI cuối và
+workflow đã merge vào main. Trong khi PR còn mở, ghi controls sẵn sàng trên PR, giữ
+EX-2 cho phần workflow chưa có trên main.
 Chưa đủ thì ghi partial, giữ [EX-2](supply-chain-exceptions.md)
 mở cùng compensating controls. [EX-1](supply-chain-exceptions.md) (`image` chờ 18/10)
 và AC-9 UAT thiết bị vẫn mở độc lập.
@@ -148,3 +150,11 @@ nhật cùng ruleset ID. Không tắt ruleset, thêm bypass hoặc bỏ qua gate
 - [GitHub REST: bật và kiểm vulnerability alerts](https://docs.github.com/en/rest/repos/repos#enable-vulnerability-alerts).
 - [GitHub REST SBOM](https://docs.github.com/en/rest/dependency-graph/sboms) và [dependency compare](https://docs.github.com/en/rest/dependency-graph/dependency-review).
 - [Inputs action tại SHA ghim](https://github.com/actions/dependency-review-action/blob/a1d282b36b6f3519aa1f3fc636f609c47dddb294/action.yml).
+
+## Bằng chứng đợt XS-05
+
+[PR #53](https://github.com/seeker19110/X-Scanner/pull/53) giữ bằng chứng head CI cuối.
+[Run38925328599](https://github.com/seeker19110/X-Scanner/actions/runs/38925328599)
+ở head bb98b4a được cố ý huỷ: action review SUCCESS trước app gate, required check
+15368 cancelled và PR BLOCKED, không artifact. Checkpoint sau chỉ tài liệu/evidence;
+CI final-head được đối chiếu riêng, không nhận hai head là một hay nhận API merge bị từ chối.

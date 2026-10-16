@@ -38,7 +38,10 @@ Chủ repo yêu cầu review/sửa/merge PR #52 rồi nâng cấp tiếp theo ư
 PR-1 merge → git fetch/main ff-only → branch codex/xs05-repository-guards → T2 worktree riêng. Root tích hợp patch, cập nhật CODEMAP/PROGRESS/CHANGELOG và work records; chạy full gate, áp settings đã review, mở PR-2, kiểm CI/negative control với evidence thật. Không migration app.
 
 ## Reconcile native defaults sau T2 — 2026-10-16
-Root thêm hai tham số do GitHub tự trả về: required_reviewers=[] và require_extra_approval_for_unattributed_changes=true. Không đổi số approval0 hay rule/check; official docs xác nhận extra approval không có tác dụng khi count0. Giữ bảo vệ mặc định, làm JSON/readback khớp chính xác; root review delta này và ghi bằng chứng.
+Root thêm hai tham số do GitHub tự trả về: required_reviewers=[] và require_extra_approval_for_unattributed_changes=true. Không đổi số approval0 hay rule/check; official docs xác nhận extra approval không có tác dụng khi count 0. Giữ bảo vệ mặc định, làm JSON/readback khớp chính xác; root review delta này và ghi bằng chứng.
+
+## Checkpoint thực thi — PR #53
+Negative control ở head bb98b4a/run 38925328599: cancelled và BLOCKED, action review step đã success. Checkpoint cuối chỉ docs/evidence, giữ nguyên workflow/ruleset/app; CI được chạy trên head cuối sau push. Không giả rằng hai head giống nhau, không cần một lượt CI đầy đủ trên head sắp được thay bằng tài liệu. Root đối chiếu SUCCESS/CLEAN của head cuối trên PR, không merge PR #53.
 
 ## Duyệt cuối (Tầng 1)
 Đọc diff và source action, kiểm active ruleset không bypass và app-bound check đúng tên; alerts/secret settings đọc riêng; không suy graph có đủ pub packages từ response rỗng. Negative control trên chính PR-2: sau full gate cục bộ xanh, cố ý huỷ một run CI của PR-2, đọc conclusion cancelled và mergeStateStatus BLOCKED với required check ràng buộc app 15368; không gửi merge request cho PR-2. Rerun CI, chờ success/CLEAN. Ghi chính xác đây là phép kiểm CI không đạt (cancelled), không phải test code cố tình đỏ hay API merge bị từ chối. Không cố merge code không xanh hoặc bật auto-merge. PR-2 để review trừ khi được cấp quyền merge riêng.
