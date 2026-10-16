@@ -19,7 +19,7 @@ build APK debug, `flutter analyze --fatal-infos`, `dart format`, `flutter test` 
 
 `deferred-dropins/` giữ .example của CI target, release, maintenance, auto-merge,
 CodeQL, Scorecard, secret/dependency scan, Dependabot và ruleset để review theo stack/quyền thực.
-Chưa nhập ruleset, xác minh branch protection, chạy security gates theo stack hoặc bật lịch định kỳ.
+XS-05 bổ sung ruleset và dependency review riêng cho X-Scanner; trạng thái native/CI ở bảng dưới và [runbook](../ops/x-scanner-repository-guards.md). Không nhập các workflow mẫu hoặc bật lịch định kỳ.
 Repository CI không đại diện chất lượng app hoặc readiness phát hành.
 
 ## Nâng cấp
@@ -33,7 +33,8 @@ Bảng Evidence trong `docs/ops/repository-settings.md` là của repo khung (fi
 
 | Setting/control | Giá trị | Owner | Kiểm ngày | Bằng chứng | Xem lại |
 | --- | --- | --- | --- | --- | --- |
-| Ruleset/branch protection `main` | chưa nhập, chưa xác minh | chủ repo | 2026-10-12 | không có `.github/rulesets/`; chỉ có `.example` trong `deferred-dropins/` | khi chủ repo bật; required check phải đúng tên job `Framework and Android app gate` |
-| Required status check | job `framework-gate` ("Framework and Android app gate") trong `ci.yml` | chủ repo | 2026-10-12 | chạy trên PR #6–#10, xanh trước mỗi lần merge | khi đổi `ci.yml` |
+| Ruleset/branch protection `main` | active, main protected=true, bypass=[]/owner cannot bypass, 5 rules khớp JSON | chủ repo / phiên chính theo ủy quyền | 2026-10-16 | [ruleset 25250032](https://github.com/seeker19110/X-Scanner/rules/25250032), [readback](../ops/evidence/2026-10-16-xs05-native.json) | khi đổi rule/check; [PR #53](https://github.com/seeker19110/X-Scanner/pull/53) giữ kết quả final-head |
+| Required status check | `Framework and Android app gate`, GitHub Actions integration15368, strict=true; cùng job gồm dependency review trên PR | chủ repo / phiên chính | 2026-10-16 | ruleset readback và check-runs PR #52 khớp app 15368; run 38925328599 check app 15368 cancelled và PR BLOCKED; CI head cuối xem PR #53 | khi đổi ci.yml/check/app |
 | Auto-merge, pr-policy, progress-freshness, protection-guard | chưa bật | chủ repo | 2026-10-12 | `.github/workflows/` chỉ có `ci.yml`, `adopt-projects-template.yml` | khi chủ repo duyệt |
-| Dependency review / cảnh báo lỗ hổng | chưa bật | chủ repo | 2026-10-12 | exception EX-2 ở `docs/ops/supply-chain-exceptions.md` | trước release |
+| Dependency alerts/graph và review | alerts GET 204; graph 86/86 Pub khớp lockfile; review step SUCCESS trong PR #53, workflow còn chờ merge main | chủ repo / phiên chính | 2026-10-16 | [readback](../ops/evidence/2026-10-16-xs05-native.json), EX-2 giữ mở tới khi workflow merge; compare f753933...bb98b4a HTTP200/no-warning | khi workflow merge; snapshot warning hoặc trước release |
+| Native secret controls / quyền workflow | secret scanning + push protection enabled; default GITHUB_TOKEN read, không approve PR | chủ repo | 2026-10-16 | GET repository security_and_analysis và actions/permissions/workflow, [readback](../ops/evidence/2026-10-16-xs05-native.json) | khi đổi quyền/settings |

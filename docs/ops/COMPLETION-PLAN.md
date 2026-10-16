@@ -90,3 +90,13 @@ F-059, F-070, F-072 (tài liệu) đi cùng PR W-502 theo `pr-flow` (0).
 - F-045 bản sao picker trên iOS: iOS non-goal P1; hướng lỗi là giữ file (an toàn) — backlog P2 iOS, 2026-10-12.
 - F-046 nối cổng giải mã ở `main.dart`: quy ước + test F-006 lặp đúng cách nối; xem lại khi thêm nơi giải mã mới — phiên chính, 2026-10-12.
 - F-049 thông báo sai sau `load` lỗi I/O: không mất dữ liệu đã lưu, hiếm; cần notice mới + thử load lại — Data Governance P2, 2026-10-12.
+
+## Cập nhật XS-05 — 2026-10-16
+
+F-014 native đã xử lý: ruleset 25250032 active/no-bypass, đúng required check/app 15368/strict,
+readback và PUT/GET JSON khớp. [PR #53](https://github.com/seeker19110/X-Scanner/pull/53):
+negative control run 38925328599/head bb98b4a cancelled→BLOCKED, không gọi merge API;
+CI head cuối xem PR. F-009: alerts GET 204, graph 86/86 Pub khớp lockfile, action step SUCCESS/
+compare không warning; EX-2 còn phần workflow chưa merge main. Các dòng WAITING owner settings
+ngày 12/10 là lịch sử trước ủy quyền nâng cấp ngày 16/10; hiện chỉ còn chờ merge #53, W-104b
+đủ tuổi 18/10 và AC-9 thiết bị. Không đóng EX-1 hoặc tuyên bố P1 Complete.

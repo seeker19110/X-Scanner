@@ -1,0 +1,62 @@
+{
+  "repository": "seeker19110/X-Scanner",
+  "verifiedAt": "2026-10-16T15:33:46.694041+00:00",
+  "baselineMainSha": "f753933ae9f75c580266d52a585b4af18fc34acb",
+  "nativeRuleset": {
+    "repository": "seeker19110/X-Scanner",
+    "verifiedAt": "2026-10-16T15:33:46.694041+00:00",
+    "rulesetId": 25250032,
+    "rulesetUrl": "https://github.com/seeker19110/X-Scanner/rules/25250032",
+    "mainSha": "f753933ae9f75c580266d52a585b4af18fc34acb",
+    "protected": true,
+    "enforcement": "active",
+    "bypassActors": [],
+    "appliedRuleCount": 5,
+    "requiredCheck": "Framework and Android app gate",
+    "integrationId": 15368,
+    "strict": true,
+    "currentUserCanBypass": "never",
+    "exactJsonPutGetRoundtrip": true
+  },
+  "dependabotAlerts": {
+    "enabled": true,
+    "getStatus": 204
+  },
+  "dependencyGraph": {
+    "expectedPub": 86,
+    "actualPub": 86,
+    "exactNameVersionMatch": true,
+    "sbomPackageCount": 91,
+    "created": "2026-10-16T15:21:26Z"
+  },
+  "secretScanning": "enabled",
+  "secretScanningPushProtection": "enabled",
+  "defaultWorkflowPermissions": "read",
+  "canApprovePullRequestReviews": false,
+  "automaticSecurityUpdates": "disabled",
+  "prVerification": {
+    "prUrl": "https://github.com/seeker19110/X-Scanner/pull/53",
+    "negativeControl": {
+      "recordedAt": "2026-10-16T15:38:47.377382+00:00",
+      "pr": 53,
+      "head": "bb98b4a49d12c8b44bc2d2ee6f27f16db9ce4151",
+      "cancelledRun": "https://github.com/seeker19110/X-Scanner/actions/runs/38925328599",
+      "conclusion": "cancelled",
+      "requiredCheck": "Framework and Android app gate",
+      "appId": 15368,
+      "mergeState": "BLOCKED",
+      "mergeAttempted": false,
+      "dependencyComparison": {
+        "http": 200,
+        "snapshotWarnings": [],
+        "changes": 1,
+        "addedPackage": "actions/dependency-review-action",
+        "addedVersion": "a1d282b36b6f3519aa1f3fc636f609c47dddb294"
+      },
+      "dependencyReviewStep": "success before intentional cancellation of full gate",
+      "artifactCount": 0
+    },
+    "finalCi": null,
+    "note": "CI on the final documentation handoff head is verified on PR #53. Cancelled head is recorded explicitly; no claim of a rejected merge API or deliberately failing test."
+  }
+}

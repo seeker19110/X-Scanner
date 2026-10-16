@@ -2,7 +2,7 @@
 
 **Đề xuất:** giữ Flutter và luồng scan offline hiện có; ưu tiên an toàn decoder, bằng chứng trên thiết bị, thư viện nhiều tài liệu và ngân sách xuất PDF. Sau đó bổ sung nhận mép trên ảnh đã chụp, bộ lọc giữ nội dung và OCR Việt–Anh. Camera riêng và depth cần thử nghiệm riêng, sau khi có baseline để so sánh.
 
-Phạm vi lần này là nghiên cứu và tài liệu, theo yêu cầu pull và nghiên cứu nâng cấp của chủ repo. Đây là **ADVISORY**, không duyệt migration PR-4b, dependency mới, thay đổi settings hoặc phát hành. Dùng lại ID XS của [kế hoạch hiện có](../plans/2026-10-12-comprehensive-development-plan.md), không tạo một roadmap cạnh tranh. Hồ sơ: [2026-10-16-upgrade-research](../work/2026-10-16-upgrade-research/working.md).
+Phạm vi lần này là nghiên cứu và tài liệu, theo yêu cầu pull và nghiên cứu nâng cấp của chủ repo. Đây là **ADVISORY**, không duyệt migration PR-4b, dependency mới, thay đổi settings hoặc phát hành. Dùng lại ID XS của [kế hoạch hiện có](../plans/2026-10-12-comprehensive-development-plan.md), không tạo một roadmap cạnh tranh. Hồ sơ: [2026-10-16-upgrade-research](../work/2026-10-16-upgrade-research/done.md).
 
 ## 1. Hiện trạng đã đối chiếu
 
@@ -207,4 +207,4 @@ Trước beta còn XS-25: signing thật, inventory license/model, privacy/reten
 | CI trên base | Run 38350895593 success; không dùng làm bằng chứng thay đổi chưa commit |
 | Tài liệu | Các link nội bộ trong bốn file thay đổi đều có đích; kiểm whitespace/diff sạch |
 
-Không đo CER, p95, RAM hoặc chất lượng ảnh trong đợt này. Các con số ở phần protocol là thiết kế thử. Khi kết thúc nghiên cứu, chưa commit hoặc mở PR vì full gate thiếu công cụ. Sau yêu cầu triển khai tiếp của chủ repo cùng ngày, việc cài toolchain, chạy lại full gate và đưa nghiên cứu vào PR được ghi ở [hồ sơ XS-04](../work/2026-10-16-android-uat-artifacts/working.md); không dùng kết quả mới để viết lại bằng chứng lịch sử ở bảng trên.
+Không đo CER, p95, RAM hoặc chất lượng ảnh trong đợt này. Các con số ở phần protocol là thiết kế thử. Khi kết thúc nghiên cứu, chưa commit hoặc mở PR vì full gate thiếu công cụ. Sau yêu cầu triển khai tiếp của chủ repo cùng ngày, việc cài toolchain, chạy lại full gate và đưa nghiên cứu vào PR được ghi ở [hồ sơ XS-04](../work/2026-10-16-android-uat-artifacts/done.md); không dùng kết quả mới để viết lại bằng chứng lịch sử ở bảng trên.

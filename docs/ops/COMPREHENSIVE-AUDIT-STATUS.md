@@ -99,3 +99,12 @@ Mức: Cao = mất/hỏng dữ liệu, rò riêng tư, crash luồng chính, tà
 ## Ghi chú điểm dừng
 
 - Không có nhóm đang dở. Đã kiểm, không thành phát hiện: hướng EXIF không xoay hai lần; PNG trong suốt không thành nền đen; PDF nhúng JPEG `/DCTDecode` không nén lại; file xuất không mang EXIF/GPS; `onReorderItem` đúng chỉ số; manifest chống traversal; không bí mật trong code/lịch sử.
+
+## Đối chiếu XS-05 — 2026-10-16
+
+F-014 đã có native control/evidence: ruleset 25250032/no bypass, required app 15368 strict,
+CI cố ý cancelled làm PR #53 BLOCKED (run 38925328599, không thử merge). F-009 partial:
+alerts/graph 86/86 Pub bật, dependency review step SUCCESS trên PR; EX-2 giữ tới khi
+workflow merge main. Bằng chứng [XS-05](../work/2026-10-16-xs05-repository-guards/working.md)
+và [PR #53](https://github.com/seeker19110/X-Scanner/pull/53). Các thống kê audit 12/10 giữ
+nguyên lịch sử; đây không phải một full audit mới hoặc bằng chứng decoder F-004 đã an toàn.
