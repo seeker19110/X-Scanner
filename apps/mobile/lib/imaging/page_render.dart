@@ -160,6 +160,8 @@ img.Image decodeOriented(Uint8List bytes, {int maxPixels = maxDecodedPixels}) {
 /// samples never blend in out-of-range (black) pixels. Non-8-bit or
 /// palette sources are first converted to 8-bit so channel values are
 /// rescaled rather than truncated. The output holds at most [maxPixels].
+/// Exact full-frame output at unchanged dimensions copies normalized pixels
+/// without resampling. The output always owns its pixels and omits metadata.
 img.Image rectify(
   img.Image source,
   PageQuad quad, {
@@ -169,17 +171,25 @@ img.Image rectify(
       ? source
       : source.convert(format: img.Format.uint8, noAnimation: true);
   final size = rectifiedSize(quad, src.width, src.height, maxPixels: maxPixels);
+  final out = img.Image(
+    width: size.width,
+    height: size.height,
+    numChannels: src.numChannels,
+  );
+  if (quad == PageQuad.fullFrame &&
+      size.width == src.width &&
+      size.height == src.height) {
+    final bytes = out.toUint8List();
+    bytes.setRange(0, bytes.length, src.toUint8List());
+    return out;
+  }
+  // DEBT: generic interpolation does not preserve gray-alpha channels | trần: non-full-frame or resized 2-channel sources | xem lại khi: W-104b decoder upgrade (2026-10-18) or gray-alpha crop regression work.
   final c = _pixelCorners(quad, src.width, src.height);
   final homography = Homography.unitSquareTo(
     topLeft: c.tl,
     topRight: c.tr,
     bottomRight: c.br,
     bottomLeft: c.bl,
-  );
-  final out = img.Image(
-    width: size.width,
-    height: size.height,
-    numChannels: src.numChannels,
   );
   final maxX = src.width - 1;
   final maxY = src.height - 1;

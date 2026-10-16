@@ -22,8 +22,13 @@ Ruleset [25250032](https://github.com/seeker19110/X-Scanner/rules/25250032) đã
 
 ## 2026-10-16: XS-06a corpus và baseline host
 
-Hồ sơ: [2026-10-16-xs06-host-baseline](docs/work/2026-10-16-xs06-host-baseline/working.md).
-Tooling nội bộ dùng ảnh hình học tổng hợp/checksum và core thumbnail/render/PDF hiện có; không đổi app/dependency. [PR #54](https://github.com/seeker19110/X-Scanner/pull/54) có 20 mẫu host AOT thành công trên source935083e; review theo yêu cầu17/10 đang chạy lại gate, execution của head cuối đối chiếu trên PR. Corpus thiết bị/120 trang/OCR và target latency/RAM vẫn chưa nghiệm thu; W-104b chờ 18/10, AC-9 cần thiết bị.
+Hồ sơ: [2026-10-16-xs06-host-baseline](docs/work/2026-10-16-xs06-host-baseline/done.md).
+Tooling nội bộ dùng ảnh hình học tổng hợp/checksum và core thumbnail/render/PDF hiện có; không đổi app/dependency. [PR #54](https://github.com/seeker19110/X-Scanner/pull/54) có 20 mẫu host AOT thành công trên source935083e; đã review/sửa ca filename Windows và squash merge `8b99c51` sau fullgate/hook4/4,592/592 và [CI cuối](https://github.com/seeker19110/X-Scanner/actions/runs/38980161272) SUCCESS trên95dad0d. Corpus thiết bị/120 trang/OCR và target latency/RAM vẫn chưa nghiệm thu; W-104b chờ 18/10, AC-9 cần thiết bị.
+
+## 2026-10-17: XS-07a pixel toàn khung và chi phí render
+
+Hồ sơ: [2026-10-17-xs07a-full-frame-render](docs/work/2026-10-17-xs07a-full-frame-render/working.md).
+Sau54merged/reconcile, [spec XS-07a](docs/specs/2026-10-17-xs07a-full-frame-render.md) Approved theo ủy quyền §3d: sửa lệch pixel khi rectify fullFrame không resize bằng copy byte vào output độc lập. Root đã xác minh test đỏ pixel thật trước source, tích hợp fast path và15regression; review độc lập sạch và root fullgate607/607; chốt snapshot cuối qua gate/hook rồi đo matched AOT và CI trên PR mới. Chưa nghiệm thu hiệu năng hoặc merge PR mới. EX1/AC9/PR4b giữ mở.
 
 ## 2026-10-11: lưu gợi ý và áp dụng bộ khung
 
