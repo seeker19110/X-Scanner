@@ -13,7 +13,7 @@ Giai đoạn nghiên cứu chỉ thay tài liệu; chưa sửa app, dependency, 
 Hồ sơ: [2026-10-16-android-uat-artifacts](docs/work/2026-10-16-android-uat-artifacts/working.md).
 Theo yêu cầu triển khai tiếp của chủ repo: cài toolchain đúng pin, bổ sung APK UAT kiểm chứng được sau gate CI và [hướng dẫn AC-9](docs/ops/android-uat.md).
 W-104b giữ mốc đủ tuổi từ 18/10 theo EX-1; chưa bật migration XS-09 PR-4b. Kết quả gate/PR cập nhật trong hồ sơ.
-Gate cục bộ trên snapshot cố định PASS 4/4, Flutter 546/546, analyze sạch và format 55 file/0 thay đổi; AC-9 vẫn chờ UAT thật. PR đang chuẩn bị, chưa merge.
+Gate cục bộ trên snapshot cố định và pre-commit PASS 4/4, Flutter 546/546, analyze sạch và format 55 file/0 thay đổi; AC-9 vẫn chờ UAT thật. [PR #52](https://github.com/seeker19110/X-Scanner/pull/52) đã mở, chưa merge; kết quả CI của head cuối xem trên PR.
 
 ## 2026-10-11: lưu gợi ý và áp dụng bộ khung
 

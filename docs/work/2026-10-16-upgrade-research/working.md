@@ -41,5 +41,5 @@
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
-- Chưa có commit/PR/merge; giữ working.md. Hoàn tất nghiên cứu không đồng nghĩa P1 đã qua UAT hay roadmap được duyệt triển khai.
+- Nghiên cứu đã vào commit `3251652` và [PR #52](https://github.com/seeker19110/X-Scanner/pull/52), chưa merge; giữ working.md. Hoàn tất nghiên cứu không đồng nghĩa P1 đã qua UAT hay roadmap được duyệt triển khai.
 - Tiêu chí nghiên cứu đạt: baseline/CI được đối chiếu, nguồn sở hữu và upstream được chỉ rõ, khuyến nghị nối ID cũ và có tiêu chí đo, không biến giả thuyết thành kết quả thực nghiệm. Phiên chính tự review theo §3d ngày 2026-10-16.

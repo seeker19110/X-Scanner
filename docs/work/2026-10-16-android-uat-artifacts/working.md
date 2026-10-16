@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-16-android-uat-artifacts
 - Yêu cầu / outcome: chủ repo yêu cầu triển khai theo ưu tiên báo cáo, cài toolchain, tự quyết kỹ thuật, chạy đủ gate và mở PR. Đợt đầu tạo APK UAT kiểm chứng được sau full gate.
-- Trạng thái: Ready — full gate cục bộ PASS; chuẩn bị commit/push và PR, chưa merge.
+- Trạng thái: Ready — full gate cục bộ/pre-commit PASS; PR #52 mở, chưa merge.
 - Chủ trì / writer: phiên chính.
 - Mức rủi ro / số PR: S (CI/config và tài liệu); một PR gồm nghiên cứu đang giữ cục bộ và phần triển khai XS-04 này. Một outcome nên phiên chính tự làm.
 - Scope / non-goal: Flutter 3.47.7/Dart 3.13.5, JDK/Android SDK cục bộ; bundle APK debug/checksum/build SHA/PR head SHA/SDK metadata sau gate; hướng dẫn UAT. Không đổi source app, schema, dependency pub, settings repo, bật migration, release hoặc merge PR.
@@ -32,6 +32,7 @@
 - Lượt gate tiếp theo hoàn thành build/release manifest, analyze 0 issues, lint 47 checks và format 55 file/0 changed. Test adoption/manifest/hook đã chạy nhưng bị ngắt giữa hook suite khi phiên bị dừng; chưa tới Flutter test, không coi là full PASS. Chạy lại đủ gate từ đầu trên cache hiện có, log `gate-android-uat-final.log` ngoài repo.
 - Lượt `gate-android-uat-final.log`: build/release manifest PASS, analyze 0 issues, format 55/0 changed, adoption 7/7, manifest self-test 10/10, hai hook suites và Flutter 546/546 PASS. Cổng tổng vẫn BLOCKED vì writer sửa hồ sơ/stage index khi gate đang chạy; không commit theo kết quả này. Đóng băng file/index cho lượt gate ổn định tiếp theo và chỉ commit sau PASS.
 - Lượt ổn định `gate-android-uat-stable.log`: **PASS 4/4**, exit 0, Flutter **546/546**, build APK/release manifest PASS, analyze 0 issues, lint 47 checks, format 55/0 changed, adoption 7/7, manifest 10/10 và hai hook suites PASS. Context trước checkpoint: `cda650f310d326b612db4712503fdac0d8047108:b2968da5106c353b8297b59df2dd8521f7e67ed0:e2d854199ac1066f2a4057c9d1002ac6da8724e9`. Commit tiếp theo vẫn đi qua hook chạy gate trên snapshot đã cập nhật hồ sơ.
+- Commit `3251652` được ghi sau pre-commit PASS 4/4, Flutter 546/546; đã push nhánh riêng và mở [PR #52](https://github.com/seeker19110/X-Scanner/pull/52), gắn vào chat. Không bật auto-merge hoặc merge. Checkpoint link PR đi trong cùng PR qua hook full gate trước khi ghi commit tài liệu; CI head cuối và artifact được đối chiếu trên PR khi bàn giao.
 
 ## Lần thử / blocker
 
@@ -45,8 +46,8 @@
 
 ## Bàn giao / bước tiếp theo
 
-- Commit qua hook, push nhánh `chore/android-uat-artifacts`, mở PR đủ template/Work ID; kiểm CI đúng head và artifact rồi bàn giao PR mở. Bundle thử nằm ngoài repo ở `/home/liend/.local/share/x-scanner/uat-validation/x-scanner-uat`. AC-9 UAT thật và W-104b từ 18/10 vẫn mở.
+- Kiểm CI đúng head cuối của PR #52 và tải artifact để xác minh SHA/checksum; bàn giao PR mở. Bundle thử nằm ngoài repo ở `/home/liend/.local/share/x-scanner/uat-validation/x-scanner-uat`. AC-9 UAT thật và W-104b từ 18/10 vẫn mở.
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
-- Chưa có PR/merge; giữ working.md.
+- PR #52 đã mở, chưa merge; giữ working.md. Nghiệm thu phần chuẩn bị UAT theo bằng chứng gate/bundle; AC-9 không đóng từ artifact.
