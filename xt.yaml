@@ -1,0 +1,23 @@
+# xt.yaml — lệnh chuẩn của dự án cho agent và hook (YAML PHẲNG `task: lệnh`, do .xtemplates/scripts/dev-task.sh đọc).
+# Agent KHÔNG suy diễn lệnh từ văn xuôi; đọc file này. Để trống "" = không có; thiếu khoá = tự dò.
+# Khi autopilot đang chạy, lint/test để "" hoặc lệnh không kiểm gì (true, :, exit 0, echo …) = cổng ĐỎ (ADR-0011).
+# Nhà của bộ khoá: LOOP-HARNESS-008 (.xtemplates/framework/11-autonomous-loop/harness-files.md). dev-task CHỈ chạy format · lint · typecheck · test · build · format_file
+# (`gate` = build → typecheck → lint → test). Khoá khác (install, dev, e2e, …) là lệnh KHAI BÁO để agent ĐỌC và chạy trực tiếp.
+#
+# NGUỒN: lệnh dưới đây là BẢN SAO của `.claude/project-commands.sh` (cổng thật của repo, cũng là cái CI chạy qua
+# `bash scripts/dev-task.sh gate` — .github/workflows/ci.yml). `scripts/dev-task.sh` của repo đọc project-commands.sh,
+# còn `.xtemplates/scripts/dev-task.sh` của khung đọc file này: đổi lệnh thì SỬA CẢ HAI cho khớp.
+# Stack: Flutter 3.47.7 (ghim trong CI, ADR-0002), app ở apps/mobile; không có package.json/pyproject ở gốc.
+lint: "python3 scripts/check-adoption.py --lint && cd apps/mobile && dart format --output=none --set-exit-if-changed lib test tool"
+typecheck: "cd apps/mobile && flutter analyze --fatal-infos"
+test: "python3 scripts/check-adoption.py && python3 scripts/check-release-manifest.py --self-test && bash scripts/test-hooks-gate.sh && bash scripts/test-hooks-gate-guard.sh && cd apps/mobile && flutter test"
+build: "rm -f apps/mobile/build/app/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml && (cd apps/mobile && flutter pub get --enforce-lockfile && flutter build apk --debug && cd android && ./gradlew -q :app:processReleaseMainManifest) && python3 scripts/check-release-manifest.py apps/mobile/build/app/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml"
+format: "cd apps/mobile && dart format lib test tool"
+format_file: ""
+# Merge PR (ADR-0013/0014/0015): L1 = người merge mọi PR. AGENTS.md của repo: "auto-merge không bật ở repo này" nên chọn mức chặt nhất;
+# PR Dependabot patch/minor theo docs/ops/dependency-updates.md vẫn do phiên merge sau khi người xác nhận câu hỏi của guard.
+merge_autonomy: L1
+merge_risk_paths: ""
+# Tuỳ chọn, agent đọc và chạy trực tiếp (dev-task không chạy)
+e2e: ""
+audit: ""
