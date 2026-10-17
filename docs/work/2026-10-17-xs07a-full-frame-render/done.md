@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-17-xs07a-full-frame-render
 - Yêu cầu / outcome: sau review/sửa/merge54, tiếp tục ưu tiên báo cáo16/10, tự quyết kỹ thuật và chạy đủ gate. Sửa lỗi pixel identity có trước54, đo chi phí render trước/sau.
-- Trạng thái: Review PR #55 theo yêu cầu chủ repo17/10 — đang kiểm lại source, kiểm chứng thumbnail và chạy gate mới trước merge.
+- Trạng thái: Done — PR55 đã merged và main đã đối chiếu; xem reconcile cuối hồ sơ.
 - Chủ trì / writer: phiên chính giữ spec/PLAN/docs/maps/benchmark/gate/PR; worker source/test/hồ sơ riêng, reviewer chỉ đọc.
 - Mức rủi ro / số PR: M thận trọng, một PR nhỏ thay core hiện có; request gồm54+PR kế nên giao subagent theo §3c.
 - Scope / non-goal: chỉ fast path exact fullFrame và regression; không decoder/dependency/SDK/lock, engine/cap/budget/isolate/UI/schema/migration, real documents/OCR, paidAPI, release/scheduler/auto-merge. PR mới giữ OPEN.
@@ -70,3 +70,9 @@
 - Live PubAPI17/10 xác minh image4.12.0 published2026-10-11T00:28:00.512637Z; đủ7ngày18/10T00:28Z. W104b chưa đủ tuổi, không đổi dependency; ưu tiên XS07b gray-alpha generic sau merge.
 - check-plan T2 lần đầu bị duplicate ID do lặpT2 trong mô tả group; sửa văn bản, chạy đúng dispatcher PASS2tasks trước giao review. Doctor READY4/Flutter3.47.7/Dart3.13.5 mới trong lượt.
 - Chốt review docs-only theo ngoại lệTDD3, runtime/test/tool/lock giữ5890c2f. Toàn gate mới/normalhook và smoke/CI/finalheadproof phải đạt trước merge; kết quả execution thật cập nhật trênPR để tránh self-SHA. Chưa Done; chỉ reconcile sau actualmerge.
+
+## Reconcile thực sau review/merge55 —17/10
+
+- PR55 MERGED squash `9d44fc9b39cee2d4cac7871f8ee590882e4681e5` lúc2026-10-17T02:08:56Z; root mainff-only và tree khớp reviewhead cuối. Gate mới và normalhook mỗi4/4,607/607; CI finalhead/requiredapp15368/dependencyreview/UATbundle SUCCESS, native5rules exact/no bypass, threads0/compare0changes/no warnings. Chi tiết sourcehead/CI/artifact readback trênPR55 và localreviewproof, không dùng lời khai worker làm nghiệm thu.
+- Review mới findings=[]; control replay10success/0failure không tái hiện31.5% (13.237269→13.375609s), giữ nguyên40mẫu cũ và giới hạn sharedhost. Runtime giữ5890c2f qua reviewdocs.
+- DoD phạm vi XS07a đạt, root nghiệm thu theo quyền review/repair/merge55 trực tiếp17/10; rename done chỉ sau actualmerge. Không đóng EX1/AC9/PR4b hoặc nghiệm thu iOS/device/scan/OCR/release. Nợ gray-alpha crop/downsize/rotation nối outcomeXS07b, không sửa ngược lịch sử55.

@@ -2,6 +2,8 @@
 
 ## Unreleased — 2026-10-17
 
+- XS-07b: giữ alpha của ảnh xám hai kênh khi cắt, thu nhỏ và xoay trang; giữ cách JPEG xử lý hai kênh, không chuyển ảnh sang RGBA hoặc thêm buffer toàn ảnh trung gian.
+
 - XS-07a: giữ nguyên pixel khi xuất/xem trước ảnh toàn khung không resize bằng bản sao buffer độc lập; không nội suy lại identity hoặc mang metadata gốc sang ảnh xuất.
 
 - XS-06a: tooling nội bộ tạo corpus hình học/checksum và đo core thumbnail/render/PDF, kèm protocol host/device; giữ nguyên luồng app.

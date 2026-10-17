@@ -27,8 +27,13 @@ Tooling nội bộ dùng ảnh hình học tổng hợp/checksum và core thumbn
 
 ## 2026-10-17: XS-07a pixel toàn khung và chi phí render
 
-Hồ sơ: [2026-10-17-xs07a-full-frame-render](docs/work/2026-10-17-xs07a-full-frame-render/working.md).
-Sau54merged/reconcile, [spec XS-07a](docs/specs/2026-10-17-xs07a-full-frame-render.md) Approved theo ủy quyền §3d: sửa lệch pixel khi rectify fullFrame không resize bằng copy byte vào output độc lập. Root đã xác minh test đỏ pixel thật trước source, tích hợp fast path và15regression; review độc lập sạch và root fullgate607/607; chốt snapshot cuối qua gate/hook rồi đo matched AOT và CI trên PR mới. [PR #55](https://github.com/seeker19110/X-Scanner/pull/55) trên5890c2f đã bàn giao40mẫu host/CI607PASS; theo yêu cầu chủ repo17/10 đang review lại thumbnail/source/gates trước merge, chưa Done. EX1/AC9/PR4b giữ mở.
+Hồ sơ: [2026-10-17-xs07a-full-frame-render](docs/work/2026-10-17-xs07a-full-frame-render/done.md).
+Sau review/merge54, [spec XS-07a](docs/specs/2026-10-17-xs07a-full-frame-render.md) Approved theo ủy quyền §3d: sửa lệch pixel khi rectify fullFrame không resize bằng copy byte vào output độc lập. [PR #55](https://github.com/seeker19110/X-Scanner/pull/55) đã review độc lập, gate/hook607/607 và [CI cuối](https://github.com/seeker19110/X-Scanner/actions/runs/38993226283) SUCCESS trên6a3d648; squash merge `9d44fc9`. Main có tree khớp bản review; hồ sơ root/worker chỉ chốt Done sau actual merge. Giữ40mẫu lịch sử và10mẫu đối chứng mới, không suy ra hiệu năng thiết bị. EX1/AC9/PR4b vẫn mở.
+
+## 2026-10-17: XS-07b giữ alpha khi cắt và xoay ảnh xám
+
+Hồ sơ: [2026-10-17-xs07b-gray-alpha-render](docs/work/2026-10-17-xs07b-gray-alpha-render/working.md).
+Sau55 merged/reconcile, [spec XS-07b](docs/specs/2026-10-17-xs07b-gray-alpha-render.md) Approved theo§3d cho lỗi hai kênh có trước55. Root đã tự xác minh15 lỗi pixel trong78case RED, tích hợp bản sửa và21 regression; targeted179/179/analyze/format xanh. Review độc lập sạch; bằng chứng root gates/CI trên PR cùng Work ID, PR mới giữ OPEN. W104b chờ18/10, AC9 cần thiết bị, PR4b cần duyệt riêng. Kết quả execution cập nhật trên PR cùng Work ID.
 
 ## 2026-10-11: lưu gợi ý và áp dụng bộ khung
 
