@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-16-xs06-host-baseline-tool
 - Yêu cầu / outcome: T1 XS-06a theo PLAN của phiên chính, corpus tổng hợp tái lập và CLI đo host bằng production core.
-- Trạng thái: Ready for root gate — source freeze sau targeted checks; chưa Done hoặc full gate.
+- Trạng thái: Done — root nghiệm thu/tích hợp và PR #54 merged17/10.
 - Chủ trì / writer: worker XS-06a tool, chỉ hồ sơ đơn vị; root giữ hồ sơ tổng/tích hợp/gate/PR.
 - Mức rủi ro / số PR: S, tooling nội bộ trong một PR tổng XS-06a do root mở.
 - Scope / non-goal: bốn điểm chạm T1; không app lib, SDK/dependency/lockfile/framework/CI/settings; không commit/push/merge/subagent/full gate.
@@ -48,3 +48,10 @@
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
 - Ready for root gate; chưa Done, chưa full Android gate/AOT/baseline/PR/merge. XS-06 đầy đủ, device/UAT/OCR/quality không được suy ra từ tiny host tests. Root giữ final review/integration/PR và các số đo trên head cuối.
+
+## Nghiệm thu sau merge — 2026-10-17
+
+- [PR #54](https://github.com/seeker19110/X-Scanner/pull/54) MERGED `8b99c511e1134534a05b3c93667239c50abf84c9` lúc2026-10-16T23:20:17Z, reviewedhead `95dad0d6688ced6be427ff1d49e9a96bab88abc8`. Main ff-only và tree exact reviewedhead; guarded squash, không bypass/auto-merge.
+- Root review sửa F1/POSIX filename testcase; Linux46/46, fullgate4/4 và normal hook4/4, Flutter592/592, analyze0/format57/0, fresh AOT+5smoke PASS, input hashes unchanged. [CI cuối38980161272](https://github.com/seeker19110/X-Scanner/actions/runs/38980161272) SUCCESS trên95dad0d; log đếm592testpass/0failure. Native5rules exact/no bypass, requiredapp15368, threads0, dependencycompareHTTP200/0change/emptywarnings.
+- Root kiểm20raw/provenance lịch sử935083e, hash tool/lock/bin/corpus/median đều khớp; không relabel source. Artifact12080842859 build6fe17bd parents đúng base/head, API metadata/ancestry only, chưa cài thiết bị.
+- DoD đơn vị XS06a tooling/host baseline đạt theo ủy quyền; rename done sau mergeproof và đưa vào PR kế. XS06 corpus/device đầy đủ, AC9/UAT, EX1/decoder, OCR/iOS/release và PR4b vẫn mở.

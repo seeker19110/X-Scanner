@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-16-xs06-host-baseline
 - Yêu cầu / outcome: sau review/sửa/merge PR53, tiếp tục ưu tiên báo cáo16/10, tự quyết kỹ thuật, chạy đủ gate. Đơn vị này tạo fixture/harness tái lập để so thumbnail/render/PDF trước tối ưu.
-- Trạng thái: Review PR #54 theo yêu cầu 17/10 — tooling/baseline đã bàn giao trên PR; đang chạy lại gate để merge, chưa Done.
+- Trạng thái: Done — PR #54 merged, root xác minh17/10.
 - Chủ trì / writer: phiên chính giữ hồ sơ tổng/config/maps/evidence; worker chỉ4file T1, reviewer chỉ đọc.
 - Mức rủi ro / số PR: S, một PR tooling nội bộ; không thay API/hành vi sản phẩm. Request gồm PR53 hiện có + PR kế nên giao worker theo §3c, tuần tự từ main đã merge.
 - Scope / non-goal: Dart CLI/corpus hình học/checksum/metadata đo host, protocol cho device/corpus riêng sau; không đổi app lib/SDK/dependency/lockfile/schema, thêm engine/font/data thật, dùng paidAPI, bật migration/release/scheduler/auto-merge. PR mới giữ mở trừ khi được cấp quyền merge riêng.
@@ -63,3 +63,10 @@
 - Sau sửa platform metadata: Linux targeted46/46PASS, format57file/0đổi, đọc toàn pr54-review-targeted.log. Có một lần targeted chạy từ repo root thiếu pubspec.yaml nên chưa chạy test; đã chuyển apps/mobile và rerun thật. Không tính exit1 setup là test đỏ.
 - Reviewer delta6file xác nhận F1resolved, findings=[], không vấn đề mới. Root review-check dùng report mới pr54-review-findings.json, không dùng report[] của lượt trước; source runtime/lock unchanged nên20baseline935083e vẫn là evidence lịch sử đúng source, không thay appSha để giả finalhead.
 - Đóng freeze review: sửa duy nhất metadata test platform + README/TRAPS/PROGRESS/PLAN/workrecord; TDD ngoại lệ3. Root fullgate sau sửa, normal hook và CI trên head cuối phải xanh trước guarded squash; execution trên PR54, không tự ghi Done trước merge.
+
+## Nghiệm thu sau merge — 2026-10-17
+
+- [PR #54](https://github.com/seeker19110/X-Scanner/pull/54) MERGED `8b99c511e1134534a05b3c93667239c50abf84c9` lúc2026-10-16T23:20:17Z, reviewedhead `95dad0d6688ced6be427ff1d49e9a96bab88abc8`. Main ff-only và tree exact reviewedhead; guarded squash, không bypass/auto-merge.
+- Root review sửa F1/POSIX filename testcase; Linux46/46, fullgate4/4 và normal hook4/4, Flutter592/592, analyze0/format57/0, fresh AOT+5smoke PASS, input hashes unchanged. [CI cuối38980161272](https://github.com/seeker19110/X-Scanner/actions/runs/38980161272) SUCCESS trên95dad0d; log đếm592testpass/0failure. Native5rules exact/no bypass, requiredapp15368, threads0, dependencycompareHTTP200/0change/emptywarnings.
+- Root kiểm20raw/provenance lịch sử935083e, hash tool/lock/bin/corpus/median đều khớp; không relabel source. Artifact12080842859 build6fe17bd parents đúng base/head, API metadata/ancestry only, chưa cài thiết bị.
+- DoD đơn vị XS06a tooling/host baseline đạt theo ủy quyền; rename done sau mergeproof và đưa vào PR kế. XS06 corpus/device đầy đủ, AC9/UAT, EX1/decoder, OCR/iOS/release và PR4b vẫn mở.
