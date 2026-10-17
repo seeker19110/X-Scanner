@@ -1,7 +1,7 @@
 # PLAN.md — XS-06a corpus tổng hợp và baseline host
 
 ## Bối cảnh & mục tiêu
-Sau PR #53 merge, XS-06 là việc tiếp có thể làm: W-104b chờ 18/10, AC-9 chưa có thiết bị. Tooling mức S cho corpus tái lập và baseline thumbnail/render/PDF dùng core production trước XS-07/11; không đổi app, decoder, engine hoặc dữ liệu thật. Hồ sơ docs/work/2026-10-16-xs06-host-baseline/working.md.
+Sau PR #53 merge, XS-06 là việc tiếp có thể làm: W-104b chờ 18/10, AC-9 chưa có thiết bị. Tooling mức S cho corpus tái lập và baseline thumbnail/render/PDF dùng core production trước XS-07/11; không đổi app, decoder, engine hoặc dữ liệu thật. Hồ sơ docs/work/2026-10-16-xs06-host-baseline/done.md.
 
 ## Đặc tả dùng chung
 - Schema/DDL: không đổi app lib, SDK, dependency, lockfile, schema hoặc CI. Manifest version1: generator/seed cố định, width/height/pages, tên JPEG theo index và SHA256 từng file; không timestamp/path cá nhân. Trang hình học tổng hợp có marker khác nhau, chưa là corpus chữ Việt/OCR.
@@ -14,7 +14,7 @@ Sau PR #53 merge, XS-06 là việc tiếp có thể làm: W-104b chờ 18/10, AC
 
 ## Danh sách việc
 ### T1 — Corpus và harness host   `route: complex`
-- Điểm chạm: apps/mobile/tool/scanner_benchmark.dart, apps/mobile/test/tool/scanner_benchmark_test.dart, docs/benchmarks/README.md, docs/work/2026-10-16-xs06-host-baseline-tool/working.md.
+- Điểm chạm: apps/mobile/tool/scanner_benchmark.dart, apps/mobile/test/tool/scanner_benchmark_test.dart, docs/benchmarks/README.md, docs/work/2026-10-16-xs06-host-baseline-tool/done.md.
 - Đặc tả: CLI/manifest/record/guardrails trên. Tự chọn helper và vẽ fixture nhỏ dễ test; JPEG từng trang khác checksum để không PDF dedup thành một ảnh. Không tải ảnh/font/model. README có lệnh generate/compile AOT/run process mới/checksum, protocol cold/warm,1/10/30/100 trang và12/24/48MP, >=30 mẫu nếu p95, private holdout theo physical doc, groundtruth OCR kiểm tay/NFC, unknown=null; phân biệt host/PDF-core với app/UAT/quality/corpus120trang còn mở. Nguồn chính thức Dart ProcessInfo/Stopwatch và Flutter profile. Không nâng image hoặc thay production code.
 - Phụ thuộc: none
 - Tiêu chí chấp nhận: đỏ-trước rồi xanh cho invalid dimensions/pages/SHA/CLI, từ chối overwrite, deterministic/distinct corpus, corrupt checksum bị chặn trước decode, tiny measurements dùng production core thành công, original/manifest giữ hash, record/error không lộ path. Nộp log đỏ/xanh và format/analyze/targeted test thật. Root chạy AOT smoke + baseline12MP1/10trang, ghi sample count/limitations; full gate/CI. Không nhận XS06 toàn bộ hoặc AC9 complete.

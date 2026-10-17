@@ -32,6 +32,30 @@ img.Image solid(int width, int height, int r, int g, int b) =>
 
 Uint8List pngOf(img.Image image) => img.encodePng(image);
 
+/// Odd dimensions and varied bytes expose identity interpolation rounding.
+img.Image randomPixels(int width, int height, {int numChannels = 4}) {
+  final image = img.Image(
+    width: width,
+    height: height,
+    numChannels: numChannels,
+  );
+  final random = Random(17);
+  final bytes = image.toUint8List();
+  for (var i = 0; i < bytes.length; i++) {
+    bytes[i] = random.nextInt(256);
+  }
+  return image;
+}
+
+/// Linear channels make crop/downscale samples analytically predictable.
+img.Image ramp() {
+  final image = img.Image(width: 13, height: 9);
+  for (final p in image) {
+    p.setRgb(20 * p.x, 24 * p.y, 10 * (p.x + p.y));
+  }
+  return image;
+}
+
 /// A 3×2 lossless WebP filled with RGB (10, 20, 30), made with Pillow.
 const String webp3x2 = 'UklGRh4AAABXRUJQVlA4TBEAAAAvAkAAAAdQiirUo/+BiOh/AAA=';
 
@@ -240,6 +264,45 @@ void main() {
   });
 
   group('renderPageSync', () {
+    for (var turns = 0; turns < 4; turns++) {
+      test(
+        'full-frame PNG keeps exact pixels at $turns quarter turns (XS-07a)',
+        () {
+          final source = randomPixels(13, 9);
+          final original = pngOf(source);
+          final before = Uint8List.fromList(original);
+          final decoded = img.decodePng(
+            renderPageSync(
+              original,
+              PageQuad.fullFrame,
+              turns,
+              format: RenderFormat.png,
+            ),
+          )!;
+          expect((
+            decoded.width,
+            decoded.height,
+          ), turns.isEven ? (13, 9) : (9, 13));
+          for (final p in source) {
+            // Clockwise quarter-turn coordinates, independent of copyRotate.
+            final (x, y) = switch (turns) {
+              0 => (p.x, p.y),
+              1 => (source.height - 1 - p.y, p.x),
+              2 => (source.width - 1 - p.x, source.height - 1 - p.y),
+              _ => (p.y, source.width - 1 - p.x),
+            };
+            final actual = decoded.getPixel(x, y);
+            expect(
+              [actual.r, actual.g, actual.b, actual.a],
+              [p.r, p.g, p.b, p.a],
+              reason: 'source (${p.x}, ${p.y}) -> ($x, $y)',
+            );
+          }
+          expect(original, before);
+        },
+      );
+    }
+
     test('re-decodes to the rectified size (AC-5)', () {
       final out = renderPageSync(
         pngOf(solid(400, 300, 50, 60, 70)),
@@ -312,6 +375,92 @@ void main() {
         throwsA(isA<ImageDecodeFailure>()),
       );
     });
+  });
+
+  group('rectify full-frame fidelity (XS-07a)', () {
+    for (final channels in [4, 3, 2, 1]) {
+      test('preserves every 13x9 byte with $channels channels', () {
+        final source = randomPixels(13, 9, numChannels: channels);
+        final out = rectify(source, PageQuad.fullFrame);
+        expect((out.width, out.height, out.numChannels), (13, 9, channels));
+        expect(out.toUint8List(), source.toUint8List());
+      });
+    }
+
+    test('preserves RGB pixels for a separately constructed equal quad', () {
+      final quad = quadOf([0, 0, 1, 0, 1, 1, 0, 1]);
+      expect(identical(quad, PageQuad.fullFrame), isFalse);
+      expect(quad, PageQuad.fullFrame);
+      final source = randomPixels(13, 9, numChannels: 3);
+      expect(rectify(source, quad).toUint8List(), source.toUint8List());
+    });
+
+    for (final size in [(1, 1), (13, 1), (1, 9)]) {
+      test('preserves RGBA pixels for ${size.$1}x${size.$2}', () {
+        final source = randomPixels(size.$1, size.$2);
+        final out = rectify(source, PageQuad.fullFrame);
+        expect((out.width, out.height), size);
+        expect(out.toUint8List(), source.toUint8List());
+      });
+    }
+
+    test(
+      'owns its pixels in both directions and strips synthetic metadata',
+      () {
+        final source = randomPixels(13, 9)
+          ..textData = {'synthetic-marker': 'XS-07a test data'};
+        source.exif.imageIfd.orientation = 6;
+        final before = Uint8List.fromList(source.toUint8List());
+        final out = rectify(source, PageQuad.fullFrame);
+        expect(source.toUint8List(), before);
+        expect(out.exif.imageIfd.isEmpty, isTrue);
+        expect(out.textData, isNull);
+
+        out.toUint8List()[0] ^= 255;
+        expect(
+          source.toUint8List(),
+          before,
+          reason: 'output must not alias source',
+        );
+        final outputAfter = Uint8List.fromList(out.toUint8List());
+        source.toUint8List()[source.toUint8List().length - 1] ^= 255;
+        expect(
+          out.toUint8List(),
+          outputAfter,
+          reason: 'source must not alias output',
+        );
+        expect(source.exif.imageIfd.orientation, 6);
+        expect(source.textData, {'synthetic-marker': 'XS-07a test data'});
+      },
+    );
+
+    test('full-frame under a smaller pixel cap still resamples the ramp', () {
+      final out = rectify(ramp(), PageQuad.fullFrame, maxPixels: 35);
+      expect((out.width, out.height), (7, 4));
+      expect(out.width * out.height, lessThanOrEqualTo(35));
+      // Output (3,2) samples source (6, 5.125): R=120, G=123, B=111.25.
+      final p = out.getPixel(3, 2);
+      expect(p.r, closeTo(120, 1));
+      expect(p.g, closeTo(123, 1));
+      expect(p.b, closeTo(111.25, 1));
+    });
+
+    test(
+      'near-full-frame with unchanged rounded size still crops the ramp',
+      () {
+        final source = ramp();
+        final quad = quadOf([0.02, 0, 1, 0, 1, 1, 0.02, 1]);
+        final out = rectify(source, quad);
+        expect((out.width, out.height), (13, 9));
+        // Width is 12.74 -> 13, but output x samples source x=0.25+0.98*x.
+        for (var x = 0; x < out.width; x++) {
+          final p = out.getPixel(x, 4);
+          expect(p.r, closeTo(20 * (0.25 + 0.98 * x), 1));
+          expect(p.g, 96);
+        }
+        expect(out.toUint8List(), isNot(source.toUint8List()));
+      },
+    );
   });
 
   group('preview matches export geometry (XS-13 AC-2)', () {

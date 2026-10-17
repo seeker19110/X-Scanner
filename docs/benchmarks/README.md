@@ -155,3 +155,38 @@ nhận corpus đó hoặc chạy OCR.
 
 AC-9 UAT, chất lượng scan/OCR, build iOS và release cần bằng chứng riêng. Đợt khởi tạo
 host ít mẫu không nghiệm thu các mục này hoặc toàn XS-06.
+
+## XS-07a: so sánh fidelity và render toàn khung
+
+[Spec XS-07a](../specs/2026-10-17-xs07a-full-frame-render.md) sửa sai lệch pixel identity
+và tránh vòng nội suy khi quad chính xác bằng fullFrame và output không đổi kích thước.
+Preview đã cắt dùng thumbnail rồi rectify; crop thật hoặc downsize vẫn dùng thuật toán cũ.
+Stage benchmark `thumbnail` chỉ chạy thumbnail, không gọi rectify, là đối chứng cho thay đổi này.
+Không thay decoder, trần ảnh, ngân sách isolate, PDF writer hoặc dependency.
+Regression exact PNG/rotation, ownership và metadata chạy trong gate; không đặt
+ngưỡng thời gian/RSS vào unit tests.
+
+Execution evidence của Work ID `2026-10-17-xs07a-full-frame-render` đặt trên PR cùng
+Work ID: source SHA, binary/tool/lock/corpus hashes, toàn raw JSONL và bảng
+min/median/max. Trước là binary AOT thật từ source `935083e` đã kiểm hash (source
+core/tool/lock không đổi trong review54); sau compile từ commit sạch của PR mới.
+Không gán tên SHA mới cho binary cũ hoặc dùng20sample lịch sử thay phép đo mới.
+
+Protocol matched: cùng corpus hình học4000×3000,1/10trang, hai stage
+thumbnail/render-pdf,5process mới cho mỗi tổ hợp stage/corpus/version =40process.
+Mỗi sample lẻ chạy before→after, sample chẵn after→before để giảm lệch do thứ tự;
+không chạy fullgate/compiler khác cùng lúc. Xác minh input hashes trước/sau và
+không đổi tool/lock; compile ngoài vùng đo. Ghi mọi lỗi thật, giữ dữ liệu dở nếu lỗi,
+không chọn bỏ sample chậm. Host/RSS/cache/synthetic limits ở trên vẫn áp dụng;
+đây không là p95, cold-disk, thiết bị,100trang hoặc nghiệm thu camera/OCR/release.
+
+Khi kiểm lại một control bất thường, giữ nguyên series cũ và công bố replay riêng,
+không thay mẫu cũ bằng mẫu thuận lợi. Ghi cùng binary/corpus/tool/lock hashes,
+process order, mọi lỗi và min/median/max. Nếu bổ sung CPU qua POSIX
+`RUSAGE_CHILDREN`, ghi rõ delta bao gồm cả process và waited-for descendants,
+startup/preflight/cleanup; đây không phải CPU riêng của stage. Load average không
+phải phần trăm CPU. Replay10process khi review55 không tái hiện chênh lệch31.5%
+thumbnail lịch sử (median13.237269→13.375609s); chưa xác định nguyên nhân trên
+sharedhost, không suy ra tốc độ thiết bị hoặc xoá quan sát trước đó.
+
+Hồ sơ: [XS-07a](../work/2026-10-17-xs07a-full-frame-render/working.md).

@@ -4,6 +4,17 @@
 > file này ghi lỗi đã xảy ra và khuôn của nó. Gặp triệu chứng lạ → tìm khuôn ở đây trước (`/debug` Pha 1).
 > Sửa bug xong → thêm mục mới hoặc thêm ngày/PR vào mục cũ nếu tái phát.
 
+**Nội suy ánh xạ identity vẫn làm đổi pixel.** Full-frame13×9 RGBA Random17 đi qua
+homography/bilinear làm16kênh giảm1LSB do sai số số thực và cắt về số nguyên. Test chỉ dùng ảnh
+solid hoặc một kích thước có thể bỏ sót lỗi. *Cách rà*: so mọi byte của ảnh có
+màu/alpha thay đổi ở kích thước lẻ, kể cả PNG xuất có xoay. *Chốt*: chỉ copy byte
+vào output mới khi quad bằng fullFrame theo giá trị và dimensions sau normalize/cap
+khớp source; quad gần toàn khung hoặc bị cap vẫn phải nội suy. Không dùng
+`Image.from`: constructor đó mang metadata/frames mà output cũ không giữ.
+Regression trong `apps/mobile/test/imaging/page_render_test.dart` kiểm exact pixels,
+metadata, alias hai chiều, near-full/cap và mapping xoay độc lập.
+(2026-10-17, Work ID `2026-10-17-xs07a-full-frame-render`)
+
 **Fixture tên file POSIX làm test hỏng trên Windows trước khi gọi code cần kiểm.**
 Test benchmark tạo directory có newline/backslash vô điều kiện. Win32 cấm control
 characters và dùng backslash phân cách path; API Windows `Directory.CreateDirectory`

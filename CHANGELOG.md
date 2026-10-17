@@ -1,6 +1,8 @@
 # Changelog — X-Scanner
 
-## Unreleased — 2026-10-16
+## Unreleased — 2026-10-17
+
+- XS-07a: giữ nguyên pixel khi xuất/xem trước ảnh toàn khung không resize bằng bản sao buffer độc lập; không nội suy lại identity hoặc mang metadata gốc sang ảnh xuất.
 
 - XS-06a: tooling nội bộ tạo corpus hình học/checksum và đo core thumbnail/render/PDF, kèm protocol host/device; giữ nguyên luồng app.
 
