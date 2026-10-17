@@ -183,7 +183,6 @@ img.Image rectify(
     bytes.setRange(0, bytes.length, src.toUint8List());
     return out;
   }
-  // DEBT: generic interpolation does not preserve gray-alpha channels | trần: non-full-frame or resized 2-channel sources | xem lại khi: W-104b decoder upgrade (2026-10-18) or gray-alpha crop regression work.
   final c = _pixelCorners(quad, src.width, src.height);
   final homography = Homography.unitSquareTo(
     topLeft: c.tl,
@@ -193,18 +192,25 @@ img.Image rectify(
   );
   final maxX = src.width - 1;
   final maxY = src.height - 1;
+  final isGrayAlpha = src.numChannels == 2;
   for (var j = 0; j < size.height; j++) {
     final v = (j + 0.5) / size.height;
     for (var i = 0; i < size.width; i++) {
       final p = homography.map((i + 0.5) / size.width, v);
-      out.setPixel(
+      final sample = src.getPixelInterpolate(
+        (p.x - 0.5).clamp(0, maxX),
+        (p.y - 0.5).clamp(0, maxY),
+        interpolation: img.Interpolation.linear,
+      );
+      // image stores the setter's g argument in byte 1, which is alpha
+      // for a two-channel image rather than its logical green channel.
+      out.setPixelRgba(
         i,
         j,
-        src.getPixelInterpolate(
-          (p.x - 0.5).clamp(0, maxX),
-          (p.y - 0.5).clamp(0, maxY),
-          interpolation: img.Interpolation.linear,
-        ),
+        sample.r,
+        isGrayAlpha ? sample.a : sample.g,
+        sample.b,
+        sample.a,
       );
     }
   }
@@ -232,12 +238,43 @@ Uint8List renderPageSync(
     maxPixels: maxPixels,
   );
   if (quarterTurns != 0) {
-    page = img.copyRotate(page, angle: 90 * quarterTurns);
+    page = page.numChannels == 2
+        ? _rotateGrayAlpha(page, quarterTurns)
+        : img.copyRotate(page, angle: 90 * quarterTurns);
   }
   return switch (format) {
     RenderFormat.jpeg => img.encodeJpg(page, quality: 90),
     RenderFormat.png => img.encodePng(page),
   };
+}
+
+/// Rotates an already-owned uint8 page without the library's gray-alpha
+/// setter or RGBA promotion, which would also change JPEG alpha handling.
+img.Image _rotateGrayAlpha(img.Image source, int quarterTurns) {
+  final turns = quarterTurns % 4;
+  if (turns == 0) return source;
+  final width = source.width;
+  final height = source.height;
+  final out = img.Image(
+    width: turns.isOdd ? height : width,
+    height: turns.isOdd ? width : height,
+    numChannels: 2,
+  );
+  final input = source.toUint8List();
+  final output = out.toUint8List();
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      final from = (y * width + x) * 2;
+      final to = switch (turns) {
+        1 => (x * height + height - 1 - y) * 2,
+        2 => ((height - 1 - y) * width + width - 1 - x) * 2,
+        _ => ((width - 1 - x) * height + y) * 2,
+      };
+      output[to] = input[from];
+      output[to + 1] = input[from + 1];
+    }
+  }
+  return out;
 }
 
 /// Runs [renderPageSync] on the file at [originalPath] in a background
