@@ -28,7 +28,7 @@ Tooling nội bộ dùng ảnh hình học tổng hợp/checksum và core thumbn
 ## 2026-10-17: XS-07a pixel toàn khung và chi phí render
 
 Hồ sơ: [2026-10-17-xs07a-full-frame-render](docs/work/2026-10-17-xs07a-full-frame-render/working.md).
-Sau54merged/reconcile, [spec XS-07a](docs/specs/2026-10-17-xs07a-full-frame-render.md) Approved theo ủy quyền §3d: sửa lệch pixel khi rectify fullFrame không resize bằng copy byte vào output độc lập. Root đã xác minh test đỏ pixel thật trước source, tích hợp fast path và15regression; review độc lập sạch và root fullgate607/607; chốt snapshot cuối qua gate/hook rồi đo matched AOT và CI trên PR mới. Chưa nghiệm thu hiệu năng hoặc merge PR mới. EX1/AC9/PR4b giữ mở.
+Sau54merged/reconcile, [spec XS-07a](docs/specs/2026-10-17-xs07a-full-frame-render.md) Approved theo ủy quyền §3d: sửa lệch pixel khi rectify fullFrame không resize bằng copy byte vào output độc lập. Root đã xác minh test đỏ pixel thật trước source, tích hợp fast path và15regression; review độc lập sạch và root fullgate607/607; chốt snapshot cuối qua gate/hook rồi đo matched AOT và CI trên PR mới. [PR #55](https://github.com/seeker19110/X-Scanner/pull/55) trên5890c2f đã bàn giao40mẫu host/CI607PASS; theo yêu cầu chủ repo17/10 đang review lại thumbnail/source/gates trước merge, chưa Done. EX1/AC9/PR4b giữ mở.
 
 ## 2026-10-11: lưu gợi ý và áp dụng bộ khung
 

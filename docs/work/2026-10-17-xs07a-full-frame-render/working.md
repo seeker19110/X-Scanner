@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-17-xs07a-full-frame-render
 - Yêu cầu / outcome: sau review/sửa/merge54, tiếp tục ưu tiên báo cáo16/10, tự quyết kỹ thuật và chạy đủ gate. Sửa lỗi pixel identity có trước54, đo chi phí render trước/sau.
-- Trạng thái: Ready for commit gates — source/test freeze sau root RED→GREEN và review; còn normal hook, benchmark/CI của commit sạch trước bàn giao PR.
+- Trạng thái: Review PR #55 theo yêu cầu chủ repo17/10 — đang kiểm lại source, kiểm chứng thumbnail và chạy gate mới trước merge.
 - Chủ trì / writer: phiên chính giữ spec/PLAN/docs/maps/benchmark/gate/PR; worker source/test/hồ sơ riêng, reviewer chỉ đọc.
 - Mức rủi ro / số PR: M thận trọng, một PR nhỏ thay core hiện có; request gồm54+PR kế nên giao subagent theo §3c.
 - Scope / non-goal: chỉ fast path exact fullFrame và regression; không decoder/dependency/SDK/lock, engine/cap/budget/isolate/UI/schema/migration, real documents/OCR, paidAPI, release/scheduler/auto-merge. PR mới giữ OPEN.
@@ -28,15 +28,15 @@
 
 ## Lần thử / blocker
 
-- Chưa chạy test XS07a, gate/benchmark mới; không dùng gate54 làm bằng chứng cho source sắp đổi. Giới hạn device/real corpus/100page/OCR giữ nguyên.
+- Checkpoint khởi tạo trước triển khai: chưa chạy test XS07a, gate/benchmark mới; không dùng gate54 làm bằng chứng cho source sắp đổi. Giới hạn device/real corpus/100page/OCR giữ nguyên.
 
 ## Bàn giao / bước tiếp theo
 
-- Worker tests-only RED/pause; root xác minh assertion pixel thật trước logic. Không dùng compile/setup error làm RED.
+- Checkpoint trước implementation: worker tests-only RED/pause; root xác minh assertion pixel thật trước logic. Không dùng compile/setup error làm RED.
 
 ## Nghiệm thu cuối
 
-- Chưa Done, chưa PR/merge; giữ working.md. Bằng chứng execution/CI source cuối đặt trên PR. PR54 đã MERGED nhưng không đồng nghĩa XS07a hoặc P1 hoàn tất.
+- Checkpoint trước commit: chưa Done, chưa PR/merge; giữ working.md. Bằng chứng execution/CI source cuối đặt trên PR. PR54 đã MERGED nhưng không đồng nghĩa XS07a hoặc P1 hoàn tất.
 
 - Check-plan thực tế: lệnh đoán scripts/check-plan.sh không tồn tại; _plan_check.py là module thuần nên --help không kiểm gì. Đã đọc entrypoint thật và chạy python3 scripts/subagent-dispatch.py --check-plan docs/work/2026-10-17-xs07a-full-frame-render/PLAN.md, PASS1task trước dispatch. Không dùng lần setup lỗi làm bằng chứng gate hoặc RED.
 - Giao T1 qua followup_task xs06_tool, exact3files và hai mốc RED/GREEN; worker không fullgate/commit/push. Root ghi spec/docs/maps riêng, không overlap source/test ở worktree worker.
@@ -53,3 +53,20 @@
 - Root fullgate vòng đầu sau tích hợp PASS4/4,607/607, analyze0/format57/0, syntax47checks/adoption7/7/manifest10/10/hooksPASS; đọc868lines xs07a-root-gate.log. evidence-check VERIFIED với snapshot trước checkpoint docs này. Dòng FAIL missingmanifest là negative selftest dự kiến; helper đọc status nhầm PASSED đã sửa về schema PASS, không coi đó là gate fail.
 - Checkpoint này chỉ cập nhật hồ sơ/PROGRESS sau kết quả thật; source/test không đổi. Rerun gate cuối trên snapshot staged trước commit và normal precommit hook bắt buộc, không bypass. Execution/benchmark/CI final-head ghi trên PR để tránh commit tự ghi SHA/CI chính nó. Test/run trước checkpoint không được dùng thay gate final snapshot.
 - Mốc bàn giao dự kiến: mở PR mới khi gate/hook đã xanh; benchmark matched40process và CI finalhead phải đạt mới Ready review. Giữ OPEN, working.md và EX1/AC9/PR4b; không tự merge từ quyền54.
+
+
+## Review/merge theo yêu cầu trực tiếp — 2026-10-17
+
+- Chủ repo cấp quyền review kỹ, sửa mọi vấn đề và merge PR55 khi đủ điều kiện; thay giới hạn bàn giao OPEN của lượt trước. Sau merge tiếp tục một outcome/PR theo báo cáo, tự quyết kỹ thuật. Không mở quyền release/auto-merge/migration PR4b.
+- Reconcile ban đầu: branch codex/xs07a-full-frame-render sạch, HEAD5890c2f1fef191a42f8dff3ed19188f601f5b29a, base8b99c511e1134534a05b3c93667239c50abf84c9; PR55OPEN/ready/CLEAN/MERGEABLE, CI38983570571SUCCESS. Không dùng gate lượt trước thay gate mới.
+- Bàn giao trước:40process thành công, rawSHAfe11dbc2e2088906d2c3804c5a6c16bbbd0a4e361d5526965bd001d9a9a7916d; PDF10trang median123.146→32.388s, thumbnailcontrol20.024→26.324s chậm31.5%. Phải kiểm lại source/provenance và chạy control mới trước kết luận, không tự quy nguyên nhân cho tải host.
+- Request gồm review55+PR nâng cấp kế: giao reviewer riêng trên detachedworktree review-pr55; root viết hồ sơ/docs và giữ diagnosis/gates/merge. Worker source/test nâng cấp kế chỉ giao sau main đã merge/reconcile, worktree/filecontract riêng.
+- Chọn kiểm chứng lại control cùng corpus/binaries đã kiểm hash, giữ đủ mẫu/raw và hostload; không chạy fullgate/compiler cùng lúc · loại bỏ sample bất lợi/đoán nguyên nhân hoặc dùng CI làm bằng chứng tốc độ · bậc1+3.
+- Nợ gray-alpha generic có trước55, đã ghi DEBT; root/reviewer xác minh không phải regression identityfix. Đối chiếu ưu tiên/điều kiện và chọn sửa trong outcome kế nếu W104b chưa đủ tuổi, không tự mở migration hoặc feature từ roadmap.
+
+- Review độc lập mới review_pr52 trên detached5890c2f: findings=[], đọc đủ15file/callers/image4.10.1 và kiểm40raw/provenance; root tự đọc diff và source dependency. Reviewer không chạy test/build và không sửa file. Không finding source mới; không sửa runtime để xử lý số đo chưa tái hiện.
+- Control replay17/10: cùng exact binaries935083e/5890c2f,5process/version xen kẽ,10success/0failure, originalhashes giữ nguyên. Thumbnail10trang median13.237269→13.375609s (+1.05%), ranges12.915099–14.416925 và13.030217–13.920055s; wholechild CPU user+system median18.249867→18.220072s. Không tái hiện mức chậm31.5% lịch sử; chưa chứng minh nguyên nhân tải host và không nhận ±1% là speedup/regression chắc chắn trên sharedhost. Giữ nguyên40mẫu cũ, công bố riêng10mẫu mới.
+- Replay provenance: fixtureSHAaa1b42083684bc35a763c3c8814105c9e5fde767c7ffa19933f4e6386aa2344b; rawSHA8cebc5748e2fb3f4e19566c5a73721c3ea58681128dbaa5c1695a105edfa322c; binarybefore019f2302a094409ac5fafb3760f8fd26ca19fbb86dac3d965420bcb00c9f1715/after92f8a5e6b0ca9d8aa105611110c4365f91141785ad5b476e5fc3e1a0d14b2bb0. CPU là RUSAGE_CHILDREN cảprocess+waiteddescendants/startup/preflight/cleanup, không stageCPU; hostloadavg không utilization; RSS vẫn highwaterprocess. Root tự tính lại medians/hash/order từ đủ10raw.
+- Live PubAPI17/10 xác minh image4.12.0 published2026-10-11T00:28:00.512637Z; đủ7ngày18/10T00:28Z. W104b chưa đủ tuổi, không đổi dependency; ưu tiên XS07b gray-alpha generic sau merge.
+- check-plan T2 lần đầu bị duplicate ID do lặpT2 trong mô tả group; sửa văn bản, chạy đúng dispatcher PASS2tasks trước giao review. Doctor READY4/Flutter3.47.7/Dart3.13.5 mới trong lượt.
+- Chốt review docs-only theo ngoại lệTDD3, runtime/test/tool/lock giữ5890c2f. Toàn gate mới/normalhook và smoke/CI/finalheadproof phải đạt trước merge; kết quả execution thật cập nhật trênPR để tránh self-SHA. Chưa Done; chỉ reconcile sau actualmerge.

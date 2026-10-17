@@ -180,4 +180,13 @@ không đổi tool/lock; compile ngoài vùng đo. Ghi mọi lỗi thật, giữ
 không chọn bỏ sample chậm. Host/RSS/cache/synthetic limits ở trên vẫn áp dụng;
 đây không là p95, cold-disk, thiết bị,100trang hoặc nghiệm thu camera/OCR/release.
 
+Khi kiểm lại một control bất thường, giữ nguyên series cũ và công bố replay riêng,
+không thay mẫu cũ bằng mẫu thuận lợi. Ghi cùng binary/corpus/tool/lock hashes,
+process order, mọi lỗi và min/median/max. Nếu bổ sung CPU qua POSIX
+`RUSAGE_CHILDREN`, ghi rõ delta bao gồm cả process và waited-for descendants,
+startup/preflight/cleanup; đây không phải CPU riêng của stage. Load average không
+phải phần trăm CPU. Replay10process khi review55 không tái hiện chênh lệch31.5%
+thumbnail lịch sử (median13.237269→13.375609s); chưa xác định nguyên nhân trên
+sharedhost, không suy ra tốc độ thiết bị hoặc xoá quan sát trước đó.
+
 Hồ sơ: [XS-07a](../work/2026-10-17-xs07a-full-frame-render/working.md).
