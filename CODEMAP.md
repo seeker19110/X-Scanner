@@ -4,11 +4,11 @@
 > "Có tính năng gì" ở `docs/FEATURE-MAP.md`; "viết thế nào" ở `docs/CONVENTIONS.md`.
 > Đổi cấu trúc (thư mục, lệnh gate, CI) → cập nhật dòng liên quan trong cùng PR.
 > Lệnh gate đầy đủ: `bash scripts/dev-task.sh gate` (build APK debug, `flutter analyze --fatal-infos`,
-> `dart format`, `flutter test` + kiểm repository; lệnh cụ thể ở `.claude/project-commands.sh`).
+> `dart format`, `flutter test`, `:app:testDebugUnitTest` + kiểm repository; lệnh cụ thể ở `.claude/project-commands.sh`).
 
 ## App `apps/mobile`
 
-Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export` → `imaging` → `core`; `storage` → `core`. `core` thuần Dart, không import Flutter (`test/core/core_purity_test.dart`).
+Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export` → `imaging` → `core`; `storage` → `core`; leaf `storage/android_storage.dart` dùng Flutter services để nối API Android. `core` thuần Dart, không import Flutter (`test/core/core_purity_test.dart`).
 
 | Muốn | Sửa | Rồi chạy |
 | --- | --- | --- |
@@ -18,6 +18,7 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Đổi cách lưu/khôi phục/cách ly phiên, giữ bản gốc | `lib/storage/session_store.dart` | `flutter test test/storage` — mọi ca mất dữ liệu phải có test đỏ trước |
 | Đổi lưu trữ theo tài liệu hoặc thư viện (XS-09; chưa nối vào app tới PR-4) | `lib/storage/document_store.dart` (bản chép `SessionStore` có `DEBT:` — sửa bảo đảm ở cả hai tới khi PR-4 xoá `SessionStore`), `lib/storage/library_store.dart` (`list()` chỉ đọc) | `flutter test test/storage` |
 | Đổi migration P1 → thư viện (XS-09 FR-6/FR-7; chạy trên dữ liệu thật chỉ từ PR-4) | `lib/storage/p1_migration.dart` (nhật ký `migration.json`, chỉ bắt `FileSystemException`/`FormatException`, không bao giờ xoá `session/` hay `session.migrated*`) | `flutter test test/storage/p1_migration_test.dart` — thêm lệnh đổi đĩa thì cập nhật số trong `the clean run covers steps 2 to 7` |
+| Đo dung lượng internal Android trước copy (XS09 capacityleaf; chưa nối app) | `lib/storage/android_storage.dart`, `android/app/src/main/kotlin/org/xscanner/x_scanner/StorageHandler.kt`, `MainActivity.kt` (filesDir/StatFs, fixed noargs channel) | `test/storage/android_storage_test.dart`; JVM `StorageHandlerTest.kt`; dispatcher gate thực chạy cả hai |
 | Đổi màn thư viện: trạng thái, tạo, đổi tên, thông báo migration (XS-09 PR-4a; chưa nối vào app tới PR-4b) | `lib/ui/library_controller.dart` (`start`/`refresh` xếp hàng; đổi tên chỉ trên mục đọc được), `lib/ui/library_screen.dart` (màn tài liệu tiêm qua `documentScreen`) | `flutter test test/ui/library_controller_test.dart test/ui/library_screen_test.dart test/ui/accessibility_test.dart` |
 | Đổi thuật toán nắn phối cảnh | `lib/imaging/homography.dart` | `flutter test test/imaging` |
 | Đổi rectify toàn khung không resize (XS-07a) | `lib/imaging/page_render.dart` (`rectify`, sau normalize/cap) | `flutter test test/imaging/page_render_test.dart test/tool/scanner_benchmark_test.dart`; exact pixels, metadata/ownership, near-full/cap và PNG rotation; matched AOT theo `docs/benchmarks/README.md` |

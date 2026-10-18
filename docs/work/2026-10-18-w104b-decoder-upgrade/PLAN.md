@@ -11,7 +11,7 @@ Root owns spec/plan/docs/maps/gates/PR/merge. Worker owns only pubspec.yaml/lock
 
 ## Danh sách việc
 ### T1 — Security regression and instance bounded decoder   `route: complex`
-- Điểm chạm: apps/mobile/pubspec.yaml, apps/mobile/pubspec.lock, apps/mobile/lib/imaging/page_render.dart, apps/mobile/test/imaging/decoder_security_test.dart, docs/work/2026-10-18-w104b-decoder-core/working.md.
+- Điểm chạm: apps/mobile/pubspec.yaml, apps/mobile/pubspec.lock, apps/mobile/lib/imaging/page_render.dart, apps/mobile/test/imaging/decoder_security_test.dart, docs/work/2026-10-18-w104b-decoder-core/done.md.
 - Đặc tả: ApprovedspecAC1..4, rawsyntheticEXIFcycle/finitepoisonPNG, independent expected raster/bounds, typed fixtureCRC viainstalledlibrary/stdlib. No OOM, performance threshold, realdocument or contentlogging. Actualtests-onlyRED thenpause; root independentlyverifies beforepin. Afterpin append new-APIdefaultcap tests; REDB thenpause beforecore. Explicitcapsbeforeparse, nonpositivebeforeupstreamdisable, header+outputcap, nullableimageSizeOf; reuse upstream2chfix onlyafterequivalence. No scaleddecodefeature.
 - Phụ thuộc: none
 - Tiêu chí chấp nhận: RED is actual assertion/decodefailure, not compile/setup; testexactcontentsretainedRED→GREEN; allold/newtargetedimaging/export/ui-controller/toolPASS, analyze0/format0, fullsource/lockdiffselfreview and exactfrozenhashes/logs. No commit/push/merge/fullgate/AOT/CI/nativechanges/subagents. RootAC5..6.

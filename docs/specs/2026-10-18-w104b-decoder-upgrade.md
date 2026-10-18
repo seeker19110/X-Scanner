@@ -45,7 +45,7 @@ Choose dependency fix over hand-written EXIF/PNG parser or changing process-wide
 - `apps/mobile/pubspec.yaml`, `apps/mobile/pubspec.lock` — exact reviewed pin, generated lock.
 - `apps/mobile/lib/imaging/page_render.dart` — decoder factory/start/read boundary and redundant2channel workaround removal only.
 - `apps/mobile/test/imaging/decoder_security_test.dart` — synthetic regression/cap boundaries.
-- `docs/work/2026-10-18-w104b-decoder-upgrade/working.md` — root decisions/evidence; worker ownrecord separate.
+- `docs/work/2026-10-18-w104b-decoder-upgrade/done.md` — root decisions/evidence; worker ownrecord separate.
 - `docs/ops/COMPLETION-PLAN.md`, `docs/ops/supply-chain-exceptions.md`, `CODEMAP.md`, `docs/FEATURE-MAP.md`, `PROGRESS.md`, `TRAPS.md`, `CHANGELOG.md` — current state/evidence, root only.
 
 ## 16. Test/eval and evidence
@@ -56,7 +56,7 @@ Choose dependency fix over hand-written EXIF/PNG parser or changing process-wide
 | AC-2 | `apps/mobile/test/imaging/decoder_security_test.dart` |
 | AC-3 | `apps/mobile/test/imaging/decoder_security_test.dart` |
 | AC-4 | `apps/mobile/test/imaging/page_render_test.dart`; `apps/mobile/test/export/page_exporter_test.dart`; `apps/mobile/test/ui/session_controller_test.dart`; `apps/mobile/test/tool/scanner_benchmark_test.dart` |
-| AC-5 | `docs/work/2026-10-18-w104b-decoder-upgrade/working.md` and PR execution evidence |
+| AC-5 | `docs/work/2026-10-18-w104b-decoder-upgrade/done.md` and PR execution evidence |
 | AC-6 | `docs/ops/COMPLETION-PLAN.md`; `docs/ops/supply-chain-exceptions.md` and PR actualmerge readback |
 
 Paths to newtest must exist before contract compiler acceptance; mapping is not test acceptance. REDA baseline→rootverify→pin→REDB wiring→rootverify→coreGREEN. No golden updates. Debuggate/AOT are not device/iOS/camera/OCR/release evidence.

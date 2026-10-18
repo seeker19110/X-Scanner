@@ -5,7 +5,7 @@
 | Goal ID | 2026-10-18-upgrade-completion |
 | Owner | Chủ repo; root tích hợp/nghiệm thu, worker riêng theo contract |
 | State | ACTIVE |
-| Default-branch SHA đã reconcile | 561a5cf05f12ccba03d536f5b522ad0e046f6255; actual56merge/tree verified18Oct |
+| Default-branch SHA đã reconcile | c50670af18b1f11af38d15051b36264e1a051cb3; actual58merge/tree verified18Oct |
 | Bắt đầu / review | 2026-10-18 |
 | Quyền AI | research/spec/branch/PR/review/merge sau gates theo goalP1 + yêu cầu tiếp; không deploy/auto-merge/release |
 | Budget | Không paidAPI/dịch vụ mới; chỉ công cụ/dev/CI hiện có, checkpoint trước ngưỡng ngữ cảnh |
@@ -25,8 +25,8 @@ Dùng lại P1, XS08/XS09PR1..3/4a đã merge. Không cloud/OCR/depth/newcamerae
 | ID | Outcome/AC | Dependency | Spec | PR | State | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
 | S1 | Fresh review/gate/merge56 grayalpha | 55merged | specXS07b17Oct | 56 | DONE | work2026-10-17-xs07b-gray-alpha-render |
-| S2 | W104b decoder/F004/EX1 | S1actualmerge | specW104b18Oct | pending | VERIFY | work2026-10-18-w104b-decoder-upgrade |
-| S3 | Library/app/migration/capacityadapter, XS09AC13 | S2merged; explicit18Octownerapproval | specXS09 updatedapproval before source | pending | RESEARCH | work2026-10-18-xs09-pr4b-integration |
+| S2 | W104b decoder/F004/EX1 | S1actualmerge | specW104b18Oct | 58 | DONE | work2026-10-18-w104b-decoder-upgrade |
+| S3 | Library/app/migration/capacityadapter, XS09AC13 | S2merged; explicit18Octownerapproval | specXS09 ownerApproved18Oct; capacityleafApproved before source | pending | IMPLEMENT | work2026-10-18-xs09-pr4b-integration |
 | S4 | Synthetic OS UAT/AC9 evidence | usableemulator/device; exactartifact | P1AC9/D4 andandroid-uat | pending | WAITING | outsideuat-20261018 checkpoint; no device yet |
 | S5 | Re-audit/reconcile currentmain/docs/exceptions/records | S1..3; actualS4outcome | completionplaybook/P1 | pending | BACKLOG | actualmergeproofs required |
 
@@ -41,9 +41,9 @@ Dùng lại P1, XS08/XS09PR1..3/4a đã merge. Không cloud/OCR/depth/newcamerae
 
 ## Current truth
 
-- Gap:56merged561a5cf; W104btargeted240/240, fullgates/PR/CIpending; PR4bauthorized/designready, implementationpending; AC9unverified.
+- Current:56/58 merged, W104b/F004 fixed on c50670a and EX1 reconciled; PR4b authorized, capacityleaf verification active, pending-picker designApproved before source; AC9 awaits actual Windows accelerated UAT.
 - Decision: technical/specselfapprovalunder§3d; actualdataactivationPR4bownerconsent18Oct recorded, noquestionrepeat.
-- Next slice: finishW104bgates/CI/merge thenPR4b; preparePR4bdesign inparallelreadonly, implementsequentially fromfreshmain.
+- Next slice: merge capacity only after fullgate/hook/finalCI/native proof, then pending-picker preservation and appintegration from freshmain; finish actual UAT on verified artifacts.
 
 ## Iteration log
 
@@ -55,3 +55,8 @@ Ownercontinuesuntilcomplete; current56runtime reviewedindependently findings[], 
 NOT COMPLETE. Executionandactualmain evidence pending; no device/iOS/OCR/release acceptance.
 
 18Octiteration:56actualmerge561a5cf at01:40:12Z, CI39086812105/root628+628/AOT12/nativeproof. W104bstagedREDA/B→GREEN240; EX1stillopenuntilmerged. API36softwarebootmemoryguardstopped safely, nodeviceclaim; isolatedAPI24preparedforfuturewindow. OwnerPR4bapprovalretained; no technicaldecisionreconfirmation.
+
+
+### Iteration2 — actual58merge and PR4b foundation
+
+S2done: PR58/c50670a, exactmain/tree/headCI proof; EX1 reconciled. S3 capacityleaf has actual Dart1P/18F and JVM2P/9F RED, sameassertion implementation then targeted19Dart/11JVM, rootfreshmain/fullgate/PRpending. Additional pending-picker persistence contract is being designed before app switch; no arbitrary document receives global lostresult. Root reuses existing controllers/stores/IDs and no runtime dependency. S4 remainsWAITING: both Linuxsoftware boots hit guard, owner now explicitly authorizes self-install accelerated Android environment; Windowssetup separate. Goal remainsACTIVE, notProjectComplete.

@@ -8,8 +8,8 @@
 | ID | Tính năng / luồng | Điểm vào (widget → method) | Dữ liệu đụng tới | Trạng thái | Test hiện có |
 |----|-------------------|-----------------------------|------------------|-----------|--------------|
 | FT-01 | Khôi phục phiên khi mở app (AC-2, AC-3) | `XScannerApp.initState` → `SessionController.restore` → `PageExporter.clearLeftovers`, `SessionStore.load`, `PageSource.retrieveLost` | `session.json`, `originals/`, `session.corrupt-*.json`, `temp/exports`, `temp/share_plus` | ⚠️ (F-018, F-049 dời P2) | `test/storage/session_store_test.dart` (gồm F-001); `test/ui/session_controller_test.dart` restore*, `restoring` (F-021); `review_screen_test` restoreFailed, "while the session is opening…" (F-021) |
-| FT-02 | Chụp trang (camera hệ thống, D1) | nút "Chụp" → `capture` → `_addFromPath` (giải mã thử → `importOriginal` → `save`) → `PageSource.discard` | ảnh tạm của picker trong cache (xoá sau khi lưu), `originals/{id}.{ext}`, `session.json` | ⚠️ (W104b implementation; EX1 chờ actual merge/gates) | `review_screen_test` captured/cancelled/undecodable (AC-7); `session_controller_test` add*, "(F-048) any other error of the decode check…"; `test/ui/page_source_test.dart` (F-005); `test/imaging/decoder_security_test.dart` (W104b: bounded EXIF/PNG, per-instance limits) |
-| FT-03 | Nhập ảnh từ thư viện | nút "Nhập ảnh" → `importFromGallery` → `_addFromPath` | như FT-02 | ⚠️ (W104b implementation; EX1 chờ actual merge/gates) | `session_controller_test` add*; `page_source_test` (F-005) |
+| FT-02 | Chụp trang (camera hệ thống, D1) | nút "Chụp" → `capture` → `_addFromPath` (giải mã thử → `importOriginal` → `save`) → `PageSource.discard` | ảnh tạm của picker trong cache (xoá sau khi lưu), `originals/{id}.{ext}`, `session.json` | ✅ (W104b/EX1 đóng PR58; camera thực vẫn AC9 chờ UAT) | `review_screen_test` captured/cancelled/undecodable (AC-7); `session_controller_test` add*, "(F-048) any other error of the decode check…"; `test/ui/page_source_test.dart` (F-005); `test/imaging/decoder_security_test.dart` (W104b: bounded EXIF/PNG, per-instance limits) |
+| FT-03 | Nhập ảnh từ thư viện | nút "Nhập ảnh" → `importFromGallery` → `_addFromPath` | như FT-02 | ✅ (W104b/EX1 đóng PR58; camera thực vẫn AC9 chờ UAT) | `session_controller_test` add*; `page_source_test` (F-005) |
 | FT-04 | Sắp xếp trang | `ReorderableListView.onReorderItem` → `move` (tay kéo tắt khi bận) | `session.json` | ✅ | `review_screen_test` dragging…, "dragging a page while busy does not reorder (F-007)", Move down accessibility action (F-051); `session_controller_test` move* |
 | FT-05 | Xoá trang (xác nhận, FR-3) | nút "Xoá trang" → `remove` | `session.json`; bản gốc xoá sau khi lưu | ✅ | `review_screen_test` deleting…; `session_store_test` AC-1 |
 | FT-06 | Chụp lại trang (xác nhận) | nút "Chụp lại" → `retake` | `originals/` mới; bản cũ xoá sau khi lưu | ✅ | `review_screen_test` retake…; `session_store_test` retake… |
@@ -30,3 +30,6 @@
 
 - Ảnh xem trước trong danh sách áp khung cắt + xoay như file xuất, dựng từ thumbnail ≤ 1024 px, cache theo `(pageId, revision)` (F-026 đóng ở XS-13 PR-1).
 - Không có tự nhận mép, OCR, depth, iOS, cloud (spec P1 §5 non-goal).
+
+
+XS09 capacityfoundation: `test/storage/android_storage_test.dart` kiểm boundary mockedchannel; `android/app/src/test/kotlin/org/xscanner/x_scanner/StorageHandlerTest.kt` kiểm handler bằng JVM trong dispatcher. Đây chưa phải luồng app/migration hoặc StatFs trên thiết bị; AC13 chưa đóng.
