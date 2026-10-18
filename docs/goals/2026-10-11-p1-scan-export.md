@@ -14,9 +14,9 @@
 
 - User/job: người cần số hóa tài liệu tạo tài liệu nhiều trang và xuất PDF/ảnh offline trên Android.
 - Baseline → target: không tạo được tài liệu → chụp/nhập, chỉnh góc, xoay, sắp xếp, xuất PDF/JPG/PNG.
-- Goal DoD: AC-1..8 có bằng chứng máy trên `main`; AC-9 do chủ repo kiểm trên emulator (D4).
+- Goal DoD: AC-1..8 có bằng chứng máy trên `main`; AC-9 camera→edit→PDF→viewer trên emulator (D4); execution delegated18Oct, root accepts under§3d.
 - Guardrails: spec §2 (không mạng/upload/log nội dung, bản gốc không bị ghi đè hay mất).
-- Completion approver: chủ repo (AC-9).
+- Completion approver: root under delegated§3d18Oct for technical AC9; owner retains release approval.
 
 ## Milestones và slices
 
@@ -27,7 +27,7 @@
 | S2 | Nắn phối cảnh, AC-5 | S1 | như trên | #8 | DONE | merge `1cc15e3`, CI xanh |
 | S3 | UI chụp/xem lại/chỉnh góc + Dark/Light, AC-4, AC-7, AC-8 | S2 | như trên | #9 | DONE | merge `99027ba`, CI xanh |
 | S4 | Xuất PDF/ảnh + chia sẻ, AC-6 | S3 | như trên | #10 | DONE | merge `6177e29`, CI xanh |
-| S5 | UAT AC-9 | S4 | như trên | — | WAITING chủ repo | |
+| S5 | UAT AC-9 | S4 | như trên | report in next PR | ACCEPTED; report merge pending | work2026-10-18-p1-android-uat; committed ac9.json |
 
 ## Risk register
 
@@ -39,5 +39,8 @@
 
 ## Current truth
 
-- Goal gap: S5 (AC-9 UAT trên emulator, chủ repo). Hoàn thiện sau P1: `docs/ops/COMPLETION-PLAN.md` (Work ID `2026-10-12-p1-completion`).
+- S5 execution accepted18Oct from exactCI58 APK on WindowsWHPX; report/reconciliation merge pending. Hoàn thiện sau P1: `docs/ops/COMPLETION-PLAN.md` (Work ID `2026-10-12-p1-completion`).
 - Blocker/open decision: không.
+
+
+18Oct acceptance: actual3camera/edit/reorder/PDF/share/Librera pages1/3→3/3, cancel/restart and original hashes verified by root and independent reviewer. Evidence `docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json`. Goal remains ACTIVE until report reconciliation merges; no release/device performance claim.

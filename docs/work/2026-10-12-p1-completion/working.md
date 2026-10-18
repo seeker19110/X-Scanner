@@ -129,3 +129,8 @@ và PR-4b vẫn mở. XS-06a chuẩn bị fixture/tooling host theo Work ID
 ## Reconcile sau PR58 — 2026-10-18
 
 W104b đã mergec50670a, headb227825/root639+639/CI39088067553/AOT12/CLI/nativeproof, main clean/treeequal; xem hồ sơ `docs/work/2026-10-18-w104b-decoder-upgrade/done.md`. F004/EX1 đã đóng. F009/F014/EX2 đã đóng ở XS05. Hồ sơ P1 vẫn working vì AC9 chưa có camera→edit/reorder→recipientPDF thật; không rename Done từ dòng bàn giao12Oct chỉ nói sauW104b. Linuxemulator36/24 thiếuRAM; owner giao tự cài môi trường có tăng tốc18Oct, thực hiện Windowssetup riêng. PR4b đã ownerApproved/P1notdistributed; không còn chờ lại quyền đó.
+
+
+## AC9 execution accepted — 2026-10-18
+
+Root accepts agent-run emulator AC9 under delegated§3d after actual3system-camera captures→crop/rotate/reorder→PDF→Androidsharesheet→Librera1/3,2/3,3/3 on verifiedCI58APK. Bundle/APK/PDF/rawDCT/originalbefore-after hashes and cancel/restart manifest/UI independently verified; proof `docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json`, work2026-10-18-p1-android-uat. Not owner-personally-run, not release/physicalcamera/OCR/depth/XS09AC13. Earlier owner/device waiting entries are historical; report reconciliation still awaits merge, so keep working until that actualmerge and final convergence audit.

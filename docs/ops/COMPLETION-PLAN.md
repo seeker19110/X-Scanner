@@ -120,3 +120,8 @@ PR56 đã merge561a5cf sau freshgate/hook/CI628/628. W104b đủ7ngày (Pubmetad
 W104b/F004 và EX1 đã đóng trên mainc50670a với đủ proof ở hồ sơ Done. F009/F014 đã đóng tại XS05, EX2 đóng16Oct; các WAITING12Oct ở trên là checkpoint lịch sử. Chỉ AC9 còn thiếu bằng chứng thiết bị cho P1Complete. LinuxAPI36/24 software boots đều bị memoryguard dừng trước boot; không APK/UAT. Chủ repo18Oct giao tự cài môi trường Android có tăng tốc, Windowssetup đang xử lý riêng. Không gộp kết quả build/JVM/mock/AOT thành camera/UAT.
 
 XS09PR4b đã được chủ repo duyệt rõ và xác nhận P1 chưa phân phối; capacityfoundation là slice tiếp theo, chưa kích hoạt migration. Pending-picker ownership và lifecycle cần contract/test trước nối app.
+
+
+## Current AC9 execution — 2026-10-18 after PR59
+
+PR59/209c808 capacityleaf merged after658Flutter+11freshJVM localgate/hook, finalCI39121270944/nativeexacthead/tree; app migration still inactive. AC9 controlledWindowsWHPX execution now accepted by root under delegated§3d: actual3camera/edit/reorder/PDF/share/Librera all3pages, unchangedoriginals/cancel/restart. Report `docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json`, work2026-10-18-p1-android-uat; report merge/finalconvergence audit remain before closing P1completion records. Pending picker leaf and XS09AC13 integration are separate active approvedoutcomes. Historical WAITING forenvironment/AC9 is superseded only for this controlledemulator scope.

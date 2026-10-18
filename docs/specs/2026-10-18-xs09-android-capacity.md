@@ -1,6 +1,6 @@
 # XS-09 PR-4b.1 — Android internal-storage capacity
 
-| Attribute | Value |
+| Thuộc tính | Giá trị |
 | --- | --- |
 | Work ID | 2026-10-18-xs09-android-capacity |
 | State | **Approved for implementation** |
@@ -43,7 +43,7 @@ P1Migration gọi Storage.freeBytes(appRoot) trước copy +10% (FR6/AC8), nhưn
 - `apps/mobile/android/app/src/main/kotlin/org/xscanner/x_scanner/StorageHandler.kt` — pure handler.
 - `apps/mobile/android/app/src/test/kotlin/org/xscanner/x_scanner/StorageHandlerTest.kt` — JVM behavior.
 - `apps/mobile/android/app/build.gradle.kts`, `.claude/project-commands.sh` — test dependency/dispatcher.
-- `docs/work/2026-10-18-xs09-android-capacity/working.md` — root proof/decisions.
+- `docs/work/2026-10-18-xs09-android-capacity/done.md` — root proof/decisions.
 
 ## 16. Evidence
 
@@ -52,6 +52,6 @@ P1Migration gọi Storage.freeBytes(appRoot) trước copy +10% (FR6/AC8), nhưn
 | AC-1 | `apps/mobile/test/storage/android_storage_test.dart` |
 | AC-2 | `apps/mobile/android/app/src/test/kotlin/org/xscanner/x_scanner/StorageHandlerTest.kt` |
 | AC-3 | `.claude/project-commands.sh`; `apps/mobile/test/storage/p1_migration_test.dart` |
-| AC-4 | `docs/work/2026-10-18-xs09-android-capacity/working.md` |
+| AC-4 | `docs/work/2026-10-18-xs09-android-capacity/done.md` |
 
 New paths must exist before contract acceptance; no fake evidence or empty exemption. Root separately approves library/picker wiring contract before source in next slice. Rollback via PR, no app data touched by this slice.

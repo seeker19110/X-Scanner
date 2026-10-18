@@ -291,3 +291,8 @@ Chủ repo trả lời câu hỏi rõ về migration dữ liệu thật: **“Du
 - PR-4b.2: app/library/document routing và pending-picker ownership; root chốt contract cụ thể và PLAN trước source. Copy/verify/journal/rollback không thay đổi; journal hỏng vẫn fail closed + Retry tới XS-10.
 - Giữ tên `session_manifest.dart`: file vẫn phục vụ đọc schema1 và schema2; không rename cơ học chỉ để xoá tên legacy. Gỡ SessionStore chỉ khi mọi bảo đảm P1 được kiểm trên DocumentStore, giữ schema1 codec/ScanSession cho migration.
 - PR-4b chỉ Complete khi AC13 có evidence và mọi PR đã merge; gate debug không thay UAT/iOS/camera thực.
+
+
+### Pending-original leaf refinement — 2026-10-18
+
+Before app activation, PR4b also includes a dedicated pending picker preservation leaf, approved before source: `docs/specs/2026-10-18-xs09-picker-preservation.md`. Its immutable document/page ownership, bounded durable cache copy, retained rejection and explicit size/I/O classification protect P1 recovery across routes; it does not activate migration. App integration still follows this parent spec/AC13 and the leaf's §12 protocol. Keep copy/check/rollback and no runtime dependencies.

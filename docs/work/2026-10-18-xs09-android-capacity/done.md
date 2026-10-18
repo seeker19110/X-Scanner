@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-18-xs09-android-capacity
 - Outcome: fulfill missing Storage.freeBytes for approved PR4b without activating migration yet.
-- Trạng thái: VERIFY; source integrated on actualmainc50670a, spec approved before source.
+- Trạng thái: Done — actual PR59 merge209c808/main/tree verified18Oct; source spec approved before behavior.
 - Risk: M leaf of L data integration; one PR then app wiring separately.
 - Scope: exact files in approved capacity spec; no main.dart/schema/permission/runtime dependency change.
 - Spec: docs/specs/2026-10-18-xs09-android-capacity.md; parent XS09 explicit owner18Oct approval.
@@ -43,3 +43,10 @@ W104bactualmerge58/tree/proofs đã reconcile Done và EX1/F004đóng trong cùn
 First integrated dispatcher gate4/4 PASS (config3a1ec4baa525de0c1401ceb53b84995514198931/snapshote34e6a21453c509cdadd5022c8e67e0be8759e8a),658FlutterPASS/analyze0/format0/freshAPK+releaseguard. Its quiet Gradle task may reuse up-to-date outputs; do not call its old XML a new JVM execution. Root queried installed Gradle9.3.1 task help and verified `--rerun` means re-run task even if up-to-date. Added that task-local flag to dispatcher to execute native tests in every gate, without rebuilding every dependency. Pure configuration change; TDD exemption config-only, allruntimefiles/tests unchanged. Finalprofile gate must rerun after flag/docs refinement.
 
 FreshOSV10:48Z query86Pub+2Maven/88results returned0advisories, retained capacity-osv-final.json; no full-audit claim. Root actualWindowsaccel proof exit0/WHPXusable and verifiedCI58bundlehash are available outside repo; UAT notyetperformed.
+
+
+## Actual merge reconciliation — 2026-10-18
+
+PR [#59](https://github.com/seeker19110/X-Scanner/pull/59) squash merged `209c808ec20b4df9ca75e64c0c8d037e150aae7c` at11:06:20UTC. Reviewed head `c367d6fcf1da4de7c94e4f2541a829eb9e64a151`, basec50670a. Independent final29file review findings=[]; final rootgate/hook each4/4,658Flutter+11freshJVM; finalCI39121270944 SUCCESS (658uniqueFlutter PASS/native --rerun command completed), analyze0/format0/APK/releaseguard/repositorychecks. Fresh native exact5rules/app15368/strict/nobypass/ownernever,0unresolvedthreads, compareHTTP200/0changes/emptywarnings. Artifact12134422425 build85e3cb8 parents[base,head], matchingtree.
+
+Root fetched/ff-only main to actualmerge209c808; clean/tree546d5408da5357131eb290af25eb120cd1e79a14 matches reviewedhead. Outside proofs pr59-review-proof.json, pr59-merged.json, pr59-main-reconcile.json, pr59-ci-log-proof.json and fullrawlogs. Leaf DoD met; root accepts under ownerPR4b/§3d. Adapter runtime still not exercised by current P1APK; app switch/AC13 remain in parentintegration. No release/auto-merge or original deletion.
