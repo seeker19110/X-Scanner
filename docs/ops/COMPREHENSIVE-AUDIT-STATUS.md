@@ -121,3 +121,10 @@ và PR-4b vẫn mở. XS-06a chuẩn bị fixture/tooling host theo Work ID
 ## Re-audit W104b chuẩn bị18Oct
 
 F004: image4.12.0 đủtuổi, archivehash/taglibverified, wholelockchỉimageđổi; root actualREDA trên4.10.1/REDB saupintrướcwire, targeted240/240. Reuse byte/time/format/staticWebP guards và original-preservation; explicitperinstancecap khôngphảiquotaRAM/lazyinflatercóreadahead. Đây làrànhóm2/7/corebịảnhhưởng, khôngfullaudit/newsecuritycertification. Rootfullgate/CI/actualmergepending; F004/EX1 giữmởđếnđủevidence. PR4bownerapproval18Octthuộcgoalriêng, chưacode/appactivation.
+
+
+## Re-audit W104b sau actualmerge — 2026-10-18
+
+F004 đóng bởi PR58/c50670a: reviewed4.12.0, hash/age/tag/lock chính thức, actual stagedRED→GREEN, rootgate/hook639+639, CI39088067553 SUCCESS, core/AOT/CLI originals unchanged, nativeproof đúnghead/base. EX1 đóng. Rà nhóm2/7 và core bị ảnh hưởng không có finding mới từ review cuối23files; đây không phải full security audit hay deviceRAM acceptance. Những dòng W104b/EX1WAITING trong checkpoint12–17Oct là lịch sử.
+
+Capacityleaf dùng StatFs trên filesDir, mock/JVM/error-boundary tests và gate bổ sung; chưa nối app nên chưa nghiệm thu XS09AC13. Pendingpicker actual plugin read-clear và perdoc recovery được ghi để chặn crossdoc data-loss trước khi tích hợp.

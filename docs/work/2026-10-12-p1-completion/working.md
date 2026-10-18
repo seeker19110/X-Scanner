@@ -124,3 +124,8 @@ Alerts trả 204, graph 86/86 Pub và dependency compare cuối không warning; 
 Các dòng chờ owner settings/partial trước đó là lịch sử. EX-1/W-104b (18/10), AC-9
 và PR-4b vẫn mở. XS-06a chuẩn bị fixture/tooling host theo Work ID
 `2026-10-16-xs06-host-baseline`; chưa nghiệm thu thiết bị, chất lượng, OCR hoặc 100 trang.
+
+
+## Reconcile sau PR58 — 2026-10-18
+
+W104b đã mergec50670a, headb227825/root639+639/CI39088067553/AOT12/CLI/nativeproof, main clean/treeequal; xem hồ sơ `docs/work/2026-10-18-w104b-decoder-upgrade/done.md`. F004/EX1 đã đóng. F009/F014/EX2 đã đóng ở XS05. Hồ sơ P1 vẫn working vì AC9 chưa có camera→edit/reorder→recipientPDF thật; không rename Done từ dòng bàn giao12Oct chỉ nói sauW104b. Linuxemulator36/24 thiếuRAM; owner giao tự cài môi trường có tăng tốc18Oct, thực hiện Windowssetup riêng. PR4b đã ownerApproved/P1notdistributed; không còn chờ lại quyền đó.

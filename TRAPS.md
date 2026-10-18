@@ -85,3 +85,6 @@ so JSON với readback thật và kiểm CI không đạt bị BLOCKED; không n
 (2026-10-16, Work ID `2026-10-16-xs05-repository-guards`; evidence trong hồ sơ)
 
 **Truyền giới hạn decoder sau startDecode là quá muộn.** Từ image4.12, JPEG/PNG nhậnmaxPixels ởconstructor; WebP dùngproperty phải gántrướcparse. <=0 của thư viện nghĩa là unlimited, app phải từchối. Defaultstatic cóthểkhácappcap: testtạmdefault1/callercap6 choJPEG/PNG/WebP vàkhôiphụcfinally; khôngđổiglobal trongproduction. imageSizeOf phải giữnullable khi thư việnnémImageException doheadercap. *Chốt chặn*: `apps/mobile/test/imaging/decoder_security_test.dart`; fixtureEXIFbịkillhữuhạn vàPNGunusedtail~64KiB chỉkiểmconsumption, không phảiPNGconformance/RAMquota. (2026-10-18, W104b)
+
+
+**Dung lượng không đo được không có nghĩa là 0 hoặc vô hạn.** Dùng StatFs.availableBytes trên đúng volume filesDir; không nhận arbitrary path qua channel. Dart chỉ nhận int>=0, giữ0 và >32bit; lỗi platform/missingplugin/badtype thành FileSystemException static với path:null tường minh (bỏ argument thì SDK mặc định chuỗi rỗng). JVM chỉ catch Exception của supplier, không nuốt lỗi callback hoặc Error. *Chốt*: android_storage_test.dart và StorageHandlerTest.kt chạy qua dispatcher; mock/JVM không chứng minh nativeAPI đã chạy trên thiết bị. (2026-10-18, XS09 capacity)
