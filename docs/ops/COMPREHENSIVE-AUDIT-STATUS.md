@@ -117,3 +117,7 @@ Alerts trả 204, graph 86/86 Pub và dependency compare cuối không warning; 
 Các dòng chờ owner settings/partial trước đó là lịch sử. EX-1/W-104b (18/10), AC-9
 và PR-4b vẫn mở. XS-06a chuẩn bị fixture/tooling host theo Work ID
 `2026-10-16-xs06-host-baseline`; chưa nghiệm thu thiết bị, chất lượng, OCR hoặc 100 trang.
+
+## Re-audit W104b chuẩn bị18Oct
+
+F004: image4.12.0 đủtuổi, archivehash/taglibverified, wholelockchỉimageđổi; root actualREDA trên4.10.1/REDB saupintrướcwire, targeted240/240. Reuse byte/time/format/staticWebP guards và original-preservation; explicitperinstancecap khôngphảiquotaRAM/lazyinflatercóreadahead. Đây làrànhóm2/7/corebịảnhhưởng, khôngfullaudit/newsecuritycertification. Rootfullgate/CI/actualmergepending; F004/EX1 giữmởđếnđủevidence. PR4bownerapproval18Octthuộcgoalriêng, chưacode/appactivation.

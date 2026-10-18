@@ -58,7 +58,7 @@ Use a private two-channel byte rotation helper. RGBA promotion preserves alpha, 
 | AC-2 | `apps/mobile/test/imaging/page_render_test.dart` |
 | AC-3 | `apps/mobile/test/imaging/page_render_test.dart` |
 | AC-4 | `apps/mobile/test/imaging/page_render_test.dart`, `apps/mobile/test/export/page_exporter_test.dart`, `apps/mobile/test/tool/scanner_benchmark_test.dart` |
-| AC-5 | `docs/work/2026-10-17-xs07b-gray-alpha-render/working.md`, `docs/work/2026-10-17-xs07b-gray-alpha-render/PLAN.md` and execution evidence on the PR with this Work ID |
+| AC-5 | `docs/work/2026-10-17-xs07b-gray-alpha-render/done.md`, `docs/work/2026-10-17-xs07b-gray-alpha-render/PLAN.md` and execution evidence on the PR with this Work ID |
 
 Tests-only RED → root rerun/approval → production GREEN. Preserve tests and expectations through implementation; no golden changes. Android debug/analyze/format/unit/widget gates do not prove device camera/OCR/iOS/release quality.
 

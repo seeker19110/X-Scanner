@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-17-xs07b-gray-alpha-render
 - Yêu cầu / outcome: sau review/sửa/merge55, tiếp tục ưu tiên4 của báo cáo16/10; sửa lỗi pixel hai kênh có trước55 trong core hiện tại.
-- Trạng thái: Implementation freeze — root đã xác minh RED, tích hợp source/test và review độc lập sạch. Execution gates/CI cuối trên PR cùng Work ID; chưa Done trước actual merge.
+- Trạng thái: Done — actual56merge/readback18Oct at final reconciliation below; old checkpoints retained.
 - Chủ trì / writer: root giữ spec/PLAN/docs/maps/reconcile/gate/PR; worker giữ core/test/hồ sơ riêng trên worktree tách; reviewer chỉ đọc.
 - Mức rủi ro / số PR: M thận trọng, một PR nhỏ. Yêu cầu gồm55+PR kế nên giao subagent theo§3c.
 - Scope / non-goal: giữ hai kênh qua generic rectify và xoay render; không dependency/SDK/lock/tool/decoder/caps/budget/API/UI/schema/migration. Không tài liệu thật/OCR, release, paidAPI hoặc auto-merge. PR mới giữ OPEN.
@@ -58,3 +58,9 @@
 - Fresh reconcile: PR56 OPEN/head314a296/base9d44fc9, CI38994921878 SUCCESS; root sạch trước cập nhật hồ sơ. Đây là readback CI cũ, chưa phải gate thực thi18/10. PR57 do phiên khác tạo là phạm vi độc lập, không tích hợp vào app trong việc này.
 - Contract review56: reviewer chỉ đọc checkout tách /home/liend/.local/share/x-scanner/review-pr56-20261018 tại314a296; rà toàn diff/spec/caller/library và báo finding có đường tái hiện. Không sửa/commit/compiler/gate. Root giữ toàn bộ writer/docs/gate/merge.
 - Kế tiếp: root review và chạy lại đủ gate18/10, normal hook nếu commit hồ sơ, kiểm CI/native/threads/base/head rồi squash theo SHA khi đủ điều kiện. Sau actual merge mới reconcile done và làm W104b. Pub release đã qua mốc18/10T00:28Z; adb hiện không có thiết bị, chưa coi AC9 đạt.
+
+## Actual merge reconciliation — 2026-10-18
+
+Done after PR56 MERGED561a5cf05f12ccba03d536f5b522ad0e046f6255 at2026-10-18T01:40:12Z, reviewedheadcc5bb448523775a501e9f9bc32813a988d145005. Freshrootgate+normalhook4/4 each628/628, freshAOT12cases, finalCI39086812105SUCCESS628/628. Native5exactrules/app15368/strict/no bypass, ownerbypassnever, threads0, dependencycompareHTTP200/0changes/no snapshotwarning; artifact12121227969build0c5b04d exactparents/tree. Rootmainff-only and actualmergetree equals reviewedhead; no unresolvedfinding. Renameperformedonlyafterthisreadback in nextPR.
+
+Historical OPEN-only/checkpoint17Oct limits preceded owner's18Octcontinuation; completedwithincontinuedreview/repair/guardedmergeauthority. No device/UAT/iOS/OCR/release/performance acceptance. W104b owns newdecoder separately and may replace workaround with provenupstreamfix while retaining allregressions.
