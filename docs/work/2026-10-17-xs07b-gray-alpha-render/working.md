@@ -51,3 +51,10 @@
 - Review implementation mới review_pr52: findings=[], hash cả3file trước/sau khớp freeze; đọc code/callers/pinnedlibrary/spec/TRAPS. Reviewer không chạy compiler/test/gate và không sửa file. Root tự review: mapping1/3/4 tương đương, helper chỉuint8/2channels từrectify, bijective integerrotation/mod4, oneoutput/views; không secret/debug/deadcode/dep mới hoặc publicAPI thay đổi.
 - Main CI sau55 [38993777041](https://github.com/seeker19110/X-Scanner/actions/runs/38993777041) SUCCESS trên9d44fc9, readback mới sau checkpoint pending ở trên. Không dùng CI đó thay CI source XS07b.
 - Snapshot cuối gồm spec Approved/PLAN/maps/TRAPS/CHANGELOG/PROGRESS và reconcile55 done trong cùngPR. Root tiếp dispatcher fullgate và normalhook không bypass, AOT smoke từ commit sạch và CI finalhead; execution results/SHA/PR evidence đặt trênPR để tránh commit tự ghi SHA/CI chính nó. Không sửa trackedfile trong lúcgate. PR mới giữOPEN; chưa nghiệm thu UAT/device/iOS/OCR/release/100page hoặc hiệu năng/RAM.
+
+## Tiếp tục theo yêu cầu chủ repo — 2026-10-18
+
+- Chủ repo yêu cầu “tiếp cho đến khi hoàn thiện” sau chuỗi review/sửa/merge rồi nâng cấp. Root tiếp tục cùng vòng review→gate→merge có điều kiện cho các PR trong phạm vi đã giao; không bật auto-merge/deploy hoặc suy quyền kích hoạt migration PR-4b. Giới hạn giữ OPEN ở checkpoint17/10 là lịch sử trước yêu cầu tiếp tục này.
+- Fresh reconcile: PR56 OPEN/head314a296/base9d44fc9, CI38994921878 SUCCESS; root sạch trước cập nhật hồ sơ. Đây là readback CI cũ, chưa phải gate thực thi18/10. PR57 do phiên khác tạo là phạm vi độc lập, không tích hợp vào app trong việc này.
+- Contract review56: reviewer chỉ đọc checkout tách /home/liend/.local/share/x-scanner/review-pr56-20261018 tại314a296; rà toàn diff/spec/caller/library và báo finding có đường tái hiện. Không sửa/commit/compiler/gate. Root giữ toàn bộ writer/docs/gate/merge.
+- Kế tiếp: root review và chạy lại đủ gate18/10, normal hook nếu commit hồ sơ, kiểm CI/native/threads/base/head rồi squash theo SHA khi đủ điều kiện. Sau actual merge mới reconcile done và làm W104b. Pub release đã qua mốc18/10T00:28Z; adb hiện không có thiết bị, chưa coi AC9 đạt.

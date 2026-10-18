@@ -42,7 +42,7 @@ Use a private two-channel byte rotation helper. RGBA promotion preserves alpha, 
 - AC-2: Verify source preservation, output ownership/metadata and 16-bit gray-alpha normalization. Existing gray/RGB/RGBA/palette/border/identity cases remain green.
 - AC-3: PNG full-frame and crop at turns0..3 preserve exact gray/alpha/dimensions using manual non-square matrices. Include single pixel/row/column and negative/repeated turns modulo4. Expected values must not come from production transforms or `copyRotate`.
 - AC-4: JPEG rotation retains the existing two-channel encoder behavior using manually rotated fixtures; existing async preview/export/PDF/tool tests remain green.
-- AC-5: Root independently verifies RED before logic, then targeted/full gate, normal hook, AOT smoke and final-head CI. Maps/TRAPS/work records and actual55 reconciliation share this PR. New PR stays OPEN pending separate merge authorization.
+- AC-5: Root independently verifies RED before logic, then targeted/full gate, normal hook, AOT smoke and final-head CI. Maps/TRAPS/work records and actual55 reconciliation share this PR. New PR stays OPEN pending merge authorization (continued by the owner's18Oct request below).
 
 ## 11. Architecture và code touchpoints
 
@@ -65,3 +65,5 @@ Tests-only RED → root rerun/approval → production GREEN. Preserve tests and 
 ## 17. Approval, delivery and rollback
 
 Approved for implementation — main session under owner delegation dated2026-10-07 §3d; actual approval2026-10-17. One outcome/PR after55 merge. Worker writes three contracted files in a separate worktree; root owns docs/gates/PR. Merge authority covers55 only; new PR stays OPEN. No auto-merge, release or migration. Roll back through a revert PR; originals remain untouched.
+
+18Oct continuation: the owner's “tiếp cho đến khi hoàn thiện” continues the existing review/repair/gate/guarded-merge workflow for the assigned scope. Root reviews56 afresh and merges only after current-head checks, strict native protection, clean review and full gates. The17Oct OPEN checkpoint above is historical; no auto-merge/deploy or PR-4b data activation is authorized by it.
