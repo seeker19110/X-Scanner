@@ -1,6 +1,6 @@
 # W-104b — bounded decoder upgrade
 
-| Attribute | Value |
+| Thuộc tính | Giá trị |
 | --- | --- |
 | Work ID | 2026-10-18-w104b-decoder-upgrade |
 | State | **Approved for implementation** |

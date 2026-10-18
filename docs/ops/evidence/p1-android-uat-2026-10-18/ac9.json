@@ -1,0 +1,106 @@
+{
+  "verified_at_utc": "2026-10-18T11:03:58.791072+00:00",
+  "root_acceptance": "AC9 accepted under delegated technical acceptance; agent-run controlled emulator, not owner personally performed",
+  "source": "b227825a3145a2a73e2198320d58d4a08b5f327b",
+  "build": "a810e3fbf8f30acc2db977683aabf5fe79b318d5",
+  "main_same_tree": "c50670af18b1f11af38d15051b36264e1a051cb3",
+  "artifact": 12120799566,
+  "run": 39088067553,
+  "apk": {
+    "file": "X-Scanner-debug.apk",
+    "sha256": "d3fbacc2f9eba2dde2b2caf59844f31fba7596035a3c5e4ac28fe3069011c79f",
+    "bytes": 163354013
+  },
+  "emulator": "Windows37.2.12/WHPX/Android36 Google APIs x86_64 r7/2560MiB/2cores/private5039/emulator5582",
+  "viewer": "Librera FD9.6.39-fdroid7398 official F-Droid SHA256/signature/ABI/SEND handler verified",
+  "execution": "Actual camera(3) -> corner edits -> rotate -> reorder -> PDF export -> Android share sheet -> Librera FD receiver opened and navigated1/3,2/3,3/3",
+  "pdf": {
+    "bytes": 306290,
+    "sha256": "d488982dca7bc9708a1b4de21f32ee8e9edc70efb9120c4b73c5e1e6d6df59e9",
+    "page_count": 3,
+    "export_share_identical": true,
+    "raw_dct": [
+      {
+        "bytes": 100679,
+        "sha256": "1ea415d4c6de58ec388c8b2b4a0291b86ea25fc430015f6e8357ebf35b790f40"
+      },
+      {
+        "bytes": 98534,
+        "sha256": "946bce07bc748d3624a3c2b6e64eb842b6078844607df542aa0dc41db702f4d5"
+      },
+      {
+        "bytes": 105145,
+        "sha256": "f109e84299a11a2810f6910929a57271568e32df0e4b75910cae9cc48093bf1e"
+      }
+    ]
+  },
+  "originals": [
+    {
+      "id": "996fe429e48c3aed6304f19d7182ef5d",
+      "bytes": 99780,
+      "sha256": "0890fd5e22d87e9c9ae368e9dd0600c0a4edc47b4984522b12679e07d1cdabc2"
+    },
+    {
+      "id": "e7e9e6eb55f1ec75948e01ca8f3c221e",
+      "bytes": 99780,
+      "sha256": "284a67b38283efcfb5f998a4c592da3dfcec8eab082178fcb776ad1e33ae409c"
+    },
+    {
+      "id": "f00dbfd8ecbfa7ab9e2a854b82dac1db",
+      "bytes": 99780,
+      "sha256": "3ddb158679d5e9e0d6b0da98f13f9456c3656eb3b935f33fc19b27ab937f8d67"
+    }
+  ],
+  "order": [
+    "e7e9e6eb55f1ec75948e01ca8f3c221e",
+    "996fe429e48c3aed6304f19d7182ef5d",
+    "f00dbfd8ecbfa7ab9e2a854b82dac1db"
+  ],
+  "page_sizes": [
+    [
+      960,
+      1280
+    ],
+    [
+      885,
+      1280
+    ],
+    [
+      1280,
+      960
+    ]
+  ],
+  "orientation_degrees": [
+    180,
+    0,
+    90
+  ],
+  "manifest_unchanged_after_cancel_and_restart": true,
+  "screenshots_reviewed": [
+    "pdf-librera-page3.png",
+    "review-after-relaunch-ready.png"
+  ],
+  "limits": [
+    "All3camera captures use same emulated static geometric source; differentiated with real crop/rotate edits",
+    "Imagefile camera backend captures a subregion of host PNG; comparison uses actual original camera JPG, not a claim of full host PNG framing",
+    "NativeWHPX proven, graphics SwiftShader, debug/emulator timings do not establish device performance",
+    "No real documents/OCR/cloud/release/iOS/device-camera/depth tested",
+    "P1schema1 current APK does not activate unmergedcapacityadapter or XS09PR4b"
+  ],
+  "evidence_root": "/home/liend/.local/share/x-scanner/uat-20261018/windows",
+  "evidence_files": {
+    "review-restored.png": {
+      "bytes": 54865,
+      "sha256": "6137c51b082941a0d79afffbedeba2d2a5436d4d6ac8656fe5611efea9b75c6d"
+    },
+    "pdf-viewer-page3.png": {
+      "bytes": 370433,
+      "sha256": "123d99589b1da1c9f3d62173c326d7aea95b15f4ee2a6a6445a4a52832759e1c"
+    },
+    "three-pages.pdf": {
+      "bytes": 306290,
+      "sha256": "d488982dca7bc9708a1b4de21f32ee8e9edc70efb9120c4b73c5e1e6d6df59e9"
+    }
+  },
+  "handoff_manifest_sha256": "0770a52070923bbc316f1ecc8b12b526530837038342368c91a44897cbf0f069"
+}

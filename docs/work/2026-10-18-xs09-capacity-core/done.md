@@ -6,7 +6,7 @@
 - Chủ trì / writer: worker /root/w104b_research; root giữ spec/PLAN/dispatcher/review/gates/PR/merge.
 - Mức rủi ro / số PR: M leaf thuộc outcome L XS09; một PR foundation do root tích hợp.
 - Scope / non-goal: chỉ android_storage.dart/test, StorageHandler.kt/Test, MainActivity.kt, app/build.gradle.kts và hồ sơ này; không main.dart/schema/permission/pub/runtime dependency, không commit/push/merge/subagent.
-- Spec / goal / issue: docs/specs/2026-10-18-xs09-android-capacity.md Approved root18Oct theo owner PR4b; root PLAN và docs/work/2026-10-18-xs09-android-capacity/working.md.
+- Spec / goal / issue: docs/specs/2026-10-18-xs09-android-capacity.md Approved root18Oct theo owner PR4b; root PLAN và docs/work/2026-10-18-xs09-android-capacity/done.md.
 - Nhánh / base SHA / thời điểm reconcile: `codex/xs09-android-capacity` @ `561a5cf` · 2026-10-18T01:52:39Z
 
 ## Kế hoạch và phân công
@@ -111,3 +111,10 @@ Logs dưới /home/liend/.local/share/x-scanner/downloads/:
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
 Chưa nghiệm thu; không có PR/merge/test runtime của leaf này. Mock/JVM/build không phải bằng chứng StatFs trên thiết bị; không tuyên bố AC13/UAT/Complete.
+
+
+## Actual merge reconciliation — 2026-10-18
+
+PR [#59](https://github.com/seeker19110/X-Scanner/pull/59) squash merged `209c808ec20b4df9ca75e64c0c8d037e150aae7c` at11:06:20UTC. Reviewed head `c367d6fcf1da4de7c94e4f2541a829eb9e64a151`, basec50670a. Independent final29file review findings=[]; final rootgate/hook each4/4,658Flutter+11freshJVM; finalCI39121270944 SUCCESS (658uniqueFlutter PASS/native --rerun command completed), analyze0/format0/APK/releaseguard/repositorychecks. Fresh native exact5rules/app15368/strict/nobypass/ownernever,0unresolvedthreads, compareHTTP200/0changes/emptywarnings. Artifact12134422425 build85e3cb8 parents[base,head], matchingtree.
+
+Root fetched/ff-only main to actualmerge209c808; clean/tree546d5408da5357131eb290af25eb120cd1e79a14 matches reviewedhead. Outside proofs pr59-review-proof.json, pr59-merged.json, pr59-main-reconcile.json, pr59-ci-log-proof.json and fullrawlogs. Leaf DoD met; root accepts under ownerPR4b/§3d. Adapter runtime still not exercised by current P1APK; app switch/AC13 remain in parentintegration. No release/auto-merge or original deletion.

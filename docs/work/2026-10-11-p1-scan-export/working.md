@@ -64,3 +64,8 @@
 <DoD, mọi PR MERGED + merge SHA và main đã đối chiếu, giới hạn/rủi ro còn lại,
 ngày và người nghiệm thu theo ủy quyền. Khi đủ điều kiện rename working.md → done.md
 trong cùng thư mục; không overwrite lịch sử. Chưa có PR/merge thì giữ working.md.>
+
+
+## AC9 execution accepted — 2026-10-18
+
+Root accepts agent-run emulator AC9 under delegated§3d after actual3system-camera captures→crop/rotate/reorder→PDF→Androidsharesheet→Librera1/3,2/3,3/3 on verifiedCI58APK. Bundle/APK/PDF/rawDCT/originalbefore-after hashes and cancel/restart manifest/UI independently verified; proof `docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json`, work2026-10-18-p1-android-uat. Not owner-personally-run, not release/physicalcamera/OCR/depth/XS09AC13. Earlier owner/device waiting entries are historical; report reconciliation still awaits merge, so keep working until that actualmerge and final convergence audit.

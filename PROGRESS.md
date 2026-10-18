@@ -92,4 +92,13 @@ XS-08: spec [hợp đồng tài liệu, revision và xuất](docs/specs/2026-10-
 
 ## 2026-10-18: XS09 PR4b capacity foundation
 
-Hồ sơ [capacity](docs/work/2026-10-18-xs09-android-capacity/working.md); spec Approved trước source theo ownerPR4b18Oct. Leaf Android dùng StatFs/filesDir và channel không nhận path, kiểm int/0/64bit/lỗi sanitize; JUnit chỉ test dependency, JVM tests được nối vào dispatcher. Mã và targeted tests sẵn sàng; root đã reconcileactualmainc50670a, fullgate/CI/merge đang thực hiện. App vẫn dùng bố cục P1 tới slice tích hợp; giữcopy/verify/session.migrated. Pending-picker ownership cần contract trước app switch.
+Hồ sơ [capacity](docs/work/2026-10-18-xs09-android-capacity/done.md); spec Approved trước source theo ownerPR4b18Oct. Leaf Android dùng StatFs/filesDir và channel không nhận path, kiểm int/0/64bit/lỗi sanitize; JUnit chỉ test dependency, JVM tests được nối vào dispatcher. Mã và targeted tests sẵn sàng; root đã reconcileactualmainc50670a, fullgate/CI/merge đang thực hiện. App vẫn dùng bố cục P1 tới slice tích hợp; giữcopy/verify/session.migrated. Pending-picker ownership cần contract trước app switch.
+
+
+## 2026-10-18: capacity đã merge, AC9 đã có bằng chứng, pending-original đang tích hợp
+
+[Capacity Done](docs/work/2026-10-18-xs09-android-capacity/done.md): [PR59](https://github.com/seeker19110/X-Scanner/pull/59) đã merge209c808 sau review29files/findings[], gate/hook4/4 với658Flutter+11freshJVM và CI39121270944 SUCCESS/native/treeproof. Adapter chưa được app gọi, không suy runtime từ mocks/JVM.
+
+[UAT AC9](docs/work/2026-10-18-p1-android-uat/working.md): WindowsWHPX/API36 đã boot và chạy exactCI58APK; ba lần camera→crop/rotate/reorder→PDF/share→Librera đủ3trang. Root nghiệm thu theo§3d, agent thực hiện, không ghi chủ repo tự chạy. Kiểm bản gốc trước/sau bằng byte/hash, cancel/restart UI/manifest, Dark/Light và offline export/viewer. [Proof](docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json); report/reconciliation đang vào PR tiếp. Các đoạn chờ AC9/môi trường phía trên là checkpoint lịch sử trước bằng chứng18Oct, không còn blocker của narrowAC9. Chưa physicalcamera/OCR/depth/iOS/release.
+
+[Pending preservation](docs/work/2026-10-18-xs09-picker-preservation/working.md): spec Approved trước behavior, rootactualRED86case trướclogic; durableowner/journal/copy/retainedrejection leaf đangreview trênmain209c808. Chưa nối app/library/migration. XS09AC13 và parentgoal còn ACTIVE; bước tiếp là mergeleaf đủgates rồi tích hợp app bằng contract/test, giữsession.migrated và synthetic3pageAVD cho UATmigration.

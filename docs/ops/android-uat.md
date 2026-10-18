@@ -49,3 +49,8 @@ Ghi Pass/Fail/Not run và bằng chứng cho từng ca; không đánh dấu thay
 Lưu kết quả vào hồ sơ P1/việc đang mở, gồm ngày, link run/artifact, `BUILD_COMMIT`, `SOURCE_COMMIT`, phiên bản Flutter, thiết bị/emulator và Android, viewer nhận file, bảng kết quả cùng lỗi tái hiện. Ảnh/video chỉ chứa fixture tổng hợp; không đính kèm scan cá nhân hoặc log nội dung OCR.
 
 AC-9 chỉ đóng sau khi người nghiệm thu ghi bằng chứng chụp → chỉnh → xuất → mở PDF. Checklist mở rộng không chứng minh hiệu năng thiết bị, OCR, depth, iOS hoặc release readiness. PR-4b thư viện/migration và W-104b decoder có phạm vi, cổng và mốc riêng.
+
+
+## Accepted controlled execution — 2026-10-18
+
+[P1 AC9 proof](evidence/p1-android-uat-2026-10-18/ac9.json): verifiedCI58APK on WindowsWHPX/API36, actual three external-camera captures, crop/rotate/reorder, PDF/share and Librera pages1/3–3/3. Agent executed, root accepted under delegated§3d; [restored review](evidence/p1-android-uat-2026-10-18/review-restored.png), [viewer3/3](evidence/p1-android-uat-2026-10-18/pdf-viewer-page3.png), [synthetic PDF](evidence/p1-android-uat-2026-10-18/three-pages.pdf). Originals preserved byte-for-byte and cancel/restart checked. Dark/Light and offline export/viewer checked; broader checklist items (gallery formats, process-death camera recovery, JPG/PNG recipient, TalkBack/large text, offline capture) are not claimed by this narrow AC9 execution. XS09 migration/nativecapacity need their own later exact-APK evidence.
