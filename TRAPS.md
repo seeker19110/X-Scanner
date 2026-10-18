@@ -40,6 +40,16 @@ xong** cùng store.
 đồng nhất, kiểm pixel ở 4 mép đầu ra. *Chốt chặn*: `apps/mobile/test/imaging/page_render_test.dart`.
 (2026-10-11, seeker19110/X-Scanner#8)
 
+**Nhầm RGBA logic với storage gray-alpha hai kênh.** Trong image4.10.1,
+`PixelUint8.g` của ảnh hai kênh trả gray nhưng `ImageDataUint8.setPixelRgba` ghi g
+vào byte1 (alpha). Vì vậy nội suy hoặc `copyRotate` qua `setPixel` thay alpha bằng
+gray. *Cách rà*: tạo fixture bằng byte thô, gray khác alpha, gồm0/partial/255;
+kiểm crop/cap/skew và ma trận xoay tay, không dùng chính setter/transform làm expected.
+*Chốt chặn*: regression XS-07b trong `apps/mobile/test/imaging/page_render_test.dart`.
+Giữ hai kênh qua storage mapping và byte rotation. Chuyển RGBA riêng lúc xoay còn
+đổi cách JPEG blend nền và thêm buffer lớn; đó không phải workaround tương đương.
+(2026-10-17, Work ID `2026-10-17-xs07b-gray-alpha-render`; nợ có trướcPR55)
+
 **Ảnh 16-bit bị cắt về 0 khi mã hoá.** Ảnh PNG 16-bit/kênh mã hoá thẳng sang JPEG 8-bit cho ảnh đen.
 *Cách rà*: mọi đường mã hoá đầu ra phải chuẩn hoá về 8-bit/kênh trước. *Chốt chặn*: test ảnh 16-bit trong
 `apps/mobile/test/imaging/page_render_test.dart`. (2026-10-11, seeker19110/X-Scanner#8)

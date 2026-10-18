@@ -56,6 +56,26 @@ img.Image ramp() {
   return image;
 }
 
+/// Populate raw gray/alpha storage without the library's RGBA setter.
+img.Image grayAlpha(int width, int height, List<int> samples) {
+  final image = img.Image(width: width, height: height, numChannels: 2);
+  image.toUint8List().setAll(0, samples);
+  return image;
+}
+
+img.Image grayAlphaRamp() {
+  final image = img.Image(width: 8, height: 6, numChannels: 2);
+  final bytes = image.toUint8List();
+  for (var y = 0; y < 6; y++) {
+    for (var x = 0; x < 8; x++) {
+      final offset = (y * 8 + x) * 2;
+      bytes[offset] = 10 + 20 * x;
+      bytes[offset + 1] = 30 + 30 * y;
+    }
+  }
+  return image;
+}
+
 /// A 3×2 lossless WebP filled with RGB (10, 20, 30), made with Pillow.
 const String webp3x2 = 'UklGRh4AAABXRUJQVlA4TBEAAAAvAkAAAAdQiirUo/+BiOh/AAA=';
 
@@ -79,6 +99,286 @@ void expectRgb(img.Image image, int x, int y, List<int> rgb) {
 }
 
 void main() {
+  group('gray-alpha fidelity (XS-07b)', () {
+    final crop = quadOf([0.25, 0, 1, 0, 1, 1, 0.25, 1]);
+    for (final caseName in ['crop', 'cap', 'skew']) {
+      test('$caseName interpolates gray and alpha independently', () {
+        final source = grayAlphaRamp();
+        final quad = switch (caseName) {
+          'crop' => crop,
+          'skew' => quadOf([0, 0, 0.75, 0, 1, 1, 0.25, 1]),
+          _ => PageQuad.fullFrame,
+        };
+        final out = rectify(
+          source,
+          quad,
+          maxPixels: caseName == 'cap' ? 12 : maxDecodedPixels,
+        );
+        expect((out.width, out.height), caseName == 'cap' ? (4, 3) : (6, 6));
+        expect(out.numChannels, 2);
+        expect(
+          out.width * out.height,
+          lessThanOrEqualTo(caseName == 'cap' ? 12 : 48),
+        );
+        for (final p in out) {
+          // Crop samples (x+2,y); cap samples (2*x+.5,2*y+.5);
+          // parallelogram samples (x+(y+.5)/3,y), all in source pixel centers.
+          final expectedGray = switch (caseName) {
+            'crop' => 50 + 20 * p.x,
+            'cap' => 20 + 40 * p.x,
+            _ => 10 + 20 * (p.x + (p.y + 0.5) / 3),
+          };
+          final expectedAlpha = caseName == 'cap'
+              ? 45 + 60 * p.y
+              : 30 + 30 * p.y;
+          expect(p.r, closeTo(expectedGray, 1), reason: 'gray (${p.x},${p.y})');
+          expect(
+            p.a,
+            closeTo(expectedAlpha, 1),
+            reason: 'alpha (${p.x},${p.y})',
+          );
+        }
+      });
+    }
+
+    test('normalizes uint16 gray-alpha before cropping', () {
+      final source = img.Image(
+        width: 4,
+        height: 2,
+        numChannels: 2,
+        format: img.Format.uint16,
+      );
+      final values = [
+        10,
+        0,
+        20,
+        40,
+        30,
+        80,
+        40,
+        120,
+        50,
+        160,
+        60,
+        200,
+        70,
+        240,
+        80,
+        255,
+      ];
+      source.buffer.asUint16List().setAll(
+        0,
+        values.map((value) => value * 257),
+      );
+      final before = Uint8List.fromList(source.toUint8List());
+      final out = rectify(source, quadOf([0, 0, 0.5, 0, 0.5, 1, 0, 1]));
+      expect((out.width, out.height, out.numChannels), (2, 2, 2));
+      expect(out.format, img.Format.uint8);
+      expect(out.toUint8List(), [10, 0, 20, 40, 50, 160, 60, 200]);
+      expect(source.toUint8List(), before);
+    });
+
+    test('cropped pixels own storage and omit synthetic metadata', () {
+      final source = grayAlphaRamp()..textData = {'synthetic': 'XS-07b'};
+      source.exif.imageIfd.orientation = 6;
+      final before = Uint8List.fromList(source.toUint8List());
+      final out = rectify(source, crop);
+      expect(source.toUint8List(), before);
+      expect(out.exif.imageIfd.isEmpty, isTrue);
+      expect(out.textData, isNull);
+      out.toUint8List()[1] ^= 255;
+      expect(source.toUint8List(), before);
+      final outputAfter = Uint8List.fromList(out.toUint8List());
+      source.toUint8List()[0] ^= 255;
+      expect(out.toUint8List(), outputAfter);
+      expect(source.exif.imageIfd.orientation, 6);
+      expect(source.textData, {'synthetic': 'XS-07b'});
+    });
+
+    // A B C / D E F, with distinct gray and alpha (including 0/partial/255).
+    const cells = [
+      [10, 0],
+      [50, 40],
+      [90, 80],
+      [130, 120],
+      [170, 200],
+      [210, 255],
+    ];
+    const orders = [
+      [0, 1, 2, 3, 4, 5], // A B C / D E F
+      [3, 0, 4, 1, 5, 2], // D A / E B / F C
+      [5, 4, 3, 2, 1, 0], // F E D / C B A
+      [2, 5, 1, 4, 0, 3], // C F / B E / A D
+    ];
+    img.Image manual(List<int> order, int width, int height) =>
+        grayAlpha(width, height, [for (final index in order) ...cells[index]]);
+    final full = manual(orders[0], 3, 2);
+    final padded = grayAlpha(4, 4, [
+      10,
+      0,
+      50,
+      40,
+      90,
+      80,
+      240,
+      5,
+      130,
+      120,
+      170,
+      200,
+      210,
+      255,
+      241,
+      6,
+      242,
+      7,
+      243,
+      8,
+      244,
+      9,
+      245,
+      10,
+      246,
+      11,
+      247,
+      12,
+      248,
+      13,
+      249,
+      14,
+    ]);
+    for (final cropped in [false, true]) {
+      for (var turns = 0; turns < 4; turns++) {
+        test(
+          'PNG ${cropped ? 'crop' : 'full-frame'} turn $turns matches manual matrix',
+          () {
+            final original = pngOf(cropped ? padded : full);
+            final before = Uint8List.fromList(original);
+            final out = img.decodePng(
+              renderPageSync(
+                original,
+                cropped
+                    ? quadOf([0, 0, 0.75, 0, 0.75, 0.5, 0, 0.5])
+                    : PageQuad.fullFrame,
+                turns,
+                format: RenderFormat.png,
+              ),
+            )!;
+            final expected = manual(
+              orders[turns],
+              turns.isEven ? 3 : 2,
+              turns.isEven ? 2 : 3,
+            );
+            expect(
+              (out.width, out.height, out.numChannels),
+              (expected.width, expected.height, 2),
+            );
+            expect(out.toUint8List(), expected.toUint8List());
+            expect(original, before);
+          },
+        );
+      }
+    }
+
+    test(
+      'PNG negative and repeated turns follow modulo four manual matrices',
+      () {
+        for (final turns in [-5, -4, -1, 4, 5, 7, 8, 10]) {
+          final normalized = turns % 4;
+          final expected = manual(
+            orders[normalized],
+            normalized.isEven ? 3 : 2,
+            normalized.isEven ? 2 : 3,
+          );
+          final out = img.decodePng(
+            renderPageSync(
+              pngOf(full),
+              PageQuad.fullFrame,
+              turns,
+              format: RenderFormat.png,
+            ),
+          )!;
+          expect(
+            (out.width, out.height, out.numChannels),
+            (expected.width, expected.height, 2),
+            reason: 'turns=$turns',
+          );
+          expect(
+            out.toUint8List(),
+            expected.toUint8List(),
+            reason: 'turns=$turns',
+          );
+        }
+      },
+    );
+
+    for (final shape in ['pixel', 'row', 'column']) {
+      test('PNG $shape keeps both channels through each quarter turn', () {
+        final source = switch (shape) {
+          'pixel' => manual([0], 1, 1),
+          'row' => manual([0, 1, 2], 3, 1),
+          _ => manual([0, 1, 2], 1, 3),
+        };
+        for (var turns = 0; turns < 4; turns++) {
+          final reverse = shape == 'row'
+              ? turns >= 2
+              : turns == 1 || turns == 2;
+          final order = shape == 'pixel'
+              ? [0]
+              : reverse
+              ? [2, 1, 0]
+              : [0, 1, 2];
+          final horizontal = shape == 'row' ? turns.isEven : turns.isOdd;
+          final expected = manual(
+            order,
+            shape == 'pixel'
+                ? 1
+                : horizontal
+                ? 3
+                : 1,
+            shape == 'pixel'
+                ? 1
+                : horizontal
+                ? 1
+                : 3,
+          );
+          final out = img.decodePng(
+            renderPageSync(
+              pngOf(source),
+              PageQuad.fullFrame,
+              turns,
+              format: RenderFormat.png,
+            ),
+          )!;
+          expect(
+            (out.width, out.height, out.numChannels),
+            (expected.width, expected.height, 2),
+            reason: 'turns=$turns',
+          );
+          expect(
+            out.toUint8List(),
+            expected.toUint8List(),
+            reason: 'turns=$turns',
+          );
+        }
+      });
+    }
+
+    for (var turns = 0; turns < 4; turns++) {
+      test('JPEG turn $turns retains two-channel encoder policy', () {
+        final expected = manual(
+          orders[turns],
+          turns.isEven ? 3 : 2,
+          turns.isEven ? 2 : 3,
+        );
+        expect(
+          renderPageSync(pngOf(full), PageQuad.fullFrame, turns),
+          img.encodeJpg(expected, quality: 90),
+        );
+      });
+    }
+  });
+
   group('rectifiedSize', () {
     test('uses the longer opposite edges in pixels (AC-5)', () {
       final size = rectifiedSize(ac5Quad(), 400, 300);

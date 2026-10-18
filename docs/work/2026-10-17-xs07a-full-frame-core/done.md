@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-17-xs07a-full-frame-core
 - Yêu cầu / outcome: XS-07a T1, sửa pixel full-frame không resample theo spec Approved trước source.
-- Trạng thái: Ready for root gate — targeted checks xanh, source freeze; chưa Done/fullgate/benchmark.
+- Trạng thái: Done — tích hợp PR55, root nghiệm thu và actualmerge; xem reconcile cuối hồ sơ.
 - Chủ trì / writer: worker T1 chỉ core/test/hồ sơ riêng; root giữ spec/PLAN/docs/maps/gate/benchmark/PR.
 - Mức rủi ro / số PR: M gọn, một PR tổng XS-07a do root tích hợp/mở.
 - Scope / non-goal: chỉ ba điểm chạm được giao, không API/schema/dependency/SDK/lock/decoder/budget/CI/tool changes; không fullgate/commit/push/merge/subagent.
@@ -45,3 +45,9 @@
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
 - Ready for root gate, chưa Done; giữ working.md. Root chịu AC5 comparison/fullgate/CI và quyền PR. Chưa chạy full Android gate hoặc benchmark ở worker, không có claim hiệu năng/device/UAT/OCR/release.
+
+## Reconcile thực sau review/merge55 —17/10
+
+- PR55 MERGED squash `9d44fc9b39cee2d4cac7871f8ee590882e4681e5` lúc2026-10-17T02:08:56Z; root mainff-only và tree khớp reviewhead cuối. Gate mới và normalhook mỗi4/4,607/607; CI finalhead/requiredapp15368/dependencyreview/UATbundle SUCCESS, native5rules exact/no bypass, threads0/compare0changes/no warnings. Chi tiết sourcehead/CI/artifact readback trênPR55 và localreviewproof, không dùng lời khai worker làm nghiệm thu.
+- Review mới findings=[]; control replay10success/0failure không tái hiện31.5% (13.237269→13.375609s), giữ nguyên40mẫu cũ và giới hạn sharedhost. Runtime giữ5890c2f qua reviewdocs.
+- DoD phạm vi XS07a đạt, root nghiệm thu theo quyền review/repair/merge55 trực tiếp17/10; rename done chỉ sau actualmerge. Không đóng EX1/AC9/PR4b hoặc nghiệm thu iOS/device/scan/OCR/release. Nợ gray-alpha crop/downsize/rotation nối outcomeXS07b, không sửa ngược lịch sử55.
