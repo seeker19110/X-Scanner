@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-17-xs07b-gray-alpha-core
 - Yêu cầu / outcome: XS07b T1 giữ gray/alpha độc lập qua generic rectify và render quarter turns, sau PR55 merge thật.
-- Trạng thái: Ready for root gate — targeted GREEN/source freeze; chưa fullgate/AOT/CI/PR/Done.
+- Trạng thái: Done — root final gates/CI/actual56merge verified18Oct below; worker did not claim root gates.
 - Chủ trì / writer: worker chỉ core/test/hồ sơ riêng; root giữ spec/PLAN/docs/maps/reconcile/gates/PR.
 - Mức rủi ro / số PR: M thận trọng, một PR tổng do root tích hợp/mở, giữ OPEN.
 - Scope / non-goal: ba file T1, không public API/schema/UI/tool/decoder/dependency/lock/SDK/cap/budget/isolate; không real documents/OCR/API/commit/push/merge/fullgate/subagent.
@@ -43,3 +43,9 @@ Writer scope: `apps/mobile/lib/imaging/page_render.dart`, `apps/mobile/test/imag
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
 - Ready for root gate, chưa Done; giữ working.md. Root AC5/gates/CI/PR riêng, không nhận device/UAT/scan/OCR/iOS/release từ host checks. New PR giữ OPEN theo quyền đã giao.
+
+## Actual merge reconciliation — 2026-10-18
+
+Done after PR56 MERGED561a5cf05f12ccba03d536f5b522ad0e046f6255 at2026-10-18T01:40:12Z, reviewedheadcc5bb448523775a501e9f9bc32813a988d145005. Freshrootgate+normalhook4/4 each628/628, freshAOT12cases, finalCI39086812105SUCCESS628/628. Native5exactrules/app15368/strict/no bypass, ownerbypassnever, threads0, dependencycompareHTTP200/0changes/no snapshotwarning; artifact12121227969build0c5b04d exactparents/tree. Rootmainff-only and actualmergetree equals reviewedhead; no unresolvedfinding. Renameperformedonlyafterthisreadback in nextPR.
+
+Historical OPEN-only/checkpoint17Oct limits preceded owner's18Octcontinuation; completedwithincontinuedreview/repair/guardedmergeauthority. No device/UAT/iOS/OCR/release/performance acceptance. W104b owns newdecoder separately and may replace workaround with provenupstreamfix while retaining allregressions.

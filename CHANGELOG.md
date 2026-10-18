@@ -1,6 +1,8 @@
 # Changelog — X-Scanner
 
-## Unreleased — 2026-10-17
+## Unreleased — 2026-10-18
+
+- W104b: ghim `image 4.12.0` đủ tuổi, truyền giới hạn theo từng decoder trước parse, kiểm header/output và trả null cho header bị từ chối. Giữ regression gray-alpha; dùng lại setter/xoay upstream đã sửa thay helper riêng. Không đổi các package khác hoặc bật scaled JPEG.
 
 - XS-07b: giữ alpha của ảnh xám hai kênh khi cắt, thu nhỏ và xoay trang; giữ cách JPEG xử lý hai kênh, không chuyển ảnh sang RGBA hoặc thêm buffer toàn ảnh trung gian.
 

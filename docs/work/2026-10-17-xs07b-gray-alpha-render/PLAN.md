@@ -18,7 +18,7 @@ Correct the existing two-channel storage defect in generic rectify and render qu
 ## Danh sách việc
 ### T1 — Gray-alpha generic and rotation correctness   `route: complex`
 
-- Điểm chạm: apps/mobile/lib/imaging/page_render.dart, apps/mobile/test/imaging/page_render_test.dart, docs/work/2026-10-17-xs07b-gray-alpha-core/working.md.
+- Điểm chạm: apps/mobile/lib/imaging/page_render.dart, apps/mobile/test/imaging/page_render_test.dart, docs/work/2026-10-17-xs07b-gray-alpha-core/done.md.
 - Đặc tả: implement the algorithm above and specAC1..5. Choose local fixture names/test placement within the existing file. Expected values come from analytical ramps/manual tables, not production geometry. Reuse helpers/imports; no abstraction framework/dependency. Report any out-of-scope defect to root before expanding work.
 - Phụ thuộc: none
 - Tiêu chí chấp nhận: actual RED pixel mismatch, not setup/compile failure; pause for root GREENLIGHT. Fixed old/new targeted tests green, analyze0 and format0. Self-review and freeze exact three files with hashes and complete logs. No commit/push/merge/fullgate/subagents/native changes; root owns all other files and PR/CI.

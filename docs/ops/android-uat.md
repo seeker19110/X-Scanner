@@ -19,7 +19,7 @@ Cả bốn file phải `OK`. Không cài nếu checksum sai; tải lại từ ru
 
 Dùng emulator hoặc máy Android dành cho thử nghiệm, có camera hệ thống và trình xem PDF. Dùng tài liệu tổng hợp, không dùng giấy tờ cá nhân. APK được ký bằng debug key của runner, dành cho kiểm thử; không dùng làm bản phát hành.
 
-Trong khi W-104b còn chờ mốc 18/10, decoder vẫn là `image` 4.10.1 với lỗi đầu vào đã ghi ở [EX-1](supply-chain-exceptions.md). Chỉ dùng fixture tổng hợp do nhóm phát triển kiểm soát; artifact UAT không đóng EX-1 hoặc chứng minh decoder đã được vá.
+Kiểm pin decoder của đúng `SOURCE_COMMIT` trong lockfile: artifact cũ dùng image4.10.1 có lỗi ở [EX-1](supply-chain-exceptions.md); W104b nâng4.12.0 khi đủ7ngày18Oct. Chỉ dùng fixture tổng hợp được kiểm soát. Artifact/UAT không thay hồi quy decoder, gate hoặc actual merge cần để đóng EX1; không nhận artifact cũ đã được vá chỉ vì ngày tải mới.
 
 ```bash
 adb devices

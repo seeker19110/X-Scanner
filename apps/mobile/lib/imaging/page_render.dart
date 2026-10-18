@@ -38,7 +38,7 @@ const List<int> _webpMagic = [0x57, 0x45, 0x42, 0x50]; // WEBP
 /// `null`. Only these formats are accepted as originals, whatever the file
 /// is named: fewer decoders face untrusted input, and none is picked by a
 /// loose guess such as TGA.
-img.Decoder? _decoderFor(Uint8List bytes) {
+img.Decoder? _decoderFor(Uint8List bytes, int maxPixels) {
   bool startsWith(List<int> magic, [int offset = 0]) {
     if (bytes.length < offset + magic.length) return false;
     for (var i = 0; i < magic.length; i++) {
@@ -47,25 +47,34 @@ img.Decoder? _decoderFor(Uint8List bytes) {
     return true;
   }
 
-  if (startsWith(_jpegMagic)) return img.JpegDecoder();
-  if (startsWith(_pngMagic)) return img.PngDecoder();
+  if (startsWith(_jpegMagic)) return img.JpegDecoder(maxPixels: maxPixels);
+  if (startsWith(_pngMagic)) return img.PngDecoder(maxPixels: maxPixels);
   if (startsWith(_riffMagic) && startsWith(_webpMagic, 8)) {
-    return img.WebPDecoder();
+    return img.WebPDecoder()..maxPixels = maxPixels;
   }
   return null;
 }
 
 /// The decoder for [bytes] and their header, or `null` for a format other
-/// than JPEG, PNG or WebP, an unreadable header, a non-positive side or an
-/// animated WebP.
+/// than JPEG, PNG or WebP, an unreadable or oversized header, a non-positive
+/// side or limit, or an animated WebP. Instance limits are set before parsing.
 ///
 /// An animated WebP reports its canvas, not the size of the frame that
 /// decoding allocates, so the pixel ceiling could not hold for it. (An
 /// animated PNG decodes frame 0 at its header size.)
-({img.Decoder decoder, img.DecodeInfo info})? _startDecode(Uint8List bytes) {
-  final decoder = _decoderFor(bytes);
+({img.Decoder decoder, img.DecodeInfo info})? _startDecode(
+  Uint8List bytes, {
+  int maxPixels = maxDecodedPixels,
+}) {
+  // Upstream treats nonpositive limits as unlimited; the app never does.
+  if (maxPixels <= 0) return null;
+  final decoder = _decoderFor(bytes, maxPixels);
   final info = decoder?.startDecode(bytes);
-  if (decoder == null || info == null || info.width <= 0 || info.height <= 0) {
+  if (decoder == null ||
+      info == null ||
+      info.width <= 0 ||
+      info.height <= 0 ||
+      info.width * info.height > maxPixels) {
     return null;
   }
   if (info is img.WebPInfo &&
@@ -79,11 +88,15 @@ img.Decoder? _decoderFor(Uint8List bytes) {
 
 /// Width and height of the image in [bytes], read from its header only
 /// (no pixels are decoded), or `null` when the header is not accepted (see
-/// [_startDecode]).
+/// [_startDecode]), including an image above [maxDecodedPixels].
 ({int width, int height})? imageSizeOf(Uint8List bytes) {
-  final info = _startDecode(bytes)?.info;
-  if (info == null) return null;
-  return (width: info.width, height: info.height);
+  try {
+    final info = _startDecode(bytes)?.info;
+    if (info == null) return null;
+    return (width: info.width, height: info.height);
+  } on img.ImageException {
+    return null;
+  }
 }
 
 /// Decodes the first frame of [bytes] and bakes its EXIF orientation in.
@@ -94,14 +107,16 @@ img.Decoder? _decoderFor(Uint8List bytes) {
 /// headers (more than [maxPixels] pixels) and any decoder error.
 img.Image decodeOriented(Uint8List bytes, {int maxPixels = maxDecodedPixels}) {
   try {
-    final start = _startDecode(bytes);
+    final start = _startDecode(bytes, maxPixels: maxPixels);
     if (start == null) throw const ImageDecodeFailure();
-    final (:decoder, :info) = start;
-    if (info.width * info.height > maxPixels) {
+    final decoder = start.decoder;
+    final image = decoder.decode(bytes, frame: 0);
+    if (image == null ||
+        image.width <= 0 ||
+        image.height <= 0 ||
+        image.width * image.height > maxPixels) {
       throw const ImageDecodeFailure();
     }
-    final image = decoder.decode(bytes, frame: 0);
-    if (image == null) throw const ImageDecodeFailure();
     // bakeOrientation always copies the pixels; skip it when there is
     // nothing to bake so a large original is held in memory only once.
     final ifd = image.exif.imageIfd;
@@ -192,7 +207,6 @@ img.Image rectify(
   );
   final maxX = src.width - 1;
   final maxY = src.height - 1;
-  final isGrayAlpha = src.numChannels == 2;
   for (var j = 0; j < size.height; j++) {
     final v = (j + 0.5) / size.height;
     for (var i = 0; i < size.width; i++) {
@@ -202,16 +216,7 @@ img.Image rectify(
         (p.y - 0.5).clamp(0, maxY),
         interpolation: img.Interpolation.linear,
       );
-      // image stores the setter's g argument in byte 1, which is alpha
-      // for a two-channel image rather than its logical green channel.
-      out.setPixelRgba(
-        i,
-        j,
-        sample.r,
-        isGrayAlpha ? sample.a : sample.g,
-        sample.b,
-        sample.a,
-      );
+      out.setPixel(i, j, sample);
     }
   }
   return out;
@@ -238,43 +243,12 @@ Uint8List renderPageSync(
     maxPixels: maxPixels,
   );
   if (quarterTurns != 0) {
-    page = page.numChannels == 2
-        ? _rotateGrayAlpha(page, quarterTurns)
-        : img.copyRotate(page, angle: 90 * quarterTurns);
+    page = img.copyRotate(page, angle: 90 * quarterTurns);
   }
   return switch (format) {
     RenderFormat.jpeg => img.encodeJpg(page, quality: 90),
     RenderFormat.png => img.encodePng(page),
   };
-}
-
-/// Rotates an already-owned uint8 page without the library's gray-alpha
-/// setter or RGBA promotion, which would also change JPEG alpha handling.
-img.Image _rotateGrayAlpha(img.Image source, int quarterTurns) {
-  final turns = quarterTurns % 4;
-  if (turns == 0) return source;
-  final width = source.width;
-  final height = source.height;
-  final out = img.Image(
-    width: turns.isOdd ? height : width,
-    height: turns.isOdd ? width : height,
-    numChannels: 2,
-  );
-  final input = source.toUint8List();
-  final output = out.toUint8List();
-  for (var y = 0; y < height; y++) {
-    for (var x = 0; x < width; x++) {
-      final from = (y * width + x) * 2;
-      final to = switch (turns) {
-        1 => (x * height + height - 1 - y) * 2,
-        2 => ((height - 1 - y) * width + width - 1 - x) * 2,
-        _ => ((width - 1 - x) * height + y) * 2,
-      };
-      output[to] = input[from];
-      output[to + 1] = input[from + 1];
-    }
-  }
-  return out;
 }
 
 /// Runs [renderPageSync] on the file at [originalPath] in a background

@@ -49,6 +49,7 @@ kiểm crop/cap/skew và ma trận xoay tay, không dùng chính setter/transfor
 Giữ hai kênh qua storage mapping và byte rotation. Chuyển RGBA riêng lúc xoay còn
 đổi cách JPEG blend nền và thêm buffer lớn; đó không phải workaround tương đương.
 (2026-10-17, Work ID `2026-10-17-xs07b-gray-alpha-render`; nợ có trướcPR55)
+W104b18Oct: image4.12 đã sửa setter/copyRotate hai kênh; bỏ workaround sau khi21regression xanh trước/sau. Không đổi policyJPEG hoặc xoá test chỉ vì upstream sửa.
 
 **Ảnh 16-bit bị cắt về 0 khi mã hoá.** Ảnh PNG 16-bit/kênh mã hoá thẳng sang JPEG 8-bit cho ảnh đen.
 *Cách rà*: mọi đường mã hoá đầu ra phải chuẩn hoá về 8-bit/kênh trước. *Chốt chặn*: test ảnh 16-bit trong
@@ -82,3 +83,5 @@ làm so sánh nguyên rule đỏ dù các giá trị đã yêu cầu khớp. *C�
 count khi required approvals=0. *Chốt*: khai rõ mặc định đã kiểm trong `.github/rulesets/main.json`,
 so JSON với readback thật và kiểm CI không đạt bị BLOCKED; không nuốt mọi field lạ.
 (2026-10-16, Work ID `2026-10-16-xs05-repository-guards`; evidence trong hồ sơ)
+
+**Truyền giới hạn decoder sau startDecode là quá muộn.** Từ image4.12, JPEG/PNG nhậnmaxPixels ởconstructor; WebP dùngproperty phải gántrướcparse. <=0 của thư viện nghĩa là unlimited, app phải từchối. Defaultstatic cóthểkhácappcap: testtạmdefault1/callercap6 choJPEG/PNG/WebP vàkhôiphụcfinally; khôngđổiglobal trongproduction. imageSizeOf phải giữnullable khi thư việnnémImageException doheadercap. *Chốt chặn*: `apps/mobile/test/imaging/decoder_security_test.dart`; fixtureEXIFbịkillhữuhạn vàPNGunusedtail~64KiB chỉkiểmconsumption, không phảiPNGconformance/RAMquota. (2026-10-18, W104b)

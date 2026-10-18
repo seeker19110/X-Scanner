@@ -1,6 +1,6 @@
 # X-Scanner — Tiến độ
 
-Ngày cập nhật: 2026-10-17
+Ngày cập nhật: 2026-10-18
 
 ## 2026-10-16: nghiên cứu nâng cấp
 
@@ -32,8 +32,14 @@ Sau review/merge54, [spec XS-07a](docs/specs/2026-10-17-xs07a-full-frame-render.
 
 ## 2026-10-17: XS-07b giữ alpha khi cắt và xoay ảnh xám
 
-Hồ sơ: [2026-10-17-xs07b-gray-alpha-render](docs/work/2026-10-17-xs07b-gray-alpha-render/working.md).
-Sau55 merged/reconcile, [spec XS-07b](docs/specs/2026-10-17-xs07b-gray-alpha-render.md) Approved theo§3d cho lỗi hai kênh có trước55. Root đã tự xác minh15 lỗi pixel trong78case RED, tích hợp bản sửa và21 regression; targeted179/179/analyze/format xanh. Review độc lập sạch; bằng chứng root gates/CI trên PR cùng Work ID, PR mới giữ OPEN. W104b chờ18/10, AC9 cần thiết bị, PR4b cần duyệt riêng. Kết quả execution cập nhật trên PR cùng Work ID.
+Hồ sơ: [2026-10-17-xs07b-gray-alpha-render](docs/work/2026-10-17-xs07b-gray-alpha-render/done.md).
+Sau khi PR55 merge, spec XS-07b được duyệt theo §3d để sửa lỗi hai kênh có trước55. Giữ21 regression độc lập và bằng chứng RED15 lỗi pixel. [PR56](https://github.com/seeker19110/X-Scanner/pull/56) đã được review mới ngày18/10, không còn finding; gate/hook628/628, AOT12 và [CI39086812105](https://github.com/seeker19110/X-Scanner/actions/runs/39086812105) SUCCESS trêncc5bb44. Squash merge561a5cf; main/tree khớp bản review. Hồ sơ root/worker chỉ chốt Done sau actual merge.
+
+## 2026-10-18: W104b và tiếp tục hoàn thiện
+
+Hồ sơ: [W104b](docs/work/2026-10-18-w104b-decoder-upgrade/working.md); [goal tiếp tục](docs/goals/2026-10-18-upgrade-completion.md). Sau khi56 merge, root duyệt spec nhỏ trước source: pin `image 4.12.0` đủ7ngày với hash chính thức; lock chỉ đổi `image`, giữ `archive 4.5.1`. Truyền cap theo từng decoder trước parse, kiểm header/output và giữ hợp đồng nullable của `imageSizeOf`. Hai lượt TDD phân biệt dependency với wiring: RED trên4.10.1, rồi RED sau pin/trước sửa core; fixed targeted240/240. Giữ21 regression gray-alpha, bỏ workaround đã được upstream sửa. Full gate, CI và PR cập nhật ở hồ sơ; EX1 chưa đóng trước actual merge.
+
+Chủ repo ngày18/10 xác nhận “Duyệt PR-4b; P1 chưa phân phối”. Thiết kế tiếp theo giữ copy/verify/rollback và bổ sung ownership của picker, vòng đời màn tài liệu theo AC13; không duyệt OCR/depth/release hoặc toàn roadmap. UAT Android36 chưa chạy: software boot bị guard dừng vì runtime ép2560MiB làm RAM cạn; chưa cài APK. Đã chuẩn bị Android24 riêng, đúng minSdk24, chờ cửa sổ CPU. Không đổi quyền KVM.
 
 ## 2026-10-11: lưu gợi ý và áp dụng bộ khung
 
