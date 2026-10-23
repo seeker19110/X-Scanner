@@ -2,11 +2,11 @@
 
 - Work ID: 2026-10-18-xs09-picker-design
 - Yêu cầu / outcome: đề xuất API nhỏ nhất giữ kết quả picker đúng tài liệu và giữ ảnh trước decode, phục vụ XS09 PR-4b đã được chủ repo duyệt.
-- Trạng thái: Design checkpoint; **chưa được root duyệt contract/PLAN để sửa source**.
+- Trạng thái: **Done** — thiết kế được root duyệt thành spec `docs/specs/2026-10-18-xs09-picker-preservation.md`, triển khai ở [#60](https://github.com/seeker19110/X-Scanner/pull/60) `30b47da`. Bản ghi thiết kế giữ nguyên làm lịch sử.
 - Chủ trì / writer: `/root/picker_contract`; root quyết định contract, nghiệm thu, gate và quyền merge.
 - Mức rủi ro / số PR: leaf mức M trong outcome L PR-4b; đề nghị một PR lưu pending, sau đó PR tích hợp app phụ thuộc leaf này.
 - Scope / non-goal: chỉ thiết kế journal/copy và contract bên gọi; không source, test, spec, PLAN, compiler, gate, commit, push, merge hay subagent. Không plugin fork, database, framework task, upload, xoá tài liệu hoặc rollback.
-- Spec / goal / issue: `docs/specs/2026-10-12-document-library-migration.md` AC-13; `docs/work/2026-10-18-xs09-picker-preservation/working.md`; quyền trực tiếp của chủ repo 18/10: “Duyệt PR-4b; P1 chưa phân phối”.
+- Spec / goal / issue: `docs/specs/2026-10-12-document-library-migration.md` AC-13; `docs/work/2026-10-18-xs09-picker-preservation/done.md`; quyền trực tiếp của chủ repo 18/10: “Duyệt PR-4b; P1 chưa phân phối”.
 - Nhánh / base SHA / thời điểm reconcile: `codex/xs09-picker-preservation` @ `c50670a` · 2026-10-18T02:03:17Z
 
 ## Kế hoạch và phân công

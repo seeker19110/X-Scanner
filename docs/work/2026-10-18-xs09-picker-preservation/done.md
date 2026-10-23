@@ -2,14 +2,14 @@
 
 - Work ID: 2026-10-18-xs09-picker-preservation
 - Outcome: bound camera/gallery/retake recovery to the correct document before library activation; preserve cached/pending originals across normal retry/relaunch.
-- Trạng thái: Approved18Oct before source; tests-only/stub phase next.
+- Trạng thái: **Done** — [#60](https://github.com/seeker19110/X-Scanner/pull/60) `30b47da` (2026-10-18) sau gate/CI; protocol §12 nối app ở [#62](https://github.com/seeker19110/X-Scanner/pull/62) `4956064` với tinh chỉnh C5 ghi ở spec cha.
 - Risk: M leaf within owner-approved L PR4b; one preservation PR before app integration if design warrants split.
 - Owner: root owns final spec/PLAN/review/gates/PR/merge; worker own designrecord only on separatetree.
 - Parent: docs/specs/2026-10-12-document-library-migration.md, explicit18Octowner “Duyệt PR-4b; P1 chưa phân phối”.
 - Base: c50670af18b1f11af38d15051b36264e1a051cb3 actualW104merge; branchcodex/xs09-picker-preservation.
 
 ## Kế hoạch và phân công
-Readactualcallchain/plugin and propose the smallest concrete persistence API/tests for app integration. No source/compiler/gate before approved contract. Root independently verifies actualRED before logic. Worker only docs/work/2026-10-18-xs09-picker-design/working.md.
+Readactualcallchain/plugin and propose the smallest concrete persistence API/tests for app integration. No source/compiler/gate before approved contract. Root independently verifies actualRED before logic. Worker only docs/work/2026-10-18-xs09-picker-design/done.md.
 
 ## Quyết định và bằng chứng
 Installed image_picker_android0.8.13+25 retrieveLostImage clears cache before returning; setPendingOptionsAndResult clears cache before a new picker. Per-document globalretrieveLost would attach A's photo to B. Reuse current queues/ID validators/atomicwrite/cache-delete guards; no plugin fork/database/generic task framework.

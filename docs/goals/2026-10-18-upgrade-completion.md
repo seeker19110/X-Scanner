@@ -4,8 +4,8 @@
 | --- | --- |
 | Goal ID | 2026-10-18-upgrade-completion |
 | Owner | Chủ repo; root tích hợp/nghiệm thu, worker riêng theo contract |
-| State | ACTIVE |
-| Default-branch SHA đã reconcile | 209c808ec20b4df9ca75e64c0c8d037e150aae7c; actual59merge/tree verified18Oct |
+| State | WAITING |
+| Default-branch SHA đã reconcile | `4956064` (2026-10-23, after #62) |
 | Bắt đầu / review | 2026-10-18 |
 | Quyền AI | research/spec/branch/PR/review/merge sau gates theo goalP1 + yêu cầu tiếp; không deploy/auto-merge/release |
 | Budget | Không paidAPI/dịch vụ mới; chỉ công cụ/dev/CI hiện có, checkpoint trước ngưỡng ngữ cảnh |
@@ -26,9 +26,9 @@ Dùng lại P1, XS08/XS09PR1..3/4a đã merge. Không cloud/OCR/depth/newcamerae
 | --- | --- | --- | --- | --- | --- | --- |
 | S1 | Fresh review/gate/merge56 grayalpha | 55merged | specXS07b17Oct | 56 | DONE | work2026-10-17-xs07b-gray-alpha-render |
 | S2 | W104b decoder/F004/EX1 | S1actualmerge | specW104b18Oct | 58 | DONE | work2026-10-18-w104b-decoder-upgrade |
-| S3 | Library/app/migration/capacityadapter, XS09AC13 | S2merged; explicit18Octownerapproval | specXS09 ownerApproved18Oct; capacityleafApproved before source; PR-4b.2 contract C1–C6 Approved 23Oct (§3d) | 59, 60; PR-4b.2 pending | IMPLEMENT (PR-4b.2 gate/PR) | work2026-10-18-xs09-pr4b-integration |
-| S4 | Synthetic OS UAT/AC9 evidence | usableemulator/device; exactartifact | P1AC9/D4 andandroid-uat | report nextPR | ACCEPTED/report merge pending | work2026-10-18-p1-android-uat; ac9.json |
-| S5 | Re-audit/reconcile currentmain/docs/exceptions/records | S1..3; actualS4outcome | completionplaybook/P1 | pending | BACKLOG | actualmergeproofs required |
+| S3 | Library/app/migration/capacityadapter, XS09AC13 | S2merged; explicit18Octownerapproval | specXS09 ownerApproved18Oct; capacityleafApproved before source; PR-4b.2 contract C1–C6 Approved 23Oct (§3d) | 59, 60, 62 (`4956064`) | DONE (host/widget evidence; device run in W-602) | work2026-10-18-xs09-pr4b-integration |
+| S4 | Synthetic OS UAT/AC9 evidence | usableemulator/device; exactartifact | P1AC9/D4 andandroid-uat | 60 (`30b47da`) | DONE for P1 APK | work2026-10-18-p1-android-uat; ac9.json |
+| S5 | Re-audit/reconcile currentmain/docs/exceptions/records | S1..3; actualS4outcome | completionplaybook/P1 | reconcile PR 23Oct | DONE (Pha 4 lần 4, F-073..F-079) | COMPREHENSIVE-AUDIT-STATUS |
 
 ## Risk register
 
@@ -70,3 +70,7 @@ PR59/209c808 merged11:06UTC, finalCI39121270944/rootgate+hook658Flutter+11freshJ
 ### Iteration4 — 2026-10-23
 
 #61 (`e21e2cb`) and #57 (`4ce9a76`) merged first (FIFO, same files). PR-4b.2 implemented on `4ce9a76`: library home, migration + one startup picker recovery, document screen on DocumentStore, SessionStore removed. Host evidence only; exact-APK migration UAT on emulator still open. Goal remains ACTIVE.
+
+### Iteration5 — 2026-10-23 close-out
+
+#62 merged `4956064` (CI 40039328590). Re-audit Pha 4 lần 4: 0 Cao. Goal DoD met on host/CI except the device run of the library APK (W-602 / F-078): container has no KVM. State WAITING on an accelerated Android environment; next step: install the #62 CI APK over the preserved P1 AVD data from the 18/10 run and verify migration + reopen.

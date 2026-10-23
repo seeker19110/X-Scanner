@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-12-p1-completion
 - Yêu cầu / outcome: `/auto-complete` lần 4, bước 2: `/completion` (`docs/framework/project-completion.md` Pha 0–4) sau khi P1 PR-0..4 merged (#6..#10). Outcome: Definition of Complete có bằng chứng hoặc BLOCKED/WAITING đúng §8.
-- Trạng thái: In progress — Pha 0–2 + W-201 merged (#11 `97deb76`); W-101 merged (#12 `faf89a0`); W-301 merged (#13 `ba3d5a9`); W-401 merged (#14 `4efd3d8`); W-102 merged (#15 `e7d265c`); W-103 merged (#16 `43f24d9`); W-302 merged (#17 `63b7ef0`); W-402 merged (#18 `4d07a6a`); W-403 merged (#19 `a7399de`); Pha 4 quét lại xong → Đợt 4: W-501 merged (#20 `673ed97`); W-503 merged (#21 `0e45794`); W-502 merged (#22 `d219ce7`); Pha 4 lần 2 xong; W-504 merged (#24 `0327ab7`); Pha 4 lần 3 hội tụ; DoC có bằng chứng → **WAITING** (W-104 từ 2026-10-18; F-014/F-009, AC-9 chủ repo).
+- Trạng thái: **Done** — Pha 0–4 đủ; Pha 4 lần 4 (23/10, `main` `4956064`) 0 Cao, DoC P1 đối chiếu xong trong `docs/ops/COMPLETION-PLAN.md`. AC-9 nghiệm thu 18/10; W-104b/EX-1 đóng #58; F-009/F-014 đóng XS-05. WAITING còn lại (W-602, chạy APK có thư viện trên thiết bị) chuyển sang goal `2026-10-18-upgrade-completion`.
 - Chủ trì / writer: phiên chính (kế hoạch, duyệt, tích hợp); audit giao 3 subagent chỉ đọc; sửa giao worker theo số PR.
 - Mức rủi ro / số PR: M; PR-A tài liệu Pha 0–2, rồi một PR mỗi việc W-xxx theo kế hoạch.
 - Scope / non-goal: app `apps/mobile` P1 + tài liệu dự án. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release, bật branch protection/auto-merge (cần quyền chủ repo).

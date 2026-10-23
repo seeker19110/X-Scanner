@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-18-xs09-pr4b-integration
 - Yêu cầu / outcome: chủ repo18Oct trả lời trực tiếp “Duyệt PR-4b; P1 chưa phân phối” sau câu hỏi cụ thể về copy/kiểm từngbản gốc, giữ session.migrated và phục hồi khi bịngắt. Tích hợp thư viện/documentstore với app, hoàn tất XS09AC13 và capacityadapter; không hỏi lại quyền này.
-- Trạng thái: PR-4b.2 implemented 23/10 trên `main` `4ce9a76` (sau #61, #57); gate/PR/merge đang chạy. Chưa Done.
+- Trạng thái: **Done** — PR-4b.1 [#59](https://github.com/seeker19110/X-Scanner/pull/59) `209c808`, leaf [#60](https://github.com/seeker19110/X-Scanner/pull/60) `30b47da`, PR-4b.2 [#62](https://github.com/seeker19110/X-Scanner/pull/62) squash `4956064` (2026-10-23) sau CI bắt buộc [40039328590](https://github.com/seeker19110/X-Scanner/actions/runs/40039328590) SUCCESS trên head `115cd75`, không review thread mở. AC-13 có bằng chứng host/widget. Còn WAITING ngoài hồ sơ này: chạy APK có thư viện trên emulator/thiết bị (goal upgrade-completion).
 - Chủ trì / writer: root giữ spec/approval/PLAN/docs/gates/PR/merge; worker riêng sau contract. Chỉđọc thiết kế trước sourceapproval.
 - Mức rủi ro / số PR: L (migration dữ liệu thật), satu outcome/PR cuối của XS09 sauPR1..3/4a đãmerge; goal18Oct và XS09spec/ADR0011.
 - Scope / non-goal: reuseLibraryStore/DocumentStore/P1Migration/LibraryScreen/Controller, nối main/sessioncontroller/review, free-spaceAndroidadapter; giữ toàn P1flow và rollback. Không xoá document/quarantine/rollback, không cloud/OCR/paidAPI/release/deploy/auto-merge.

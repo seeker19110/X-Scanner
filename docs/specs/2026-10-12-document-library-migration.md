@@ -285,7 +285,7 @@ phiên, 2026-10-12
 
 ### Phê duyệt và chia nhỏ PR-4b — 2026-10-18
 
-Chủ repo trả lời câu hỏi rõ về migration dữ liệu thật: **“Duyệt PR-4b; P1 chưa phân phối”**. Đây là quyền triển khai và nối app, không phải tự suy rộng từ advisory. Hồ sơ hiện tại: `docs/work/2026-10-18-xs09-pr4b-integration/working.md`. Lịch sử giới hạn 12Oct ở các hồ sơ Done giữ nguyên.
+Chủ repo trả lời câu hỏi rõ về migration dữ liệu thật: **“Duyệt PR-4b; P1 chưa phân phối”**. Đây là quyền triển khai và nối app, không phải tự suy rộng từ advisory. Hồ sơ hiện tại: `docs/work/2026-10-18-xs09-pr4b-integration/done.md`. Lịch sử giới hạn 12Oct ở các hồ sơ Done giữ nguyên.
 
 - PR-4b.1: Android capacity leaf + contract tests; chưa nối migration. Spec chi tiết `docs/specs/2026-10-18-xs09-android-capacity.md`. Không runtime dependency/quyền Android mới; JUnit4.13.2 chỉ test JVM được phiên chính duyệt theo §3d trước source.
 - PR-4b.2: app/library/document routing và pending-picker ownership; root chốt contract cụ thể và PLAN trước source. Copy/verify/journal/rollback không thay đổi; journal hỏng vẫn fail closed + Retry tới XS-10.

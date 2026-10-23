@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-17-install-xtemplates
 - Yêu cầu / outcome: chủ repo yêu cầu cài khung X-Templates vào repo (2026-10-17) — hook PreToolUse (guard egress/phụ thuộc/container), skill, `xt.yaml`; không đổi mã app.
-- Trạng thái: In review (PR)
+- Trạng thái: **Done** — [#57](https://github.com/seeker19110/X-Scanner/pull/57) squash `4ce9a76` (2026-10-23) sau cập nhật với `main` và CI [40032027076](https://github.com/seeker19110/X-Scanner/actions/runs/40032027076) SUCCESS; merge theo yêu cầu chủ repo "merge các PR đang mở". 5 điểm chờ chủ repo trong mô tả PR vẫn mở (xem PROGRESS).
 - Chủ trì / writer: phiên chính (cài bằng executor, phiên chính review + mở PR)
 - Mức rủi ro / số PR: S (chore harness, 1 PR); chạm `.claude/` nên người merge (`merge_autonomy: L1`).
 - Scope / non-goal: `.xtemplates/`, `.claude/` (hook/skill/agent mới, `_lib.sh` hợp, `settings.json`), `xt.yaml`, `.gitignore`, sửa regex mục 14 `scripts/test-hooks-gate.sh`. Non-goal: AGENTS/CLAUDE/PROGRESS, bỏ hook cũ, đổi CI.

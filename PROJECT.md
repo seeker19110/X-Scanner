@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-P1 scan và xuất đã merge (2026-10-12); AC-9 được root nghiệm thu trên emulator18/10 theo ủy quyền, agent thực hiện. Bằng chứng: `docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json`; hồ sơ đang reconcile qua PR. Chủ dự án: @seeker19110.
+P1 scan và xuất đã merge (2026-10-12); AC-9 được root nghiệm thu trên emulator18/10 theo ủy quyền, agent thực hiện (bằng chứng `docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json`). XS-09 thư viện nhiều tài liệu + migration P1 nối vào app ở #62 (2026-10-23); chưa UAT bản này trên emulator/thiết bị. Chủ dự án: @seeker19110.
 Đã duyệt ngày 2026-10-11: lưu nghiên cứu, áp dụng projects-template, stack ADR-0002, spec P0 nền và spec P1 scan và xuất.
 Mục tiêu sản phẩm: scan tài liệu, xuất PDF hoặc ảnh; nghiên cứu khoảng cách/depth để tăng chất lượng.
 Người dùng: người cần số hóa tài liệu; phân khúc cụ thể và nền tảng phát hành chưa chốt.
@@ -12,7 +12,7 @@ Outcome: bản scan rõ, đủ và file dùng được; chưa có số đo thự
 
 App Flutter `apps/mobile` (Android trước), offline, theo `docs/specs/2026-10-11-p1-scan-export.md`:
 chụp bằng camera hệ thống hoặc nhập ảnh (`image_picker`, không xin quyền camera/bộ nhớ), sắp xếp, xoá, chụp lại,
-xoay, chỉnh 4 góc (nắn phối cảnh bằng homography Dart), lưu phiên giữ nguyên bản gốc qua lần đóng app,
+xoay, chỉnh 4 góc (nắn phối cảnh bằng homography Dart), lưu từng tài liệu trong thư viện (tạo, đổi tên; spec XS-09) giữ nguyên bản gốc qua lần đóng app,
 xuất PDF nhiều trang hoặc JPG/PNG từng trang qua share sheet. Tính năng: `docs/FEATURE-MAP.md`.
 Chưa có: tự nhận mép, depth, OCR, PDF searchable, iOS.
 

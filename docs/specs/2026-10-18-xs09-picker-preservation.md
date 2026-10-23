@@ -9,7 +9,7 @@
 
 ## 1. Evidence and research
 
-Design `docs/work/2026-10-18-xs09-picker-design/working.md`, frozen7a670b6f712c791604ac71c23d51e38cebb866bd7267592006f91a8c30a8857b, reviewed by root before approval. Actual installed image_picker_android0.8.13+25 read-clears lost-result preferences BEFORE Dart return and clears again on new launch. Current SessionController.restore globally retrieves a lost photo; multi-document B would consume A's result. A stable pageId is not reserved until after decode, so replay after manifest commit can duplicate pages. DocumentStore.load cleans orphan originals, so preserve pending outside documents.
+Design `docs/work/2026-10-18-xs09-picker-design/done.md`, frozen7a670b6f712c791604ac71c23d51e38cebb866bd7267592006f91a8c30a8857b, reviewed by root before approval. Actual installed image_picker_android0.8.13+25 read-clears lost-result preferences BEFORE Dart return and clears again on new launch. Current SessionController.restore globally retrieves a lost photo; multi-document B would consume A's result. A stable pageId is not reserved until after decode, so replay after manifest commit can duplicate pages. DocumentStore.load cleans orphan originals, so preserve pending outside documents.
 
 | Already deeper | Present but shallower | Missing and real need |
 | --- | --- | --- |
@@ -52,7 +52,7 @@ Future<void> retainRejected(PendingPick pick);
 
 - `apps/mobile/lib/storage/pending_pick_store.dart` — newpureDartstorageleaf, core validators only.
 - `apps/mobile/test/storage/pending_pick_store_test.dart` — bounded filesystem+fault tests.
-- `docs/work/2026-10-18-xs09-picker-preservation/working.md` — rootapproval/decision/proof.
+- `docs/work/2026-10-18-xs09-picker-preservation/done.md` — rootapproval/decision/proof.
 
 New paths must exist before contract acceptance; no fakeexemptions. One leaf PR after capacitymainreconcile, then integration.
 
@@ -69,7 +69,7 @@ Bootstrap after migration: Failed blocks; existingmarker takesprecedence. No mar
 | AC-1 | `apps/mobile/test/storage/pending_pick_store_test.dart` |
 | AC-2 | `apps/mobile/test/storage/pending_pick_store_test.dart` |
 | AC-3 | `apps/mobile/test/storage/pending_pick_store_test.dart` |
-| AC-4 | `docs/work/2026-10-18-xs09-picker-preservation/working.md` |
+| AC-4 | `docs/work/2026-10-18-xs09-picker-preservation/done.md` |
 
 ## 19. Limits and rollback
 

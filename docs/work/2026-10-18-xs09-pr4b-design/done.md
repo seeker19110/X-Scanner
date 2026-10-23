@@ -2,11 +2,11 @@
 
 - Work ID: 2026-10-18-xs09-pr4b-design
 - Yêu cầu / outcome: root giao research/design PR-4b sau lời duyệt trực tiếp chủ repo18Oct “Duyệt PR-4b; P1 chưa phân phối”, ghi ở hồ sơ root. Chốt reuse/lifecycle/capacity/picker ownership để root duyệt spec/PLAN trước code.
-- Trạng thái: Ready — thiết kế tĩnh bàn giao, chưa source/test/compiler/gate.
+- Trạng thái: **Done** — thiết kế được dùng cho contract PR-4b.2 (spec cha) và triển khai ở [#62](https://github.com/seeker19110/X-Scanner/pull/62) `4956064`.
 - Chủ trì / writer: worker w104b_research, chỉ ghi hồ sơ này; root giữ authority/spec/PLAN/gates và mọi quyết định cuối.
 - Mức rủi ro / số PR: L ở outcome tích hợp dữ liệu; một unit thiết kế cho PR-4b, không tự mở PR.
 - Scope / non-goal: đọc app/library/store/migration và official platform API; đề xuất contract/tests/phạm vi ghi. Không sửa production/tests/spec/plan/dep, không compiler/gate/commit/push/merge hoặc subagent; không dữ liệu thật/OCR.
-- Spec / goal / issue: docs/specs/2026-10-12-document-library-migration.md; ADR-0011; docs/work/2026-10-18-xs09-pr4b-integration/working.md; prior PR1..3/4a done; execution chờ actual W104b merge/fresh main.
+- Spec / goal / issue: docs/specs/2026-10-12-document-library-migration.md; ADR-0011; docs/work/2026-10-18-xs09-pr4b-integration/done.md; prior PR1..3/4a done; execution chờ actual W104b merge/fresh main.
 - Nhánh / base SHA / thời điểm reconcile: `codex/xs09-pr4b` @ `314a296` · 2026-10-18T01:28:30Z
 
 ## Kế hoạch và phân công
