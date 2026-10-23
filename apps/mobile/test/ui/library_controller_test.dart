@@ -10,6 +10,7 @@ import 'package:x_scanner/core/session_manifest.dart';
 import 'package:x_scanner/storage/library_store.dart';
 import 'package:x_scanner/storage/p1_migration.dart';
 import 'package:x_scanner/ui/library_controller.dart';
+import 'package:x_scanner/ui/pick_import.dart';
 
 final DateTime _t0 = DateTime.utc(2026, 10, 1, 8);
 
@@ -396,6 +397,76 @@ void main() {
     expect(controller.takeNotice(), LibraryNotice.saveFailed);
     expect(snapshot(), before);
     expect(controller.entries.single, isA<LibraryNeedsUpdate>());
+  });
+
+  group('startup picker recovery (PR-4b.2 C4)', () {
+    test(
+      'runs after the migration step with its outcome, before listing',
+      () async {
+        final seen = <MigrationOutcome>[];
+        var listsAtRecovery = -1;
+        final c = LibraryController(
+          library: library,
+          migrate: () async => MigrationDone(id(1)),
+          recover: (outcome) async {
+            seen.add(outcome);
+            listsAtRecovery = library.lists;
+            return PickRecovery.added;
+          },
+        );
+        await c.start();
+        expect(seen.single, isA<MigrationDone>());
+        expect((seen.single as MigrationDone).docId, id(1));
+        expect(listsAtRecovery, 0);
+        expect(c.status, LibraryStatus.ready);
+        expect(c.takeNotice(), isNull);
+      },
+    );
+
+    test('a failed migration skips recovery until a retry succeeds', () async {
+      var calls = 0;
+      var fail = true;
+      final c = LibraryController(
+        library: library,
+        migrate: () async => fail
+            ? const MigrationFailed(MigrationFailure.io)
+            : const MigrationNotNeeded(),
+        recover: (_) async {
+          calls++;
+          return PickRecovery.none;
+        },
+      );
+      await c.start();
+      expect(calls, 0);
+      fail = false;
+      await c.start();
+      expect(calls, 1);
+    });
+
+    test(
+      'rejected and kept images are reported; an error still opens',
+      () async {
+        for (final (result, notice) in [
+          (PickRecovery.rejected, LibraryNotice.pickRejected),
+          (PickRecovery.kept, LibraryNotice.pickKept),
+        ]) {
+          final c = LibraryController(
+            library: library,
+            recover: (_) async => result,
+          );
+          await c.start();
+          expect(c.takeNotice(), notice);
+          expect(c.status, LibraryStatus.ready);
+        }
+        final c = LibraryController(
+          library: library,
+          recover: (_) async => throw StateError('unexpected'),
+        );
+        await c.start();
+        expect(c.takeNotice(), LibraryNotice.pickKept);
+        expect(c.status, LibraryStatus.ready);
+      },
+    );
   });
 
   test('a disposed controller does not notify', () async {

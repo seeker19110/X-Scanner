@@ -26,7 +26,7 @@ Dùng lại P1, XS08/XS09PR1..3/4a đã merge. Không cloud/OCR/depth/newcamerae
 | --- | --- | --- | --- | --- | --- | --- |
 | S1 | Fresh review/gate/merge56 grayalpha | 55merged | specXS07b17Oct | 56 | DONE | work2026-10-17-xs07b-gray-alpha-render |
 | S2 | W104b decoder/F004/EX1 | S1actualmerge | specW104b18Oct | 58 | DONE | work2026-10-18-w104b-decoder-upgrade |
-| S3 | Library/app/migration/capacityadapter, XS09AC13 | S2merged; explicit18Octownerapproval | specXS09 ownerApproved18Oct; capacityleafApproved before source | pending | IMPLEMENT | work2026-10-18-xs09-pr4b-integration |
+| S3 | Library/app/migration/capacityadapter, XS09AC13 | S2merged; explicit18Octownerapproval | specXS09 ownerApproved18Oct; capacityleafApproved before source; PR-4b.2 contract C1–C6 Approved 23Oct (§3d) | 59, 60; PR-4b.2 pending | IMPLEMENT (PR-4b.2 gate/PR) | work2026-10-18-xs09-pr4b-integration |
 | S4 | Synthetic OS UAT/AC9 evidence | usableemulator/device; exactartifact | P1AC9/D4 andandroid-uat | report nextPR | ACCEPTED/report merge pending | work2026-10-18-p1-android-uat; ac9.json |
 | S5 | Re-audit/reconcile currentmain/docs/exceptions/records | S1..3; actualS4outcome | completionplaybook/P1 | pending | BACKLOG | actualmergeproofs required |
 
@@ -65,3 +65,8 @@ S2done: PR58/c50670a, exactmain/tree/headCI proof; EX1 reconciled. S3 capacityle
 ### Iteration3 — capacity actualmerge and AC9 accepted
 
 PR59/209c808 merged11:06UTC, finalCI39121270944/rootgate+hook658Flutter+11freshJVM/nativeexacthead/tree; capacityleaf Done. Pendingoriginal7methods + static sizeRejectedclassification contract Approved before behavior, source/targeted review underway on freshmain209c808. AC9 actualWindowsWHPX/API36+exactCI58APK camera3→edit/reorder→PDF→Librera all3pages, originals/cancel/restart verified; root accepts under§3d, reportmergepending. App/library/XS09AC13 stillACTIVE, nativecapacity not yet called by P1APK. Continue leaf→app integration→exactAPK migrationUAT→finalaudit; no release.
+
+
+### Iteration4 — 2026-10-23
+
+#61 (`e21e2cb`) and #57 (`4ce9a76`) merged first (FIFO, same files). PR-4b.2 implemented on `4ce9a76`: library home, migration + one startup picker recovery, document screen on DocumentStore, SessionStore removed. Host evidence only; exact-APK migration UAT on emulator still open. Goal remains ACTIVE.

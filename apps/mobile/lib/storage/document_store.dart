@@ -1,4 +1,3 @@
-// DEBT: DocumentStore copies SessionStore's guarantees for one document folder | trần: two stores to keep in sync | xem lại khi: XS-09 PR-4 switches the app to documents and deletes SessionStore.
 import 'dart:convert';
 import 'dart:io';
 
@@ -35,7 +34,7 @@ final class DocumentUnrecoverable extends DocumentLoadResult {
 /// Persists one document in its folder [dir] (`documents/{docId}`):
 /// `document.json` plus untouched originals in `originals/{id}.{ext}`.
 ///
-/// Same guarantees as `SessionStore`: originals are never overwritten and
+/// Originals are never overwritten and
 /// are only deleted once a manifest that no longer references them has been
 /// saved, or as orphans after a successful [load]. Nothing is logged.
 class DocumentStore {

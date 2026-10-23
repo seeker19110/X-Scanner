@@ -84,7 +84,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   static String _message(SessionNotice notice) => switch (notice) {
     SessionNotice.restoreFailed =>
-      'Không khôi phục được phiên trước. '
+      'Không mở được tài liệu này. '
           'Ảnh gốc vẫn được giữ trong bộ nhớ của app.',
     SessionNotice.decodeFailed =>
       'Không đọc được ảnh này. Chưa thêm trang nào.',
@@ -93,6 +93,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
     SessionNotice.exportFailed =>
       'Không xuất được tài liệu. Bản gốc vẫn còn nguyên.',
     SessionNotice.exportCancelled => 'Đã huỷ xuất.',
+    SessionNotice.pendingImage =>
+      'Một ảnh chụp trước đó chưa được lưu xong. '
+          'Ảnh vẫn được giữ; hãy mở lại app để thử lại.',
   };
 
   /// Asks a yes/no question; true only if [confirmLabel] was pressed.
@@ -205,7 +208,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
     final dark = widget.themeMode == ThemeMode.dark;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('X-Scanner'),
+        title: Text(_controller.document.title),
         actions: [
           IconButton(
             tooltip: dark ? 'Chế độ sáng' : 'Chế độ tối',

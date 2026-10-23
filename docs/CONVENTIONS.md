@@ -6,13 +6,13 @@
 
 | Pattern | Cách đúng duy nhất | File ví dụ chuẩn | Ghi chú |
 |---------|--------------------|------------------|---------|
-| Thay đổi phiên | Mọi thao tác ghi đi qua hàng đợi `_enqueue`; trạng thái trong RAM chỉ đổi **sau** khi `SessionStore.save` thành công (`_commit`) | `lib/ui/session_controller.dart` | |
+| Thay đổi phiên | Mọi thao tác ghi đi qua hàng đợi `_enqueue`; trạng thái trong RAM chỉ đổi **sau** khi `DocumentStore.save` thành công (`_commit`) | `lib/ui/session_controller.dart` | |
 | Báo lỗi cho người dùng | Bắt kiểu lỗi cụ thể → `SessionNotice`; bắt mọi lỗi (`catch (_)`) chỉ khi mọi lỗi cùng nghĩa với người dùng và ra đúng một notice (giải mã thử ở `_addFromPath`, `exportAndShare`) (F-059) → câu tiếng Việt ở một `switch` duy nhất; không đưa đường dẫn/nội dung, không log | `session_controller.dart` `_report`, `lib/ui/review_screen.dart` `_message` | Thêm notice mới = thêm nhánh `switch` (analyzer bắt thiếu) |
 | Validate dữ liệu ngoài | Biên đọc file ném `FormatException` chỉ nêu tên trường; constructor lõi ném `ArgumentError` | `lib/core/session_manifest.dart`, `lib/core/page_quad.dart` | |
 | Kiểu lõi | Bất biến, thao tác trả bản mới, không I/O, không import Flutter | `lib/core/scan_session.dart`, `lib/core/scan_page.dart` | `test/core/core_purity_test.dart` |
-| Ghi file bền | Ghi `.tmp`/`.part` → flush/fsync → rename; không ghi đè bản gốc | `lib/storage/session_store.dart` `importOriginal`, `_save` | |
-| Không xoá bản gốc | Chỉ xoá bản gốc khi một manifest **đã lưu** không còn tham chiếu nó; khi nghi ngờ (manifest hỏng/không đọc được) thì giữ | `session_store.dart` `_load`, `_deleteUnreferencedOriginals` | CLAUDE.md: never discard scan originals |
-| Xoá best-effort | `_deleteQuietly` chỉ nuốt `FileSystemException`, dùng sau khi trạng thái chính đã bền | `session_store.dart`, `lib/export/page_exporter.dart` | |
+| Ghi file bền | Ghi `.tmp`/`.part` → flush/fsync → rename; không ghi đè bản gốc | `lib/storage/document_store.dart` `importOriginal`, `_save` | |
+| Không xoá bản gốc | Chỉ xoá bản gốc khi một manifest **đã lưu** không còn tham chiếu nó; khi nghi ngờ (manifest hỏng/không đọc được) thì giữ | `document_store.dart` `_load`, `_deleteUnreferencedOriginals` | CLAUDE.md: never discard scan originals |
+| Xoá best-effort | `_deleteQuietly` chỉ nuốt `FileSystemException`, dùng sau khi trạng thái chính đã bền | `document_store.dart`, `lib/export/page_exporter.dart` | |
 | Xử lý ảnh nặng | Giải mã trong isolate qua `runWithinBudget` (bị kill khi quá `decodeBudget`) ở `lib/imaging/`; chỉ JPEG/PNG/WebP tĩnh theo nội dung; lỗi giải mã → `ImageDecodeFailure` không mang nội dung; có trần `maxOriginalBytes` và `maxDecodedPixels` | `lib/imaging/page_render.dart` | Mọi lần giải mã bản gốc đi qua **một** `DecodeGate` (`lib/imaging/decode_gate.dart`), tạo ở `main.dart` |
 | Phụ thuộc nền tảng | Interface + adapter tiêm qua constructor để test dùng fake | `lib/ui/page_source.dart`, `lib/export/file_sharer.dart` | Nối thật ở `lib/main.dart` |
 | Hành động phá huỷ | Luôn qua hộp xác nhận `_confirm(question, label)` | `review_screen.dart` | |
@@ -23,7 +23,7 @@
 | Chuỗi UI | Tiếng Việt inline, `static const` khi dùng lại | `review_screen.dart` | Chưa có l10n (F-031, P2) |
 | Phần mở rộng / đường dẫn bản gốc | `fileExtension` + `isValidExtension` ở `core/session_manifest.dart`; khuôn viết một lần | `lib/core/session_manifest.dart` | |
 | Trần cố ý | `DEBT: … \| trần: … \| xem lại khi: …` ngay tại chỗ | `lib/ui/quad_editor_screen.dart` | CLAUDE.md §3.7 |
-| Test sửa lỗi | Test tái hiện đỏ trước, ở lại làm hồi quy; khuôn lỗi ghi `TRAPS.md` | `test/storage/session_store_test.dart` | |
+| Test sửa lỗi | Test tái hiện đỏ trước, ở lại làm hồi quy; khuôn lỗi ghi `TRAPS.md` | `test/storage/document_store_test.dart` | |
 
 ## Đang có NHIỀU KIỂU — cần hợp nhất
 

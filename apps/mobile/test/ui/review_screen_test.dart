@@ -13,11 +13,14 @@ import 'package:x_scanner/export/export_job.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/imaging/page_render.dart';
-import 'package:x_scanner/main.dart';
-import 'package:x_scanner/storage/session_store.dart';
+import 'package:x_scanner/core/scan_document.dart';
+import 'package:x_scanner/storage/document_store.dart';
+import 'package:x_scanner/storage/pending_pick_store.dart';
 import 'package:x_scanner/ui/page_source.dart';
 import 'package:x_scanner/ui/quad_editor_screen.dart';
 import 'package:x_scanner/ui/session_controller.dart';
+
+import 'document_test_app.dart';
 
 /// Scripted [PageSource]: each call takes the next queued result;
 /// [discarded] records every [discard] call.
@@ -55,15 +58,15 @@ class FakeSharer implements FileSharer {
   }
 }
 
-/// [SessionStore] whose [load] waits for [hold] once [loading] completes.
-class HeldStore extends SessionStore {
-  HeldStore(super.root);
+/// [DocumentStore] whose [load] waits for [hold] once [loading] completes.
+class HeldStore extends DocumentStore {
+  HeldStore(super.dir);
 
   final Completer<void> hold = Completer<void>();
   final Completer<void> loading = Completer<void>();
 
   @override
-  Future<SessionLoadResult> load() async {
+  Future<DocumentLoadResult> load() async {
     loading.complete();
     await hold.future;
     return super.load();
@@ -119,15 +122,21 @@ void main() {
   late FakeSource source;
   late FakeSharer sharer;
   late SessionController controller;
+  late ScanDocument document;
+  late PendingPickStore pending;
   var n = 0;
 
   setUp(() {
     tmp = Directory.systemTemp.createTempSync('review_screen_test');
     picks = Directory('${tmp.path}/picks')..createSync();
+    document = testDocument(tmp);
+    pending = testPending(tmp, picks);
     source = FakeSource();
     sharer = FakeSharer();
     controller = SessionController(
-      store: SessionStore(Directory('${tmp.path}/session')..createSync()),
+      store: DocumentStore(documentDir(tmp, document)),
+      document: document,
+      pending: pending,
       source: source,
       exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
       sharer: sharer,
@@ -168,13 +177,20 @@ void main() {
   }
 
   Future<void> start(WidgetTester tester, {int pages = 0}) async {
-    await tester.runAsync(() async {
-      for (var i = 0; i < pages; i++) {
-        source.captures.add(png());
-        await controller.capture();
-      }
-    });
-    await tester.pumpWidget(XScannerApp(controller: controller));
+    // Pages are added with real I/O, after opening loads the document. A
+    // controller made under the fake clock is opened by the screen instead.
+    if (pages > 0) {
+      await tester.runAsync(() async {
+        await controller.restore();
+        for (var i = 0; i < pages; i++) {
+          source.captures.add(png());
+          await controller.capture();
+        }
+      });
+    }
+    await tester.pumpWidget(
+      DocumentTestApp(controller: controller, restore: pages == 0),
+    );
     await settle(tester);
   }
 
@@ -188,7 +204,9 @@ void main() {
       final exporter = HeldFinalExporter(Directory('${tmp.path}/exports'));
       await tester.runAsync(() async {
         controller = SessionController(
-          store: SessionStore(Directory('${tmp.path}/session')),
+          store: DocumentStore(documentDir(tmp, document)),
+          document: document,
+          pending: pending,
           source: source,
           exporter: exporter,
           sharer: sharer,
@@ -328,7 +346,9 @@ void main() {
     expect(find.byIcon(Icons.broken_image_outlined), findsNothing);
     // A fresh controller has no cached preview, and its decoder fails.
     controller = SessionController(
-      store: SessionStore(Directory('${tmp.path}/session')),
+      store: DocumentStore(documentDir(tmp, document)),
+      document: document,
+      pending: pending,
       source: source,
       exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
       sharer: sharer,
@@ -359,7 +379,9 @@ void main() {
     await start(tester, pages: 1);
     var fail = true;
     controller = SessionController(
-      store: SessionStore(Directory('${tmp.path}/session')),
+      store: DocumentStore(documentDir(tmp, document)),
+      document: document,
+      pending: pending,
       source: source,
       exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
       sharer: sharer,
@@ -412,7 +434,9 @@ void main() {
     var failCalls = 0;
     final slow = Completer<void>();
     controller = SessionController(
-      store: SessionStore(Directory('${tmp.path}/session')),
+      store: DocumentStore(documentDir(tmp, document)),
+      document: document,
+      pending: pending,
       source: source,
       exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
       sharer: sharer,
@@ -484,7 +508,9 @@ void main() {
     previewer,
   ) async {
     controller = SessionController(
-      store: SessionStore(Directory('${tmp.path}/session')),
+      store: DocumentStore(documentDir(tmp, document)),
+      document: document,
+      pending: pending,
       source: source,
       exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
       sharer: sharer,
@@ -621,14 +647,16 @@ void main() {
   testWidgets('while the session is opening, a loading state replaces the '
       'empty text (F-021)', (tester) async {
     final handle = tester.ensureSemantics();
-    final store = HeldStore(Directory('${tmp.path}/session'));
+    final store = HeldStore(documentDir(tmp, document));
     controller = SessionController(
       store: store,
+      document: document,
+      pending: pending,
       source: source,
       exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
       sharer: sharer,
     );
-    await tester.pumpWidget(XScannerApp(controller: controller));
+    await tester.pumpWidget(DocumentTestApp(controller: controller));
     for (var i = 0; i < 500 && !store.loading.isCompleted; i++) {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 5)),
@@ -674,12 +702,12 @@ void main() {
   });
 
   testWidgets('a corrupt saved session shows restoreFailed', (tester) async {
-    File('${tmp.path}/session/session.json')
+    File('${documentDir(tmp, document).path}/document.json')
         .writeAsStringSync('{"schemaVersion": 99}');
     await start(tester);
     expect(
       find.text(
-        'Không khôi phục được phiên trước. '
+        'Không mở được tài liệu này. '
         'Ảnh gốc vẫn được giữ trong bộ nhớ của app.',
       ),
       findsOneWidget,
@@ -1055,7 +1083,9 @@ void main() {
     // the real I/O of start().
     await tester.runAsync(() async {
       controller = SessionController(
-        store: SessionStore(Directory('${tmp.path}/session')),
+        store: DocumentStore(documentDir(tmp, document)),
+        document: document,
+        pending: pending,
         source: source,
         exporter: PageExporter(
           exportDir: Directory('${tmp.path}/exports'),

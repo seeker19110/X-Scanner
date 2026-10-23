@@ -2,9 +2,14 @@
 
 Ngày cập nhật: 2026-10-23
 
+## 2026-10-23: merge #61, #57 và XS-09 PR-4b.2 nối thư viện vào app
+
+Theo yêu cầu chủ repo ("merge các PR đang mở", "/autopilot"): [#61](https://github.com/seeker19110/X-Scanner/pull/61) squash `e21e2cb` và [#57](https://github.com/seeker19110/X-Scanner/pull/57) squash `4ce9a76`, cả hai sau CI bắt buộc xanh trên head cuối.
+PR-4b.2 (hồ sơ [2026-10-18-xs09-pr4b-integration](docs/work/2026-10-18-xs09-pr4b-integration/working.md), contract C1–C6 trong spec XS-09): app mở vào Thư viện, migration P1 + khôi phục ảnh picker một lần khi khởi động, màn tài liệu trên `DocumentStore`, gỡ `SessionStore`. Kết quả gate/PR ghi trong hồ sơ; chưa chạy APK mới trên emulator/thiết bị.
+
 ## 2026-10-23: nâng trải nghiệm và hiệu năng, giữ workflow P1
 
-Hồ sơ: [scanner-experience](docs/work/2026-10-23-scanner-experience/working.md); [spec Approved theo §3d trước source](docs/specs/2026-10-23-scanner-experience.md). Phạm vi: theme/viewport/chữ lớn, xuất rõ ràng, chỉnh góc bằng chạm, scaled JPEG thumbnail và guard dispose/huỷ PDF. Giữ schema/bản gốc/dependency và app wiring P1. Local gate PASS: 808 Flutter +11 JVM, APK debug; benchmark host thumbnail giảm median20.27% thời gian/53.61% peak RSS. Chưa có PR/CI/merge/UAT mới; GitHub API bị network chặn, bản nháp môi trường đã bổ sung hostname. Trạng thái và số đo chính xác nằm trong hồ sơ, không dùng checkpoint cũ làm bằng chứng cho bản nâng cấp.
+Hồ sơ: [scanner-experience](docs/work/2026-10-23-scanner-experience/done.md); [spec Approved theo §3d trước source](docs/specs/2026-10-23-scanner-experience.md). Phạm vi: theme/viewport/chữ lớn, xuất rõ ràng, chỉnh góc bằng chạm, scaled JPEG thumbnail và guard dispose/huỷ PDF. Giữ schema/bản gốc/dependency và app wiring P1. Local gate PASS: 808 Flutter +11 JVM, APK debug; benchmark host thumbnail giảm median20.27% thời gian/53.61% peak RSS. Đã merge qua [#61](https://github.com/seeker19110/X-Scanner/pull/61) `e21e2cb` sau CI [40031189744](https://github.com/seeker19110/X-Scanner/actions/runs/40031189744) xanh; chưa UAT thiết bị. Trạng thái và số đo chính xác nằm trong hồ sơ, không dùng checkpoint cũ làm bằng chứng cho bản nâng cấp.
 
 ## 2026-10-16: nghiên cứu nâng cấp
 

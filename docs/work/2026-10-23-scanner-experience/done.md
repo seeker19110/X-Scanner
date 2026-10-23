@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-23-scanner-experience
 - Yêu cầu / outcome: Chủ repo yêu cầu nâng chất lượng, hiệu năng, UI đẹp/UX dễ và giữ toàn bộ tính năng đang có.
-- Trạng thái: Ready for local review; research/spec/PLAN được phiên chính duyệt theo §3d trước source; chưa merge.
+- Trạng thái: Done — squash merge [#61](https://github.com/seeker19110/X-Scanner/pull/61) `e21e2cb` ngày 23/10 sau CI bắt buộc [40031189744](https://github.com/seeker19110/X-Scanner/actions/runs/40031189744) SUCCESS trên head `1148524`, không review thread mở; merge theo yêu cầu chủ repo "merge các PR đang mở". Chưa UAT thiết bị/iOS.
 - Chủ trì / writer: Phiên chính; ba audit chỉ đọc; T2 và T3 giao worker tuần tự, một source writer tại một thời điểm.
 - Mức rủi ro / số PR: M; một outcome/PR nâng trải nghiệm workflow hiện có, không schema/dependency/migration mới.
 - Scope / non-goal: Theo spec; không kích hoạt library/OCR/depth/cloud; không merge/deploy.

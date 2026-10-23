@@ -4,6 +4,15 @@
 > file này ghi lỗi đã xảy ra và khuôn của nó. Gặp triệu chứng lạ → tìm khuôn ở đây trước (`/debug` Pha 1).
 > Sửa bug xong → thêm mục mới hoặc thêm ngày/PR vào mục cũ nếu tái phát.
 
+**Widget test treo vô hạn khi trộn vùng fake-async và `runAsync` trên cùng hàng đợi.** Store/controller có
+hàng đợi `Future` (`_tail`/`_writeTail`) tạo hoặc nối tiếp trong vùng fake-async của `testWidgets` chỉ chạy tiếp khi
+`pump`; gọi nó từ `tester.runAsync` thì chờ mãi, `--timeout` cũng không cắt được (cả file chết theo trần ngoài).
+Gặp ở XS-09 PR-4b.2: màn test gọi `restore()` lần hai dưới fake clock trên `PendingPickStore` dùng chung, và một
+controller dựng trong thân test được `restore()` trong `runAsync`. *Cách rà*: mọi đối tượng có hàng đợi dùng trong
+`runAsync` phải được dựng và gọi lần đầu ở vùng thật (setUp hoặc bên trong `runAsync`); không gọi cùng hàng đợi ở
+cả hai vùng. *Chốt*: `apps/mobile/test/ui/document_test_app.dart` (`restore: false` khi test đã mở bằng I/O thật),
+`review_screen_test.dart` `start()`. (2026-10-23, Work ID `2026-10-18-xs09-pr4b-integration`)
+
 **Nội suy ánh xạ identity vẫn làm đổi pixel.** Full-frame13×9 RGBA Random17 đi qua
 homography/bilinear làm16kênh giảm1LSB do sai số số thực và cắt về số nguyên. Test chỉ dùng ảnh
 solid hoặc một kích thước có thể bỏ sót lỗi. *Cách rà*: so mọi byte của ảnh có
