@@ -77,3 +77,13 @@ Tất cả source đã freeze; root và reviewer đã đọc diff, xem ảnh UI,
 Báo cáo trước commit: Build ✅ | Type ✅ (0 lỗi) | Lint ✅ | Format ✅ | Test ✅ (808 Flutter +11 JVM). Tái hiện RED ✅; logic mới RED-trước ✅; golden n-a. Review diff ✅; không bí mật/rác ✅; AC1–8 có bằng chứng local ✅. DoD code/local gates ✅; PR/CI/merge và UAT mới chưa thực hiện. Rủi ro còn lại: số đo host/synthetic 5 mẫu, ảnh thumbnail lossy khác pixel; không suy thành p95/device/100-page/export-quality UAT. Rollback revert code, không migration.
 
 Không có PR/merge mới tại thời điểm ghi hồ sơ; GitHub API Forbidden, draft đã thêm api.github.com nhưng runtime policy chưa áp cấu hình đó. Giữ working.md; không đánh Done trước merge. Bằng chứng cloud install/startup được lưu ở bản nháp môi trường, không commit cache/toolchain.
+
+## Checkpoint /autopilot — 2026-10-24
+
+- Product commit: `2a3220cafae4f2e72e6dac492083ecada61a7ba1` đã push lên `feat/scanner-experience`; đọc remote lần này xác nhận đúng SHA, upstream main vẫn `30b47dadf4323d5d4744c78c0f57ea1c26cfc170`. Working tree sạch khi tiếp tục.
+- Hook commit đã chạy lại toàn gate và PASS: `/workspace/.x-scanner/experience/commit-gate.log`; Flutter **808/808**, JVM **11/11**, skipped/errors/failures0. XML của lượt hook có timestamp UTC `2026-10-23T13:19:29.811Z`. Hash source của benchmark vẫn khớp product commit.
+- Audit chỉ đọc lần tiếp tục không thấy coding blocker; mô tả PR đã lưu bền vững trong `pull-request.md` cùng thư mục hồ sơ, đủ Work ID/spec/validation/risk và phân biệt local gate với CI/UAT còn chờ.
+- Gate của lượt /autopilot cũng **PASS**, exit0 (`/workspace/.x-scanner/experience/autopilot-gate.log`): build/manifest/analyze/format/adoption/hooks xanh, **808 Flutter +11 JVM**. Không sửa source; hash benchmark vẫn khớp. Đọc Git pull refs không thấy head nào trùng product commit; chưa có bằng chứng PR/CI mới.
+- Trạng thái: **WAITING — áp dụng cấu hình mạng để tạo draft PR**. Runtime vẫn spec revision1, danh sách hostname hiện tại chưa có api.github.com; draft revision7 đã chứa api.github.com và storage.googleapis.com. Retained network diagnostics chưa có record. Công cụ môi trường hiện chỉ lưu draft, không có thao tác publish/apply runtime.
+- Quyết định: giữ nhánh đã kiểm chứng và chờ runtime nhận cấu hình · loại lặp lại cùng request API khi policy chưa đổi · bậc2: giảm thao tác thừa, giữ nguyên bằng chứng và giới hạn quyền. Không sửa source hoặc đổi số đo hiệu năng trong checkpoint này.
+- Tiếp theo: publish bản nháp cấu hình môi trường; xác nhận runtime đã nhận hostname; dùng auth GitHub sẵn có để đọc PR đang mở/WIP, tạo draft PR bằng `docs/work/2026-10-23-scanner-experience/pull-request.md` và theo dõi CI của đúng head. Chưa có PR nên chưa có link/CI/merge mới; tiếp tục giữ working.md.
