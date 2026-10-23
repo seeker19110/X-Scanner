@@ -84,6 +84,64 @@ Future<ScanPage?> _save(WidgetTester tester, List<ScanPage?> results) async {
 }
 
 void main() {
+  testWidgets(
+    'tap controls adjust a selected corner and support undo and save',
+    (tester) async {
+      final results = await _open(tester);
+      await tester.tap(_handle('Góc trên phải'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Dịch sang trái'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Hoàn tác'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<IconButton>(find.widgetWithIcon(IconButton, Icons.redo))
+            .onPressed,
+        isNotNull,
+      );
+      await tester.tap(find.byTooltip('Làm lại'));
+      await tester.pumpAndSettle();
+      final saved = (await _save(tester, results))!;
+      expect(saved.quad.topRight.x, closeTo(_base.topRight.x - 0.01, 1e-9));
+      expect(saved.quad.topLeft, _base.topLeft);
+    },
+  );
+
+  testWidgets('selecting a corner leaves history and saved data unchanged', (
+    tester,
+  ) async {
+    final results = await _open(tester);
+    await tester.tap(_handle('Góc dưới trái'));
+    await tester.pumpAndSettle();
+    expect(find.text('Đang chọn: góc dưới trái'), findsOneWidget);
+    expect(
+      tester
+          .widget<IconButton>(find.widgetWithIcon(IconButton, Icons.undo))
+          .onPressed,
+      isNull,
+    );
+    expect(await _save(tester, results), isNull);
+  });
+
+  testWidgets(
+    'editor preserves canvas and reachable controls with large text',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(320, 320);
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.reset);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await _open(tester);
+      expect(tester.takeException(), isNull);
+      expect(tester.getSize(find.byType(Image)).height, greaterThan(40));
+      await tester.ensureVisible(find.byTooltip('Dịch sang trái'));
+      expect(find.byTooltip('Dịch sang trái').hitTestable(), findsOneWidget);
+      await tester.ensureVisible(find.text('Lưu'));
+      expect(find.text('Lưu').hitTestable(), findsOneWidget);
+    },
+  );
+
   testWidgets('shows four labelled handles with 48 dp touch targets (F-029)', (
     tester,
   ) async {

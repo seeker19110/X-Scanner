@@ -1,6 +1,10 @@
 # X-Scanner — Tiến độ
 
-Ngày cập nhật: 2026-10-18
+Ngày cập nhật: 2026-10-23
+
+## 2026-10-23: nâng trải nghiệm và hiệu năng, giữ workflow P1
+
+Hồ sơ: [scanner-experience](docs/work/2026-10-23-scanner-experience/working.md); [spec Approved theo §3d trước source](docs/specs/2026-10-23-scanner-experience.md). Phạm vi: theme/viewport/chữ lớn, xuất rõ ràng, chỉnh góc bằng chạm, scaled JPEG thumbnail và guard dispose/huỷ PDF. Giữ schema/bản gốc/dependency và app wiring P1. Local gate PASS: 808 Flutter +11 JVM, APK debug; benchmark host thumbnail giảm median20.27% thời gian/53.61% peak RSS. Chưa có PR/CI/merge/UAT mới; GitHub API bị network chặn, bản nháp môi trường đã bổ sung hostname. Trạng thái và số đo chính xác nằm trong hồ sơ, không dùng checkpoint cũ làm bằng chứng cho bản nâng cấp.
 
 ## 2026-10-16: nghiên cứu nâng cấp
 

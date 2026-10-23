@@ -408,10 +408,16 @@ class SessionController extends ChangeNotifier {
   Future<void> _enqueue(Future<void> Function() operation) {
     _pending++;
     _notify();
-    final result = _writeTail.then((_) => operation()).whenComplete(() {
-      _pending--;
-      _notify();
-    });
+    final result = _writeTail
+        .then((_) async {
+          // Let an in-flight save finish, but never start another picker, write
+          // or share after its owning screen/controller has gone away.
+          if (!_disposed) await operation();
+        })
+        .whenComplete(() {
+          _pending--;
+          _notify();
+        });
     _writeTail = result.then<void>((_) {}, onError: (Object _) {});
     return result;
   }

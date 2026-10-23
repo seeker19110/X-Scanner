@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/semantics.dart';
 import 'package:x_scanner/core/page_quad.dart';
+import 'package:x_scanner/core/scan_page.dart';
+import 'package:x_scanner/export/export_job.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/imaging/page_render.dart';
@@ -92,6 +94,23 @@ class HeldRenderer {
   }
 }
 
+/// Holds the runner after rendering all pages, before packaging completes.
+class HeldFinalExporter extends PageExporter {
+  HeldFinalExporter(Directory dir) : super(exportDir: dir);
+
+  final hold = Completer<void>();
+
+  @override
+  Future<void> run(ExportJob job, File Function(ScanPage) originalOf) async {
+    job.start();
+    for (final _ in job.pages) {
+      job.pageDone();
+    }
+    await hold.future;
+    job.markCancelled();
+  }
+}
+
 const String _empty = 'Chưa có trang nào. Chụp hoặc nhập ảnh để bắt đầu.';
 
 void main() {
@@ -159,12 +178,107 @@ void main() {
     await settle(tester);
   }
 
+  for (final (format, label) in [
+    (ExportFormat.pdf, 'Đang tạo PDF…'),
+    (ExportFormat.jpeg, 'Đang hoàn tất…'),
+  ]) {
+    testWidgets('final export phase shows $label and cancellation priority', (
+      tester,
+    ) async {
+      final exporter = HeldFinalExporter(Directory('${tmp.path}/exports'));
+      await tester.runAsync(() async {
+        controller = SessionController(
+          store: SessionStore(Directory('${tmp.path}/session')),
+          source: source,
+          exporter: exporter,
+          sharer: sharer,
+          thumbnailer: (path) async =>
+              thumbnailSync(File(path).readAsBytesSync()),
+          previewer: (bytes, quad, turns) async =>
+              renderPageSync(bytes, quad, turns),
+        );
+      });
+      await start(tester, pages: 1);
+      unawaited(controller.exportAndShare(format));
+      for (var i = 0; i < 100 && controller.exportJob?.done != 1; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 5)),
+        );
+        await tester.pump();
+      }
+      await tester.pump();
+      expect(find.text(label), findsOneWidget);
+      expect(
+        tester
+            .widget<LinearProgressIndicator>(
+              find.byType(LinearProgressIndicator),
+            )
+            .value,
+        isNull,
+      );
+      await tester.tap(find.text('Huỷ'));
+      await tester.pump();
+      expect(find.text('Đang huỷ…'), findsOneWidget);
+      exporter.hold.complete();
+      await settle(tester);
+      expect(sharer.shared, isEmpty);
+    });
+  }
+
   testWidgets('empty session offers capture and import', (tester) async {
     await start(tester);
     expect(find.text('X-Scanner'), findsOneWidget);
     expect(find.text(_empty), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Chụp'), findsOneWidget);
     expect(find.text('Nhập ảnh'), findsOneWidget);
+  });
+
+  testWidgets('document summary and labelled export explain the formats', (
+    tester,
+  ) async {
+    await start(tester, pages: 2);
+    expect(find.text('2 trang'), findsOneWidget);
+    final export = find.widgetWithText(FilledButton, 'Xuất tài liệu');
+    expect(export, findsOneWidget);
+    await tester.tap(export);
+    await tester.pumpAndSettle();
+    expect(find.text('Gộp các trang thành một tài liệu'), findsOneWidget);
+    expect(find.text('Mỗi trang là một ảnh JPG'), findsOneWidget);
+    expect(find.text('Mỗi trang là một ảnh PNG'), findsOneWidget);
+  });
+
+  testWidgets('empty state scrolls at 320dp and 200 percent text', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(320, 240);
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await start(tester);
+    expect(tester.takeException(), isNull);
+    await tester.ensureVisible(find.text('Nhập ảnh'));
+    expect(find.text('Nhập ảnh').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('populated screen and export sheet scroll in short landscape', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(320, 280);
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await start(tester, pages: 1);
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byTooltip('Xuất'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.ensureVisible(find.text('PNG'));
+    expect(find.text('PNG').hitTestable(), findsOneWidget);
+    await tester.tap(find.text('PNG'));
+    await settle(tester);
+    expect(sharer.shared.single, ['X-Scanner-trang-01.png']);
   });
 
   testWidgets('cancelled capture adds no page (AC-7)', (tester) async {
@@ -494,7 +608,7 @@ void main() {
   ) async {
     await start(tester, pages: 1);
     final image = tester.widget<Image>(find.byType(Image)).image;
-    final px = (72 * tester.view.devicePixelRatio).ceil();
+    final px = (96 * tester.view.devicePixelRatio).ceil();
     expect(
       image,
       isA<ResizeImage>()

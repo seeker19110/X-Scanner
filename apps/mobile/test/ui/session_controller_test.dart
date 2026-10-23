@@ -1268,6 +1268,32 @@ void main() {
     return c;
   }
 
+  test('disposed controller does not start queued picker or export', () async {
+    await addPages(1);
+    final renderer = HeldRenderer(holds: {1});
+    final c = await withRenderer(renderer);
+    final running = c.exportAndShare(ExportFormat.jpeg);
+    await renderer.reached(1);
+    source.captures.add(null);
+    final capture = c.capture();
+    final queued = c.exportAndShare(ExportFormat.jpeg);
+    c.dispose();
+    renderer.release(1);
+    await Future.wait([running, capture, queued]);
+    expect(source.captures, hasLength(1), reason: 'picker never started');
+    expect(renderer.turns, hasLength(1), reason: 'queued export never started');
+    expect(sharer.shared, isEmpty);
+    expect(c.session.pages, hasLength(1));
+  });
+
+  test('disposed controller ignores newly submitted operations', () async {
+    source.captures.add(null);
+    controller.dispose();
+    await controller.capture();
+    expect(source.captures, hasLength(1));
+    expect(sharer.shared, isEmpty);
+  });
+
   test('export job reports progress (AC-6)', () async {
     await addPages(3);
     final renderer = HeldRenderer(holds: {2});
