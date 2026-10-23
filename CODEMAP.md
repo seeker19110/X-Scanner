@@ -4,11 +4,11 @@
 > "Có tính năng gì" ở `docs/FEATURE-MAP.md`; "viết thế nào" ở `docs/CONVENTIONS.md`.
 > Đổi cấu trúc (thư mục, lệnh gate, CI) → cập nhật dòng liên quan trong cùng PR.
 > Lệnh gate đầy đủ: `bash scripts/dev-task.sh gate` (build APK debug, `flutter analyze --fatal-infos`,
-> `dart format`, `flutter test` + kiểm repository; lệnh cụ thể ở `.claude/project-commands.sh`).
+> `dart format`, `flutter test`, `:app:testDebugUnitTest` + kiểm repository; lệnh cụ thể ở `.claude/project-commands.sh`).
 
 ## App `apps/mobile`
 
-Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export` → `imaging` → `core`; `storage` → `core`. `core` thuần Dart, không import Flutter (`test/core/core_purity_test.dart`).
+Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export` → `imaging` → `core`; `storage` → `core`; leaf `storage/android_storage.dart` dùng Flutter services để nối API Android. `core` thuần Dart, không import Flutter (`test/core/core_purity_test.dart`).
 
 | Muốn | Sửa | Rồi chạy |
 | --- | --- | --- |
@@ -18,10 +18,13 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Đổi cách lưu/khôi phục/cách ly phiên, giữ bản gốc | `lib/storage/session_store.dart` | `flutter test test/storage` — mọi ca mất dữ liệu phải có test đỏ trước |
 | Đổi lưu trữ theo tài liệu hoặc thư viện (XS-09; chưa nối vào app tới PR-4) | `lib/storage/document_store.dart` (bản chép `SessionStore` có `DEBT:` — sửa bảo đảm ở cả hai tới khi PR-4 xoá `SessionStore`), `lib/storage/library_store.dart` (`list()` chỉ đọc) | `flutter test test/storage` |
 | Đổi migration P1 → thư viện (XS-09 FR-6/FR-7; chạy trên dữ liệu thật chỉ từ PR-4) | `lib/storage/p1_migration.dart` (nhật ký `migration.json`, chỉ bắt `FileSystemException`/`FormatException`, không bao giờ xoá `session/` hay `session.migrated*`) | `flutter test test/storage/p1_migration_test.dart` — thêm lệnh đổi đĩa thì cập nhật số trong `the clean run covers steps 2 to 7` |
+| Giữ ảnh picker chờ đúng owner trước nối thư viện | `lib/storage/pending_pick_store.dart` (journal giới hạn, staging ngoài document, retained rejection, lỗi size phân biệt I/O) | `test/storage/pending_pick_store_test.dart`; IOOverrides finite faults, no app activation |
+| Đo dung lượng internal Android trước copy (XS09 capacityleaf; chưa nối app) | `lib/storage/android_storage.dart`, `android/app/src/main/kotlin/org/xscanner/x_scanner/StorageHandler.kt`, `MainActivity.kt` (filesDir/StatFs, fixed noargs channel) | `test/storage/android_storage_test.dart`; JVM `StorageHandlerTest.kt`; dispatcher gate thực chạy cả hai |
 | Đổi màn thư viện: trạng thái, tạo, đổi tên, thông báo migration (XS-09 PR-4a; chưa nối vào app tới PR-4b) | `lib/ui/library_controller.dart` (`start`/`refresh` xếp hàng; đổi tên chỉ trên mục đọc được), `lib/ui/library_screen.dart` (màn tài liệu tiêm qua `documentScreen`) | `flutter test test/ui/library_controller_test.dart test/ui/library_screen_test.dart test/ui/accessibility_test.dart` |
 | Đổi thuật toán nắn phối cảnh | `lib/imaging/homography.dart` | `flutter test test/imaging` |
 | Đổi rectify toàn khung không resize (XS-07a) | `lib/imaging/page_render.dart` (`rectify`, sau normalize/cap) | `flutter test test/imaging/page_render_test.dart test/tool/scanner_benchmark_test.dart`; exact pixels, metadata/ownership, near-full/cap và PNG rotation; matched AOT theo `docs/benchmarks/README.md` |
-| Đổi giải mã/EXIF/giới hạn điểm ảnh/thumbnail | `lib/imaging/page_render.dart` | `flutter test test/imaging test/export` |
+| Giữ gray-alpha khi crop/cap/xoay (XS-07b) | `lib/imaging/page_render.dart` (`rectify`, `renderPageSync`; image4.12 đã sửa setter/xoay, không còn helper riêng) | `flutter test test/imaging/page_render_test.dart`; expected ramp/matrix độc lập, PNG/JPEG, source/metadata/channel ownership; full gate qua dispatcher |
+| Đổi giải mã/EXIF/giới hạn điểm ảnh/thumbnail | `lib/imaging/page_render.dart` (`_decoderFor`/`_startDecode`, instance cap trước parse; header/output guard, nullable header), image pin/lock | `flutter test test/imaging test/export`; `decoder_security_test.dart` staged RED, finite EXIF/PNG/cap regressions; dispatcher full gate |
 | Đổi định dạng ảnh nhận (JPEG/PNG/WebP theo magic bytes) hoặc trần byte bản gốc | `lib/imaging/page_render.dart` (`_decoderFor`, `maxOriginalBytes`) | `flutter test test/imaging test/ui/session_controller_test.dart` |
 | Đổi ngân sách thời gian giải mã (isolate bị kill khi quá hạn) | `lib/imaging/isolate_budget.dart` (`decodeBudget`, `runWithinBudget`) | `flutter test test/imaging/isolate_budget_test.dart` |
 | Đổi cách giới hạn giải mã đồng thời (thumbnail + render khi xuất) | `lib/imaging/decode_gate.dart`; nối một cổng duy nhất ở `lib/main.dart` | `flutter test test/imaging/decode_gate_test.dart test/ui/session_controller_test.dart` |
@@ -35,6 +38,8 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Đổi màn chỉnh góc (hiển thị xoay, hoàn tác/làm lại, hỏi bỏ thay đổi, kính lúp, thao tác trợ năng dịch góc — XS-13) | `lib/ui/quad_editor_screen.dart`; quy đổi toạ độ hiển thị `toDisplay`/`fromDisplay`/`sourceCorner` ở `lib/core/quad_editing.dart`; lịch sử `lib/core/edit_history.dart` | `flutter test test/ui/quad_editor_screen_test.dart test/core/quad_editing_test.dart test/core/edit_history_test.dart test/ui/accessibility_test.dart` |
 | Đổi nguồn ảnh (camera hệ thống / thư viện) | `lib/ui/page_source.dart` | `flutter test test/ui` |
 | Đổi theme Dark/Light | `lib/app/theme.dart` | `flutter test test/app_test.dart test/ui/accessibility_test.dart` (vùng chạm, nhãn, tương phản ở cả hai theme) |
+| Đổi bố cục màn nhỏ/chữ lớn, xuất có nhãn và chỉnh góc bằng nút chạm | `lib/ui/review_screen.dart`, `lib/ui/quad_editor_screen.dart`, `lib/app/theme.dart` | `flutter test test/ui/review_screen_test.dart test/ui/quad_editor_screen_test.dart test/ui/accessibility_test.dart`; xem spec `docs/specs/2026-10-23-scanner-experience.md` |
+| Tối ưu JPEG thumbnail với original-header cap và EXIF | `lib/imaging/page_render.dart` (`thumbnailSync`, `decodeOriented`); export mặc định scale 1 | `flutter test test/imaging/page_render_test.dart test/imaging/decoder_security_test.dart`; benchmark AOT có source/binary/corpus hashes |
 | Nối dependency, thư mục lưu | `lib/main.dart` | `flutter test test/app_test.dart` + gate |
 | Đổi quyền / backup Android | `android/app/src/main/AndroidManifest.xml`, `android/app/src/main/res/xml/data_extraction_rules.xml` | `flutter test test/android_manifest_test.dart`; gate (bước build gộp manifest release và chạy `scripts/check-release-manifest.py`, AC-8) |
 | Thêm/nâng dependency | `pubspec.yaml` (ghim chính xác), `pubspec.lock` (sinh bởi `flutter pub get`) | gate + kiểm manifest release đã gộp; spec §3 yêu cầu bản phát hành ≥ 7 ngày |

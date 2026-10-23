@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart' show CustomSemanticsAction;
 
@@ -68,6 +69,7 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
   late final EditHistory<ScanPage> _history = EditHistory(widget.page);
   late final Size _imageSize = _readImageSize(widget.thumbnailBytes);
   bool _rejectionShown = false;
+  QuadCorner _selectedCorner = QuadCorner.topLeft;
 
   /// The page when the current drag began, or `null` when not dragging.
   ScanPage? _dragStart;
@@ -151,6 +153,7 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
   void _onDragStart(QuadCorner shown) {
     _rejectionShown = false;
     setState(() {
+      _selectedCorner = shown;
       _dragStart = _history.current;
       _dragCorner = shown;
       _draft = null;
@@ -242,7 +245,6 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
     if (discard == true && mounted) Navigator.of(context).pop();
   }
 
-  // DEBT: corners move by dragging or by screen-reader nudges only; there is no one-tap way for users who cannot drag and do not use a screen reader | trần: WCAG 2.2 2.5.7 not fully met in the editor | xem lại khi: XS-20.
   Widget _handle(QuadCorner shown, Offset center, ColorScheme colors) {
     return Positioned(
       left: center.dx - _handleSize / 2,
@@ -257,6 +259,8 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
         },
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
+          dragStartBehavior: DragStartBehavior.down,
+          onTap: () => setState(() => _selectedCorner = shown),
           onPanStart: (_) => _onDragStart(shown),
           onPanUpdate: (d) => _onDrag(shown, d.globalPosition),
           onPanEnd: (_) => _onDragEnd(),
@@ -267,8 +271,10 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
               height: _handleDot,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: colors.primaryContainer,
-                border: Border.all(color: colors.primary, width: 3),
+                color: shown == _selectedCorner
+                    ? colors.primary
+                    : colors.primaryContainer,
+                border: Border.all(color: colors.onPrimaryContainer, width: 3),
               ),
             ),
           ),
@@ -342,6 +348,7 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
                       painter: _QuadPainter(
                         corners: [for (final c in QuadCorner.values) at(c)],
                         color: colors.primary,
+                        shadeColor: colors.scrim.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -353,37 +360,103 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
             },
           ),
         ),
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Wrap(
-              alignment: WrapAlignment.spaceEvenly,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 8,
-              children: [
-                IconButton(
-                  tooltip: 'Hoàn tác',
-                  onPressed: _history.canUndo ? _undo : null,
-                  icon: const Icon(Icons.undo),
+        bottomNavigationBar: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.surfaceContainerLow,
+            border: Border(top: BorderSide(color: colors.outlineVariant)),
+          ),
+          child: SafeArea(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.4,
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Chạm chọn góc rồi dùng nút dịch, hoặc kéo trực tiếp.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: colors.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Đang chọn: ${_labels[_selectedCorner]!.toLowerCase()}',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      children: [
+                        for (final (label, icon, delta) in const [
+                          (
+                            'Dịch sang trái',
+                            Icons.arrow_back,
+                            Offset(-_nudgeStep, 0),
+                          ),
+                          (
+                            'Dịch lên',
+                            Icons.arrow_upward,
+                            Offset(0, -_nudgeStep),
+                          ),
+                          (
+                            'Dịch xuống',
+                            Icons.arrow_downward,
+                            Offset(0, _nudgeStep),
+                          ),
+                          (
+                            'Dịch sang phải',
+                            Icons.arrow_forward,
+                            Offset(_nudgeStep, 0),
+                          ),
+                        ])
+                          IconButton(
+                            tooltip: label,
+                            onPressed: () => _nudge(_selectedCorner, delta),
+                            icon: Icon(icon),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      alignment: WrapAlignment.spaceEvenly,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      children: [
+                        IconButton(
+                          tooltip: 'Hoàn tác',
+                          onPressed: _history.canUndo ? _undo : null,
+                          icon: const Icon(Icons.undo),
+                        ),
+                        IconButton(
+                          tooltip: 'Làm lại',
+                          onPressed: _history.canRedo ? _redo : null,
+                          icon: const Icon(Icons.redo),
+                        ),
+                        TextButton(
+                          onPressed: () => _commit(
+                            _history.current.withQuad(PageQuad.fullFrame),
+                          ),
+                          child: const Text('Đặt lại'),
+                        ),
+                        TextButton.icon(
+                          onPressed: () =>
+                              _commit(_history.current.rotatedClockwise()),
+                          icon: const Icon(Icons.rotate_90_degrees_cw),
+                          label: const Text('Xoay 90°'),
+                        ),
+                        Text('Xoay: ${_page.quarterTurns * 90}°'),
+                        FilledButton(
+                          onPressed: _save,
+                          child: const Text('Lưu'),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                IconButton(
-                  tooltip: 'Làm lại',
-                  onPressed: _history.canRedo ? _redo : null,
-                  icon: const Icon(Icons.redo),
-                ),
-                TextButton(
-                  onPressed: () =>
-                      _commit(_history.current.withQuad(PageQuad.fullFrame)),
-                  child: const Text('Đặt lại'),
-                ),
-                TextButton.icon(
-                  onPressed: () => _commit(_history.current.rotatedClockwise()),
-                  icon: const Icon(Icons.rotate_90_degrees_cw),
-                  label: const Text('Xoay 90°'),
-                ),
-                Text('Xoay: ${_page.quarterTurns * 90}°'),
-                FilledButton(onPressed: _save, child: const Text('Lưu')),
-              ],
+              ),
             ),
           ),
         ),
@@ -394,14 +467,24 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
 
 /// Outlines the crop quad through [corners] (screen coordinates).
 class _QuadPainter extends CustomPainter {
-  const _QuadPainter({required this.corners, required this.color});
+  const _QuadPainter({
+    required this.corners,
+    required this.color,
+    required this.shadeColor,
+  });
 
   final List<Offset> corners;
   final Color color;
+  final Color shadeColor;
 
   @override
   void paint(Canvas canvas, Size size) {
     final path = Path()..addPolygon(corners, true);
+    final outside = Path()
+      ..fillType = PathFillType.evenOdd
+      ..addRect(Offset.zero & size)
+      ..addPath(path, Offset.zero);
+    canvas.drawPath(outside, Paint()..color = shadeColor);
     canvas.drawPath(
       path,
       Paint()
@@ -413,5 +496,7 @@ class _QuadPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_QuadPainter old) =>
-      old.color != color || !listEquals(old.corners, corners);
+      old.color != color ||
+      old.shadeColor != shadeColor ||
+      !listEquals(old.corners, corners);
 }

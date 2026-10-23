@@ -1,0 +1,487 @@
+{
+  "baseCommit": "30b47dadf4323d5d4744c78c0f57ea1c26cfc170",
+  "measuredAtUtc": "2026-10-23T13:13:13.210896+00:00",
+  "afterSourceState": "Final working tree after parser-free near-square and duplicate-EXIF correction, identified by source hashes",
+  "sourceHashes": {
+    "apps/mobile/lib/imaging/page_render.dart": "6039e556fb504f9941f608d6baed03196f775943b8ccadf05347bf083db54a24",
+    "apps/mobile/lib/imaging/homography.dart": "4d23e32239c2d38e86bc9cbc1701583454ddc0dbf40565d548260ce44348ca1c",
+    "apps/mobile/lib/imaging/isolate_budget.dart": "26dbccf68719540a3c10cb35083141f112140b56e2deead5017184990c8453c8",
+    "apps/mobile/tool/scanner_benchmark.dart": "8fd922b3a07ed90e51ecf94f48b33c20611ccf16e94001abad141e31aef5bf81",
+    "apps/mobile/pubspec.lock": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec"
+  },
+  "beforeSourceHashes": {
+    "apps/mobile/lib/imaging/page_render.dart": "80627d25b0c80a6971c6c5912e0468f9f2b46b3aac9fce6bb0b302230b8862f7",
+    "apps/mobile/lib/imaging/homography.dart": "4d23e32239c2d38e86bc9cbc1701583454ddc0dbf40565d548260ce44348ca1c",
+    "apps/mobile/lib/imaging/isolate_budget.dart": "26dbccf68719540a3c10cb35083141f112140b56e2deead5017184990c8453c8",
+    "apps/mobile/tool/scanner_benchmark.dart": "8fd922b3a07ed90e51ecf94f48b33c20611ccf16e94001abad141e31aef5bf81",
+    "apps/mobile/pubspec.lock": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec"
+  },
+  "binaryHashes": {
+    "before": "21d0d83a642aa42804b50ef5b9e75e2a4a146b47ff2de4005a3ce9b88726338c",
+    "accepted": "71993bf11b13686e742fae11f00a4f4c45dcda41157b1a9debaafc6401493a5b"
+  },
+  "limitations": "One synthetic 4000\u00d73000 JPEG; 5 fresh processes per version, alternating order; OS I/O cache uncontrolled. Not p95, device, UI or real-document quality evidence. The CLI appSha argument is the base commit for both binaries; accepted source is the working tree identified by hashes. Earlier provisional series are retained separately under /workspace/.x-scanner/experience/.",
+  "command": "dart compile exe tool/scanner_benchmark.dart -o <binary>; <binary> thumbnail <corpus> <baseCommit> (cwd apps/mobile)",
+  "summary": {
+    "before": {
+      "n": 5,
+      "durationMs": {
+        "min": 569.492,
+        "median": 578.921,
+        "max": 675.108
+      },
+      "peakProcessRssBytes": {
+        "min": 48275456,
+        "median": 48443392,
+        "max": 48549888
+      }
+    },
+    "accepted": {
+      "n": 5,
+      "durationMs": {
+        "min": 421.384,
+        "median": 461.563,
+        "max": 524.267
+      },
+      "peakProcessRssBytes": {
+        "min": 22405120,
+        "median": 22474752,
+        "max": 22536192
+      }
+    },
+    "durationReductionPercent": 20.271850563375672,
+    "peakRssReductionPercent": 53.6061554071193
+  },
+  "samples": [
+    {
+      "sample": 1,
+      "version": "before",
+      "measurement": {
+        "schemaVersion": 1,
+        "appSha": "30b47dadf4323d5d4744c78c0f57ea1c26cfc170",
+        "fixtureId": "x-scanner-geometric-v1-4000x3000-1",
+        "fixtureSha256": "c3f3bd7b360b07d4e06b5b67fbd058fe63d751f91ebdde6eb8aec25ae23730ec",
+        "width": 4000,
+        "height": 3000,
+        "pageCount": 1,
+        "host": {
+          "os": "linux",
+          "architecture": "linux_x64"
+        },
+        "runtime": {
+          "name": "Dart",
+          "version": "3.13.5"
+        },
+        "buildMode": "host-dart",
+        "engines": {
+          "thumbnailCore": "lib/imaging/page_render.dart#thumbnail",
+          "renderCore": "lib/imaging/page_render.dart#renderPage",
+          "pdfCore": "lib/export/pdf_export.dart#buildPdf",
+          "pubspecLockSha256": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec",
+          "imageVersion": null,
+          "pdfVersion": null
+        },
+        "recipeRevision": 0,
+        "stage": "thumbnail",
+        "durationMs": 640.96,
+        "renderDurationMs": 640.959,
+        "packageDurationMs": null,
+        "writeDurationMs": null,
+        "outputBytes": 25798,
+        "peakProcessRssBytes": 48476160,
+        "currentRssBytes": 48693248,
+        "cancelLatencyMs": null,
+        "ioCache": "uncontrolled",
+        "rssScope": "process-lifetime-including-setup",
+        "outcome": "success"
+      }
+    },
+    {
+      "sample": 1,
+      "version": "accepted",
+      "measurement": {
+        "schemaVersion": 1,
+        "appSha": "30b47dadf4323d5d4744c78c0f57ea1c26cfc170",
+        "fixtureId": "x-scanner-geometric-v1-4000x3000-1",
+        "fixtureSha256": "c3f3bd7b360b07d4e06b5b67fbd058fe63d751f91ebdde6eb8aec25ae23730ec",
+        "width": 4000,
+        "height": 3000,
+        "pageCount": 1,
+        "host": {
+          "os": "linux",
+          "architecture": "linux_x64"
+        },
+        "runtime": {
+          "name": "Dart",
+          "version": "3.13.5"
+        },
+        "buildMode": "host-dart",
+        "engines": {
+          "thumbnailCore": "lib/imaging/page_render.dart#thumbnail",
+          "renderCore": "lib/imaging/page_render.dart#renderPage",
+          "pdfCore": "lib/export/pdf_export.dart#buildPdf",
+          "pubspecLockSha256": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec",
+          "imageVersion": null,
+          "pdfVersion": null
+        },
+        "recipeRevision": 0,
+        "stage": "thumbnail",
+        "durationMs": 524.267,
+        "renderDurationMs": 524.267,
+        "packageDurationMs": null,
+        "writeDurationMs": null,
+        "outputBytes": 27161,
+        "peakProcessRssBytes": 22523904,
+        "currentRssBytes": 22884352,
+        "cancelLatencyMs": null,
+        "ioCache": "uncontrolled",
+        "rssScope": "process-lifetime-including-setup",
+        "outcome": "success"
+      }
+    },
+    {
+      "sample": 2,
+      "version": "accepted",
+      "measurement": {
+        "schemaVersion": 1,
+        "appSha": "30b47dadf4323d5d4744c78c0f57ea1c26cfc170",
+        "fixtureId": "x-scanner-geometric-v1-4000x3000-1",
+        "fixtureSha256": "c3f3bd7b360b07d4e06b5b67fbd058fe63d751f91ebdde6eb8aec25ae23730ec",
+        "width": 4000,
+        "height": 3000,
+        "pageCount": 1,
+        "host": {
+          "os": "linux",
+          "architecture": "linux_x64"
+        },
+        "runtime": {
+          "name": "Dart",
+          "version": "3.13.5"
+        },
+        "buildMode": "host-dart",
+        "engines": {
+          "thumbnailCore": "lib/imaging/page_render.dart#thumbnail",
+          "renderCore": "lib/imaging/page_render.dart#renderPage",
+          "pdfCore": "lib/export/pdf_export.dart#buildPdf",
+          "pubspecLockSha256": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec",
+          "imageVersion": null,
+          "pdfVersion": null
+        },
+        "recipeRevision": 0,
+        "stage": "thumbnail",
+        "durationMs": 444.639,
+        "renderDurationMs": 444.638,
+        "packageDurationMs": null,
+        "writeDurationMs": null,
+        "outputBytes": 27161,
+        "peakProcessRssBytes": 22536192,
+        "currentRssBytes": 22929408,
+        "cancelLatencyMs": null,
+        "ioCache": "uncontrolled",
+        "rssScope": "process-lifetime-including-setup",
+        "outcome": "success"
+      }
+    },
+    {
+      "sample": 2,
+      "version": "before",
+      "measurement": {
+        "schemaVersion": 1,
+        "appSha": "30b47dadf4323d5d4744c78c0f57ea1c26cfc170",
+        "fixtureId": "x-scanner-geometric-v1-4000x3000-1",
+        "fixtureSha256": "c3f3bd7b360b07d4e06b5b67fbd058fe63d751f91ebdde6eb8aec25ae23730ec",
+        "width": 4000,
+        "height": 3000,
+        "pageCount": 1,
+        "host": {
+          "os": "linux",
+          "architecture": "linux_x64"
+        },
+        "runtime": {
+          "name": "Dart",
+          "version": "3.13.5"
+        },
+        "buildMode": "host-dart",
+        "engines": {
+          "thumbnailCore": "lib/imaging/page_render.dart#thumbnail",
+          "renderCore": "lib/imaging/page_render.dart#renderPage",
+          "pdfCore": "lib/export/pdf_export.dart#buildPdf",
+          "pubspecLockSha256": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec",
+          "imageVersion": null,
+          "pdfVersion": null
+        },
+        "recipeRevision": 0,
+        "stage": "thumbnail",
+        "durationMs": 569.492,
+        "renderDurationMs": 569.491,
+        "packageDurationMs": null,
+        "writeDurationMs": null,
+        "outputBytes": 25798,
+        "peakProcessRssBytes": 48275456,
+        "currentRssBytes": 48709632,
+        "cancelLatencyMs": null,
+        "ioCache": "uncontrolled",
+        "rssScope": "process-lifetime-including-setup",
+        "outcome": "success"
+      }
+    },
+    {
+      "sample": 3,
+      "version": "before",
+      "measurement": {
+        "schemaVersion": 1,
+        "appSha": "30b47dadf4323d5d4744c78c0f57ea1c26cfc170",
+        "fixtureId": "x-scanner-geometric-v1-4000x3000-1",
+        "fixtureSha256": "c3f3bd7b360b07d4e06b5b67fbd058fe63d751f91ebdde6eb8aec25ae23730ec",
+        "width": 4000,
+        "height": 3000,
+        "pageCount": 1,
+        "host": {
+          "os": "linux",
+          "architecture": "linux_x64"
+        },
+        "runtime": {
+          "name": "Dart",
+          "version": "3.13.5"
+        },
+        "buildMode": "host-dart",
+        "engines": {
+          "thumbnailCore": "lib/imaging/page_render.dart#thumbnail",
+          "renderCore": "lib/imaging/page_render.dart#renderPage",
+          "pdfCore": "lib/export/pdf_export.dart#buildPdf",
+          "pubspecLockSha256": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec",
+          "imageVersion": null,
+          "pdfVersion": null
+        },
+        "recipeRevision": 0,
+        "stage": "thumbnail",
+        "durationMs": 570.507,
+        "renderDurationMs": 570.507,
+        "packageDurationMs": null,
+        "writeDurationMs": null,
+        "outputBytes": 25798,
+        "peakProcessRssBytes": 48443392,
+        "currentRssBytes": 48906240,
+        "cancelLatencyMs": null,
+        "ioCache": "uncontrolled",
+        "rssScope": "process-lifetime-including-setup",
+        "outcome": "success"
+      }
+    },
+    {
+      "sample": 3,
+      "version": "accepted",
+      "measurement": {
+        "schemaVersion": 1,
+        "appSha": "30b47dadf4323d5d4744c78c0f57ea1c26cfc170",
+        "fixtureId": "x-scanner-geometric-v1-4000x3000-1",
+        "fixtureSha256": "c3f3bd7b360b07d4e06b5b67fbd058fe63d751f91ebdde6eb8aec25ae23730ec",
+        "width": 4000,
+        "height": 3000,
+        "pageCount": 1,
+        "host": {
+          "os": "linux",
+          "architecture": "linux_x64"
+        },
+        "runtime": {
+          "name": "Dart",
+          "version": "3.13.5"
+        },
+        "buildMode": "host-dart",
+        "engines": {
+          "thumbnailCore": "lib/imaging/page_render.dart#thumbnail",
+          "renderCore": "lib/imaging/page_render.dart#renderPage",
+          "pdfCore": "lib/export/pdf_export.dart#buildPdf",
+          "pubspecLockSha256": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec",
+          "imageVersion": null,
+          "pdfVersion": null
+        },
+        "recipeRevision": 0,
+        "stage": "thumbnail",
+        "durationMs": 508.958,
+        "renderDurationMs": 508.957,
+        "packageDurationMs": null,
+        "writeDurationMs": null,
+        "outputBytes": 27161,
+        "peakProcessRssBytes": 22437888,
+        "currentRssBytes": 22872064,
+        "cancelLatencyMs": null,
+        "ioCache": "uncontrolled",
+        "rssScope": "process-lifetime-including-setup",
+        "outcome": "success"
+      }
+    },
+    {
+      "sample": 4,
+      "version": "accepted",
+      "measurement": {
+        "schemaVersion": 1,
+        "appSha": "30b47dadf4323d5d4744c78c0f57ea1c26cfc170",
+        "fixtureId": "x-scanner-geometric-v1-4000x3000-1",
+        "fixtureSha256": "c3f3bd7b360b07d4e06b5b67fbd058fe63d751f91ebdde6eb8aec25ae23730ec",
+        "width": 4000,
+        "height": 3000,
+        "pageCount": 1,
+        "host": {
+          "os": "linux",
+          "architecture": "linux_x64"
+        },
+        "runtime": {
+          "name": "Dart",
+          "version": "3.13.5"
+        },
+        "buildMode": "host-dart",
+        "engines": {
+          "thumbnailCore": "lib/imaging/page_render.dart#thumbnail",
+          "renderCore": "lib/imaging/page_render.dart#renderPage",
+          "pdfCore": "lib/export/pdf_export.dart#buildPdf",
+          "pubspecLockSha256": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec",
+          "imageVersion": null,
+          "pdfVersion": null
+        },
+        "recipeRevision": 0,
+        "stage": "thumbnail",
+        "durationMs": 421.384,
+        "renderDurationMs": 421.383,
+        "packageDurationMs": null,
+        "writeDurationMs": null,
+        "outputBytes": 27161,
+        "peakProcessRssBytes": 22474752,
+        "currentRssBytes": 22867968,
+        "cancelLatencyMs": null,
+        "ioCache": "uncontrolled",
+        "rssScope": "process-lifetime-including-setup",
+        "outcome": "success"
+      }
+    },
+    {
+      "sample": 4,
+      "version": "before",
+      "measurement": {
+        "schemaVersion": 1,
+        "appSha": "30b47dadf4323d5d4744c78c0f57ea1c26cfc170",
+        "fixtureId": "x-scanner-geometric-v1-4000x3000-1",
+        "fixtureSha256": "c3f3bd7b360b07d4e06b5b67fbd058fe63d751f91ebdde6eb8aec25ae23730ec",
+        "width": 4000,
+        "height": 3000,
+        "pageCount": 1,
+        "host": {
+          "os": "linux",
+          "architecture": "linux_x64"
+        },
+        "runtime": {
+          "name": "Dart",
+          "version": "3.13.5"
+        },
+        "buildMode": "host-dart",
+        "engines": {
+          "thumbnailCore": "lib/imaging/page_render.dart#thumbnail",
+          "renderCore": "lib/imaging/page_render.dart#renderPage",
+          "pdfCore": "lib/export/pdf_export.dart#buildPdf",
+          "pubspecLockSha256": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec",
+          "imageVersion": null,
+          "pdfVersion": null
+        },
+        "recipeRevision": 0,
+        "stage": "thumbnail",
+        "durationMs": 675.108,
+        "renderDurationMs": 675.107,
+        "packageDurationMs": null,
+        "writeDurationMs": null,
+        "outputBytes": 25798,
+        "peakProcessRssBytes": 48549888,
+        "currentRssBytes": 48906240,
+        "cancelLatencyMs": null,
+        "ioCache": "uncontrolled",
+        "rssScope": "process-lifetime-including-setup",
+        "outcome": "success"
+      }
+    },
+    {
+      "sample": 5,
+      "version": "before",
+      "measurement": {
+        "schemaVersion": 1,
+        "appSha": "30b47dadf4323d5d4744c78c0f57ea1c26cfc170",
+        "fixtureId": "x-scanner-geometric-v1-4000x3000-1",
+        "fixtureSha256": "c3f3bd7b360b07d4e06b5b67fbd058fe63d751f91ebdde6eb8aec25ae23730ec",
+        "width": 4000,
+        "height": 3000,
+        "pageCount": 1,
+        "host": {
+          "os": "linux",
+          "architecture": "linux_x64"
+        },
+        "runtime": {
+          "name": "Dart",
+          "version": "3.13.5"
+        },
+        "buildMode": "host-dart",
+        "engines": {
+          "thumbnailCore": "lib/imaging/page_render.dart#thumbnail",
+          "renderCore": "lib/imaging/page_render.dart#renderPage",
+          "pdfCore": "lib/export/pdf_export.dart#buildPdf",
+          "pubspecLockSha256": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec",
+          "imageVersion": null,
+          "pdfVersion": null
+        },
+        "recipeRevision": 0,
+        "stage": "thumbnail",
+        "durationMs": 578.921,
+        "renderDurationMs": 578.921,
+        "packageDurationMs": null,
+        "writeDurationMs": null,
+        "outputBytes": 25798,
+        "peakProcessRssBytes": 48414720,
+        "currentRssBytes": 48676864,
+        "cancelLatencyMs": null,
+        "ioCache": "uncontrolled",
+        "rssScope": "process-lifetime-including-setup",
+        "outcome": "success"
+      }
+    },
+    {
+      "sample": 5,
+      "version": "accepted",
+      "measurement": {
+        "schemaVersion": 1,
+        "appSha": "30b47dadf4323d5d4744c78c0f57ea1c26cfc170",
+        "fixtureId": "x-scanner-geometric-v1-4000x3000-1",
+        "fixtureSha256": "c3f3bd7b360b07d4e06b5b67fbd058fe63d751f91ebdde6eb8aec25ae23730ec",
+        "width": 4000,
+        "height": 3000,
+        "pageCount": 1,
+        "host": {
+          "os": "linux",
+          "architecture": "linux_x64"
+        },
+        "runtime": {
+          "name": "Dart",
+          "version": "3.13.5"
+        },
+        "buildMode": "host-dart",
+        "engines": {
+          "thumbnailCore": "lib/imaging/page_render.dart#thumbnail",
+          "renderCore": "lib/imaging/page_render.dart#renderPage",
+          "pdfCore": "lib/export/pdf_export.dart#buildPdf",
+          "pubspecLockSha256": "3ef1c0ae34225306735518725544409eea73ed6e4d610d663c57d7888f63a1ec",
+          "imageVersion": null,
+          "pdfVersion": null
+        },
+        "recipeRevision": 0,
+        "stage": "thumbnail",
+        "durationMs": 461.563,
+        "renderDurationMs": 461.562,
+        "packageDurationMs": null,
+        "writeDurationMs": null,
+        "outputBytes": 27161,
+        "peakProcessRssBytes": 22405120,
+        "currentRssBytes": 22835200,
+        "cancelLatencyMs": null,
+        "ioCache": "uncontrolled",
+        "rssScope": "process-lifetime-including-setup",
+        "outcome": "success"
+      }
+    }
+  ]
+}

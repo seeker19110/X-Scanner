@@ -4,13 +4,13 @@
 | --- | --- |
 | Issue / Goal | XS-09 của `docs/plans/2026-10-12-comprehensive-development-plan.md` (§6.1, §13) · Work ID `2026-10-12-xs09-document-library-spec` |
 | Spec owner | Phiên chính (Claude Code) |
-| State | **Approved for implementation** — PR-1..PR-3 (§3d), PR-4a (chủ repo); PR-4b chờ chủ repo |
-| Approver / date | Phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12 — PR-1..PR-3; chủ repo duyệt PR-4a 2026-10-12 |
-| Last updated | 2026-10-12 |
+| State | **Approved for implementation** — PR-1..PR-3 (§3d), PR-4a/PR-4b (chủ repo) |
+| Approver / date | Phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12 — PR-1..PR-3; chủ repo duyệt PR-4a 2026-10-12; PR-4b 2026-10-18 |
+| Last updated | 2026-10-18 |
 
 > Mức **L**: đổi bố cục lưu trữ dữ liệu thật của người dùng (migration). PR-1..PR-3 chỉ thêm code không nối vào app, không
 > chạm dữ liệu thật → phiên chính duyệt theo §3d. **PR-4** (công tắc chạy migration trên dữ liệu thật) không tự duyệt:
-> chờ chủ repo (§3d "không bao giờ tự quyết").
+> chủ repo đã duyệt trực tiếp 2026-10-18: “Duyệt PR-4b; P1 chưa phân phối”. Quyền này bao gồm copy/kiểm, phục hồi khi bị ngắt và giữ `session.migrated/`; không bao gồm xoá bản quay lại/release.
 > Tuân hợp đồng XS-08 (`docs/specs/2026-10-12-document-revision-export-contract.md`, ADR-0004): spec này là consumer
 > đầu tiên, nên mang AC-1..AC-5 và FR-7 của hợp đồng.
 
@@ -27,7 +27,7 @@ lại tài liệu cũ. Bằng chứng trong code (`main` @ `474fa28`): `main.dar
 - Target: thư viện gồm nhiều **tài liệu** (hợp đồng XS-08 FR-1), mỗi tài liệu mở ra màn xem lại P1; dữ liệu P1 hiện có
   được chuyển thành **một** tài liệu khi mở bản mới lần đầu, không mất bản gốc hay chỉnh sửa nào.
 - Guardrails (kế thừa, không nới): bản gốc không bị ghi đè, không bị xoá khi chưa có manifest đã lưu không tham chiếu nó
-  (TRAPS F-001); không log/hiển thị tiêu đề, đường dẫn, nội dung trang; không mạng; không thêm dependency; mọi luồng P1
+  (TRAPS F-001); không log/hiển thị tiêu đề, đường dẫn, nội dung trang; không mạng; không thêm runtime dependency (JUnit chỉ test ở capacityleaf); mọi luồng P1
   (chụp, nhập, sắp xếp, chỉnh góc, xoay, xuất) giữ nguyên hành vi trong một tài liệu.
 
 ## 3. Research current state
@@ -247,7 +247,7 @@ Tuần tự (cùng lớp lưu trữ), mỗi PR một outcome, app vẫn chạy b
     migration tiêm từ ngoài (AC-11, AC-12; phần UI của AC-8, AC-9). **Không nối vào app**, không chạm dữ liệu thật — chủ
     repo duyệt 2026-10-12 ("chỉ làm PR đóng hồ sơ XS-12a và PR-4a").
   - PR-4b: `SessionController`/`ReviewScreen` chạy trên `DocumentStore` (FR-8), nối `main.dart` (migration → thư viện), gỡ
-    `SessionStore` (AC-13). **Chỉ PR này đổi hành vi** — vẫn chờ chủ repo duyệt (Approval).
+    `SessionStore` (AC-13). **Chỉ PR này đổi hành vi** — chủ repo duyệt 2026-10-18 (Approval). Tách leaf capacity adapter/test thành PR-4b.1 trước PR-4b.2 tích hợp; cả hai nối cùng outcome, không kích hoạt migration ở PR-4b.1.
 
 ## 18. Rollout/rollback
 
@@ -265,20 +265,34 @@ Sau khi đã migrate, quay về bản P1 cần đổi tên tay `session.migrated
 | D-5 Bản quay lại `session.migrated/`: giữ, không tự xoá (thay đề xuất nháp "xoá ở lần mở sau") | AC-14; tốn gấp đôi dung lượng tới khi chủ repo quyết | Phiên chính | 2026-10-12 | **Chốt** giữ (bậc 1: tự xoá dữ liệu thật là việc §3d không tự quyết; bậc 2: bớt một nhánh code). Xoá → chủ repo, cùng XS-10 |
 | Bố cục mỗi tài liệu một thư mục (§4 A) | AC-10 | Phiên chính | 2026-10-12 | Chốt (ADR-0011) |
 | Copy rồi kiểm thay vì rename | AC-7, AC-8; cần dung lượng gấp đôi lúc migrate | Phiên chính | 2026-10-12 | Chốt (ADR-0011) |
-| Giả định: P1 chưa phân phối nên không cần đường downgrade tự động | §18 | Chủ repo | Trước PR-4 | Mở — chặn PR-4, không chặn PR-1..PR-3 (không nối vào app) |
+| Giả định: P1 chưa phân phối nên không cần đường downgrade tự động | §18 | Chủ repo | Trước PR-4 | Đã xác nhận trực tiếp 2026-10-18: P1 chưa phân phối |
 
-D-2..D-5 đã chốt. Giả định downgrade và việc bật migration trên dữ liệu thật (PR-4) chờ chủ repo.
+D-2..D-5 đã chốt. Giả định downgrade và việc bật migration trên dữ liệu thật (PR-4b) đã được chủ repo xác nhận/duyệt 2026-10-18.
 
 ## Approval
 
 - [x] Product/scope — PR-1..PR-3
-- [x] UX/a11y — PR-4a (§6, §10), chủ repo 2026-10-12; PR-4b chờ chủ repo
+- [x] UX/a11y — PR-4a (§6, §10), chủ repo 2026-10-12; PR-4b chủ repo 2026-10-18
 - [x] Architecture/API/data — ADR-0011
 - [x] Security/privacy/cost — §14; không dependency, không chi phí
 - [x] Test/telemetry/rollout/rollback — §16; PR-4 là công tắc duy nhất (§18)
 - [x] Blocking decisions closed (D-2..D-5) — cho PR-1..PR-3
 
-**Conclusion:** **Approved for implementation** — phạm vi PR-1..PR-3 và PR-4a (không nối vào app, không chạm dữ liệu thật);
-PR-4b chờ chủ repo
+**Conclusion:** **Approved for implementation** — PR-1..PR-3 và PR-4a theo approval12Oct; PR-4b gồm nối app/migration được chủ repo duyệt trực tiếp18Oct, P1 chưa phân phối. Lịch sử PR1..3/4a chưa nối app không còn là giới hạn của PR4b.
 **Approver/date:** Phiên chính duyệt theo ủy quyền §3d (`/auto-complete`), 2026-10-12 — PR-1..PR-3; chủ repo duyệt PR-4a trong
 phiên, 2026-10-12
+
+
+### Phê duyệt và chia nhỏ PR-4b — 2026-10-18
+
+Chủ repo trả lời câu hỏi rõ về migration dữ liệu thật: **“Duyệt PR-4b; P1 chưa phân phối”**. Đây là quyền triển khai và nối app, không phải tự suy rộng từ advisory. Hồ sơ hiện tại: `docs/work/2026-10-18-xs09-pr4b-integration/working.md`. Lịch sử giới hạn 12Oct ở các hồ sơ Done giữ nguyên.
+
+- PR-4b.1: Android capacity leaf + contract tests; chưa nối migration. Spec chi tiết `docs/specs/2026-10-18-xs09-android-capacity.md`. Không runtime dependency/quyền Android mới; JUnit4.13.2 chỉ test JVM được phiên chính duyệt theo §3d trước source.
+- PR-4b.2: app/library/document routing và pending-picker ownership; root chốt contract cụ thể và PLAN trước source. Copy/verify/journal/rollback không thay đổi; journal hỏng vẫn fail closed + Retry tới XS-10.
+- Giữ tên `session_manifest.dart`: file vẫn phục vụ đọc schema1 và schema2; không rename cơ học chỉ để xoá tên legacy. Gỡ SessionStore chỉ khi mọi bảo đảm P1 được kiểm trên DocumentStore, giữ schema1 codec/ScanSession cho migration.
+- PR-4b chỉ Complete khi AC13 có evidence và mọi PR đã merge; gate debug không thay UAT/iOS/camera thực.
+
+
+### Pending-original leaf refinement — 2026-10-18
+
+Before app activation, PR4b also includes a dedicated pending picker preservation leaf, approved before source: `docs/specs/2026-10-18-xs09-picker-preservation.md`. Its immutable document/page ownership, bounded durable cache copy, retained rejection and explicit size/I/O classification protect P1 recovery across routes; it does not activate migration. App integration still follows this parent spec/AC13 and the leaf's §12 protocol. Keep copy/check/rollback and no runtime dependencies.

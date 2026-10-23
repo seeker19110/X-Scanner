@@ -38,7 +38,7 @@ const List<int> _webpMagic = [0x57, 0x45, 0x42, 0x50]; // WEBP
 /// `null`. Only these formats are accepted as originals, whatever the file
 /// is named: fewer decoders face untrusted input, and none is picked by a
 /// loose guess such as TGA.
-img.Decoder? _decoderFor(Uint8List bytes) {
+img.Decoder? _decoderFor(Uint8List bytes, int maxPixels, {int jpegScale = 1}) {
   bool startsWith(List<int> magic, [int offset = 0]) {
     if (bytes.length < offset + magic.length) return false;
     for (var i = 0; i < magic.length; i++) {
@@ -47,25 +47,37 @@ img.Decoder? _decoderFor(Uint8List bytes) {
     return true;
   }
 
-  if (startsWith(_jpegMagic)) return img.JpegDecoder();
-  if (startsWith(_pngMagic)) return img.PngDecoder();
+  if (startsWith(_jpegMagic)) {
+    return img.JpegDecoder(maxPixels: maxPixels, scale: jpegScale);
+  }
+  if (startsWith(_pngMagic)) return img.PngDecoder(maxPixels: maxPixels);
   if (startsWith(_riffMagic) && startsWith(_webpMagic, 8)) {
-    return img.WebPDecoder();
+    return img.WebPDecoder()..maxPixels = maxPixels;
   }
   return null;
 }
 
 /// The decoder for [bytes] and their header, or `null` for a format other
-/// than JPEG, PNG or WebP, an unreadable header, a non-positive side or an
-/// animated WebP.
+/// than JPEG, PNG or WebP, an unreadable or oversized header, a non-positive
+/// side or limit, or an animated WebP. Instance limits are set before parsing.
 ///
 /// An animated WebP reports its canvas, not the size of the frame that
 /// decoding allocates, so the pixel ceiling could not hold for it. (An
 /// animated PNG decodes frame 0 at its header size.)
-({img.Decoder decoder, img.DecodeInfo info})? _startDecode(Uint8List bytes) {
-  final decoder = _decoderFor(bytes);
+({img.Decoder decoder, img.DecodeInfo info})? _startDecode(
+  Uint8List bytes, {
+  int maxPixels = maxDecodedPixels,
+  int jpegScale = 1,
+}) {
+  // Upstream treats nonpositive limits as unlimited; the app never does.
+  if (maxPixels <= 0) return null;
+  final decoder = _decoderFor(bytes, maxPixels, jpegScale: jpegScale);
   final info = decoder?.startDecode(bytes);
-  if (decoder == null || info == null || info.width <= 0 || info.height <= 0) {
+  if (decoder == null ||
+      info == null ||
+      info.width <= 0 ||
+      info.height <= 0 ||
+      info.width * info.height > maxPixels) {
     return null;
   }
   if (info is img.WebPInfo &&
@@ -79,11 +91,15 @@ img.Decoder? _decoderFor(Uint8List bytes) {
 
 /// Width and height of the image in [bytes], read from its header only
 /// (no pixels are decoded), or `null` when the header is not accepted (see
-/// [_startDecode]).
+/// [_startDecode]), including an image above [maxDecodedPixels].
 ({int width, int height})? imageSizeOf(Uint8List bytes) {
-  final info = _startDecode(bytes)?.info;
-  if (info == null) return null;
-  return (width: info.width, height: info.height);
+  try {
+    final info = _startDecode(bytes)?.info;
+    if (info == null) return null;
+    return (width: info.width, height: info.height);
+  } on img.ImageException {
+    return null;
+  }
 }
 
 /// Decodes the first frame of [bytes] and bakes its EXIF orientation in.
@@ -92,16 +108,28 @@ img.Decoder? _decoderFor(Uint8List bytes) {
 /// (recognised by content, not file name), animated WebP, invalid or
 /// oversized
 /// headers (more than [maxPixels] pixels) and any decoder error.
-img.Image decodeOriented(Uint8List bytes, {int maxPixels = maxDecodedPixels}) {
+/// [jpegScale] reduces only the JPEG raster by 1, 2, 4 or 8 before orientation
+/// is baked; the pixel ceiling always applies to the original dimensions.
+img.Image decodeOriented(
+  Uint8List bytes, {
+  int maxPixels = maxDecodedPixels,
+  int jpegScale = 1,
+}) {
   try {
-    final start = _startDecode(bytes);
+    final start = _startDecode(
+      bytes,
+      maxPixels: maxPixels,
+      jpegScale: jpegScale,
+    );
     if (start == null) throw const ImageDecodeFailure();
-    final (:decoder, :info) = start;
-    if (info.width * info.height > maxPixels) {
+    final decoder = start.decoder;
+    final image = decoder.decode(bytes, frame: 0);
+    if (image == null ||
+        image.width <= 0 ||
+        image.height <= 0 ||
+        image.width * image.height > maxPixels) {
       throw const ImageDecodeFailure();
     }
-    final image = decoder.decode(bytes, frame: 0);
-    if (image == null) throw const ImageDecodeFailure();
     // bakeOrientation always copies the pixels; skip it when there is
     // nothing to bake so a large original is held in memory only once.
     final ifd = image.exif.imageIfd;
@@ -183,7 +211,6 @@ img.Image rectify(
     bytes.setRange(0, bytes.length, src.toUint8List());
     return out;
   }
-  // DEBT: generic interpolation does not preserve gray-alpha channels | trần: non-full-frame or resized 2-channel sources | xem lại khi: W-104b decoder upgrade (2026-10-18) or gray-alpha crop regression work.
   final c = _pixelCorners(quad, src.width, src.height);
   final homography = Homography.unitSquareTo(
     topLeft: c.tl,
@@ -197,15 +224,12 @@ img.Image rectify(
     final v = (j + 0.5) / size.height;
     for (var i = 0; i < size.width; i++) {
       final p = homography.map((i + 0.5) / size.width, v);
-      out.setPixel(
-        i,
-        j,
-        src.getPixelInterpolate(
-          (p.x - 0.5).clamp(0, maxX),
-          (p.y - 0.5).clamp(0, maxY),
-          interpolation: img.Interpolation.linear,
-        ),
+      final sample = src.getPixelInterpolate(
+        (p.x - 0.5).clamp(0, maxX),
+        (p.y - 0.5).clamp(0, maxY),
+        interpolation: img.Interpolation.linear,
       );
+      out.setPixel(i, j, sample);
     }
   }
   return out;
@@ -279,13 +303,34 @@ Future<Uint8List> croppedPreview(
 /// [maxSide], keeping the aspect ratio.
 ///
 /// Throws [ImageDecodeFailure] if the original cannot be decoded.
+/// JPEGs decode at the largest supported scale that still supplies both
+/// target dimensions and preserves distinct axes for a non-square original.
+/// Nonpositive [maxSide] is rejected with the same failure.
 Uint8List thumbnailSync(
   Uint8List originalBytes, {
   int maxSide = 1024,
   int maxPixels = maxDecodedPixels,
 }) {
-  var image = decodeOriented(originalBytes, maxPixels: maxPixels);
-  if (max(image.width, image.height) > maxSide) {
+  if (maxSide <= 0) throw const ImageDecodeFailure();
+  final jpeg = _jpegThumbnailPlan(originalBytes, maxSide, maxPixels);
+  var image = decodeOriented(
+    originalBytes,
+    maxPixels: maxPixels,
+    jpegScale: jpeg?.scale ?? 1,
+  );
+  if (jpeg != null) {
+    final landscape = image.width >= image.height;
+    final width = landscape ? jpeg.longSide : jpeg.shortSide;
+    final height = landscape ? jpeg.shortSide : jpeg.longSide;
+    if (image.width != width || image.height != height) {
+      image = img.copyResize(
+        image,
+        width: width,
+        height: height,
+        interpolation: img.Interpolation.average,
+      );
+    }
+  } else if (max(image.width, image.height) > maxSide) {
     final landscape = image.width >= image.height;
     image = img.copyResize(
       image,
@@ -295,6 +340,43 @@ Uint8List thumbnailSync(
     );
   }
   return img.encodeJpg(image, quality: 85);
+}
+
+/// Keeps the target aspect based on the original header, including odd or
+/// one-pixel sides; rounding a scaled raster must not change that target.
+({int scale, int longSide, int shortSide})? _jpegThumbnailPlan(
+  Uint8List bytes,
+  int maxSide,
+  int maxPixels,
+) {
+  if (_decoderFor(bytes, maxPixels) is! img.JpegDecoder) return null;
+  try {
+    final info = _startDecode(bytes, maxPixels: maxPixels)?.info;
+    if (info == null) throw const ImageDecodeFailure();
+    final originalLong = max(info.width, info.height);
+    final longSide = min(maxSide, originalLong);
+    final shortSide = max(
+      1,
+      (min(info.width, info.height) * longSide / originalLong).round(),
+    );
+    final width = info.width >= info.height ? longSide : shortSide;
+    final height = info.width >= info.height ? shortSide : longSide;
+    var scale = 8;
+    while (scale > 1) {
+      final scaledWidth = (info.width + scale - 1) ~/ scale;
+      final scaledHeight = (info.height + scale - 1) ~/ scale;
+      final enoughPixels = scaledWidth >= width && scaledHeight >= height;
+      // Use the decoder's effective EXIF orientation, including duplicate or
+      // malformed metadata. Distinct raster axes keep its result unambiguous.
+      final distinctAxes =
+          info.width == info.height || scaledWidth != scaledHeight;
+      if (enoughPixels && distinctAxes) break;
+      scale ~/= 2;
+    }
+    return (scale: scale, longSide: longSide, shortSide: shortSide);
+  } catch (_) {
+    throw const ImageDecodeFailure();
+  }
 }
 
 /// Runs [thumbnailSync] on the file at [originalPath] in a background

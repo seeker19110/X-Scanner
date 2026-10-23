@@ -1,6 +1,10 @@
 # X-Scanner — Tiến độ
 
-Ngày cập nhật: 2026-10-17
+Ngày cập nhật: 2026-10-23
+
+## 2026-10-23: nâng trải nghiệm và hiệu năng, giữ workflow P1
+
+Hồ sơ: [scanner-experience](docs/work/2026-10-23-scanner-experience/working.md); [spec Approved theo §3d trước source](docs/specs/2026-10-23-scanner-experience.md). Phạm vi: theme/viewport/chữ lớn, xuất rõ ràng, chỉnh góc bằng chạm, scaled JPEG thumbnail và guard dispose/huỷ PDF. Giữ schema/bản gốc/dependency và app wiring P1. Local gate PASS: 808 Flutter +11 JVM, APK debug; benchmark host thumbnail giảm median20.27% thời gian/53.61% peak RSS. Chưa có PR/CI/merge/UAT mới; GitHub API bị network chặn, bản nháp môi trường đã bổ sung hostname. Trạng thái và số đo chính xác nằm trong hồ sơ, không dùng checkpoint cũ làm bằng chứng cho bản nâng cấp.
 
 ## 2026-10-16: nghiên cứu nâng cấp
 
@@ -27,8 +31,19 @@ Tooling nội bộ dùng ảnh hình học tổng hợp/checksum và core thumbn
 
 ## 2026-10-17: XS-07a pixel toàn khung và chi phí render
 
-Hồ sơ: [2026-10-17-xs07a-full-frame-render](docs/work/2026-10-17-xs07a-full-frame-render/working.md).
-Sau54merged/reconcile, [spec XS-07a](docs/specs/2026-10-17-xs07a-full-frame-render.md) Approved theo ủy quyền §3d: sửa lệch pixel khi rectify fullFrame không resize bằng copy byte vào output độc lập. Root đã xác minh test đỏ pixel thật trước source, tích hợp fast path và15regression; review độc lập sạch và root fullgate607/607; chốt snapshot cuối qua gate/hook rồi đo matched AOT và CI trên PR mới. [PR #55](https://github.com/seeker19110/X-Scanner/pull/55) trên5890c2f đã bàn giao40mẫu host/CI607PASS; theo yêu cầu chủ repo17/10 đang review lại thumbnail/source/gates trước merge, chưa Done. EX1/AC9/PR4b giữ mở.
+Hồ sơ: [2026-10-17-xs07a-full-frame-render](docs/work/2026-10-17-xs07a-full-frame-render/done.md).
+Sau review/merge54, [spec XS-07a](docs/specs/2026-10-17-xs07a-full-frame-render.md) Approved theo ủy quyền §3d: sửa lệch pixel khi rectify fullFrame không resize bằng copy byte vào output độc lập. [PR #55](https://github.com/seeker19110/X-Scanner/pull/55) đã review độc lập, gate/hook607/607 và [CI cuối](https://github.com/seeker19110/X-Scanner/actions/runs/38993226283) SUCCESS trên6a3d648; squash merge `9d44fc9`. Main có tree khớp bản review; hồ sơ root/worker chỉ chốt Done sau actual merge. Giữ40mẫu lịch sử và10mẫu đối chứng mới, không suy ra hiệu năng thiết bị. EX1/AC9/PR4b vẫn mở.
+
+## 2026-10-17: XS-07b giữ alpha khi cắt và xoay ảnh xám
+
+Hồ sơ: [2026-10-17-xs07b-gray-alpha-render](docs/work/2026-10-17-xs07b-gray-alpha-render/done.md).
+Sau khi PR55 merge, spec XS-07b được duyệt theo §3d để sửa lỗi hai kênh có trước55. Giữ21 regression độc lập và bằng chứng RED15 lỗi pixel. [PR56](https://github.com/seeker19110/X-Scanner/pull/56) đã được review mới ngày18/10, không còn finding; gate/hook628/628, AOT12 và [CI39086812105](https://github.com/seeker19110/X-Scanner/actions/runs/39086812105) SUCCESS trêncc5bb44. Squash merge561a5cf; main/tree khớp bản review. Hồ sơ root/worker chỉ chốt Done sau actual merge.
+
+## 2026-10-18: W104b và tiếp tục hoàn thiện
+
+Hồ sơ: [W104b](docs/work/2026-10-18-w104b-decoder-upgrade/done.md); [goal tiếp tục](docs/goals/2026-10-18-upgrade-completion.md). Sau khi56 merge, root duyệt spec nhỏ trước source: pin `image 4.12.0` đủ7ngày với hash chính thức; lock chỉ đổi `image`, giữ `archive 4.5.1`. Truyền cap theo từng decoder trước parse, kiểm header/output và giữ hợp đồng nullable của `imageSizeOf`. Hai lượt TDD phân biệt dependency với wiring: RED trên4.10.1, rồi RED sau pin/trước sửa core; fixed targeted240/240. Giữ21 regression gray-alpha, bỏ workaround đã được upstream sửa. [PR58](https://github.com/seeker19110/X-Scanner/pull/58) đã mergec50670a sau rootgate/hook639+639, CI39088067553 SUCCESS, AOT12/CLI và nativeproof; main/tree khớp reviewedheadb227825. F004/EX1 đã đóng bằng actualmerge.
+
+Chủ repo ngày18/10 xác nhận “Duyệt PR-4b; P1 chưa phân phối”. Thiết kế tiếp theo giữ copy/verify/rollback và bổ sung ownership của picker, vòng đời màn tài liệu theo AC13; không duyệt OCR/depth/release hoặc toàn roadmap. UAT Android36 chưa chạy: software boot bị guard dừng vì runtime ép2560MiB làm RAM cạn; chưa cài APK. Android24 đúng1024MiB cũng bị memoryguard dừng trước boot; chưa cài APK/UAT. Owner18Oct giao tự cài môi trường Android có tăng tốc; đang chuẩn bị Windows riêng, không đổi quyền KVM hoặc dừng process người dùng.
 
 ## 2026-10-11: lưu gợi ý và áp dụng bộ khung
 
@@ -56,7 +71,7 @@ Spike camera/ARCore depth trên thiết bị thật vẫn cần thiết bị.
 Hồ sơ `docs/work/2026-10-12-p1-completion/working.md` · kế hoạch `docs/ops/COMPLETION-PLAN.md` · audit `docs/ops/COMPREHENSIVE-AUDIT-STATUS.md`
 (62 phát hiện sau ba lượt quét lại Pha 4: 3 Cao, 16 Trung, 43 Thấp; lần quét đầu 42). Nợ có chủ đích: mục "Phát hiện dời đợt sau" của kế hoạch; exception `docs/ops/supply-chain-exceptions.md`.
 PR seeker19110/X-Scanner#11–#22, #24 (`0327ab7`) merged; quét lại hội tụ, Definition of Complete có bằng chứng.
-W-104a hàng rào ảnh đầu vào (JPEG/PNG/WebP theo nội dung, trần 64 MiB, ngân sách 60 s có kill isolate; WebP động bị từ chối): merged #28 `474fa28`. WAITING: W-104b nâng `image` từ 2026-10-18 (EX-1); UAT AC-9 cần chủ repo; F-014 native đã kiểm ở XS-05, F-009 alerts/graph/review đã kiểm sau merge PR #53, EX-2 đóng16/10.
+W-104a hàng rào ảnh đầu vào (JPEG/PNG/WebP theo nội dung, trần 64 MiB, ngân sách 60 s có kill isolate; WebP động bị từ chối): merged #28 `474fa28`. W-104b/EX1 đã đóng ở PR58/c50670a18Oct. WAITING: UAT AC-9 cần môi trường chạy được; F-014 native đã kiểm ở XS-05, F-009 alerts/graph/review đã kiểm sau merge PR #53, EX-2 đóng16/10.
 Dependabot (chủ repo duyệt 2026-10-13, F-009 phần version updates): `.github/dependabot.yml` cho pub + github-actions, cooldown 7 ngày; #47 `81cae78`, hồ sơ `docs/work/2026-10-13-dependabot/done.md`. Alerts/graph đã bật ở XS-05; workflow review đã merge PR #53, EX-2 đóng16/10. #48 `f188b14` (`image_picker` 1.2.4) merge sau kiểm; luật tự merge PR bot patch/minor: `docs/ops/dependency-updates.md`, #50 `cd1f53b`, hồ sơ `docs/work/2026-10-13-dependabot-merge-rule/done.md`.
 
 ## Chưa thực hiện
@@ -77,3 +92,17 @@ Tài liệu: [Kế hoạch M0–M5 và nhánh depth](docs/plans/2026-10-12-compr
 Chủ repo merge seeker19110/X-Scanner#23 (`ac2c435`); M0 trùng việc đang làm: XS-01 = W-502 (#22), XS-02 = W-504 (#24), XS-03 = W-104.
 Kế hoạch giữ trạng thái DRAFT/đề xuất, các chỉ tiêu là mục tiêu chưa nghiệm thu; không thay thế trạng thái thực trong hồ sơ P1.
 XS-08: spec [hợp đồng tài liệu, revision và xuất](docs/specs/2026-10-12-document-revision-export-contract.md) Approved 2026-10-12 theo ủy quyền §3d (#27 `8d7c356`), D-1 = A ([ADR-0004](docs/adr/0004-document-revision-export-contract.md): code đi cùng consumer đầu tiên); hồ sơ `docs/work/2026-10-12-xs08-document-contract-spec/done.md`. XS-09: spec [thư viện nhiều tài liệu + migration P1](docs/specs/2026-10-12-document-library-migration.md) (nháp #29 `ed06e58`, duyệt #30 `508f057`) Approved 2026-10-12 theo ủy quyền §3d **chỉ cho PR-1..PR-3** (không nối vào app, không chạm dữ liệu thật), D-2..D-5 chốt (D-5: giữ `session.migrated/`), [ADR-0011](docs/adr/0011-document-library-layout-and-migration.md); PR-4 (bật migration trên dữ liệu thật) chờ chủ repo; hồ sơ spec `docs/work/2026-10-12-xs09-document-library-spec/done.md`, code PR-1..PR-3 (#31 `c1bdcad`, #32 `8aa493e`, #33 `b77e926`) `docs/work/2026-10-12-xs09-document-library/done.md`. XS-13: spec [xem trước đã cắt + trình chỉnh góc](docs/specs/2026-10-12-preview-and-corner-editor.md) (F-026, F-032) Approved 2026-10-12 theo ủy quyền §3d (mức M, không đổi dữ liệu) (#35 `29e868f`); code PR-1 #36 `f7dc45c` (xem trước đã cắt), PR-2 #37 `9fbe2fd` (trình chỉnh góc); hồ sơ `docs/work/2026-10-12-xs13-preview-corner-editor/done.md`. XS-12a: spec [tác vụ xuất có tiến độ và huỷ](docs/specs/2026-10-12-export-progress-cancel.md) (F-033) Approved 2026-10-12 theo ủy quyền §3d (mức M, không đổi dữ liệu/định dạng); code PR-1 #40 `614b5b4` (tiến độ i/N, huỷ ở ranh giới trang); hồ sơ `docs/work/2026-10-12-xs12a-export-progress/done.md`. XS-09 PR-4 tách PR-4a (màn thư viện, chưa nối app — chủ repo duyệt 2026-10-12) / PR-4b (nối app + migration dữ liệu thật — chờ chủ repo); PR-4a #43 `26d3d39`, hồ sơ `docs/work/2026-10-12-xs09-pr4a-library-screen/done.md`.
+
+
+## 2026-10-18: XS09 PR4b capacity foundation
+
+Hồ sơ [capacity](docs/work/2026-10-18-xs09-android-capacity/done.md); spec Approved trước source theo ownerPR4b18Oct. Leaf Android dùng StatFs/filesDir và channel không nhận path, kiểm int/0/64bit/lỗi sanitize; JUnit chỉ test dependency, JVM tests được nối vào dispatcher. Mã và targeted tests sẵn sàng; root đã reconcileactualmainc50670a, fullgate/CI/merge đang thực hiện. App vẫn dùng bố cục P1 tới slice tích hợp; giữcopy/verify/session.migrated. Pending-picker ownership cần contract trước app switch.
+
+
+## 2026-10-18: capacity đã merge, AC9 đã có bằng chứng, pending-original đang tích hợp
+
+[Capacity Done](docs/work/2026-10-18-xs09-android-capacity/done.md): [PR59](https://github.com/seeker19110/X-Scanner/pull/59) đã merge209c808 sau review29files/findings[], gate/hook4/4 với658Flutter+11freshJVM và CI39121270944 SUCCESS/native/treeproof. Adapter chưa được app gọi, không suy runtime từ mocks/JVM.
+
+[UAT AC9](docs/work/2026-10-18-p1-android-uat/working.md): WindowsWHPX/API36 đã boot và chạy exactCI58APK; ba lần camera→crop/rotate/reorder→PDF/share→Librera đủ3trang. Root nghiệm thu theo§3d, agent thực hiện, không ghi chủ repo tự chạy. Kiểm bản gốc trước/sau bằng byte/hash, cancel/restart UI/manifest, Dark/Light và offline export/viewer. [Proof](docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json); report/reconciliation đang vào PR tiếp. Các đoạn chờ AC9/môi trường phía trên là checkpoint lịch sử trước bằng chứng18Oct, không còn blocker của narrowAC9. Chưa physicalcamera/OCR/depth/iOS/release.
+
+[Pending preservation](docs/work/2026-10-18-xs09-picker-preservation/working.md): spec Approved trước behavior, rootactualRED86case trướclogic; durableowner/journal/copy/retainedrejection leaf đangreview trênmain209c808. Chưa nối app/library/migration. XS09AC13 và parentgoal còn ACTIVE; bước tiếp là mergeleaf đủgates rồi tích hợp app bằng contract/test, giữsession.migrated và synthetic3pageAVD cho UATmigration.

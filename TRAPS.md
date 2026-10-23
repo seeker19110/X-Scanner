@@ -40,6 +40,17 @@ xong** cùng store.
 đồng nhất, kiểm pixel ở 4 mép đầu ra. *Chốt chặn*: `apps/mobile/test/imaging/page_render_test.dart`.
 (2026-10-11, seeker19110/X-Scanner#8)
 
+**Nhầm RGBA logic với storage gray-alpha hai kênh.** Trong image4.10.1,
+`PixelUint8.g` của ảnh hai kênh trả gray nhưng `ImageDataUint8.setPixelRgba` ghi g
+vào byte1 (alpha). Vì vậy nội suy hoặc `copyRotate` qua `setPixel` thay alpha bằng
+gray. *Cách rà*: tạo fixture bằng byte thô, gray khác alpha, gồm0/partial/255;
+kiểm crop/cap/skew và ma trận xoay tay, không dùng chính setter/transform làm expected.
+*Chốt chặn*: regression XS-07b trong `apps/mobile/test/imaging/page_render_test.dart`.
+Giữ hai kênh qua storage mapping và byte rotation. Chuyển RGBA riêng lúc xoay còn
+đổi cách JPEG blend nền và thêm buffer lớn; đó không phải workaround tương đương.
+(2026-10-17, Work ID `2026-10-17-xs07b-gray-alpha-render`; nợ có trướcPR55)
+W104b18Oct: image4.12 đã sửa setter/copyRotate hai kênh; bỏ workaround sau khi21regression xanh trước/sau. Không đổi policyJPEG hoặc xoá test chỉ vì upstream sửa.
+
 **Ảnh 16-bit bị cắt về 0 khi mã hoá.** Ảnh PNG 16-bit/kênh mã hoá thẳng sang JPEG 8-bit cho ảnh đen.
 *Cách rà*: mọi đường mã hoá đầu ra phải chuẩn hoá về 8-bit/kênh trước. *Chốt chặn*: test ảnh 16-bit trong
 `apps/mobile/test/imaging/page_render_test.dart`. (2026-10-11, seeker19110/X-Scanner#8)
@@ -72,3 +83,18 @@ làm so sánh nguyên rule đỏ dù các giá trị đã yêu cầu khớp. *C�
 count khi required approvals=0. *Chốt*: khai rõ mặc định đã kiểm trong `.github/rulesets/main.json`,
 so JSON với readback thật và kiểm CI không đạt bị BLOCKED; không nuốt mọi field lạ.
 (2026-10-16, Work ID `2026-10-16-xs05-repository-guards`; evidence trong hồ sơ)
+
+**Truyền giới hạn decoder sau startDecode là quá muộn.** Từ image4.12, JPEG/PNG nhậnmaxPixels ởconstructor; WebP dùngproperty phải gántrướcparse. <=0 của thư viện nghĩa là unlimited, app phải từchối. Defaultstatic cóthểkhácappcap: testtạmdefault1/callercap6 choJPEG/PNG/WebP vàkhôiphụcfinally; khôngđổiglobal trongproduction. imageSizeOf phải giữnullable khi thư việnnémImageException doheadercap. *Chốt chặn*: `apps/mobile/test/imaging/decoder_security_test.dart`; fixtureEXIFbịkillhữuhạn vàPNGunusedtail~64KiB chỉkiểmconsumption, không phảiPNGconformance/RAMquota. (2026-10-18, W104b)
+
+
+**Dung lượng không đo được không có nghĩa là 0 hoặc vô hạn.** Dùng StatFs.availableBytes trên đúng volume filesDir; không nhận arbitrary path qua channel. Dart chỉ nhận int>=0, giữ0 và >32bit; lỗi platform/missingplugin/badtype thành FileSystemException static với path:null tường minh (bỏ argument thì SDK mặc định chuỗi rỗng). JVM chỉ catch Exception của supplier, không nuốt lỗi callback hoặc Error. *Chốt*: android_storage_test.dart và StorageHandlerTest.kt chạy qua dispatcher; mock/JVM không chứng minh nativeAPI đã chạy trên thiết bị. (2026-10-18, XS09 capacity)
+
+
+**Destructive picker recovery needs durable ownership before launching.** Installed image_picker clears lost-result preferences before Dart receives them and before a new picker. Per-document global retrieval can attach A's image to B, and replay with a fresh pageId duplicates a committed page. Reserve owner/stablepage before launch, journal cache-relative path and bounded stagedoriginal outside document orphan cleanup, retain unknown state; only durable commit permits cleanup. Rejected invalid images need retained parking so P1AC7 still permits a later capture. Size rejection must be distinguishable from I/O, which stays active for retry; never parse OS error text. *Chốt*: pending_pick_store_test.dart (identity/CAS/paths/caps/faults/retained rejection/classification). Leaf tests do not prove app integration or native-to-Dart exactly-once; residual handoff DEBT is required when connected. (2026-10-18, XS09 pending foundation)
+
+
+**Dispose không tự dừng hàng đợi của ChangeNotifier.** Chặn bắt đầu operation trong `_enqueue` khi đã dispose; chỉ huỷ export đang chạy, không cắt ngang save đang bền hoá. Queued/new picker/share sau dispose phải không chạy. *Chốt*: `session_controller_test.dart` hai ca `disposed controller`; assertion RED trước guard, GREEN cùng toàn suite. (2026-10-23, scanner-experience)
+
+**Huỷ ở final progress vẫn phải thắng PDF packaging.** Listener `pageDone` có thể yêu cầu huỷ sau trang cuối. Kiểm huỷ trước đóng gói, nếu không PDF không hợp lệ có thể trả writeFailed thay vì cancelled và làm việc thừa. *Chốt*: `page_exporter_test.dart` `final progress cancellation skips PDF packaging`, assertion RED→GREEN. (2026-10-23)
+
+**Scaled JPEG vẫn phải kiểm raster gốc và giữ cả hai chiều mục tiêu.** Cap kiểm trước parse/decode; không coi raster thu nhỏ là quyền nhận ảnh vượt cap. Chọn scale theo cả hai cạnh, làm tròn cạnh lẻ và clamp cạnh ngắn ít nhất1px; bake đủ8EXIF. Raster gần vuông có thể làm tròn thành vuông và mất dấu trục: giảm scale đến khi phân biệt được, giữ tỷ lệ header và lấy hướng thực tế của decoder. Không dùng EXIF parser riêng để chọn hướng: utility lấy APP1 đầu, decoder có thể áp APP1 sau. *Chốt*: regressions near-square/duplicate-EXIF/imaging/security và host benchmark có source/binary hashes; không suy thumbnail lossy thành pixel-identical hoặc chất lượng export. (2026-10-23)

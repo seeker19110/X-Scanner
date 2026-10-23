@@ -189,4 +189,4 @@ phải phần trăm CPU. Replay10process khi review55 không tái hiện chênh 
 thumbnail lịch sử (median13.237269→13.375609s); chưa xác định nguyên nhân trên
 sharedhost, không suy ra tốc độ thiết bị hoặc xoá quan sát trước đó.
 
-Hồ sơ: [XS-07a](../work/2026-10-17-xs07a-full-frame-render/working.md).
+Hồ sơ: [XS-07a](../work/2026-10-17-xs07a-full-frame-render/done.md).

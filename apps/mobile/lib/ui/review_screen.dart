@@ -32,7 +32,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   static const String _emptyText =
       'Chưa có trang nào. Chụp hoặc nhập ảnh để bắt đầu.';
   static const String _openingText = 'Đang mở phiên…';
-  static const double _thumbSide = 72;
+  static const double _thumbSide = 96;
   static const List<(ExportFormat, String)> _exportChoices = [
     (ExportFormat.pdf, 'PDF'),
     (ExportFormat.jpeg, 'JPG'),
@@ -141,16 +141,47 @@ class _ReviewScreenState extends State<ReviewScreen> {
   Future<void> _export() async {
     final format = await showModalBottomSheet<ExportFormat>(
       context: context,
+      isScrollControlled: true,
       builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final (format, label) in _exportChoices)
-              ListTile(
-                title: Text(label),
-                onTap: () => Navigator.of(context).pop(format),
-              ),
-          ],
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.75,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                  child: Text(
+                    'Chọn định dạng',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                for (final (format, label) in _exportChoices)
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 8,
+                    ),
+                    leading: Icon(
+                      format == ExportFormat.pdf
+                          ? Icons.picture_as_pdf_outlined
+                          : Icons.image_outlined,
+                    ),
+                    title: Text(label),
+                    subtitle: Text(switch (format) {
+                      ExportFormat.pdf => 'Gộp các trang thành một tài liệu',
+                      ExportFormat.jpeg => 'Mỗi trang là một ảnh JPG',
+                      ExportFormat.png => 'Mỗi trang là một ảnh PNG',
+                    }),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).pop(format),
+                  ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -202,7 +233,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
             height: 4,
             child: job != null
                 ? LinearProgressIndicator(
-                    value: job.done / job.total,
+                    value: job.done == job.total ? null : job.done / job.total,
                     semanticsLabel: _exportLabel(job),
                   )
                 : busy
@@ -214,6 +245,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 ? (_controller.restoring ? _openingState() : _emptyState(busy))
                 : ReorderableListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 8),
+                    header: _documentSummary(pages.length),
                     itemCount: pages.length,
                     // Off while busy like every button: a queued move would
                     // run later with indices that may no longer match.
@@ -233,47 +265,148 @@ class _ReviewScreenState extends State<ReviewScreen> {
       ),
       bottomNavigationBar: pages.isEmpty
           ? null
-          : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: job != null
-                    ? _exportProgress(job)
-                    : _sourceButtons(busy),
-              ),
+          : _footer(
+              job != null
+                  ? _exportProgress(job)
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        FilledButton.icon(
+                          onPressed: busy ? null : _export,
+                          icon: const Icon(Icons.ios_share),
+                          label: const Text('Xuất tài liệu'),
+                        ),
+                        const SizedBox(height: 12),
+                        _sourceButtons(busy),
+                      ],
+                    ),
             ),
     );
   }
 
-  Widget _emptyState(bool busy) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(_emptyText, textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          _sourceButtons(busy),
-        ],
+  Widget _scrollableState(List<Widget> children) => LayoutBuilder(
+    builder: (context, constraints) => SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: constraints.maxHeight),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: children,
+          ),
+        ),
       ),
     ),
   );
 
+  Widget _emptyState(bool busy) {
+    final colors = Theme.of(context).colorScheme;
+    return _scrollableState([
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: colors.primaryContainer,
+          borderRadius: BorderRadius.circular(28),
+        ),
+        child: Icon(
+          Icons.document_scanner_outlined,
+          size: 56,
+          color: colors.onPrimaryContainer,
+        ),
+      ),
+      const SizedBox(height: 24),
+      Text(
+        'Tài liệu gọn gàng.\nBắt đầu thật dễ.',
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.headlineSmall
+            ?.copyWith(fontWeight: FontWeight.w700),
+      ),
+      const SizedBox(height: 12),
+      const Text(_emptyText, textAlign: TextAlign.center),
+      const SizedBox(height: 24),
+      _sourceButtons(busy),
+      const SizedBox(height: 24),
+      Text(
+        'Chỉnh góc · Sắp xếp · Xuất PDF hoặc ảnh',
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.bodySmall
+            ?.copyWith(color: colors.onSurfaceVariant),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        'Xử lý ngay trên thiết bị',
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.bodySmall
+            ?.copyWith(color: colors.onSurfaceVariant),
+      ),
+    ]);
+  }
+
   /// Shown while a saved session may still be loading, so an empty list
   /// is not mistaken for a lost session.
-  static Widget _openingState() => const Center(
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CircularProgressIndicator(),
-        SizedBox(height: 16),
-        Text(_openingText, textAlign: TextAlign.center),
-      ],
+  Widget _openingState() => _scrollableState(const [
+    CircularProgressIndicator(),
+    SizedBox(height: 24),
+    Text(_openingText, textAlign: TextAlign.center),
+  ]);
+
+  Widget _documentSummary(int count) {
+    final colors = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tài liệu của bạn',
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$count trang',
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(color: colors.primary),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Chỉnh từng trang, giữ để sắp xếp lại.',
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: colors.onSurfaceVariant),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _footer(Widget child) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      border: Border(
+        top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+    ),
+    child: SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.32,
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: child,
+        ),
+      ),
     ),
   );
 
   /// "Exporting page i/N", where i is the page being exported.
-  static String _exportLabel(ExportJob job) =>
-      'Đang xuất trang ${min(job.done + 1, job.total)}/${job.total}';
+  static String _exportLabel(ExportJob job) => job.cancelRequested
+      ? 'Đang huỷ…'
+      : job.done == job.total
+      ? (job.format == ExportFormat.pdf ? 'Đang tạo PDF…' : 'Đang hoàn tất…')
+      : 'Đang xuất trang ${min(job.done + 1, job.total)}/${job.total}';
 
   /// Takes the place of the source buttons during an export. Cancel stays
   /// enabled while busy, as the export itself keeps the controller busy,
@@ -283,9 +416,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
     constraints: const BoxConstraints(minHeight: 48),
     child: Row(
       children: [
-        Expanded(
-          child: Text(job.cancelRequested ? 'Đang huỷ…' : _exportLabel(job)),
-        ),
+        Expanded(child: Text(_exportLabel(job))),
         const SizedBox(width: 12),
         OutlinedButton(
           onPressed: job.cancelRequested ? null : _controller.cancelExport,
@@ -329,13 +460,55 @@ class _ReviewScreenState extends State<ReviewScreen> {
               children: [
                 SizedBox.square(
                   dimension: _thumbSide,
-                  child: FutureBuilder<Uint8List>(
-                    // A new revision starts from an empty snapshot, so the
-                    // previous revision's preview is never shown meanwhile.
-                    key: ValueKey((page.id, page.revision)),
-                    future: _controller.croppedPreviewFor(page),
-                    builder: (context, preview) =>
-                        _thumbnail(preview, page, number, busy),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: ColoredBox(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: FutureBuilder<Uint8List>(
+                              // A new revision starts from an empty snapshot, so the
+                              // previous revision's preview is never shown meanwhile.
+                              key: ValueKey((page.id, page.revision)),
+                              future: _controller.croppedPreviewFor(page),
+                              builder: (context, preview) =>
+                                  _thumbnail(preview, page, number, busy),
+                            ),
+                          ),
+                          Positioned(
+                            left: 4,
+                            top: 4,
+                            child: ExcludeSemantics(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  number.toString().padLeft(2, '0'),
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -343,7 +516,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Trang $number'),
+                      Text(
+                        'Trang $number',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
                       Wrap(
                         children: [
                           IconButton(

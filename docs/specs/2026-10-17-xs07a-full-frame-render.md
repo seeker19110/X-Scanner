@@ -63,7 +63,7 @@ Bảng dưới là mapping test/evidence dự kiến; chỉ nghiệm thu khi tes
 | AC-2 | `apps/mobile/test/imaging/page_render_test.dart` |
 | AC-3 | `apps/mobile/test/imaging/page_render_test.dart` |
 | AC-4 | `apps/mobile/test/imaging/page_render_test.dart`, `apps/mobile/test/tool/scanner_benchmark_test.dart` |
-| AC-5 | `docs/benchmarks/README.md`, `docs/work/2026-10-17-xs07a-full-frame-render/working.md` và execution evidence trên PR của Work ID |
+| AC-5 | `docs/benchmarks/README.md`, `docs/work/2026-10-17-xs07a-full-frame-render/done.md` và execution evidence trên PR của Work ID |
 
 ## 17. Delivery and rollback
 

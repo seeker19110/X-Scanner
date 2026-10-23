@@ -35,7 +35,7 @@
 | W-102 | F-005 | Sau khi lưu trang thành công, xoá bản sao của picker nếu đường dẫn nằm trong thư mục tạm của app (chuẩn hoá, không bao giờ xoá ngoài) | Test đỏ trước: file nguồn trong temp bị xoá sau capture/import thành công; còn nguyên khi lưu lỗi; file ngoài temp không bị đụng | W-101 | S | ✅ | seeker19110/X-Scanner#15 `e7d265c`, CI xanh; đỏ 7 test → xanh; khuôn ghi `TRAPS.md` |
 | W-103 | F-006, F-007 | Một cổng giải mã tuần tự cho thumbnail và render khi xuất; tắt kéo-thả khi bận | Test đỏ trước: `maxActive == 1` giữa thumbnail và render khi xuất; kéo khi bận không đổi thứ tự | W-102 | M | ✅ | seeker19110/X-Scanner#16 `43f24d9`, CI xanh; đỏ 4 test (gate 2, controller `maxActive` 2 thay 1, kéo khi bận đổi thứ tự) → xanh |
 | W-104a | F-004 | Hàng rào đầu vào (chủ repo duyệt gộp 2026-10-12, kế hoạch M0 §5.1), tách khỏi việc nâng `image` vì không phụ thuộc phiên bản: chỉ nhận JPEG/PNG/WebP tĩnh theo magic bytes (thay `findDecoderForData` 11 định dạng; WebP động lách trần điểm ảnh nên bị từ chối — rà bảo mật); trần 64 MiB đọc từ độ dài file trước khi đọc; ngân sách 60 s mỗi thumbnail/render, quá hạn thì `Isolate.kill`, chỉ báo lỗi khi isolate đã thoát | Mỗi hàng rào test đỏ trước (BMP/GIF/TIFF/TGA bị từ chối; file trên trần bị từ chối; job quá hạn dừng thật: heartbeat không đổi sau khi lỗi); lỗi về notice "không đọc được", không mất trang cũ, giữ file của picker; không thêm dependency; gate PASS | – | S | ✅ | #28 `474fa28` · `test/imaging/isolate_budget_test.dart`, `page_render_test` (W-104), `session_controller_test` (W-104) |
-| W-104b | F-004 | Nâng `image` ≥ 4.12.0 khi đủ 7 ngày (từ 2026-10-18) + test hồi quy 2 ảnh tổng hợp (EXIF IFD lặp, PNG bom) | Test hồi quy xanh với bản mới, đỏ với 4.10.1; gate PASS; manifest release sạch; đóng EX-1 | W-104a | S | ⏳ 2026-10-18 | Exception ở `docs/ops/supply-chain-exceptions.md` |
+| W-104b | F-004 | Nâng `image` ≥ 4.12.0 khi đủ 7 ngày (từ 2026-10-18) + test hồi quy 2 ảnh tổng hợp (EXIF IFD lặp, PNG bom) | Test hồi quy xanh với bản mới, đỏ với 4.10.1; gate PASS; manifest release sạch; đóng EX-1 | W-104a | M thận trọng | ✅ | [PR58](https://github.com/seeker19110/X-Scanner/pull/58) c50670a; actualRED phases, rootgate/hook639+639, finalCI39088067553, AOT12/CLI, exactmain/tree; EX1 đóng18Oct |
 
 ## Đợt 2 — Hàng rào & test
 
@@ -109,3 +109,19 @@ Alerts trả 204, graph 86/86 Pub và dependency compare cuối không warning; 
 Các dòng chờ owner settings/partial trước đó là lịch sử. EX-1/W-104b (18/10), AC-9
 và PR-4b vẫn mở. XS-06a chuẩn bị fixture/tooling host theo Work ID
 `2026-10-16-xs06-host-baseline`; chưa nghiệm thu thiết bị, chất lượng, OCR hoặc 100 trang.
+
+## Tiếp tục18Oct — nguồn trạng thái mới
+
+PR56 đã merge561a5cf sau freshgate/hook/CI628/628. W104b đủ7ngày (Pubmetadata11Oct00:28Z), Approved smallspec18Oct; pin4.12.0/hashverified, lockchỉimageđổi, factoryinstancecaps trướcparse/header/output và boundedregressions đãtargeted240/240. Chưađóng EX1/F004 từsource-only: cầnfullgate/CI/actualmain proof trênW104bPR. Các checkpointchờngày18Oct ởtrênlàlịchsử. AC9 cònUAT; ownerđãduyệtriêngPR4b vàxácnhậnP1chưaphânphối18Oct, khôngsuyraP1Complete. Goal/hồsơW104b giữiteration vàgates.
+
+
+## Đối chiếu hiện tại — 2026-10-18 sau PR58
+
+W104b/F004 và EX1 đã đóng trên mainc50670a với đủ proof ở hồ sơ Done. F009/F014 đã đóng tại XS05, EX2 đóng16Oct; các WAITING12Oct ở trên là checkpoint lịch sử. Chỉ AC9 còn thiếu bằng chứng thiết bị cho P1Complete. LinuxAPI36/24 software boots đều bị memoryguard dừng trước boot; không APK/UAT. Chủ repo18Oct giao tự cài môi trường Android có tăng tốc, Windowssetup đang xử lý riêng. Không gộp kết quả build/JVM/mock/AOT thành camera/UAT.
+
+XS09PR4b đã được chủ repo duyệt rõ và xác nhận P1 chưa phân phối; capacityfoundation là slice tiếp theo, chưa kích hoạt migration. Pending-picker ownership và lifecycle cần contract/test trước nối app.
+
+
+## Current AC9 execution — 2026-10-18 after PR59
+
+PR59/209c808 capacityleaf merged after658Flutter+11freshJVM localgate/hook, finalCI39121270944/nativeexacthead/tree; app migration still inactive. AC9 controlledWindowsWHPX execution now accepted by root under delegated§3d: actual3camera/edit/reorder/PDF/share/Librera all3pages, unchangedoriginals/cancel/restart. Report `docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json`, work2026-10-18-p1-android-uat; report merge/finalconvergence audit remain before closing P1completion records. Pending picker leaf and XS09AC13 integration are separate active approvedoutcomes. Historical WAITING forenvironment/AC9 is superseded only for this controlledemulator scope.

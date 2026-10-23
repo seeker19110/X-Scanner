@@ -19,7 +19,7 @@ Cả bốn file phải `OK`. Không cài nếu checksum sai; tải lại từ ru
 
 Dùng emulator hoặc máy Android dành cho thử nghiệm, có camera hệ thống và trình xem PDF. Dùng tài liệu tổng hợp, không dùng giấy tờ cá nhân. APK được ký bằng debug key của runner, dành cho kiểm thử; không dùng làm bản phát hành.
 
-Trong khi W-104b còn chờ mốc 18/10, decoder vẫn là `image` 4.10.1 với lỗi đầu vào đã ghi ở [EX-1](supply-chain-exceptions.md). Chỉ dùng fixture tổng hợp do nhóm phát triển kiểm soát; artifact UAT không đóng EX-1 hoặc chứng minh decoder đã được vá.
+Kiểm pin decoder của đúng `SOURCE_COMMIT` trong lockfile: artifact cũ dùng image4.10.1 có lỗi ở [EX-1](supply-chain-exceptions.md); W104b nâng4.12.0 khi đủ7ngày18Oct. Chỉ dùng fixture tổng hợp được kiểm soát. Artifact/UAT không thay hồi quy decoder, gate hoặc actual merge cần để đóng EX1; không nhận artifact cũ đã được vá chỉ vì ngày tải mới.
 
 ```bash
 adb devices
@@ -49,3 +49,8 @@ Ghi Pass/Fail/Not run và bằng chứng cho từng ca; không đánh dấu thay
 Lưu kết quả vào hồ sơ P1/việc đang mở, gồm ngày, link run/artifact, `BUILD_COMMIT`, `SOURCE_COMMIT`, phiên bản Flutter, thiết bị/emulator và Android, viewer nhận file, bảng kết quả cùng lỗi tái hiện. Ảnh/video chỉ chứa fixture tổng hợp; không đính kèm scan cá nhân hoặc log nội dung OCR.
 
 AC-9 chỉ đóng sau khi người nghiệm thu ghi bằng chứng chụp → chỉnh → xuất → mở PDF. Checklist mở rộng không chứng minh hiệu năng thiết bị, OCR, depth, iOS hoặc release readiness. PR-4b thư viện/migration và W-104b decoder có phạm vi, cổng và mốc riêng.
+
+
+## Accepted controlled execution — 2026-10-18
+
+[P1 AC9 proof](evidence/p1-android-uat-2026-10-18/ac9.json): verifiedCI58APK on WindowsWHPX/API36, actual three external-camera captures, crop/rotate/reorder, PDF/share and Librera pages1/3–3/3. Agent executed, root accepted under delegated§3d; [restored review](evidence/p1-android-uat-2026-10-18/review-restored.png), [viewer3/3](evidence/p1-android-uat-2026-10-18/pdf-viewer-page3.png), [synthetic PDF](evidence/p1-android-uat-2026-10-18/three-pages.pdf). Originals preserved byte-for-byte and cancel/restart checked. Dark/Light and offline export/viewer checked; broader checklist items (gallery formats, process-death camera recovery, JPG/PNG recipient, TalkBack/large text, offline capture) are not claimed by this narrow AC9 execution. XS09 migration/nativecapacity need their own later exact-APK evidence.

@@ -1,6 +1,15 @@
 # Changelog — X-Scanner
 
-## Unreleased — 2026-10-17
+## Unreleased — 2026-10-18
+
+- XS09 pending-original foundation: journal owner/page bền, bản sao ảnh có trần byte và giữ dữ liệu khi lỗi/ngắt; input bị từ chối được giữ riêng để không chặn lần chụp sau. Chưa nối vào app.
+- AC9: đã chạy camera→chỉnh/xếp→PDF→viewer trên Android emulator Windows tăng tốc, kiểm ba bản gốc không đổi qua restart; bằng chứng synthetic trong docs/ops/evidence. Không phải nghiệm thu release hay camera vật lý.
+
+- XS09 capacity foundation: phép đo dung lượng internal Android bằng StatFs với lỗi được kiểm, thêm test JVM vào gate. Chưa nối migration vào app, không runtime dependency/quyền mới.
+
+- W104b: ghim `image 4.12.0` đủ tuổi, truyền giới hạn theo từng decoder trước parse, kiểm header/output và trả null cho header bị từ chối. Giữ regression gray-alpha; dùng lại setter/xoay upstream đã sửa thay helper riêng. Không đổi các package khác hoặc bật scaled JPEG.
+
+- XS-07b: giữ alpha của ảnh xám hai kênh khi cắt, thu nhỏ và xoay trang; giữ cách JPEG xử lý hai kênh, không chuyển ảnh sang RGBA hoặc thêm buffer toàn ảnh trung gian.
 
 - XS-07a: giữ nguyên pixel khi xuất/xem trước ảnh toàn khung không resize bằng bản sao buffer độc lập; không nội suy lại identity hoặc mang metadata gốc sang ảnh xuất.
 
