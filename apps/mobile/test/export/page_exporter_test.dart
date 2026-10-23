@@ -284,6 +284,21 @@ void main() {
     }
   });
 
+  test('final progress cancellation skips PDF packaging', () async {
+    final job = ExportJob(threePages(), ExportFormat.pdf);
+    job.addListener(() {
+      if (job.done == job.total) job.cancel();
+    });
+    await PageExporter(
+      exportDir: exportDir,
+      renderer: (path, quad, turns, {format = RenderFormat.jpeg}) async =>
+          Uint8List.fromList([1, 2, 3]),
+    ).run(job, originalOf);
+    expect(job.state, ExportState.cancelled);
+    expect(job.failure, ExportFailure.cancelled);
+    expect(exportDirIsEmpty(), isTrue);
+  });
+
   test('cancel stops at the next page (AC-3)', () async {
     for (final format in ExportFormat.values) {
       final renderer = _HeldRenderer(holds: {2});

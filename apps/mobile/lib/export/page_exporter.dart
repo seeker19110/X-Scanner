@@ -101,6 +101,9 @@ class PageExporter {
         }
         job.pageDone();
       }
+      // A final progress listener can cancel too. Avoid packaging a PDF
+      // which nobody wants, and keep cancellation ahead of packaging errors.
+      _stopIfCancelled(job);
       if (pdf) {
         files.add(
           await _step(

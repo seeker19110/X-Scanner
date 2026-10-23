@@ -38,7 +38,7 @@ const List<int> _webpMagic = [0x57, 0x45, 0x42, 0x50]; // WEBP
 /// `null`. Only these formats are accepted as originals, whatever the file
 /// is named: fewer decoders face untrusted input, and none is picked by a
 /// loose guess such as TGA.
-img.Decoder? _decoderFor(Uint8List bytes, int maxPixels) {
+img.Decoder? _decoderFor(Uint8List bytes, int maxPixels, {int jpegScale = 1}) {
   bool startsWith(List<int> magic, [int offset = 0]) {
     if (bytes.length < offset + magic.length) return false;
     for (var i = 0; i < magic.length; i++) {
@@ -47,7 +47,9 @@ img.Decoder? _decoderFor(Uint8List bytes, int maxPixels) {
     return true;
   }
 
-  if (startsWith(_jpegMagic)) return img.JpegDecoder(maxPixels: maxPixels);
+  if (startsWith(_jpegMagic)) {
+    return img.JpegDecoder(maxPixels: maxPixels, scale: jpegScale);
+  }
   if (startsWith(_pngMagic)) return img.PngDecoder(maxPixels: maxPixels);
   if (startsWith(_riffMagic) && startsWith(_webpMagic, 8)) {
     return img.WebPDecoder()..maxPixels = maxPixels;
@@ -65,10 +67,11 @@ img.Decoder? _decoderFor(Uint8List bytes, int maxPixels) {
 ({img.Decoder decoder, img.DecodeInfo info})? _startDecode(
   Uint8List bytes, {
   int maxPixels = maxDecodedPixels,
+  int jpegScale = 1,
 }) {
   // Upstream treats nonpositive limits as unlimited; the app never does.
   if (maxPixels <= 0) return null;
-  final decoder = _decoderFor(bytes, maxPixels);
+  final decoder = _decoderFor(bytes, maxPixels, jpegScale: jpegScale);
   final info = decoder?.startDecode(bytes);
   if (decoder == null ||
       info == null ||
@@ -105,9 +108,19 @@ img.Decoder? _decoderFor(Uint8List bytes, int maxPixels) {
 /// (recognised by content, not file name), animated WebP, invalid or
 /// oversized
 /// headers (more than [maxPixels] pixels) and any decoder error.
-img.Image decodeOriented(Uint8List bytes, {int maxPixels = maxDecodedPixels}) {
+/// [jpegScale] reduces only the JPEG raster by 1, 2, 4 or 8 before orientation
+/// is baked; the pixel ceiling always applies to the original dimensions.
+img.Image decodeOriented(
+  Uint8List bytes, {
+  int maxPixels = maxDecodedPixels,
+  int jpegScale = 1,
+}) {
   try {
-    final start = _startDecode(bytes, maxPixels: maxPixels);
+    final start = _startDecode(
+      bytes,
+      maxPixels: maxPixels,
+      jpegScale: jpegScale,
+    );
     if (start == null) throw const ImageDecodeFailure();
     final decoder = start.decoder;
     final image = decoder.decode(bytes, frame: 0);
@@ -290,13 +303,34 @@ Future<Uint8List> croppedPreview(
 /// [maxSide], keeping the aspect ratio.
 ///
 /// Throws [ImageDecodeFailure] if the original cannot be decoded.
+/// JPEGs decode at the largest supported scale that still supplies both
+/// target dimensions and preserves distinct axes for a non-square original.
+/// Nonpositive [maxSide] is rejected with the same failure.
 Uint8List thumbnailSync(
   Uint8List originalBytes, {
   int maxSide = 1024,
   int maxPixels = maxDecodedPixels,
 }) {
-  var image = decodeOriented(originalBytes, maxPixels: maxPixels);
-  if (max(image.width, image.height) > maxSide) {
+  if (maxSide <= 0) throw const ImageDecodeFailure();
+  final jpeg = _jpegThumbnailPlan(originalBytes, maxSide, maxPixels);
+  var image = decodeOriented(
+    originalBytes,
+    maxPixels: maxPixels,
+    jpegScale: jpeg?.scale ?? 1,
+  );
+  if (jpeg != null) {
+    final landscape = image.width >= image.height;
+    final width = landscape ? jpeg.longSide : jpeg.shortSide;
+    final height = landscape ? jpeg.shortSide : jpeg.longSide;
+    if (image.width != width || image.height != height) {
+      image = img.copyResize(
+        image,
+        width: width,
+        height: height,
+        interpolation: img.Interpolation.average,
+      );
+    }
+  } else if (max(image.width, image.height) > maxSide) {
     final landscape = image.width >= image.height;
     image = img.copyResize(
       image,
@@ -306,6 +340,43 @@ Uint8List thumbnailSync(
     );
   }
   return img.encodeJpg(image, quality: 85);
+}
+
+/// Keeps the target aspect based on the original header, including odd or
+/// one-pixel sides; rounding a scaled raster must not change that target.
+({int scale, int longSide, int shortSide})? _jpegThumbnailPlan(
+  Uint8List bytes,
+  int maxSide,
+  int maxPixels,
+) {
+  if (_decoderFor(bytes, maxPixels) is! img.JpegDecoder) return null;
+  try {
+    final info = _startDecode(bytes, maxPixels: maxPixels)?.info;
+    if (info == null) throw const ImageDecodeFailure();
+    final originalLong = max(info.width, info.height);
+    final longSide = min(maxSide, originalLong);
+    final shortSide = max(
+      1,
+      (min(info.width, info.height) * longSide / originalLong).round(),
+    );
+    final width = info.width >= info.height ? longSide : shortSide;
+    final height = info.width >= info.height ? shortSide : longSide;
+    var scale = 8;
+    while (scale > 1) {
+      final scaledWidth = (info.width + scale - 1) ~/ scale;
+      final scaledHeight = (info.height + scale - 1) ~/ scale;
+      final enoughPixels = scaledWidth >= width && scaledHeight >= height;
+      // Use the decoder's effective EXIF orientation, including duplicate or
+      // malformed metadata. Distinct raster axes keep its result unambiguous.
+      final distinctAxes =
+          info.width == info.height || scaledWidth != scaledHeight;
+      if (enoughPixels && distinctAxes) break;
+      scale ~/= 2;
+    }
+    return (scale: scale, longSide: longSide, shortSide: shortSide);
+  } catch (_) {
+    throw const ImageDecodeFailure();
+  }
 }
 
 /// Runs [thumbnailSync] on the file at [originalPath] in a background

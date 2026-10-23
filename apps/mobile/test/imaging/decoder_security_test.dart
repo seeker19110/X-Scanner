@@ -91,6 +91,108 @@ Map<String, Uint8List> _formats() {
 }
 
 void main() {
+  group('scaled JPEG thumbnail protection', () {
+    final original = img.encodeJpg(
+      img.Image(width: 65, height: 33)..clear(img.ColorRgb8(30, 90, 150)),
+    );
+
+    test('the original header cap holds even when the raster would fit', () {
+      for (final cap in [0, -1, 65 * 33 - 1]) {
+        expect(
+          () => decodeOriented(original, maxPixels: cap, jpegScale: 8),
+          throwsA(isA<ImageDecodeFailure>()),
+        );
+        expect(
+          () => thumbnailSync(original, maxSide: 9, maxPixels: cap),
+          throwsA(isA<ImageDecodeFailure>()),
+        );
+      }
+      final reduced = decodeOriented(
+        original,
+        maxPixels: 65 * 33,
+        jpegScale: 8,
+      );
+      expect((reduced.width, reduced.height), (9, 5));
+    });
+
+    test('an oversized JPEG header is refused before reduced decoding', () {
+      final bytes = Uint8List.fromList(original);
+      var patched = false;
+      for (var i = 0; i + 8 < bytes.length; i++) {
+        if (bytes[i] == 0xff && bytes[i + 1] == 0xc0) {
+          bytes[i + 5] = bytes[i + 7] = 8000 >> 8;
+          bytes[i + 6] = bytes[i + 8] = 8000 & 255;
+          patched = true;
+          break;
+        }
+      }
+      expect(patched, isTrue, reason: 'fixture has a baseline SOF header');
+      expect(imageSizeOf(bytes), isNull);
+      expect(
+        () => thumbnailSync(bytes, maxSide: 8),
+        throwsA(isA<ImageDecodeFailure>()),
+      );
+    });
+
+    test('invalid scale and malformed JPEG errors are sanitized', () {
+      for (final scale in [-1, 0, 3, 16]) {
+        expect(
+          () => decodeOriented(original, jpegScale: scale),
+          throwsA(isA<ImageDecodeFailure>()),
+        );
+      }
+      for (final bytes in [
+        Uint8List.fromList([0xff, 0xd8, 0xff]),
+        Uint8List.sublistView(original, 0, original.length ~/ 2),
+      ]) {
+        expect(
+          () => thumbnailSync(bytes, maxSide: 8),
+          throwsA(isA<ImageDecodeFailure>()),
+        );
+      }
+    });
+
+    test('malformed EXIF offsets keep the reduced JPEG raster readable', () {
+      final bytes = _jpegWithCyclicExif(original);
+      // TIFF's first-IFD offset is outside the bounded APP1 metadata block.
+      bytes.setRange(16, 20, [0xff, 0xff, 0xff, 0x7f]);
+      final before = Uint8List.fromList(bytes);
+      final result = img.decodeJpg(thumbnailSync(bytes, maxSide: 9))!;
+      expect((result.width, result.height), (9, 5));
+      final p = result.getPixel(4, 2);
+      expect(p.r, closeTo(30, 5));
+      expect(p.g, closeTo(90, 5));
+      expect(p.b, closeTo(150, 5));
+      expect(bytes, before);
+    });
+
+    test('a progressive JPEG thumbnail keeps its target and color', () {
+      // Synthetic 65×33 solid RGB (30,90,150), Pillow quality90/progressive.
+      final bytes = base64Decode(
+        '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoH'
+        'BwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQME'
+        'BAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQU'
+        'FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wgARCAAhAEEDASIAAhEBAxEB/8QAFQAB'
+        'AQAAAAAAAAAAAAAAAAAAAAf/xAAVAQEBAAAAAAAAAAAAAAAAAAAABv/aAAwDAQACEAMQ'
+        'AAABnotZAAAAAAAAAAAAAAD/xAAUEAEAAAAAAAAAAAAAAAAAAABQ/9oACAEBAAEFAjf/'
+        'xAAUEQEAAAAAAAAAAAAAAAAAAAAw/9oACAEDAQE/AX//xAAUEQEAAAAAAAAAAAAAAAAA'
+        'AAAw/9oACAECAQE/AX//xAAUEAEAAAAAAAAAAAAAAAAAAABQ/9oACAEBAAY/Ajf/xAAU'
+        'EAEAAAAAAAAAAAAAAAAAAABQ/9oACAEBAAE/ITf/2gAMAwEAAgADAAAAEP8A/wD/AP8A'
+        '/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP/EABQRAQAAAAAAAAAAAAAAAAAAADD/2gAIAQMB'
+        'AT8Qf//EABQRAQAAAAAAAAAAAAAAAAAAADD/2gAIAQIBAT8Qf//EABQQAQAAAAAAAAAA'
+        'AAAAAAAAAFD/2gAIAQEAAT8QN//Z',
+      );
+      final before = Uint8List.fromList(bytes);
+      final result = img.decodeJpg(thumbnailSync(bytes, maxSide: 9))!;
+      expect((result.width, result.height), (9, 5));
+      final p = result.getPixel(4, 2);
+      expect(p.r, closeTo(30, 5));
+      expect(p.g, closeTo(90, 5));
+      expect(p.b, closeTo(150, 5));
+      expect(bytes, before);
+    });
+  });
+
   group('W-104b decoder regressions', () {
     test(
       'cyclic EXIF stops reading metadata and preserves the JPEG raster',
@@ -104,10 +206,14 @@ void main() {
         // A kill budget bounds the old decoder loop; this is not a latency target.
         final result = await runWithinBudget(() {
           final image = decodeOriented(original);
-          return (image.width, image.height, image.toUint8List());
+          final thumb = thumbnailSync(original, maxSide: 2);
+          return (image.width, image.height, image.toUint8List(), thumb);
         }, const Duration(milliseconds: 500));
         expect((result.$1, result.$2), (3, 2));
         expect(result.$3, expected.toUint8List());
+        final thumb = img.decodeJpg(result.$4)!;
+        expect((thumb.width, thumb.height), (2, 1));
+        expect(thumb.getPixel(0, 0).r, closeTo(17, 2));
         expect(original, before);
       },
       timeout: const Timeout(Duration(seconds: 15)),
