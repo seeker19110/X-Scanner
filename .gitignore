@@ -60,3 +60,6 @@ android/local.properties
 scans/
 ocr-output/
 .adoption-logs/
+
+# X-Templates: trạng thái autopilot cục bộ
+.autopilot/

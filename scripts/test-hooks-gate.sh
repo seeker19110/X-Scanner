@@ -206,7 +206,7 @@ check_hook_modes() {   # $1 = root git; in từng đường dẫn hook không ch
   local root="$1" f p mode
   for f in "$root"/.claude/settings.json "$root"/.claude/settings-shared-default.json; do
     [ -f "$f" ] || continue
-    grep -oE '\$\{CLAUDE_PROJECT_DIR\}/[^" ]+' "$f" | sed 's|^\${CLAUDE_PROJECT_DIR}/||' | sort -u | while read -r p; do
+    grep -oE '\$\{CLAUDE_PROJECT_DIR\}/[^"\\ ]+' "$f" | sed 's|^\${CLAUDE_PROJECT_DIR}/||' | sort -u | while read -r p; do
       mode="$(git -C "$root" ls-files -s -- "$p" 2>/dev/null | awk '{print $1}')"
       if [ -z "$mode" ]; then [ -x "$root/$p" ] || echo "$p"; else [ "$mode" = "100755" ] || echo "$p"; fi
     done
@@ -220,6 +220,10 @@ printf '{"c":"${CLAUDE_PROJECT_DIR}/.claude/hooks/a.sh"}\n' > "$neg/.claude/sett
 printf '#!/usr/bin/env bash\n' > "$neg/.claude/hooks/a.sh"
 git -C "$neg" add -A; git -C "$neg" update-index --chmod=-x .claude/hooks/a.sh
 [ -n "$(check_hook_modes "$neg")" ] && ok "negative: hook 100644 bị phát hiện" || bad "negative: hook 100644 KHÔNG bị phát hiện (phép thử xanh giả)"
+# Hook của khung X-Templates đăng ký dạng `bash \"${CLAUDE_PROJECT_DIR}/…/x.sh\"` (JSON thoát nháy): đường dẫn trích ra không được
+# dính dấu `\` cuối (từng làm mọi hook dạng này "không có trong index" → đỏ oan), và hook 100644 dạng đó vẫn phải bị bắt.
+printf '{"c":"bash \\"${CLAUDE_PROJECT_DIR}/.claude/hooks/a.sh\\""}\n' > "$neg/.claude/settings.json"
+[ "$(check_hook_modes "$neg")" = ".claude/hooks/a.sh" ] && ok "negative: hook dạng bash \"…\" 100644 bị phát hiện, đường dẫn không dính dấu backslash" || bad "negative: hook dạng bash \"…\" trích sai đường dẫn hoặc không bị phát hiện: $(check_hook_modes "$neg")"
 
 echo "== 15. pre-commit-gate: cây ĐANG COMMIT (worktree) ≠ CLAUDE_PROJECT_DIR (checkout chính) =="
 # VÌ SAO (đối chiếu X-Agents 2026-09-15 `pt.10`, đo lại ở repo này): hook đọc nhánh/index/cổng từ CLAUDE_PROJECT_DIR.
