@@ -1,5 +1,9 @@
 # Changelog — X-Scanner
 
+## Unreleased — 2026-10-23
+
+- XS-09 PR-4b.2: app mở vào Thư viện; lần đầu chuyển dữ liệu P1 thành một tài liệu (copy/kiểm từng byte, giữ `session.migrated`). Mỗi tài liệu mở màn chụp/chỉnh/xuất như P1, tiêu đề là tên tài liệu. Ảnh chụp được đặt chỗ cho đúng tài liệu trước khi mở camera, giữ qua lỗi/khởi động lại; ảnh hỏng được giữ riêng để không chặn lần chụp sau. Gỡ `SessionStore`.
+
 ## Unreleased — 2026-10-18
 
 - XS09 pending-original foundation: journal owner/page bền, bản sao ảnh có trần byte và giữ dữ liệu khi lỗi/ngắt; input bị từ chối được giữ riêng để không chặn lần chụp sau. Chưa nối vào app.

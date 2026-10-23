@@ -7,12 +7,16 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:x_scanner/core/page_quad.dart';
+import 'package:x_scanner/core/scan_document.dart';
+import 'package:x_scanner/core/scan_session.dart';
 import 'package:x_scanner/export/export_job.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/imaging/decode_gate.dart';
 import 'package:x_scanner/imaging/page_render.dart';
-import 'package:x_scanner/storage/session_store.dart';
+import 'package:x_scanner/storage/document_store.dart';
+import 'package:x_scanner/storage/library_store.dart';
+import 'package:x_scanner/storage/pending_pick_store.dart';
 import 'package:x_scanner/ui/page_source.dart';
 import 'package:x_scanner/ui/session_controller.dart';
 
@@ -42,11 +46,11 @@ class FakeSource implements PageSource {
   }
 }
 
-/// [SessionStore] whose [save] can be made to fail like a full disk (or
+/// [DocumentStore] whose [save] can be made to fail like a full disk (or
 /// with a [StateError]), whose [importOriginal] like a full disk and whose
 /// [load] like an unreadable disk.
-class FlakyStore extends SessionStore {
-  FlakyStore(super.root);
+class FlakyStore extends DocumentStore {
+  FlakyStore(super.dir);
 
   bool failSave = false;
   bool failSaveState = false;
@@ -63,16 +67,26 @@ class FlakyStore extends SessionStore {
       : super.importOriginal(source, id: id, extension: extension);
 
   @override
-  Future<SessionLoadResult> load() => failLoad
-      ? Future<SessionLoadResult>.error(const FileSystemException('io'))
+  Future<DocumentLoadResult> load() => failLoad
+      ? Future<DocumentLoadResult>.error(const FileSystemException('io'))
       : super.load();
 
   @override
-  Future<void> save(session) => failSave
+  Future<void> save(document) => failSave
       ? Future<void>.error(const FileSystemException('disk full'))
       : failSaveState
       ? Future<void>.error(StateError('original of a page is missing'))
-      : super.save(session);
+      : super.save(document);
+}
+
+/// [PageSource] whose camera returns [result] once it completes.
+class _HeldSource extends FakeSource {
+  _HeldSource(this.result);
+
+  final Future<String?> result;
+
+  @override
+  Future<String?> capture() => result;
 }
 
 /// [FileSharer] that records what it was given and can be made to fail.
@@ -135,6 +149,8 @@ void main() {
   late Directory root;
   late Directory picks;
   late FlakyStore store;
+  late ScanDocument document;
+  late PendingPickStore pending;
   late FakeSource source;
   late Directory exports;
   late PageExporter exporter;
@@ -142,11 +158,26 @@ void main() {
   late SessionController controller;
   var n = 0;
 
-  setUp(() {
+  setUp(() async {
     tmp = Directory.systemTemp.createTempSync('session_controller_test');
-    root = Directory('${tmp.path}/session')..createSync();
     picks = Directory('${tmp.path}/picks')..createSync();
+    final created = DateTime.utc(2026, 10, 1);
+    document = ScanDocument(
+      id: newPageId(),
+      title: 'Hợp đồng',
+      createdAt: created,
+      updatedAt: created,
+    );
+    final library = LibraryStore(Directory('${tmp.path}/documents'));
+    await library.create(document);
+    root = Directory('${library.root.path}/${document.id}');
     store = FlakyStore(root);
+    // The picker leaves its copies in [picks], the cache folder.
+    pending = PendingPickStore(
+      dir: Directory('${tmp.path}/pending-pick'),
+      cacheDir: picks,
+      maxBytes: maxOriginalBytes,
+    );
     source = FakeSource();
     exports = Directory('${tmp.path}/exports');
     exporter = PageExporter(
@@ -156,10 +187,13 @@ void main() {
     sharer = FakeSharer();
     controller = SessionController(
       store: store,
+      document: document,
+      pending: pending,
       source: source,
       exporter: exporter,
       sharer: sharer,
     );
+    await controller.restore();
   });
 
   tearDown(() => tmp.deleteSync(recursive: true));
@@ -180,7 +214,7 @@ void main() {
 
   List<Object?> manifestPages() {
     final json = jsonDecode(
-      File('${root.path}/session.json').readAsStringSync(),
+      File('${root.path}/document.json').readAsStringSync(),
     ) as Map<String, Object?>;
     return json['pages']! as List<Object?>;
   }
@@ -202,7 +236,8 @@ void main() {
     expect(controller.session.pages, isEmpty);
     expect(controller.takeNotice(), isNull);
     expect(controller.busy, isFalse);
-    expect(File('${root.path}/session.json').existsSync(), isFalse);
+    expect(manifestPages(), isEmpty);
+    expect(await pending.load(), isNull);
   });
 
   test(
@@ -294,7 +329,9 @@ void main() {
     await addPages(2);
     final saved = ids();
     final other = SessionController(
-      store: SessionStore(root),
+      store: DocumentStore(root),
+      document: document,
+      pending: pending,
       source: source,
       exporter: exporter,
       sharer: sharer,
@@ -306,7 +343,7 @@ void main() {
 
   test('restore on a corrupt manifest gives an empty session and '
       'restoreFailed', () async {
-    File('${root.path}/session.json').writeAsStringSync('{not json');
+    File('${root.path}/document.json').writeAsStringSync('{not json');
     await controller.restore();
     expect(controller.session.pages, isEmpty);
     expect(controller.takeNotice(), SessionNotice.restoreFailed);
@@ -315,7 +352,7 @@ void main() {
   test('(F-001) restore failing with an I/O error, then capture, keeps the '
       'saved session', () async {
     await addPages(2);
-    final manifest = File('${root.path}/session.json');
+    final manifest = File('${root.path}/document.json');
     final onDisk = manifest.readAsBytesSync();
     final originals = Directory('${root.path}/originals')
         .listSync()
@@ -325,6 +362,8 @@ void main() {
     final failing = FlakyStore(root)..failLoad = true;
     final other = SessionController(
       store: failing,
+      document: document,
+      pending: pending,
       source: source,
       exporter: exporter,
       sharer: sharer,
@@ -341,14 +380,6 @@ void main() {
     for (final path in originals) {
       expect(File(path).existsSync(), isTrue);
     }
-  });
-
-  test('restore adds a photo recovered after the app was killed', () async {
-    source.lost.add(png());
-    await controller.restore();
-    expect(controller.session.pages, hasLength(1));
-    expect(manifestPages(), hasLength(1));
-    expect(controller.takeNotice(), isNull);
   });
 
   test('a failed save reports saveFailed and keeps the session', () async {
@@ -380,7 +411,7 @@ void main() {
   /// The saved manifest bytes and original file names, to show a failed
   /// add left the disk exactly as it was.
   ({List<int> manifest, List<String> originals}) disk() => (
-    manifest: File('${root.path}/session.json').readAsBytesSync(),
+    manifest: File('${root.path}/document.json').readAsBytesSync(),
     originals: [
       for (final e in Directory('${root.path}/originals').listSync())
         e.path.split('/').last,
@@ -461,6 +492,8 @@ void main() {
     final path = png();
     final other = SessionController(
       store: store,
+      document: document,
+      pending: pending,
       source: source,
       exporter: exporter,
       sharer: sharer,
@@ -506,40 +539,6 @@ void main() {
     expect(disk().manifest, onDisk.manifest);
     expect(source.discarded, isEmpty);
     expect(File(path).existsSync(), isTrue);
-  });
-
-  test('an unreadable photo recovered on restore reports decodeFailed and '
-      'keeps the restored session (F-028)', () async {
-    await addPages(2);
-    final saved = ids();
-    final onDisk = disk();
-    final lost = png();
-    final other = SessionController(
-      store: SessionStore(root),
-      source: source,
-      exporter: exporter,
-      sharer: sharer,
-      thumbnailer: (path) => path == lost
-          ? Future<Uint8List>.error(const ImageDecodeFailure())
-          : thumbnail(path),
-    );
-    source.discarded.clear();
-    source.lost.add(lost);
-
-    await other.restore();
-
-    expect(other.takeNotice(), SessionNotice.decodeFailed);
-    expect(other.takeNotice(), isNull);
-    expect([for (final p in other.session.pages) p.id], saved);
-    expect(disk().manifest, onDisk.manifest);
-    expect(disk().originals, onDisk.originals);
-    expect(source.discarded, isEmpty);
-    expect(File(lost).existsSync(), isTrue);
-    // The restored session still works: its pages decode and edits save.
-    await other.thumbnailFor(other.session.pages.first);
-    await other.move(0, 1);
-    expect([for (final p in other.session.pages) p.id], saved.reversed);
-    expect(other.takeNotice(), isNull);
   });
 
   test('move, remove, updatePage, retake and clearAll update the session '
@@ -634,15 +633,6 @@ void main() {
       expect(counts.single, isNot(page.id));
     });
 
-    test('photo recovered on restore (F-005)', () async {
-      final counts = savedPagesAtDiscard();
-      final path = png();
-      source.lost.add(path);
-      await controller.restore();
-      expect(source.discarded, [path]);
-      expect(counts, [1]);
-    });
-
     test('an undecodable image is not discarded (F-005)', () async {
       source.captures.add(garbage());
       source.gallery.add(garbage());
@@ -672,6 +662,237 @@ void main() {
     });
   });
 
+  group('library document (XS-09 PR-4b.2)', () {
+    test('restore imports a picker image this document still owns', () async {
+      final path = png();
+      final pick = await pending.remember(
+        await pending.begin(docId: document.id, pageId: newPageId()),
+        path,
+      );
+      final other = SessionController(
+        store: DocumentStore(root),
+        document: document,
+        pending: pending,
+        source: source,
+        exporter: exporter,
+        sharer: sharer,
+      );
+
+      await other.restore();
+
+      expect([for (final p in other.session.pages) p.id], [pick.pageId]);
+      expect(manifestPages(), hasLength(1));
+      expect(source.discarded, [path]);
+      expect(await pending.load(), isNull);
+      expect(other.takeNotice(), isNull);
+    });
+
+    test("another document's picker image blocks pickers here", () async {
+      final pick = await pending.remember(
+        await pending.begin(docId: newPageId(), pageId: newPageId()),
+        png(),
+      );
+      source.captures.add(png());
+
+      await controller.capture();
+
+      expect(controller.takeNotice(), SessionNotice.pendingImage);
+      expect(source.captures, hasLength(1), reason: 'no picker was opened');
+      expect((await pending.load())?.pageId, pick.pageId);
+      expect(controller.session.pages, isEmpty);
+    });
+
+    test('a failed save keeps the image, and the next capture retries it '
+        'without opening the picker', () async {
+      final path = png();
+      source.captures.add(path);
+      store.failSave = true;
+      await controller.capture();
+      expect(controller.takeNotice(), SessionNotice.saveFailed);
+      expect(File(path).existsSync(), isTrue);
+
+      store.failSave = false;
+      await controller.capture();
+
+      expect(controller.session.pages, hasLength(1));
+      expect(
+        controller
+            .originalFile(controller.session.pages.single)
+            .readAsBytesSync(),
+        File(path).readAsBytesSync(),
+      );
+      expect(source.discarded, [path]);
+      expect(await pending.load(), isNull);
+      expect(controller.takeNotice(), isNull);
+    });
+
+    test(
+      'a picker result returned after dispose is kept for the next open',
+      () async {
+        final held = Completer<String?>();
+        final slow = _HeldSource(held.future);
+        final other = SessionController(
+          store: DocumentStore(root),
+          document: document,
+          pending: pending,
+          source: slow,
+          exporter: exporter,
+          sharer: sharer,
+        );
+        await other.restore();
+        final capture = other.capture();
+        await Future<void>.delayed(Duration.zero);
+        other.dispose();
+        held.complete(png());
+        await capture;
+
+        expect(manifestPages(), isEmpty, reason: 'nothing saved after dispose');
+        final kept = await pending.load();
+        expect(kept?.docId, document.id);
+        expect(kept?.cacheRelativePath, isNotNull);
+
+        await controller.restore();
+        expect(
+          [for (final p in controller.session.pages) p.id],
+          [kept!.pageId],
+        );
+      },
+    );
+
+    test('reopening waits for the closed screen to finish its import, so '
+        'neither save overwrites the other', () async {
+      final decoding = Completer<void>();
+      final release = Completer<void>();
+      final first = SessionController(
+        store: store,
+        document: document,
+        pending: pending,
+        source: source,
+        exporter: exporter,
+        sharer: sharer,
+        thumbnailer: (path) async {
+          if (!decoding.isCompleted) decoding.complete();
+          await release.future;
+          return thumbnail(path);
+        },
+      );
+      await first.restore();
+      source.captures.add(png());
+      final capture = first.capture();
+      await decoding.future;
+      first.dispose();
+
+      final second = SessionController(
+        store: store,
+        document: document,
+        pending: pending,
+        source: source,
+        exporter: exporter,
+        sharer: sharer,
+        after: first.idle,
+      );
+      var restored = false;
+      final opening = second.restore().then((_) => restored = true);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(restored, isFalse, reason: 'waits for the closed screen');
+
+      release.complete();
+      await capture;
+      await opening;
+      expect(second.session.pages, hasLength(1));
+      source.captures.add(png());
+      await second.capture();
+      expect(manifestPages(), hasLength(2));
+    });
+
+    test('a document that cannot be loaded is read-only', () async {
+      File('${root.path}/document.json').writeAsStringSync('{not json');
+      final other = SessionController(
+        store: DocumentStore(root),
+        document: document,
+        pending: pending,
+        source: source,
+        exporter: exporter,
+        sharer: sharer,
+      );
+      await other.restore();
+      expect(other.takeNotice(), SessionNotice.restoreFailed);
+
+      source.captures.add(png());
+      await other.capture();
+      await other.clearAll();
+
+      expect(other.takeNotice(), SessionNotice.saveFailed);
+      expect(other.takeNotice(), SessionNotice.saveFailed);
+      expect(source.captures, hasLength(1), reason: 'no picker was opened');
+      expect(await pending.load(), isNull);
+    });
+
+    test(
+      'every page change saves updatedAt; the title and created time stay',
+      () async {
+        var clock = DateTime.utc(2026, 10, 23, 8);
+        final other = SessionController(
+          store: DocumentStore(root),
+          document: document,
+          pending: pending,
+          source: source,
+          exporter: exporter,
+          sharer: sharer,
+          now: () => clock,
+        );
+        await other.restore();
+        source.captures.add(png());
+        await other.capture();
+        expect(other.document.updatedAt, clock);
+
+        clock = DateTime.utc(2026, 10, 23, 9);
+        await other.updatePage(other.session.pages.single.rotatedClockwise());
+
+        final saved =
+            (await DocumentStore(root).load() as DocumentLoaded).document;
+        expect(saved.updatedAt, clock);
+        expect(saved.createdAt, document.createdAt);
+        expect(saved.title, 'Hợp đồng');
+        expect(other.document.title, 'Hợp đồng');
+      },
+    );
+
+    test('editing one document leaves another unchanged (AC-13)', () async {
+      final library = LibraryStore(Directory('${tmp.path}/documents'));
+      final otherDoc = ScanDocument(
+        id: newPageId(),
+        title: 'B',
+        createdAt: document.createdAt,
+        updatedAt: document.createdAt,
+      );
+      final otherStore = await library.create(otherDoc);
+      final b = SessionController(
+        store: otherStore,
+        document: otherDoc,
+        pending: pending,
+        source: source,
+        exporter: exporter,
+        sharer: sharer,
+      );
+      await b.restore();
+      source.captures.add(png());
+      await b.capture();
+      final bManifest = File('${otherStore.dir.path}/document.json')
+          .readAsBytesSync();
+
+      await addPages(2);
+      await controller.move(0, 1);
+      await controller.clearAll();
+
+      expect(
+        File('${otherStore.dir.path}/document.json').readAsBytesSync(),
+        bManifest,
+      );
+      expect(b.session.pages, hasLength(1));
+    });
+  });
+
   test('cancelled retake keeps the page', () async {
     await addPages(1);
     final before = controller.session;
@@ -687,6 +908,8 @@ void main() {
     var calls = 0;
     final c = SessionController(
       store: store,
+      document: document,
+      pending: pending,
       source: source,
       exporter: exporter,
       sharer: sharer,
@@ -699,6 +922,7 @@ void main() {
         return Uint8List.fromList(utf8.encode(path.split('/').last));
       },
     );
+    await c.restore();
     for (var i = 0; i < 3; i++) {
       source.captures.add(png());
       await c.capture();
@@ -707,7 +931,9 @@ void main() {
 
     // A fresh controller has an empty cache.
     final d = SessionController(
-      store: SessionStore(root),
+      store: DocumentStore(root),
+      document: document,
+      pending: pending,
       source: source,
       exporter: exporter,
       sharer: sharer,
@@ -744,7 +970,9 @@ void main() {
     await addPages(1);
     final page = controller.session.pages.single;
     final other = SessionController(
-      store: SessionStore(root),
+      store: DocumentStore(root),
+      document: document,
+      pending: pending,
       source: source,
       exporter: exporter,
       sharer: sharer,
@@ -760,7 +988,9 @@ void main() {
   SessionController countingController(
     Future<Uint8List> Function(String path) thumbnailer,
   ) => SessionController(
-    store: SessionStore(root),
+    store: DocumentStore(root),
+    document: document,
+    pending: pending,
     source: source,
     exporter: exporter,
     sharer: sharer,
@@ -869,7 +1099,9 @@ void main() {
       previewer,
       DecodeGate? decodeGate,
     }) => SessionController(
-      store: SessionStore(root),
+      store: DocumentStore(root),
+      document: document,
+      pending: pending,
       source: source,
       exporter: exporter,
       sharer: sharer,
@@ -1103,7 +1335,9 @@ void main() {
       await addPages(1);
       var notified = 0;
       final other = SessionController(
-        store: SessionStore(root),
+        store: DocumentStore(root),
+        document: document,
+        pending: pending,
         source: source,
         exporter: exporter,
         sharer: sharer,
@@ -1119,6 +1353,8 @@ void main() {
     test('ends false when load throws a FileSystemException', () async {
       final other = SessionController(
         store: FlakyStore(root)..failLoad = true,
+        document: document,
+        pending: pending,
         source: source,
         exporter: exporter,
         sharer: sharer,
@@ -1141,7 +1377,9 @@ void main() {
     // Wired like lib/main.dart: one gate for the controller and exporter.
     final gate = DecodeGate();
     final c = SessionController(
-      store: SessionStore(root),
+      store: DocumentStore(root),
+      document: document,
+      pending: pending,
       source: source,
       exporter: PageExporter(
         exportDir: exports,
@@ -1259,7 +1497,9 @@ void main() {
   /// exporter renders through [renderer]; its session is restored.
   Future<SessionController> withRenderer(HeldRenderer renderer) async {
     final c = SessionController(
-      store: SessionStore(root),
+      store: DocumentStore(root),
+      document: document,
+      pending: pending,
       source: source,
       exporter: PageExporter(exportDir: exports, renderer: renderer.call),
       sharer: sharer,

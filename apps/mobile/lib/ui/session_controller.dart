@@ -4,16 +4,18 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import '../core/page_quad.dart';
+import '../core/scan_document.dart';
 import '../core/scan_page.dart';
 import '../core/scan_session.dart';
-import '../core/session_manifest.dart';
 import '../export/export_job.dart';
 import '../export/file_sharer.dart';
 import '../export/page_exporter.dart';
 import '../imaging/decode_gate.dart';
 import '../imaging/page_render.dart';
-import '../storage/session_store.dart';
+import '../storage/document_store.dart';
+import '../storage/pending_pick_store.dart';
 import 'page_source.dart';
+import 'pick_import.dart';
 
 /// User-facing outcomes the UI reports as a message.
 enum SessionNotice {
@@ -22,13 +24,18 @@ enum SessionNotice {
   saveFailed,
   exportFailed,
   exportCancelled,
+
+  /// An earlier picker image is still being kept for another document, or
+  /// its state is unknown; no picker is opened until it is resolved.
+  pendingImage,
 }
 
-/// Owns the open scan session for the UI.
+/// Owns one open library document for the UI (XS-09 FR-8).
 ///
 /// Every change runs through one internal queue, one at a time, and is
-/// applied in memory only after [SessionStore.save] succeeded, so a failed
-/// write leaves the session exactly as it was. Nothing is logged.
+/// applied in memory only after [DocumentStore.save] succeeded, so a failed
+/// write leaves the document exactly as it was. Nothing is written until
+/// [restore] has loaded the document. Nothing is logged.
 class SessionController extends ChangeNotifier {
   /// Creates a controller; [thumbnailer] decodes an image file into a
   /// preview and throws [ImageDecodeFailure] for unreadable images. The
@@ -38,17 +45,34 @@ class SessionController extends ChangeNotifier {
   /// Thumbnails, cropped previews and decode checks run through
   /// [decodeGate]; pass the gate the exporter's renderer uses so only one
   /// original is decoded at once.
+  ///
+  /// `document` is the listed document of [store], shown until [restore]
+  /// loads it; picker images go through [pending] (PR-4b.2 C3). [restore]
+  /// first waits for `after`: the [idle] of the previous controller of the
+  /// same document.
   SessionController({
     required this._store,
+    required this._document,
+    required PendingPickStore pending,
     required this._source,
     required this._exporter,
     required this._sharer,
     this._thumbnailer = thumbnail,
     this._previewer = croppedPreview,
     DecodeGate? decodeGate,
-  }) : _decodeGate = decodeGate ?? DecodeGate();
+    DateTime Function()? now,
+    this._after,
+  }) : _now = now ?? DateTime.now,
+       _decodeGate = decodeGate ?? DecodeGate() {
+    _importer = PickImporter(
+      pending: pending,
+      source: _source,
+      decode: (path) => _decode(() => path),
+      now: _now,
+    );
+  }
 
-  final SessionStore _store;
+  final DocumentStore _store;
   final PageSource _source;
   final PageExporter _exporter;
   final FileSharer _sharer;
@@ -60,8 +84,16 @@ class SessionController extends ChangeNotifier {
   )
   _previewer;
   final DecodeGate _decodeGate;
+  final DateTime Function() _now;
+  late final PickImporter _importer;
 
-  static const String _defaultExtension = 'jpg';
+  /// [idle] of the previous controller of this document, if any.
+  final Future<void>? _after;
+
+  ScanDocument _document;
+
+  /// Whether [restore] loaded the document, so it may be saved.
+  bool _writable = false;
 
   ScanSession _session = ScanSession.empty;
   final Queue<SessionNotice> _notices = Queue<SessionNotice>();
@@ -80,8 +112,14 @@ class SessionController extends ChangeNotifier {
   /// Tail of the write queue; never completes with an error.
   Future<void> _writeTail = Future<void>.value();
 
-  /// The current session.
+  /// The pages of the document.
   ScanSession get session => _session;
+
+  /// Completes once every queued operation has finished; never errors.
+  Future<void> get idle => _writeTail;
+
+  /// The document: its title, and its pages once loaded.
+  ScanDocument get document => _document;
 
   /// Whether a queued operation has not finished yet.
   bool get busy => _pending > 0;
@@ -159,73 +197,65 @@ class SessionController extends ChangeNotifier {
   }
 
   /// Removes export files and share-sheet copies left by an earlier run,
-  /// loads the saved session,
-  /// then adds a photo Android may have kept after killing the app during
-  /// capture. [restoring] is true from this call until that has finished,
-  /// whether it succeeded or not.
+  /// loads the document, then finishes a picker image this document still
+  /// owns. Only a loaded document can be changed; anything else reports
+  /// [SessionNotice.restoreFailed]. [restoring] is true from this call until
+  /// that has finished, whether it succeeded or not.
   Future<void> restore() {
     _restoring++;
     _notify();
     return _enqueue(() async {
       try {
-        await _restoreSession();
+        await _restoreDocument();
       } finally {
         _restoring--;
       }
     });
   }
 
-  Future<void> _restoreSession() async {
+  Future<void> _restoreDocument() async {
+    // A closed screen of this document may still be saving an import; reading
+    // before it ends would let the two saves overwrite each other.
+    await _after;
     await _exporter.clearLeftovers();
-    var failed = false;
+    _writable = false;
     try {
-      switch (await _store.load()) {
-        case SessionLoaded(:final session):
-          _session = session;
-        case SessionEmpty():
-          _session = ScanSession.empty;
-        case SessionUnrecoverable():
-          _session = ScanSession.empty;
-          failed = true;
+      final loaded = await _store.load();
+      if (loaded is DocumentLoaded) {
+        _document = loaded.document;
+        _writable = true;
       }
     } on FileSystemException {
-      _session = ScanSession.empty;
-      failed = true;
+      // Reported below like an unusable document.
     }
+    _session = _writable
+        ? ScanSession(pages: _document.pages)
+        : ScanSession.empty;
     _forgetThumbnails();
-    if (failed) _notices.add(SessionNotice.restoreFailed);
+    if (!_writable) _notices.add(SessionNotice.restoreFailed);
     _notify();
-    final lost = await _source.retrieveLost();
-    if (lost != null) {
-      await _addFromPath(lost, (page) => _session.added(page));
+    if (!_writable) return;
+    final PendingPick? pick;
+    try {
+      pick = await _importer.pending.load();
+    } on PendingPickFailure {
+      return;
     }
+    if (pick != null && _owns(pick)) await _import(pick);
   }
 
   /// Adds a photo from the system camera; a cancel does nothing.
-  Future<void> capture() => _enqueue(() async {
-    final path = await _source.capture();
-    if (path != null) {
-      await _addFromPath(path, (page) => _session.added(page));
-    }
-  });
+  Future<void> capture() => _enqueue(() => _pick(_source.capture));
 
   /// Adds an image from the photo picker; a cancel does nothing.
-  Future<void> importFromGallery() => _enqueue(() async {
-    final path = await _source.pickFromGallery();
-    if (path != null) {
-      await _addFromPath(path, (page) => _session.added(page));
-    }
-  });
+  Future<void> importFromGallery() =>
+      _enqueue(() => _pick(_source.pickFromGallery));
 
   /// Replaces the page [id] with a new camera photo, resetting its quad
-  /// and rotation. The old original is removed by [SessionStore.save].
+  /// and rotation. The old original is removed by [DocumentStore.save].
   Future<void> retake(String id) => _enqueue(() async {
     if (!_contains(id)) return;
-    final path = await _source.capture();
-    if (path != null) {
-      await _addFromPath(path, (page) => _session.replaced(id, page));
-      if (!_contains(id)) _forgetThumbnail(id);
-    }
+    await _pick(_source.capture, replace: id);
   });
 
   /// Removes the page [id]; a page that is already gone is ignored.
@@ -343,52 +373,108 @@ class SessionController extends ChangeNotifier {
     );
   }
 
-  /// Checks that [path] decodes, copies it in as a new page, saves the
-  /// session built by [apply] and only then shows it and lets the source
-  /// discard its copy at [path].
-  Future<void> _addFromPath(
-    String path,
-    ScanSession Function(ScanPage page) apply,
-  ) async {
-    final Uint8List preview;
-    try {
-      preview = await _decode(() => path);
-    } catch (_) {
-      // Not only ImageDecodeFailure: a vanished or unreadable file
-      // (FileSystemException), a RemoteError from the decode isolate or
-      // running out of memory on a very large file all mean the image cannot
-      // be added. The session and the source's copy stay as they were.
-      _report(SessionNotice.decodeFailed);
+  /// Whether [pick] belongs to this document and has an image to import.
+  bool _owns(PendingPick pick) =>
+      pick.docId == _document.id && pick.cacheRelativePath != null;
+
+  /// One picker operation (PR-4b.2 C3): a pick this document still owns is
+  /// imported first instead (the retry); another pending pick blocks.
+  /// Otherwise the page id is reserved before [launch] opens the picker,
+  /// the result is remembered even if this controller is disposed
+  /// meanwhile, and only a live controller imports it.
+  Future<void> _pick(
+    Future<String?> Function() launch, {
+    String? replace,
+  }) async {
+    if (!_writable) {
+      _report(SessionNotice.saveFailed);
       return;
     }
-    final id = newPageId();
+    final pending = _importer.pending;
+    PendingPick pick;
     try {
-      final relative = await _store.importOriginal(
-        File(path),
-        id: id,
-        extension: _extensionOf(path),
+      final existing = await pending.load();
+      if (existing != null) {
+        if (_owns(existing)) {
+          await _import(existing);
+        } else {
+          _report(SessionNotice.pendingImage);
+        }
+        return;
+      }
+      pick = await pending.begin(
+        docId: _document.id,
+        pageId: newPageId(),
+        replacePageId: replace,
       );
-      final next = apply(ScanPage(id: id, originalPath: relative));
-      await _store.save(next);
-      _session = next;
-      _thumbnails[id] = Future<Uint8List>.value(preview);
-      _notify();
-    } on FileSystemException {
-      _report(SessionNotice.saveFailed);
-      return;
-    } on StateError {
-      _report(SessionNotice.saveFailed);
+    } on PendingPickFailure {
+      _report(SessionNotice.pendingImage);
       return;
     }
-    // Only now is the original safely ours; on any failure above the
-    // picker's copy is kept so the photo is not lost.
-    await _source.discard(path);
+    final path = await launch();
+    if (path == null) {
+      await _cancel(pick);
+      return;
+    }
+    try {
+      pick = await pending.remember(pick, path);
+    } on PendingPickFailure {
+      // Nothing was kept, so the empty reservation goes; a result that is no
+      // readable file in the cache cannot become a page (P1 AC-7).
+      await _cancel(pick);
+      final unreadable =
+          await FileSystemEntity.type(path) != FileSystemEntityType.file;
+      _report(
+        unreadable ? SessionNotice.decodeFailed : SessionNotice.saveFailed,
+      );
+      return;
+    }
+    // Another controller may own this document now; it imports the pick.
+    if (_disposed) return;
+    await _import(pick);
   }
 
-  /// Saves [next] and adopts it; returns whether that succeeded.
-  Future<bool> _commit(ScanSession next) async {
+  /// Drops the empty reservation [pick]; one that cannot be dropped stays
+  /// and blocks pickers until the next start resolves it.
+  Future<void> _cancel(PendingPick pick) async {
     try {
-      await _store.save(next);
+      await _importer.pending.cancel(pick);
+    } on PendingPickFailure {
+      // Kept on disk; the startup recovery cancels an empty reservation.
+    }
+  }
+
+  /// Imports [pick] into the document and shows the outcome.
+  Future<void> _import(PendingPick pick) async {
+    switch (await _importer.importInto(pick, _store, _document)) {
+      case PickImported(:final document, :final preview):
+        _document = document;
+        _session = ScanSession(pages: document.pages);
+        if (preview != null) {
+          _thumbnails[pick.pageId] = Future<Uint8List>.value(preview);
+        }
+        final replaced = pick.replacePageId;
+        if (replaced != null && !_contains(replaced)) {
+          _forgetThumbnail(replaced);
+        }
+        _notify();
+      case PickRejected():
+        _report(SessionNotice.decodeFailed);
+      case PickKept():
+        _report(SessionNotice.saveFailed);
+    }
+  }
+
+  /// Saves [next] as the document's pages and adopts it; returns whether
+  /// that succeeded.
+  Future<bool> _commit(ScanSession next) async {
+    if (!_writable) {
+      _report(SessionNotice.saveFailed);
+      return false;
+    }
+    final document = withPages(_document, next.pages, _now());
+    try {
+      await _store.save(document);
     } on FileSystemException {
       _report(SessionNotice.saveFailed);
       return false;
@@ -396,6 +482,7 @@ class SessionController extends ChangeNotifier {
       _report(SessionNotice.saveFailed);
       return false;
     }
+    _document = document;
     _session = next;
     _notify();
     return true;
@@ -429,13 +516,6 @@ class SessionController extends ChangeNotifier {
 
   void _notify() {
     if (!_disposed) notifyListeners();
-  }
-
-  /// Lowercased text after the last dot of the file name, or `jpg` when
-  /// that is missing or not 1–5 letters/digits.
-  static String _extensionOf(String path) {
-    final ext = fileExtension(path);
-    return ext != null && isValidExtension(ext) ? ext : _defaultExtension;
   }
 }
 

@@ -15,13 +15,16 @@ import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/imaging/page_render.dart';
 import 'package:x_scanner/storage/library_store.dart';
-import 'package:x_scanner/storage/session_store.dart';
+import 'package:x_scanner/storage/document_store.dart';
+import 'package:x_scanner/storage/pending_pick_store.dart';
 import 'package:x_scanner/ui/library_controller.dart';
 import 'package:x_scanner/ui/library_screen.dart';
 import 'package:x_scanner/ui/page_source.dart';
 import 'package:x_scanner/ui/quad_editor_screen.dart';
 import 'package:x_scanner/ui/review_screen.dart';
 import 'package:x_scanner/ui/session_controller.dart';
+
+import 'document_test_app.dart';
 
 /// [PageSource] that hands out the queued capture paths.
 class _Source implements PageSource {
@@ -46,15 +49,15 @@ class _Sharer implements FileSharer {
   Future<void> share(List<File> files) async {}
 }
 
-/// [SessionStore] whose [load] waits for [hold] once [loading] completes.
-class _HeldStore extends SessionStore {
-  _HeldStore(super.root);
+/// [DocumentStore] whose [load] waits for [hold] once [loading] completes.
+class _HeldStore extends DocumentStore {
+  _HeldStore(super.dir);
 
   final Completer<void> hold = Completer<void>();
   final Completer<void> loading = Completer<void>();
 
   @override
-  Future<SessionLoadResult> load() async {
+  Future<DocumentLoadResult> load() async {
     loading.complete();
     await hold.future;
     return super.load();
@@ -80,8 +83,18 @@ Future<void> _expectGuidelines(WidgetTester tester) async {
 
 void main() {
   late Directory tmp;
+  late Directory docTmp;
+  late ScanDocument document;
+  late PendingPickStore pending;
 
-  setUp(() => tmp = Directory.systemTemp.createTempSync('a11y_test'));
+  setUp(() {
+    tmp = Directory.systemTemp.createTempSync('a11y_test');
+    // Its own library, so the library screen tests start empty.
+    docTmp = Directory('${tmp.path}/review')..createSync();
+    document = testDocument(docTmp);
+    // Test images are written straight into tmp, the picker cache here.
+    pending = testPending(tmp, tmp);
+  });
   tearDown(() => tmp.deleteSync(recursive: true));
 
   for (final brightness in Brightness.values) {
@@ -97,7 +110,9 @@ void main() {
       // tests, so its queue runs on the real I/O below.
       final controller = (await tester.runAsync(() async {
         final c = SessionController(
-          store: SessionStore(Directory('${tmp.path}/session')..createSync()),
+          store: DocumentStore(documentDir(docTmp, document)),
+          document: document,
+          pending: pending,
           source: source,
           exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
           sharer: _Sharer(),
@@ -106,6 +121,7 @@ void main() {
         );
         final file = File('${tmp.path}/p.png')..writeAsBytesSync(_thumb);
         source.captures.add(file.path);
+        await c.restore();
         await c.capture();
         return c;
       }))!;
@@ -142,7 +158,9 @@ void main() {
       final controller = (await tester.runAsync(() async {
         SessionController make(Future<Uint8List> Function(String) thumbs) =>
             SessionController(
-              store: SessionStore(Directory('${tmp.path}/session')),
+              store: DocumentStore(documentDir(docTmp, document)),
+              document: document,
+              pending: pending,
               source: source,
               exporter: PageExporter(
                 exportDir: Directory('${tmp.path}/exports'),
@@ -151,10 +169,11 @@ void main() {
               thumbnailer: thumbs,
               previewer: _preview,
             );
-        Directory('${tmp.path}/session').createSync();
         final file = File('${tmp.path}/p.png')..writeAsBytesSync(_thumb);
         source.captures.add(file.path);
-        await make((_) async => _thumb).capture();
+        final adding = make((_) async => _thumb);
+        await adding.restore();
+        await adding.capture();
         final c = make((_) async => throw const ImageDecodeFailure());
         await c.restore();
         // Fails on the real event loop; the screen then shows the error.
@@ -198,7 +217,9 @@ void main() {
         '${brightness.name} theme (F-056)', (tester) async {
       final handle = tester.ensureSemantics();
       final controller = SessionController(
-        store: SessionStore(Directory('${tmp.path}/session')..createSync()),
+        store: DocumentStore(documentDir(docTmp, document)),
+        document: document,
+        pending: pending,
         source: _Source(),
         exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
         sharer: _Sharer(),
@@ -221,9 +242,11 @@ void main() {
     testWidgets('review screen while the session is opening meets the a11y '
         'guidelines in ${brightness.name} theme (F-056)', (tester) async {
       final handle = tester.ensureSemantics();
-      final store = _HeldStore(Directory('${tmp.path}/session')..createSync());
+      final store = _HeldStore(documentDir(docTmp, document));
       final controller = SessionController(
         store: store,
+        document: document,
+        pending: pending,
         source: _Source(),
         exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
         sharer: _Sharer(),
@@ -264,7 +287,9 @@ void main() {
       final hold = Completer<void>();
       final controller = (await tester.runAsync(() async {
         final c = SessionController(
-          store: SessionStore(Directory('${tmp.path}/session')..createSync()),
+          store: DocumentStore(documentDir(docTmp, document)),
+          document: document,
+          pending: pending,
           source: source,
           exporter: PageExporter(
             exportDir: Directory('${tmp.path}/exports'),
@@ -280,6 +305,7 @@ void main() {
         );
         final file = File('${tmp.path}/p.png')..writeAsBytesSync(_thumb);
         source.captures.add(file.path);
+        await c.restore();
         await c.capture();
         unawaited(c.exportAndShare(ExportFormat.jpeg));
         for (

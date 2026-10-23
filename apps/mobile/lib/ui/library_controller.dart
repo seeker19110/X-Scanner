@@ -8,12 +8,23 @@ import '../core/scan_session.dart';
 import '../storage/document_store.dart';
 import '../storage/library_store.dart';
 import '../storage/p1_migration.dart';
+import 'pick_import.dart';
 
 /// Where the library screen is (XS-09 §6).
 enum LibraryStatus { loading, ready, failed }
 
 /// A one-off message for the library screen; carries no title or path.
-enum LibraryNotice { migrationSourceUnreadable, saveFailed }
+enum LibraryNotice {
+  migrationSourceUnreadable,
+  saveFailed,
+
+  /// A photo taken before the app was stopped could not become a page; it
+  /// is kept aside.
+  pickRejected,
+
+  /// A photo taken before the app was stopped is kept for the next start.
+  pickKept,
+}
 
 /// Why a typed title cannot be saved.
 enum TitleError { empty, tooLong, invalid }
@@ -40,6 +51,7 @@ class LibraryController extends ChangeNotifier {
   LibraryController({
     required this._library,
     this._migrate,
+    this._recover,
     DateTime Function()? now,
     String Function()? newId,
   }) : _now = now ?? DateTime.now,
@@ -47,6 +59,9 @@ class LibraryController extends ChangeNotifier {
 
   final LibraryStore _library;
   final Future<MigrationOutcome> Function()? _migrate;
+
+  /// Startup picker recovery after a migration step that did not fail.
+  final Future<PickRecovery> Function(MigrationOutcome outcome)? _recover;
   final DateTime Function() _now;
   final String Function() _newId;
 
@@ -193,10 +208,10 @@ class LibraryController extends ChangeNotifier {
     _status = LibraryStatus.loading;
     _migrationFailure = null;
     final migrate = _migrate;
+    MigrationOutcome outcome = const MigrationNotNeeded();
     if (migrate != null) {
       _migrating = true;
       _notify();
-      MigrationOutcome outcome;
       try {
         outcome = await migrate();
       } catch (_) {
@@ -221,6 +236,25 @@ class LibraryController extends ChangeNotifier {
       }
     } else {
       _notify();
+    }
+    final recover = _recover;
+    if (recover != null) {
+      PickRecovery recovery;
+      try {
+        recovery = await recover(outcome);
+      } catch (_) {
+        // Nothing unexpected may keep the library from opening; the picker
+        // state on disk is left as it is.
+        recovery = PickRecovery.kept;
+      }
+      switch (recovery) {
+        case PickRecovery.rejected:
+          _notices.add(LibraryNotice.pickRejected);
+        case PickRecovery.kept:
+          _notices.add(LibraryNotice.pickKept);
+        case PickRecovery.none || PickRecovery.added:
+          break;
+      }
     }
     _opened = true;
     await _list();

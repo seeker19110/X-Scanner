@@ -94,6 +94,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
       'Không chuyển được phiên cũ. '
           'Ảnh gốc vẫn được giữ trong bộ nhớ của app.',
     LibraryNotice.saveFailed => 'Không lưu được',
+    LibraryNotice.pickRejected =>
+      'Không thêm được ảnh chụp dở. '
+          'Ảnh vẫn được giữ trong bộ nhớ của app.',
+    LibraryNotice.pickKept =>
+      'Ảnh chụp dở chưa được lưu. '
+          'Ảnh vẫn được giữ; hãy mở lại app để thử lại.',
   };
 
   static String _failureText(MigrationFailure? failure) => switch (failure) {

@@ -2,7 +2,7 @@
 
 | Thuộc tính | Giá trị |
 | --- | --- |
-| Issue / Goal | `docs/work/2026-10-23-scanner-experience/working.md` |
+| Issue / Goal | `docs/work/2026-10-23-scanner-experience/done.md` |
 | Spec owner | Phiên chính |
 | State | Approved for implementation |
 | Approver / date | Phiên chính theo ủy quyền §3d, 2026-10-23; yêu cầu nâng cấp trực tiếp của chủ repo |
@@ -40,7 +40,7 @@ Gồm theme, màn xem phiên, sheet xuất, editor góc có nút chạm, scaled 
 | AC-5 | `apps/mobile/test/imaging/page_render_test.dart`, `apps/mobile/test/imaging/decoder_security_test.dart` | Geometry/orientation/limits |
 | AC-6 | `apps/mobile/test/ui/session_controller_test.dart` | Queued/new operations after dispose |
 | AC-7 | `apps/mobile/test/export/page_exporter_test.dart` | Final-page cancellation boundary |
-| AC-8 | `docs/work/2026-10-23-scanner-experience/working.md` | Actual command evidence retained |
+| AC-8 | `docs/work/2026-10-23-scanner-experience/done.md` | Actual command evidence retained |
 
 ## 11. Architecture và code touchpoints
 

@@ -5,7 +5,7 @@
 
 ## Bắt đầu
 
-- [Nâng trải nghiệm và hiệu năng](docs/specs/2026-10-23-scanner-experience.md): giao diện thích ứng, nút chỉnh góc, JPEG thumbnail tiết kiệm RAM; giữ camera/ảnh gốc và PDF/JPG/PNG. Bằng chứng từng bước: [hồ sơ 23/10](docs/work/2026-10-23-scanner-experience/working.md).
+- [Nâng trải nghiệm và hiệu năng](docs/specs/2026-10-23-scanner-experience.md): giao diện thích ứng, nút chỉnh góc, JPEG thumbnail tiết kiệm RAM; giữ camera/ảnh gốc và PDF/JPG/PNG. Bằng chứng từng bước: [hồ sơ 23/10](docs/work/2026-10-23-scanner-experience/done.md).
 - [Nghiên cứu nâng cấp ngày 16/10/2026](docs/research/2026-10-16-upgrade-research.md): hiện trạng code/CI, đối chiếu repo sở hữu và nguồn chính thức, ưu tiên và tiêu chí kiểm chứng; ADVISORY.
 - [Gợi ý sản phẩm, repo tham khảo và depth](docs/research/2026-10-11-scanner-product-suggestions.md): ADVISORY.
 - [Kế hoạch phát triển toàn diện](docs/plans/2026-10-12-comprehensive-development-plan.md): M0–M5, depth và 33 đầu việc XS-01..XS-33; đề xuất, chưa phải phê duyệt triển khai toàn bộ.
