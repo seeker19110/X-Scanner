@@ -1,66 +1,68 @@
 # Changelog — X-Scanner
 
-## Unreleased — 2026-10-23
+Định dạng theo [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/); phiên bản theo
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html) khi có bản phát hành. Mới nhất ở trên.
+Chưa có app release: mọi mục nằm trong `[Unreleased]`. Ngày trong ngoặc ở đầu mỗi mục là ngày của heading cũ
+(`Unreleased — <ngày>` hoặc `2026-10-11`) nơi mục được ghi trước lần sắp xếp lại 2026-10-24; nội dung mục giữ nguyên.
 
-- XS-09 PR-4b.2: app mở vào Thư viện; lần đầu chuyển dữ liệu P1 thành một tài liệu (copy/kiểm từng byte, giữ `session.migrated`). Mỗi tài liệu mở màn chụp/chỉnh/xuất như P1, tiêu đề là tên tài liệu. Ảnh chụp được đặt chỗ cho đúng tài liệu trước khi mở camera, giữ qua lỗi/khởi động lại; ảnh hỏng được giữ riêng để không chặn lần chụp sau. Gỡ `SessionStore`.
+## [Unreleased]
 
-## Unreleased — 2026-10-18
+### Added
 
-- XS09 pending-original foundation: journal owner/page bền, bản sao ảnh có trần byte và giữ dữ liệu khi lỗi/ngắt; input bị từ chối được giữ riêng để không chặn lần chụp sau. Chưa nối vào app.
-- AC9: đã chạy camera→chỉnh/xếp→PDF→viewer trên Android emulator Windows tăng tốc, kiểm ba bản gốc không đổi qua restart; bằng chứng synthetic trong docs/ops/evidence. Không phải nghiệm thu release hay camera vật lý.
-
-- XS09 capacity foundation: phép đo dung lượng internal Android bằng StatFs với lỗi được kiểm, thêm test JVM vào gate. Chưa nối migration vào app, không runtime dependency/quyền mới.
-
-- W104b: ghim `image 4.12.0` đủ tuổi, truyền giới hạn theo từng decoder trước parse, kiểm header/output và trả null cho header bị từ chối. Giữ regression gray-alpha; dùng lại setter/xoay upstream đã sửa thay helper riêng. Không đổi các package khác hoặc bật scaled JPEG.
-
-- XS-07b: giữ alpha của ảnh xám hai kênh khi cắt, thu nhỏ và xoay trang; giữ cách JPEG xử lý hai kênh, không chuyển ảnh sang RGBA hoặc thêm buffer toàn ảnh trung gian.
-
-- XS-07a: giữ nguyên pixel khi xuất/xem trước ảnh toàn khung không resize bằng bản sao buffer độc lập; không nội suy lại identity hoặc mang metadata gốc sang ảnh xuất.
-
-- XS-06a: tooling nội bộ tạo corpus hình học/checksum và đo core thumbnail/render/PDF, kèm protocol host/device; giữ nguyên luồng app.
-
-- XS-05: ruleset `main` bắt buộc PR/squash và check `Framework and Android app gate` từ GitHub Actions,
-  không bypass; kiểm dependency theo advisory trong cùng gate. Runbook tách policy, live evidence và giới hạn snapshot.
-
-- XS-04: CI cung cấp APK debug cho UAT sau full gate, kèm checksum, SHA checkout/PR head và phiên bản Flutter;
+- (2026-10-24) Tài liệu quản trị: `docs/THREAT-MODEL.md`, sổ dữ liệu `docs/privacy/data-map.yaml`, sàng lọc `docs/DPIA.md`, `docs/RISKS.md`, `docs/ops/RUNBOOK.md`, sổ sự cố `docs/ops/incidents/`, `SCOPE.md`, `docs/architecture/domains.md`, ADR-0012, baseline tài nguyên `docs/perf/`; khung pháp lý, chuẩn áp dụng và hiệu năng trong `PROJECT.md`; CHANGELOG sắp theo Keep a Changelog. Không đổi mã app.
+- (2026-10-23) XS-09 PR-4b.2: app mở vào Thư viện; lần đầu chuyển dữ liệu P1 thành một tài liệu (copy/kiểm từng byte, giữ `session.migrated`). Mỗi tài liệu mở màn chụp/chỉnh/xuất như P1, tiêu đề là tên tài liệu. Ảnh chụp được đặt chỗ cho đúng tài liệu trước khi mở camera, giữ qua lỗi/khởi động lại; ảnh hỏng được giữ riêng để không chặn lần chụp sau. Gỡ `SessionStore`.
+- (2026-10-18) XS09 pending-original foundation: journal owner/page bền, bản sao ảnh có trần byte và giữ dữ liệu khi lỗi/ngắt; input bị từ chối được giữ riêng để không chặn lần chụp sau. Chưa nối vào app.
+- (2026-10-18) AC9: đã chạy camera→chỉnh/xếp→PDF→viewer trên Android emulator Windows tăng tốc, kiểm ba bản gốc không đổi qua restart; bằng chứng synthetic trong docs/ops/evidence. Không phải nghiệm thu release hay camera vật lý.
+- (2026-10-18) XS09 capacity foundation: phép đo dung lượng internal Android bằng StatFs với lỗi được kiểm, thêm test JVM vào gate. Chưa nối migration vào app, không runtime dependency/quyền mới.
+- (2026-10-18) XS-06a: tooling nội bộ tạo corpus hình học/checksum và đo core thumbnail/render/PDF, kèm protocol host/device; giữ nguyên luồng app.
+- (2026-10-18) XS-04: CI cung cấp APK debug cho UAT sau full gate, kèm checksum, SHA checkout/PR head và phiên bản Flutter;
   artifact giữ 14 ngày, hướng dẫn tải/kiểm/cài và ghi bằng chứng AC-9 tại `docs/ops/android-uat.md`.
-
-- Dependabot (chủ repo duyệt 2026-10-13): nâng bản hằng tuần cho `pub` (`apps/mobile`) và GitHub Actions, chờ
+- (2026-10-18) Dependabot (chủ repo duyệt 2026-10-13): nâng bản hằng tuần cho `pub` (`apps/mobile`) và GitHub Actions, chờ
   bản phát hành đủ 7 ngày, bỏ qua bản major, mỗi hệ sinh thái một PR.
-
-- P1 scan và xuất (#6–#10): phiên nhiều trang lưu bền giữ bản gốc, chụp bằng camera hệ thống hoặc nhập ảnh,
+- (2026-10-18) P1 scan và xuất (#6–#10): phiên nhiều trang lưu bền giữ bản gốc, chụp bằng camera hệ thống hoặc nhập ảnh,
   sắp xếp/xoá/chụp lại/xoay, chỉnh 4 góc và nắn phối cảnh, Dark/Light, tắt sao lưu Android,
   xuất PDF/JPG/PNG qua share sheet.
-- Hoàn thiện P1 (#11–#20, /completion): khôi phục phiên lỗi I/O không ghi đè phiên cũ, xoá bản sao ảnh
+- (2026-10-18) XS-09 PR-1 (#31, chưa nối vào app): mô hình tài liệu `ScanDocument` (tên 1–120 ký tự, thời điểm UTC), `revision` mỗi trang
+  tăng ở mọi lần chỉnh, codec `document.json` schema 2 đọc được schema 1 và báo "cần cập nhật app" với schema mới hơn.
+- (2026-10-18) XS-09 PR-2 (#32, chưa nối vào app): lưu mỗi tài liệu một thư mục với cùng bảo đảm như phiên P1, thư viện liệt kê không
+  đổi gì trên đĩa (tài liệu hỏng chỉ hiện "không mở được", schema mới hơn hiện "cần cập nhật app"), tạo tài liệu nguyên tử.
+- (2026-10-18) XS-09 PR-3 (#33, chưa nối vào app): migration phiên P1 thành một tài liệu — copy rồi so từng byte bản gốc, commit bằng
+  rename, giữ phiên cũ làm bản quay lại không tự xoá, nhật ký để dừng ở bất kỳ bước nào cũng làm tiếp được; tên mặc định
+  "Tài liệu dd/MM/yyyy HH:mm".
+- (2026-10-18) XS-13 PR-1 (#36): ô trang trong danh sách hiện ảnh đã cắt và xoay đúng như file xuất (F-026), dựng từ thumbnail; kết quả
+  của lần chỉnh cũ không bao giờ hiện thay cho lần chỉnh mới.
+- (2026-10-18) XS-13 PR-2 (#37): trình chỉnh góc hiện trang đúng hướng đã xoay, có Hoàn tác/Làm lại, hỏi "Bỏ thay đổi?" trước khi rời màn khi
+  còn thay đổi, kính lúp khi kéo góc, và trình đọc màn hình dịch được từng góc ("Dịch lên/xuống/sang trái/sang phải") (F-032).
+- (2026-10-18) XS-12a PR-1 (#40): khi xuất hiện "Đang xuất trang i/N" với thanh tiến độ và nút "Huỷ"; huỷ dừng ở trang kế tiếp, không để lại
+  file dở và báo "Đã huỷ xuất." (F-033). File xuất luôn là các trang lúc bắt đầu xuất.
+- (2026-10-18) XS-09 PR-4a (#43, chưa nối vào app): màn "Thư viện" — danh sách tài liệu mới sửa trước (tên, số trang, ngày), "Tài liệu mới",
+  "Đổi tên" báo lỗi tại chỗ, thông báo khi nâng cấp dữ liệu thiếu bộ nhớ hoặc không chuyển được phiên cũ, kèm "Thử lại".
+- (2026-10-18) P0 nền (#1, #2): app Flutter `apps/mobile`, lõi `PageQuad`/`ScanPage`, gate APK debug/analyze/format/test.
+- (2026-10-11) Lưu nghiên cứu scan/PDF/ảnh/OCR/depth làm gợi ý.
+- (2026-10-11) Áp dụng projects-template, provenance, project brief và gate repository.
+
+### Changed
+
+- (2026-10-18) XS-05: ruleset `main` bắt buộc PR/squash và check `Framework and Android app gate` từ GitHub Actions,
+  không bypass; kiểm dependency theo advisory trong cùng gate. Runbook tách policy, live evidence và giới hạn snapshot.
+
+### Fixed
+
+- (2026-10-18) XS-07b: giữ alpha của ảnh xám hai kênh khi cắt, thu nhỏ và xoay trang; giữ cách JPEG xử lý hai kênh, không chuyển ảnh sang RGBA hoặc thêm buffer toàn ảnh trung gian.
+- (2026-10-18) XS-07a: giữ nguyên pixel khi xuất/xem trước ảnh toàn khung không resize bằng bản sao buffer độc lập; không nội suy lại identity hoặc mang metadata gốc sang ảnh xuất.
+- (2026-10-18) Hoàn thiện P1 (#11–#20, /completion): khôi phục phiên lỗi I/O không ghi đè phiên cũ, xoá bản sao ảnh
   của picker sau khi lưu, một cổng giải mã cho thumbnail và render xuất, tắt kéo-thả khi bận, PDF dựng trong
   isolate có trần điểm ảnh, trạng thái "Đang mở phiên…" và thử lại thumbnail lỗi, kiểm a11y Dark/Light,
   gate tự kiểm manifest release đã gộp, tài liệu trạng thái, ADR-0003, `TRAPS.md`.
-- Sửa sau quét lại (#21, #22): khi app bận, thao tác TalkBack Move up/down không đổi thứ tự trang; ảnh xem
+- (2026-10-18) Sửa sau quét lại (#21, #22): khi app bận, thao tác TalkBack Move up/down không đổi thứ tự trang; ảnh xem
   trước lỗi chỉ giải mã lại khi bấm "Tải lại" (có vòng quay); mọi lỗi khi kiểm ảnh mới đều báo "không đọc được".
-- Gate manifest release (W-504): chặn khi `targetSdkVersion` < 31, thiếu hoặc không phải số — dưới 31 component có
+
+### Security
+
+- (2026-10-18) W104b: ghim `image 4.12.0` đủ tuổi, truyền giới hạn theo từng decoder trước parse, kiểm header/output và trả null cho header bị từ chối. Giữ regression gray-alpha; dùng lại setter/xoay upstream đã sửa thay helper riêng. Không đổi các package khác hoặc bật scaled JPEG.
+- (2026-10-18) Gate manifest release (W-504): chặn khi `targetSdkVersion` < 31, thiếu hoặc không phải số — dưới 31 component có
   intent-filter mà không khai `exported` vẫn bị exported ngầm.
-- Hàng rào ảnh đầu vào (W-104a): chỉ nhận JPEG/PNG/WebP tĩnh nhận dạng theo nội dung, từ chối bản gốc trên 64 MiB
+- (2026-10-18) Hàng rào ảnh đầu vào (W-104a): chỉ nhận JPEG/PNG/WebP tĩnh nhận dạng theo nội dung, từ chối bản gốc trên 64 MiB
   trước khi đọc, và dừng hẳn thumbnail/render quá 60 giây; các trường hợp này báo "không đọc được", không mất trang.
-- XS-09 PR-1 (#31, chưa nối vào app): mô hình tài liệu `ScanDocument` (tên 1–120 ký tự, thời điểm UTC), `revision` mỗi trang
-  tăng ở mọi lần chỉnh, codec `document.json` schema 2 đọc được schema 1 và báo "cần cập nhật app" với schema mới hơn.
-- XS-09 PR-2 (#32, chưa nối vào app): lưu mỗi tài liệu một thư mục với cùng bảo đảm như phiên P1, thư viện liệt kê không
-  đổi gì trên đĩa (tài liệu hỏng chỉ hiện "không mở được", schema mới hơn hiện "cần cập nhật app"), tạo tài liệu nguyên tử.
-- XS-09 PR-3 (#33, chưa nối vào app): migration phiên P1 thành một tài liệu — copy rồi so từng byte bản gốc, commit bằng
-  rename, giữ phiên cũ làm bản quay lại không tự xoá, nhật ký để dừng ở bất kỳ bước nào cũng làm tiếp được; tên mặc định
-  "Tài liệu dd/MM/yyyy HH:mm".
-- XS-13 PR-1 (#36): ô trang trong danh sách hiện ảnh đã cắt và xoay đúng như file xuất (F-026), dựng từ thumbnail; kết quả
-  của lần chỉnh cũ không bao giờ hiện thay cho lần chỉnh mới.
-- XS-13 PR-2 (#37): trình chỉnh góc hiện trang đúng hướng đã xoay, có Hoàn tác/Làm lại, hỏi "Bỏ thay đổi?" trước khi rời màn khi
-  còn thay đổi, kính lúp khi kéo góc, và trình đọc màn hình dịch được từng góc ("Dịch lên/xuống/sang trái/sang phải") (F-032).
-- XS-12a PR-1 (#40): khi xuất hiện "Đang xuất trang i/N" với thanh tiến độ và nút "Huỷ"; huỷ dừng ở trang kế tiếp, không để lại
-  file dở và báo "Đã huỷ xuất." (F-033). File xuất luôn là các trang lúc bắt đầu xuất.
-- XS-09 PR-4a (#43, chưa nối vào app): màn "Thư viện" — danh sách tài liệu mới sửa trước (tên, số trang, ngày), "Tài liệu mới",
-  "Đổi tên" báo lỗi tại chỗ, thông báo khi nâng cấp dữ liệu thiếu bộ nhớ hoặc không chuyển được phiên cũ, kèm "Thử lại".
-- P0 nền (#1, #2): app Flutter `apps/mobile`, lõi `PageQuad`/`ScanPage`, gate APK debug/analyze/format/test.
-
-## 2026-10-11
-
-- Lưu nghiên cứu scan/PDF/ảnh/OCR/depth làm gợi ý.
-- Áp dụng projects-template, provenance, project brief và gate repository.
 
 Chưa có app release.
