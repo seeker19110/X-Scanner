@@ -14,6 +14,23 @@
 
 Phân loại do 4 subagent chỉ đọc làm; phiên chính kiểm độ phủ (402/402 ID, mỗi ID một lần) và đối chiếu ngẫu nhiên 10 mục "đạt" với file thật.
 
+## Còn lại cho chủ repo (cập nhật 24/10 sau #66, #67, #69 và lát `2026-10-24-backlog-final`)
+
+Blueprint: **189 đạt · 166 không áp dụng · 47 còn mở**. Mỗi mục còn mở có dòng `— Thiếu:` trong `BLUEPRINT.md`; dưới đây là việc cụ thể, gom theo người/việc cần làm.
+
+| Việc của chủ repo | Mở được | ID |
+|---|---|---|
+| Chọn giấy phép sản phẩm (kể cả "Proprietary"), thêm `LICENSE` + trường license | quyết định pháp lý | BASE-REPO-004, CMP-LIC-001, XC-OSS-001 |
+| Settings > Security: bật Private vulnerability reporting (proxy phiên chặn API ghi) | 1 thao tác | BASE-SEC-009, XC-OSS-004 |
+| Ruleset `main` (cần admin): thêm check OSV/PR hygiene vào required checks; review bắt buộc/code owner chỉ khi có người review thứ hai (một maintainer bật thì khoá merge) | quyết định + admin | BASE-DEP-004, BASE-GATE-009, BASE-GATE-019, WF-CI-001, WF-GIT-002, WF-GIT-003, WF-REVIEW-007, XC-OSS-005 |
+| Tạo nhãn `major` trên GitHub | 1 thao tác | OPS-MAINT-005 |
+| Phát hành: chọn kênh, khoá upload/Play App Signing, SemVer tự động, tag/Release, rollback, crash reporting, Android vitals | quyết định phát hành | WF-REL-001, WF-REL-003, WF-REL-004, OPS-DEPLOY-001, PRF-MOB-001, PRF-MOB-008, PRF-MOB-009, WF-DOC-008 |
+| iOS: build bằng Xcode 26 trên macOS, Play Data safety + URL chính sách riêng tư | máy macOS, tài khoản store | PRF-MOB-003, PRF-MOB-004 |
+| Thiết bị thật/emulator có tăng tốc: W-602, TalkBack/bàn phím có biên bản, E2E, font tiếng Việt, số đo hiệu năng, spike camera | thiết bị | STD-A11Y-004, PRF-MOB-011, QA-E2E-001, UX-DS-006, QA-PERF-006, XC-PERF-003, PM-RISK-003 |
+| Pháp lý/quyền riêng tư: luật sư xác nhận khung pháp lý, cơ sở pháp lý, mã hoá at-rest, đầu mối pháp lý sự cố, ngày diễn tập năm | luật sư/chủ repo | PM-RISK-007, CMP-PRIV-001, BASE-SEC-013, OPS-IR-010, CMP-AUDIT-010 |
+| Cấu trúc/quy trình cần duyệt: chia `lib/` theo miền, script đối chiếu AC/S-NNN ↔ test, README smoke từ clone sạch, hook commit < 30 s | thay đổi lớn cần duyệt | ARC-MOD-008, WF-SDD-003, PM-SPEC-004, BASE-DOC-005, XC-DX-001, XC-DX-006 |
+| Harness khung vendored (`.xtemplates/`, có hash): guard hỏi khi sửa `analysis_options.yaml`/migration Dart, `skip:` của Dart test, độ sâu subagent; tên model trong `CLAUDE.md` | sửa ở khung X-Templates | LOOP-ORCH-001, LOOP-CI-001, LOOP-STOP-003, QA-COV-008, XC-DOCAI-005 |
+
 ## Chờ người (148 MUST lúc kết vòng, xem dòng `— Thiếu:` trong `BLUEPRINT.md`)
 
 > Cập nhật 24/10: chủ repo yêu cầu làm hết phần còn lại và cấp toàn quyền. Gói D (#66), B (#67) và C (hành vi app) đã làm: còn 50 MUST mở; mục chỉ chủ repo làm được ghi `— Thiếu: (chủ repo) …`. Bảng dưới là ảnh chụp lúc kết vòng.

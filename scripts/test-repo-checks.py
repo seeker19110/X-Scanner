@@ -333,6 +333,22 @@ class PrPolicy(Tmp):
         self.assertEqual(self.pr("Add checks").returncode, 1)
         self.assertEqual(self.pr("feat: " + "x" * 80).returncode, 1)
 
+    def test_dependency_change_needs_vetting_section(self):
+        # BASE-DEP-006: a manifest change by a person must say how new dependencies were vetted.
+        for manifest in ("apps/mobile/pubspec.yaml", "apps/mobile/android/app/build.gradle.kts"):
+            self.assertEqual(self.pr("build: add x", files=(manifest,)).returncode, 1, manifest)
+            vetted = BODY.format(wid="2026-10-24-x") + "\n## Dependencies\n\nNone added.\n"
+            self.assertEqual(
+                self.pr("build: add x", body=vetted, files=(manifest,)).returncode, 0, manifest
+            )
+        self.assertEqual(
+            self.pr(
+                "chore(deps): bump x", body="", files=("apps/mobile/pubspec.yaml",),
+                author="dependabot[bot]",
+            ).returncode,
+            0,
+        )
+
     def test_body_needs_sections_and_existing_work_id(self):
         self.assertEqual(self.pr("docs: x", body="## Summary\n").returncode, 1)
         self.assertEqual(
@@ -395,6 +411,48 @@ class ApkSize(Tmp):
     def test_missing_or_not_an_apk_fails(self):
         self.assertEqual(self.check(self.tmp / "none.apk", 150).returncode, 1)
         self.assertEqual(self.check(write(self.tmp, "a.apk", "x" * 10), 150).returncode, 1)
+
+
+class SixteenKbPages(Tmp):
+    """PRF-MOB-002: every 64-bit native library has LOAD segments aligned to >= 16 KB."""
+
+    def elf(self, align):
+        import struct
+
+        header = bytearray(64)
+        header[:5] = b"\x7fELF\x02"  # ELF64
+        struct.pack_into("<QHH", header, 0x20, 64, 0, 0)  # e_phoff
+        struct.pack_into("<HH", header, 0x36, 56, 1)  # e_phentsize, e_phnum
+        segment = struct.pack("<IIQQQQQQ", 1, 5, 0, 0, 0, 0, 0, align)  # PT_LOAD
+        return bytes(header) + segment
+
+    def apk(self, entries):
+        import zipfile
+
+        path = self.tmp / "app.apk"
+        with zipfile.ZipFile(path, "w") as apk:
+            for name, data in entries.items():
+                apk.writestr(name, data)
+        return script("check-16kb-pages.py", "--apk", str(path))
+
+    def test_aligned_libraries_pass(self):
+        out = self.apk(
+            {
+                "lib/arm64-v8a/liba.so": self.elf(16384),
+                "lib/x86_64/liba.so": self.elf(65536),
+                "lib/armeabi-v7a/liba.so": b"\x7fELF\x01",  # 32-bit ABIs are not covered
+                "classes.dex": b"x",
+            }
+        )
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+
+    def test_4kb_library_or_bad_input_fails(self):
+        self.assertEqual(self.apk({"lib/arm64-v8a/liba.so": self.elf(4096)}).returncode, 1)
+        self.assertEqual(self.apk({"lib/x86_64/liba.so": b"not an elf"}).returncode, 1)
+        self.assertEqual(self.apk({"classes.dex": b"x"}).returncode, 1)  # no 64-bit library at all
+        self.assertEqual(
+            script("check-16kb-pages.py", "--apk", str(self.tmp / "none.apk")).returncode, 1
+        )
 
 
 class EolCheck(Tmp):

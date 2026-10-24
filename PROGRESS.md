@@ -4,12 +4,12 @@
 > Lịch sử đến 2026-10-24: `docs/changelog/2026-10-progress-history.md` · CHANGELOG: `CHANGELOG.md` · Goal đang chờ: `docs/goals/2026-10-18-upgrade-completion.md` (WAITING)
 
 ## Đang làm
-- Backlog MUST blueprint theo "làm hết các việc còn lại" (24/10): D tài liệu (#66) và B CI/chuỗi cung ứng (#67) đã merge; C hành vi app + test (`docs/work/2026-10-24-app-hardening/working.md`, PR này). Blueprint: 186 đạt · 166 không áp dụng · 50 còn mở
+- Backlog MUST blueprint ("làm hết các việc còn lại", 24/10): D (#66), B (#67), C (#69) đã merge; lát cuối `docs/work/2026-10-24-backlog-final/working.md` (PR này). Blueprint: 189 đạt · 166 không áp dụng · 47 còn mở, tất cả là việc của chủ repo (`docs/autopilot/GO-NO-GO.md`)
 
 ## Tiếp theo
 1. Chủ repo chạy APK có thư viện (CI của #62/`main`) trên emulator/thiết bị có tăng tốc: cài đè lên dữ liệu P1 đã giữ từ lần UAT 18/10, kiểm migration → một tài liệu, bản gốc trùng byte, mở lại app (W-602 / F-078).
 2. 4 điểm mở còn lại của #57 (F-077 đã đóng ở #65).
-3. Rà 50 MUST còn mở: phần phiên tự làm được thì làm; phần chỉ chủ repo làm được ghi ở `docs/autopilot/GO-NO-GO.md`.
+3. 47 MUST còn mở là việc của chủ repo, gom theo việc trong `docs/autopilot/GO-NO-GO.md` (LICENSE, bật báo lỗ hổng riêng, ruleset, phát hành, iOS, thiết bị, pháp lý). PR Dependabot #68 (Gradle) cần cập nhật lockfile.
 4. Tính năng tiếp theo (XS-10 xoá/thùng rác, khôi phục ảnh bị giữ riêng…) cần chủ repo duyệt spec; roadmap `docs/plans/` vẫn ADVISORY.
 
 ## Quyết định
@@ -22,7 +22,7 @@
 - Nợ kỹ thuật chấp nhận: ảnh picker bị từ chối giữ riêng chưa có UI khôi phục (`DEBT:` ở `pending_pick_store.dart`, tới XS-10); khe plugin xoá kết quả trước khi Dart ghi nhật ký (`DEBT:` ở `pick_import.dart`) — hạn trả: trước khi phân phối
 
 ## Bàn giao phiên
-- Commit cuối trên nhánh chính: `d04bb80a78cf7199b8ac0ad851b9afc86d174b64` (#67) · CI: xanh — 4 check trên head PR trước merge
+- Commit cuối trên nhánh chính: `a99493def4e76824641abcf3529e965fb52afd36` (#69) · CI: xanh — 4 check trên head PR trước merge
 - Lệnh kiểm nhanh: `bash scripts/dev-task.sh gate` → PASS 4/4, 843 Flutter (coverage 96.33% dòng) + JVM, 2026-10-24 (gói B+C)
 - Đang chặn: không (W-602, F-077 là việc chờ người, không chặn vòng)
 - Việc dở chưa commit: không
