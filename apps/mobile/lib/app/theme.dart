@@ -48,6 +48,40 @@ ThemeData buildTheme(Brightness brightness) {
       style: IconButton.styleFrom(minimumSize: const Size.square(48)),
     ),
     dialogTheme: DialogThemeData(shape: rounded),
+    pageTransitionsTheme: PageTransitionsTheme(
+      builders: {
+        for (final MapEntry(:key, :value)
+            in const PageTransitionsTheme().builders.entries)
+          key: ReducedMotionPageTransitionsBuilder(value),
+      },
+    ),
     bottomSheetTheme: const BottomSheetThemeData(showDragHandle: true),
   );
+}
+
+/// Uses [motion] unless the system asks for reduced motion
+/// ([MediaQuery.disableAnimationsOf]), when the new page simply appears
+/// without sliding or zooming (UX-VISUAL-001, WCAG 2.3.3).
+class ReducedMotionPageTransitionsBuilder extends PageTransitionsBuilder {
+  const ReducedMotionPageTransitionsBuilder(this.motion);
+
+  /// The platform's usual transition.
+  final PageTransitionsBuilder motion;
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) => MediaQuery.disableAnimationsOf(context)
+      ? child
+      : motion.buildTransitions(
+          route,
+          context,
+          animation,
+          secondaryAnimation,
+          child,
+        );
 }
