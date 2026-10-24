@@ -15,3 +15,10 @@
 - Chọn: Coi là báo nhầm của khung, gửi feedback, chạy tiếp
 - Lý do (tiêu chí chất lượng cuối): Mọi đường dẫn '../..' trỏ file có thật (đã kiểm); đổi hook là điểm dừng
 - Đường lùi: Chủ repo chạy install.py
+
+### D-003 · 2026-10-24T02:11:50+00:00 · Gate T-003 đỏ vì --strict đo MUST đã đạt hết, không đo việc phân loại (lần 2, đổi cách)
+
+- Phương án: (1) Đổi Gate T-003 thành scripts/check-blueprint-triage.py (mọi MUST có kết cục; mục còn thiếu phải đã defer); giữ điều kiện done = blueprint-status --strict · (2) Giữ --strict, để vòng chạy tới trần · (3) Tự làm 148 MUST còn thiếu
+- Chọn: Đổi Gate T-003 thành scripts/check-blueprint-triage.py (mọi MUST có kết cục; mục còn thiếu phải đã defer); giữ điều kiện done = blueprint-status --strict
+- Lý do (tiêu chí chất lượng cuối): Đúng: task là phân loại; --strict vẫn là điều kiện done nên kết quả là done-pending-human, không khai xong. Phương án 3 chạm cấu hình cổng/license/phát hành là điểm dừng
+- Đường lùi: Đặt lại Gate T-003 về --strict trong PLAN

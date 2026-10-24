@@ -4,12 +4,13 @@
 > Lịch sử đến 2026-10-24: `docs/changelog/2026-10-progress-history.md` · CHANGELOG: `CHANGELOG.md` · Goal đang chờ: `docs/goals/2026-10-18-upgrade-completion.md` (WAITING)
 
 ## Đang làm
-- `T-001`..`T-004` của `docs/autopilot/PLAN.md` (autopilot 24/10, D-001): PROGRESS đúng luật, `xt.yaml` khớp cổng thật, phân loại `BLUEPRINT.md` có bằng chứng, phản hồi khung — trạng thái: đang làm
+- Autopilot 24/10 (`docs/autopilot/PLAN.md`) kết ở **done-pending-human**: T-001..T-004 xanh; PR của lát đang chờ CI/merge-check — chỗ dừng: `docs/autopilot/GO-NO-GO.md`
 
 ## Tiếp theo
 1. Chủ repo chạy APK có thư viện (CI của #62/`main`) trên emulator/thiết bị có tăng tốc: cài đè lên dữ liệu P1 đã giữ từ lần UAT 18/10, kiểm migration → một tài liệu, bản gốc trùng byte, mở lại app (W-602 / F-078).
 2. Chủ repo quyết F-077: tắt gate trong `pre-bash-guard` (giữ hook commit cũ) để hai gate không chạy song song mỗi commit; cùng 4 điểm mở khác của #57.
-3. Tính năng tiếp theo (XS-10 xoá/thùng rác, khôi phục ảnh bị giữ riêng…) cần chủ repo duyệt spec; roadmap `docs/plans/` vẫn ADVISORY.
+3. 148 MUST blueprint chờ người, gom theo nhóm trong `docs/autopilot/GO-NO-GO.md` (cổng/CI, LICENSE, phát hành, pháp lý, thiết bị, thay đổi hành vi cần spec, tài liệu quản trị).
+4. Tính năng tiếp theo (XS-10 xoá/thùng rác, khôi phục ảnh bị giữ riêng…) cần chủ repo duyệt spec; roadmap `docs/plans/` vẫn ADVISORY.
 
 ## Quyết định
 - 2026-10-23 PR-4b.2 contract C1–C6 (spec XS-09) — tinh chỉnh C5 không khoá việc chụp vĩnh viễn, ảnh bị giữ riêng không xoá — lý do: P1 AC-7, không mất byte — hồ sơ `docs/work/2026-10-18-xs09-pr4b-integration/done.md`

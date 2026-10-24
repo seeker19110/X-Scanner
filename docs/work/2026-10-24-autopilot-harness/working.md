@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-24-autopilot-harness
 - Yêu cầu / outcome: chủ repo gõ `/autopilot` (skill X-Templates từ #57) không đối số, sau khi #62/#63 merge. Outcome: harness của vòng autopilot đúng luật và blueprint được phân loại có bằng chứng; không mở tính năng mới (D-001).
-- Trạng thái: In progress — `docs/autopilot/PLAN.md` T-001, T-002, T-004 xanh; T-003 đang phân loại.
+- Trạng thái: Implemented — T-001..T-004 xanh qua `loop record`; vòng `done-pending-human`; PR chờ CI/merge-check.
 - Chủ trì / writer: phiên chính; 4 subagent chỉ đọc phân loại blueprint (trả JSON, phiên chính áp và kiểm).
 - Mức rủi ro / số PR: S; một PR (tài liệu/harness, không đổi app).
 - Scope / non-goal: PROGRESS, `xt.yaml`, BLUEPRINT, phản hồi khung. Không sửa hook/settings (F-077 chờ chủ repo), không chạy thiết bị (W-602).
@@ -29,3 +29,7 @@ F-077 (hai gate song song ở hook commit) đỏ 2 lần trong phiên 23–24/10
 ## Bàn giao / bước tiếp theo
 
 Áp kết quả phân loại `out1..4.json` vào `BLUEPRINT.md`, `loop defer` các MUST còn mở, chạy Gate T-003, `loop verify`, PR.
+
+### T-003 kết quả (24/10)
+
+4 agent chỉ đọc trả `out1..4.json`; phiên chính kiểm 402/402 ID duy nhất, đối chiếu 10 mục "đạt" ngẫu nhiên với file thật (ci.yml permissions, .gitattributes, analysis_options strict, rulesets/main.json…). Áp vào `BLUEPRINT.md`: 92 đạt + 2 tự sửa (`.gitignore` `*.pem`/`*.key`; test UTF-8 trong `document_store_test.dart`) = 94; 160 không áp dụng; 148 `loop defer`. Gate ban đầu `--strict` đỏ (đo hoàn tất, không đo phân loại) và khung không cho defer task đang đỏ → D-003 đổi Gate sang `scripts/check-blueprint-triage.py` (kiểm âm tính: bỏ một `— Thiếu:` → exit 1). Điều kiện `done` vẫn là `--strict` nên vòng kết `done-pending-human`. Danh sách chờ người: `docs/autopilot/GO-NO-GO.md`.

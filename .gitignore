@@ -57,6 +57,8 @@ htmlcov/
 android/local.properties
 *.keystore
 *.jks
+*.pem
+*.key
 scans/
 ocr-output/
 .adoption-logs/
