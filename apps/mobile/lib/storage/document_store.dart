@@ -1,8 +1,24 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import '../core/scan_document.dart';
 import '../core/session_manifest.dart';
+
+/// Largest `document.json` (or P1 `session.json`) that is read or written:
+/// 4 MiB, thousands of times a real document (XC-PERF-006).
+// DEBT: no page count limit, only this byte cap | trần: about 14 000 pages per document | xem lại khi: a page gains a large field or documents near the cap are reported.
+const int maxManifestBytes = 4 << 20;
+
+/// Reads at most [maxManifestBytes] + 1 bytes of [file]: its bytes, or null
+/// when it is larger than [maxManifestBytes]. Nothing on disk is changed.
+Future<Uint8List?> readManifestBytes(File file) async {
+  final bytes = BytesBuilder(copy: false);
+  await for (final chunk in file.openRead(0, maxManifestBytes + 1)) {
+    bytes.add(chunk);
+  }
+  return bytes.length > maxManifestBytes ? null : bytes.takeBytes();
+}
 
 /// Outcome of [DocumentStore.load].
 sealed class DocumentLoadResult {
@@ -141,7 +157,9 @@ class DocumentStore {
   /// Reads the saved document.
   ///
   /// A missing manifest gives [DocumentUnrecoverable] with no copy and
-  /// changes nothing. A newer schema gives [DocumentNeedsUpdate], changes
+  /// changes nothing. A manifest larger than [maxManifestBytes] throws
+  /// [FileSystemException] like an I/O error: nothing is renamed or
+  /// deleted and [save] refuses. A newer schema gives [DocumentNeedsUpdate], changes
   /// nothing and leaves [save] refusing. An undecodable manifest, one whose
   /// id is not [docId], or one referencing a missing original, is renamed
   /// to `document.corrupt-{ms}.json` and no original is deleted. On
@@ -154,7 +172,8 @@ class DocumentStore {
   /// of the previously saved document that [document] no longer references.
   ///
   /// Throws [ArgumentError] if [document] is not this folder's document or
-  /// has an invalid original path, and [StateError] if an original is
+  /// has an invalid original path, and [StateError] if its manifest would be
+  /// larger than [maxManifestBytes], if an original is
   /// missing, or if `document.json` exists but this store has not loaded it
   /// (e.g. [load] failed with an I/O error or needs an app update); in all
   /// these cases nothing is written.
@@ -172,7 +191,11 @@ class DocumentStore {
       // there is nothing to replace, so a later save is allowed.
       return _known(const {}, const DocumentUnrecoverable(null));
     }
-    final bytes = await _manifest.readAsBytes();
+    final bytes = await readManifestBytes(_manifest);
+    if (bytes == null) {
+      // Like an I/O error: nothing renamed or deleted, and save refuses.
+      throw const FileSystemException('document.json is too large');
+    }
     final DocumentDecodeResult decoded;
     try {
       decoded = decodeDocument(utf8.decode(bytes));
@@ -225,12 +248,16 @@ class DocumentStore {
     if (!_ready && await _manifest.exists()) {
       throw StateError('the saved document has not been loaded');
     }
+    final json = encodeDocument(document);
+    // A manifest that load would refuse is never written.
+    if (utf8.encode(json).length > maxManifestBytes) {
+      throw StateError('too large');
+    }
     for (final page in document.pages) {
       if (!await resolve(page.originalPath).exists()) {
         throw StateError('original of a page is missing');
       }
     }
-    final json = encodeDocument(document);
     final tmp = File('${_manifest.path}$_tmpSuffix');
     try {
       await tmp.writeAsString(json, flush: true);

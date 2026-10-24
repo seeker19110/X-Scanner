@@ -6,6 +6,7 @@ import '../core/scan_document.dart';
 import '../core/scan_page.dart';
 import '../core/scan_session.dart';
 import '../core/session_manifest.dart';
+import 'document_store.dart' show readManifestBytes;
 
 /// Why a migration did not finish; carries no path or title.
 enum MigrationFailure { insufficientSpace, io }
@@ -27,8 +28,9 @@ final class MigrationDone extends MigrationOutcome {
   final String docId;
 }
 
-/// `session/session.json` cannot be read as schema 1 or references a
-/// missing original (AC-9); `session/` is left unchanged.
+/// `session/session.json` cannot be read as schema 1, is larger than
+/// `maxManifestBytes` or references a missing original (AC-9); `session/`
+/// is left unchanged.
 final class MigrationSourceUnreadable extends MigrationOutcome {
   const MigrationSourceUnreadable();
 }
@@ -218,7 +220,11 @@ class P1Migration {
     final manifest = File(_sessionManifest);
     final ScanSession session;
     try {
-      session = decodeManifest(utf8.decode(await manifest.readAsBytes()));
+      final bytes = await readManifestBytes(manifest);
+      if (bytes == null) {
+        return null;
+      }
+      session = decodeManifest(utf8.decode(bytes));
     } on FormatException {
       return null;
     }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -44,6 +45,18 @@ class _FailingManifest implements File {
   Future<Uint8List> readAsBytes() => failRead
       ? Future<Uint8List>.error(const FileSystemException('read failed'))
       : _real.readAsBytes();
+
+  /// Served from [readAsBytes]: the real stream would open the path again
+  /// through the override zone.
+  @override
+  Stream<List<int>> openRead([int? start, int? end]) => Stream.fromFuture(
+    readAsBytes().then(
+      (bytes) => bytes.sublist(
+        min(start ?? 0, bytes.length),
+        min(end ?? bytes.length, bytes.length),
+      ),
+    ),
+  );
 
   @override
   Future<File> rename(String newPath) =>
@@ -570,6 +583,72 @@ void main() {
         expect(store.resolve(p1.originalPath).existsSync(), isFalse);
       },
     );
+  });
+
+  group('XC-PERF-006 manifest size cap', () {
+    /// Pads the saved manifest with JSON whitespace to [size] bytes.
+    void padManifest(int size) {
+      final json = manifest().readAsBytesSync();
+      manifest().writeAsBytesSync([
+        ...json,
+        ...List<int>.filled(size - json.length, 0x20),
+      ]);
+    }
+
+    test('a manifest of exactly maxManifestBytes loads', () async {
+      final p1 = await importPage(1);
+      await store.save(doc([p1]));
+      padManifest(maxManifestBytes);
+
+      final result = await DocumentStore(dir).load();
+      expect(result, isA<DocumentLoaded>());
+      expect((result as DocumentLoaded).document.pages.single.id, p1.id);
+    });
+
+    test('one byte over: load fails like an I/O error, nothing is renamed or '
+        'deleted and save refuses', () async {
+      final p1 = await importPage(1);
+      await store.save(doc([p1]));
+      final orphan = await importPage(2);
+      padManifest(maxManifestBytes + 1);
+      final before = snapshot();
+
+      final fresh = DocumentStore(dir);
+      await expectLater(fresh.load(), throwsA(isA<FileSystemException>()));
+      expect(snapshot(), before);
+      expect(corruptCopies(), isEmpty);
+      expect(store.resolve(orphan.originalPath).existsSync(), isTrue);
+
+      await expectLater(fresh.save(doc([p1])), throwsStateError);
+      await expectLater(fresh.save(doc(const [])), throwsStateError);
+      expect(snapshot(), before);
+    });
+
+    test('save refuses a document whose manifest would exceed the cap and '
+        'writes nothing', () async {
+      final p1 = await importPage(1);
+      await store.save(doc([p1]));
+      final saved = manifest().readAsBytesSync();
+      final pages = [p1];
+      // Grown in batches: encoding after every page would be quadratic.
+      while (utf8.encode(encodeDocument(doc(pages))).length <=
+          maxManifestBytes) {
+        for (var i = 0; i < 1000; i++) {
+          final id = newPageId(Random(50000 + pages.length));
+          pages.add(ScanPage(id: id, originalPath: 'originals/$id.jpg'));
+        }
+      }
+
+      await expectLater(
+        store.save(doc(pages)),
+        throwsA(
+          isA<StateError>().having((e) => e.message, 'message', 'too large'),
+        ),
+      );
+      expect(manifest().readAsBytesSync(), saved);
+      expect(File('${dir.path}/document.json.tmp').existsSync(), isFalse);
+      expect(store.resolve(p1.originalPath).existsSync(), isTrue);
+    });
   });
 
   group('(F-001) load failing with an I/O error', () {
