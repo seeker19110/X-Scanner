@@ -1,0 +1,30 @@
+{
+  "measured_on": "2026-10-24",
+  "work_id": "2026-10-24-governance-docs",
+  "ci": {
+    "source": "gh run view 40055848269 (workflow Repository checks, branch main, push)",
+    "commit": "22707f38689f17c9a8a8cf712de94a4a4ac95e8a",
+    "runner": "GitHub-hosted ubuntu-24.04 (image 20261012.334.1)",
+    "job_seconds": 453,
+    "gate_step_seconds": 379,
+    "flutter_sdk_install_seconds": 62,
+    "flutter_tests_passed": 806,
+    "python_unittest_counts": [7, 10],
+    "uat_artifact_bytes": 163443397,
+    "uat_artifact_retention_days": 14
+  },
+  "local": {
+    "commit": "edbdc50",
+    "host": "container, 4 vCPU, 15 GiB RAM, Linux",
+    "flutter": "3.47.7",
+    "debug_apk_bytes": 163435733,
+    "release_apk_bytes": 55434808,
+    "release_apk_note": "flutter build apk --release, fat APK (all ABIs), signed with the debug key per android/app/build.gradle.kts; not a distributable release",
+    "release_build_seconds_warm": 114
+  },
+  "not_measured": [
+    "device: per-page processing time, RAM/PSS, battery, energy",
+    "cold-start time",
+    "release APK per ABI (split-per-abi) or app bundle size"
+  ]
+}
