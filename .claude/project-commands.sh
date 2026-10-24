@@ -5,7 +5,7 @@ export gate_tools='bash git python3 jq flutter sha256sum mkdir'
 export format='cd apps/mobile && dart format lib test tool'
 export lint='python3 scripts/check-adoption.py --lint && cd apps/mobile && dart format --output=none --set-exit-if-changed lib test tool'
 export typecheck='cd apps/mobile && flutter analyze --fatal-infos'
-export test='python3 scripts/check-adoption.py && python3 scripts/check-release-manifest.py --self-test && bash scripts/test-hooks-gate.sh && bash scripts/test-hooks-gate-guard.sh && cd apps/mobile && flutter test && (cd android && ./gradlew -q :app:testDebugUnitTest --rerun)'
+export test='python3 scripts/check-adoption.py && python3 scripts/check-release-manifest.py --self-test && bash scripts/test-hooks-gate.sh && bash scripts/test-hooks-gate-guard.sh && bash scripts/test-dev-task-gate-lock.sh && bash scripts/check-xt-yaml-sync.sh && cd apps/mobile && flutter test && (cd android && ./gradlew -q :app:testDebugUnitTest --rerun)'
 # build also merges the release manifest (~2-3 s) and fails on new permissions/exported components (F-008);
 # the old merged manifest is removed first so a moved output path fails instead of passing on a stale file.
 export build='rm -f apps/mobile/build/app/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml && (cd apps/mobile && flutter pub get --enforce-lockfile && flutter build apk --debug && cd android && ./gradlew -q :app:processReleaseMainManifest) && python3 scripts/check-release-manifest.py apps/mobile/build/app/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml'
