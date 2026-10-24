@@ -161,3 +161,5 @@ Chỉ khi thiếu mục tiêu/dữ kiện không tự xác minh, không có phư
 - Giai đoạn hiện tại: **nguồn sự thật là `PROGRESS.md`** (đọc mục "Giai đoạn hiện tại" ở đó, đừng chép lại vào đây — hai chỗ sẽ lệch nhau).
 - **Nhịp tự kiểm tra (check-in) PR đang theo dõi:** mặc định **5 phút/lần** (thay vì mặc định ~1 giờ) — áp dụng cho mọi PR đang `subscribe_pr_activity`/babysit, mọi phiên, không chỉ phiên đã đặt lệnh này.
 - *(Riêng REPO KHUNG này: các mục `[ĐIỀN]` ở §5 và §10 là placeholder CỐ Ý cho dự án đích — repo khung không có `package.json`. Cổng thật của chính repo khung (job `framework-lint`/`framework-lint-windows`/`docs-consistency`/`copy-framework-smoke`/`progress-freshness`/`protection-guard` trong `ci.yml`) là `scripts/check-docs-consistency.sh`, `scripts/check-ci-policy.sh`, `scripts/check-progress-freshness.sh`, `scripts/test-copy-framework.sh`, `scripts/test-hooks-gate.sh` và `scripts/test-check-scripts.sh`.)*
+
+@AGENTS.md
