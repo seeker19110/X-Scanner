@@ -36,8 +36,10 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
+          # No --commits: PRs are squash-merged, so only the title lands on main, and a long-lived work
+          # branch carries commits already squashed into main. Each new commit subject is checked locally
+          # by scripts/githooks/commit-msg.
           printf '%s\n' "$PR_BODY" > "$RUNNER_TEMP/body.md"
           git diff --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/files.txt"
-          git log --format=%s "$BASE_SHA..$HEAD_SHA" > "$RUNNER_TEMP/commits.txt"
           python3 scripts/check-pr-policy.py --title "$PR_TITLE" --body-file "$RUNNER_TEMP/body.md" \
-            --changed-files "$RUNNER_TEMP/files.txt" --commits "$RUNNER_TEMP/commits.txt" --author "$PR_AUTHOR"
+            --changed-files "$RUNNER_TEMP/files.txt" --author "$PR_AUTHOR"
