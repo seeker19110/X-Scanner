@@ -37,11 +37,16 @@ mới, app không tìm/so sánh tiêu đề; i18n (`XC-I18N-001/003/009`) app ch
 
 - Lần chạy RED đầu của `error_handling_test` treo 10 phút: test widget khôi phục `FlutterError.onError` về giá trị chụp ở `setUp` (trước khi binding cài handler riêng). Sửa: test widget tự lưu/khôi phục trong thân, các test thường nằm trong group có setUp riêng.
 - Test "save vượt trần" bản đầu mã hoá lại cả tài liệu sau mỗi trang (bậc hai), chạy quá trần 15 phút; sửa thêm trang theo lô 1000.
+- Hook gate của lần commit iOS đầu báo `[dev-task] FAIL: kiểm tra 'test' thất bại (exit 1)` nhưng log không được giữ; các file đã stage lọt vào commit benchmark kế tiếp. Đã tách lại bằng `git reset --soft` (chỉ commit cục bộ, không mất thay đổi), chạy gate tay trên cùng cây: PASS, commit iOS lại: PASS. Nguyên nhân chưa xác định (có thể chập chờn); 1 lần, chưa tái hiện.
+- Gate của mỗi commit chạy trên cả cây làm việc (có cả thay đổi chưa commit lúc đó), nên chỉ chứng minh trạng thái cây, không chứng minh từng commit riêng lẻ. Gate trên HEAD cuối chạy riêng: xem bàn giao.
 
 ## Bàn giao / bước tiếp theo
 
-<Một hành động cụ thể, file/lệnh cần đọc/chạy; thay đổi chưa commit và nơi giữ;
-điều kiện có thể tiếp tục. Cập nhật trước nén/chuyển phiên/giao việc.>
+Commit cục bộ trên `local/backlog-c` (base `edbdc50`): 38a9f81, d87d6f7, 9709c7e, 3ce58df, 65d8f4f, 88a3891,
+7487b97, e99e371, 118b352, 1b813f4 và commit hồ sơ này. Chưa push/PR. Gate tay trên cây `1b813f4`-tương đương:
+`[dev-task] PASS: 4 kiểm tra đã chạy thành công` (build APK debug, analyze, format, 843+ test Flutter + JVM).
+Việc chủ repo: build iOS thật (Xcode mở project có `PrivacyInfo.xcprivacy`), kiểm giảm chuyển động/bàn phím trên
+thiết bị Android thật, khai Play Data safety và URL privacy policy (PRF-MOB-004 phần store).
 
 ## Nghiệm thu cuối (chỉ điền khi đủ bằng chứng)
 
