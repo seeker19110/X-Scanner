@@ -29,3 +29,17 @@
 - Chọn: Đổi Gate T-004 sang kiểm 4 phản hồi tay tồn tại (FB-001..003, FB-164); vẫn chạy collect một lần trước báo cáo cuối và xoá bản trùng
 - Lý do (tiêu chí chất lượng cuối): Gate phải lũy đẳng để verify trên cây cuối có nghĩa; nội dung phản hồi giữ nguyên, lỗi khung đã báo FB-164
 - Đường lùi: Đặt lại Gate T-004 về feedback collect khi khung sửa
+
+### D-005 · 2026-10-24T04:00:00+00:00 · ID tính năng trong MoSCoW: blueprint đòi `F-NNN` nhưng `F-001..F-079` đã là ID phát hiện audit nằm trong tên test
+
+- Phương án: (1) Dùng `FT-NN` của `docs/FEATURE-MAP.md` cho tính năng · (2) Đổi tên 79 phát hiện audit và test · (3) Dùng chung `F-NNN` cho cả hai
+- Chọn: (1) `FT-NN`
+- Lý do (tiêu chí chất lượng cuối): đúng mục đích của PM-PRIO-001/PM-SPEC-001 (mỗi Must có ID ổn định trỏ spec) mà không tái dùng ID cũ; (2) đổi lịch sử, (3) gây trùng ID. Chủ repo ủy quyền toàn bộ 24/10
+- Đường lùi: đổi cột ID trong `PROJECT.md` sang tiền tố khác
+
+### D-006 · 2026-10-24T04:00:00+00:00 · Chuẩn bảo mật nhắm tới: blueprint gợi ý OWASP ASVS 5.0.0, app không có server
+
+- Phương án: (1) OWASP MASVS 2.1.0 hồ sơ MAS-L1 · (2) ASVS 5.0.0 · (3) cả hai
+- Chọn: (1) MASVS MAS-L1
+- Lý do (tiêu chí chất lượng cuối): ASVS là chuẩn cho ứng dụng web/API; app offline không server, không tài khoản nên MASVS là chuẩn tương ứng cho mobile. Xem lại khi có server hoặc đồng bộ đám mây (khi đó thêm ASVS cho phần server)
+- Đường lùi: thêm ASVS vào mục Chuẩn áp dụng của `PROJECT.md`
