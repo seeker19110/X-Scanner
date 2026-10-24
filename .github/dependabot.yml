@@ -3,7 +3,9 @@ version: 2
 # Approved by the repo owner 2026-10-13 (F-009, docs/research/2026-10-13-goi-y-nang-cap.md item 2).
 # - cooldown 7 days: the same rule as EX-1 in docs/ops/supply-chain-exceptions.md (no release younger than 7 days).
 # - Major versions are ignored here; they go through /deps-upgrade (changelog, touchpoints, own PR).
-# - One grouped PR per ecosystem, so bot PRs stay within the WIP limit of 5.
+# - One grouped PR per ecosystem and open-pull-requests-limit 1 each, so bot PRs stay within the WIP limit of 5.
+# - gradle (2026-10-24, BASE-DEP-007): AGP/Kotlin plugins and junit; Gradle is locked (gradle.lockfile), so a bot PR
+#   that the gate rejects needs the lock refresh in docs/ops/dependency-updates.md before merge.
 # Merging bot PRs: docs/ops/dependency-updates.md.
 # Security updates need Dependabot alerts, which the owner enables in repository settings (EX-2).
 updates:
@@ -11,6 +13,7 @@ updates:
     directory: /apps/mobile
     schedule:
       interval: weekly
+    open-pull-requests-limit: 1
     cooldown:
       default-days: 7
     ignore:
@@ -25,6 +28,7 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 1
     cooldown:
       default-days: 7
     ignore:
@@ -32,4 +36,18 @@ updates:
         update-types: ["version-update:semver-major"]
     groups:
       github-actions:
+        patterns: ["*"]
+
+  - package-ecosystem: gradle
+    directory: /apps/mobile/android
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 1
+    cooldown:
+      default-days: 7
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      gradle:
         patterns: ["*"]

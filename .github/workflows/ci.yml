@@ -21,16 +21,45 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout exact revision
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0   # full history for the secret scan and the ADR diff against the PR base
+      - name: Scan full Git history for secrets (gitleaks)
+        shell: bash
+        env:
+          # gitleaks v8.30.1 (released 2026-03-12), checksum from the release's checksums.txt, verified 2026-10-24.
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          set -euo pipefail
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$archive"
+          echo "$GITLEAKS_SHA256  $RUNNER_TEMP/$archive" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
+          # False positives are listed with a reason in .gitleaksignore.
+          "$RUNNER_TEMP/gitleaks" git --log-opts="--all" --redact --no-banner --exit-code 1 .
+      - name: Accepted ADRs unchanged (ARC-ADR-004)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: python3 scripts/check-adr-immutable.py --base "$BASE_SHA"
+      - name: Install pinned JDK (.java-version)
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version-file: .java-version
       - name: Install pinned Flutter SDK (ADR-0002)
         shell: bash
         env:
-          FLUTTER_VERSION: 3.47.7
+          # The version comes from apps/mobile/pubspec.yaml (scripts/flutter-version.sh); a version change
+          # must update this checksum too, or the download check fails.
           FLUTTER_SHA256: af7455f540df951184c7953fbe3cf884766e7541dacf8571f9f582db03dd6230
         run: |
           set -euo pipefail
+          FLUTTER_VERSION="$(bash scripts/flutter-version.sh)"
           archive="flutter_linux_${FLUTTER_VERSION}-stable.tar.xz"
           curl -fsSL --retry 3 -o "$RUNNER_TEMP/$archive" \
             "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/$archive"
@@ -64,6 +93,18 @@ jobs:
         run: |
           set -euo pipefail
           bash scripts/dev-task.sh gate
+      - name: Write CycloneDX SBOM with licenses
+        shell: bash
+        run: python3 scripts/check-licenses.py --sbom "$RUNNER_TEMP/x-scanner-sbom.cdx.json"
+      - name: Upload coverage report and SBOM
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: x-scanner-coverage-sbom-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            apps/mobile/coverage/lcov.info
+            ${{ runner.temp }}/x-scanner-sbom.cdx.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Prepare verifiable Android UAT bundle
         shell: bash
         env:

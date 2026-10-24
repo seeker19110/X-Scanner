@@ -1,0 +1,5 @@
+{
+  "_doc": "Coverage floor for scripts/check-coverage.py (QA-COV-002). Measured 2026-10-24 with TZ=UTC flutter test --branch-coverage: lines 96.30, branches 92.20 (two identical runs); stored 0.10 lower for timing-dependent branches. Raise with --update, never lower.",
+  "lines": 96.2,
+  "branches": 92.1
+}
