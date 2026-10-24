@@ -331,6 +331,26 @@ void main() {
       expect(File('${dir.path}/document.json.tmp').existsSync(), isFalse);
     });
 
+    test('keeps a Vietnamese title with emoji byte for byte (UTF-8)', () async {
+      const title = 'Hoá đơn tiền điện tháng 10 · Đà Nẵng 🧾';
+      await store.save(
+        ScanDocument(
+          id: docId,
+          title: title,
+          createdAt: _created,
+          updatedAt: _created,
+        ),
+      );
+
+      final result = await DocumentStore(dir).load();
+      expect((result as DocumentLoaded).document.title, title);
+      expect(
+        File('${dir.path}/document.json').readAsStringSync(),
+        contains(title),
+        reason: 'stored as UTF-8 text, not escaped or re-encoded',
+      );
+    });
+
     test('load cleans orphan originals and .part files', () async {
       final p1 = await importPage(1);
       await store.save(doc([p1]));
