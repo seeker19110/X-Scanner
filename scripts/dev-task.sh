@@ -328,6 +328,14 @@ case "$TASK" in
     log "format-file: $C"; ( cd "$ROOT" && bash -c "$C" bash "$P" ) || true
     exit 0 ;;
   gate|doctor)
+    # Các hook PreToolUse khớp `git commit` chạy song song; hai gate cùng build vào một thư mục làm build đỏ ngẫu
+    # nhiên (F-077, TRAPS.md). Khoá theo worktree (thư mục git riêng) để chúng nối tiếp; không có flock thì chạy như cũ.
+    if [ "$TASK" = gate ] && command -v flock >/dev/null 2>&1; then
+      GATE_LOCK_DIR="$(git -C "$ROOT" rev-parse --absolute-git-dir 2>/dev/null || true)"
+      if [ -n "$GATE_LOCK_DIR" ] && exec 9>"$GATE_LOCK_DIR/dev-task-gate.lock"; then
+        flock 9
+      fi
+    fi
     verify_contract "$@"; exit $? ;;
   evidence-check)
     evidence_check "${2:-}"; exit $? ;;

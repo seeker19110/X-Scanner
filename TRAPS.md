@@ -4,6 +4,14 @@
 > file này ghi lỗi đã xảy ra và khuôn của nó. Gặp triệu chứng lạ → tìm khuôn ở đây trước (`/debug` Pha 1).
 > Sửa bug xong → thêm mục mới hoặc thêm ngày/PR vào mục cũ nếu tái phát.
 
+**Hai hook commit chạy gate song song trên cùng thư mục build.** Claude Code chạy song song mọi hook PreToolUse khớp
+một lệnh; sau #57 cả `pre-commit-gate.sh` và `pre-bash-guard.sh` gọi `scripts/dev-task.sh gate` khi `git commit`, hai bản
+`flutter build apk` ghi chung `apps/mobile/build` và build đỏ ngẫu nhiên (`Could not set file mode … kernel_blob.bin`,
+`compressDebugAssets … NoSuchFileException`) dù code đúng — 3 lần trong ngày 23–24/10. *Cách rà*: khi thêm hook/runner
+mới gọi gate, hỏi "có tiến trình nào khác chạy gate cùng lúc trên checkout này không?". *Chốt*: `dev-task.sh gate`
+giữ `flock` trên `<git-dir>/dev-task-gate.lock` (theo worktree); `scripts/test-dev-task-gate-lock.sh` chạy hai gate
+đồng thời và đòi trace `start end start end`, nằm trong bước test của gate. (2026-10-24, F-077, Work ID `2026-10-24-gate-lock`)
+
 **Widget test treo vô hạn khi trộn vùng fake-async và `runAsync` trên cùng hàng đợi.** Store/controller có
 hàng đợi `Future` (`_tail`/`_writeTail`) tạo hoặc nối tiếp trong vùng fake-async của `testWidgets` chỉ chạy tiếp khi
 `pump`; gọi nó từ `tester.runAsync` thì chờ mãi, `--timeout` cũng không cắt được (cả file chết theo trần ngoài).

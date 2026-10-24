@@ -8,7 +8,7 @@
 
 ## Tiếp theo
 1. Chủ repo chạy APK có thư viện (CI của #62/`main`) trên emulator/thiết bị có tăng tốc: cài đè lên dữ liệu P1 đã giữ từ lần UAT 18/10, kiểm migration → một tài liệu, bản gốc trùng byte, mở lại app (W-602 / F-078).
-2. Chủ repo quyết F-077: tắt gate trong `pre-bash-guard` (giữ hook commit cũ) để hai gate không chạy song song mỗi commit; cùng 4 điểm mở khác của #57.
+2. 4 điểm mở còn lại của #57 (F-077 đóng 24/10 bằng khoá gate).
 3. 148 MUST blueprint chờ người, gom theo nhóm trong `docs/autopilot/GO-NO-GO.md` (cổng/CI, LICENSE, phát hành, pháp lý, thiết bị, thay đổi hành vi cần spec, tài liệu quản trị).
 4. Tính năng tiếp theo (XS-10 xoá/thùng rác, khôi phục ảnh bị giữ riêng…) cần chủ repo duyệt spec; roadmap `docs/plans/` vẫn ADVISORY.
 
@@ -24,4 +24,4 @@
 - Lệnh kiểm nhanh: `bash scripts/dev-task.sh gate` → PASS 4/4, 805 Flutter + JVM, lúc 2026-10-24 00:xx UTC (hook commit #63)
 - Đang chặn: không (W-602, F-077 là việc chờ người, không chặn vòng)
 - Việc dở chưa commit: theo `docs/autopilot/PLAN.md`
-- Câu hỏi cần người: cho phép tắt gate trong `pre-bash-guard` (F-077)? — chủ repo
+- Câu hỏi cần người: không (đang làm backlog theo "làm hết các việc còn lại", 24/10)
