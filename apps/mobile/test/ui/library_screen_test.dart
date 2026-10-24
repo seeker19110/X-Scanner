@@ -279,6 +279,48 @@ void main() {
     });
   });
 
+  testWidgets('library fits 320dp at 200 percent text without overflow '
+      '(UX-RESP-001)', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(320, 640);
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    final long = writeDocument(
+      1,
+      title:
+          'Hợp đồng thuê nhà và các phụ lục kèm theo năm 2026 '
+          'đã ký giữa hai bên',
+      pages: 12,
+    );
+    writeFolder(id(2), '{"schemaVersion":9}');
+    writeFolder(id(3), '{garbage');
+    await open(tester);
+    expect(tester.takeException(), isNull);
+
+    // Every row and its actions stay reachable within the 320dp width.
+    for (final finder in [
+      find.textContaining('Hợp đồng thuê nhà'),
+      find.byTooltip('Đổi tên'),
+      find.text('Cần cập nhật app để mở'),
+      find.text('Không mở được tài liệu này'),
+      find.byType(FloatingActionButton),
+    ]) {
+      await tester.ensureVisible(finder);
+      await tester.pumpAndSettle();
+      final rect = tester.getRect(finder);
+      expect(rect.left, greaterThanOrEqualTo(0), reason: '$finder');
+      expect(rect.right, lessThanOrEqualTo(320), reason: '$finder');
+    }
+    // Shortened to its icon when the label does not fit, but still named.
+    expect(find.byTooltip('Tài liệu mới'), findsOneWidget);
+    await tester.tap(find.byTooltip('Đổi tên'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('Lưu').hitTestable(), findsOneWidget);
+    expect(long.pages, hasLength(12));
+  });
+
   testWidgets('new document opens the document screen (AC-12)', (tester) async {
     final controller = await open(tester);
     expect(find.text('Chưa có tài liệu'), findsOneWidget);

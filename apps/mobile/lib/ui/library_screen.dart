@@ -41,6 +41,10 @@ class LibraryScreen extends StatefulWidget {
 class _LibraryScreenState extends State<LibraryScreen> {
   static const String _newLabel = 'Tài liệu mới';
 
+  /// Width of an extended new document button besides its label: icon,
+  /// inner padding and the screen margins on both sides.
+  static const double _newButtonChromeDp = 100;
+
   LibraryController get _controller => widget.controller;
 
   /// Whether a document is being created or opened, so only one document
@@ -172,11 +176,34 @@ class _LibraryScreenState extends State<LibraryScreen> {
       floatingActionButton: ready
           ? FloatingActionButton.extended(
               onPressed: _creating ? null : _create,
+              tooltip: _newLabel,
+              isExtended: _newLabelFits(context),
               icon: const Icon(Icons.add),
               label: const Text(_newLabel),
             )
           : null,
     );
+  }
+
+  /// Whether the new document button's label fits the screen width at the
+  /// current text size; otherwise only its icon is shown, named by its
+  /// tooltip (UX-RESP-001).
+  bool _newLabelFits(BuildContext context) {
+    final theme = Theme.of(context);
+    final label = TextPainter(
+      text: TextSpan(
+        text: _newLabel,
+        style:
+            theme.floatingActionButtonTheme.extendedTextStyle ??
+            theme.textTheme.labelLarge,
+      ),
+      textScaler: MediaQuery.textScalerOf(context),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    final width = label.width;
+    label.dispose();
+    return width + _newButtonChromeDp <= MediaQuery.sizeOf(context).width;
   }
 
   Widget _loading() => Center(
