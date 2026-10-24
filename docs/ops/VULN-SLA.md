@@ -28,5 +28,5 @@ hạn ở bảng trên). Hết hạn thì OSV-Scanner tính lại finding và jo
 
 - Job tuần đỏ = việc mở: ghi vào hồ sơ `docs/work/<id>/` hoặc issue, kèm hạn theo bảng.
 - Review tháng (chủ repo): số finding quá hạn phải bằng 0; ngoại lệ sắp hết hạn được quyết định trước ngày hết hạn.
-- Ngoại lệ đang mở: EXC-OSV-1 (công cụ UTP nội bộ của AGP, hạn 2027-01-22) và EXC-OSV-2 (classpath build AGP/KGP,
+- Ngoại lệ đang mở: EXC-OSV-1 (công cụ UTP nội bộ của AGP, hạn 2027-01-22) và EXC-OSV-2 (classpath build và lint của AGP,
   hạn 2026-11-23), cả hai chờ chủ repo xác nhận — chi tiết trong `osv-scanner.toml`.
