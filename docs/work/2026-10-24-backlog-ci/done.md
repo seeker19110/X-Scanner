@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-24-backlog-ci
 - Yêu cầu / outcome: chủ repo 24/10 "merge 64 đi, rồi làm hết các việc còn lại" + cấp toàn quyền; gói B = các MUST blueprint về CI, chuỗi cung ứng, kiểm repo.
-- Trạng thái: Ready — chờ PR/CI.
+- Trạng thái: Done — merge #67 (squash `d04bb80`) 2026-10-24; CI 4 check xanh trên head `afa3201` (gate, OSV, PR hygiene; EOL bỏ qua trên PR theo thiết kế).
 - Chủ trì / writer: subagent gói B (worktree `/home/user/xs-b`, nhánh cục bộ `local/backlog-b`); phiên chính review, tích hợp, sửa F-080, chạy cổng.
 - Mức rủi ro / số PR: S/M (CI + script kiểm, không đổi hành vi app); một PR.
 - Scope / non-goal: gitleaks toàn lịch sử, OSV/EOL hằng tuần + ngoại lệ có hạn, khoá Gradle + JDK, license allow-list + SBOM, link nội bộ, coverage ratchet, test-có-assert, kiến trúc import, ADR bất biến, PR hygiene, nguồn phiên bản Flutter duy nhất, ngân sách APK. Không đổi ruleset (cần admin).

@@ -16,7 +16,7 @@ Phân loại do 4 subagent chỉ đọc làm; phiên chính kiểm độ phủ (
 
 ## Chờ người (148 MUST lúc kết vòng, xem dòng `— Thiếu:` trong `BLUEPRINT.md`)
 
-> Cập nhật 24/10: chủ repo yêu cầu làm hết phần còn lại và cấp toàn quyền. Gói D (tài liệu quản trị) đã làm: còn 106 MUST mở; mục chỉ chủ repo làm được ghi `— Thiếu: (chủ repo) …`. Bảng dưới là ảnh chụp lúc kết vòng.
+> Cập nhật 24/10: chủ repo yêu cầu làm hết phần còn lại và cấp toàn quyền. Gói D (#66), B (#67) và C (hành vi app) đã làm: còn 50 MUST mở; mục chỉ chủ repo làm được ghi `— Thiếu: (chủ repo) …`. Bảng dưới là ảnh chụp lúc kết vòng.
 
 | Nhóm | Vì sao cần người | ID |
 |---|---|---|

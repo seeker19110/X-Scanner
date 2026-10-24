@@ -32,18 +32,18 @@ class QuadEditorScreen extends StatefulWidget {
 }
 
 class _QuadEditorScreenState extends State<QuadEditorScreen> {
-  static const double _handleSize = 48;
-  static const double _handleDot = 20;
+  static const double _handleSizeDp = 48;
+  static const double _handleDotDp = 20;
 
   /// Keeps handles on screen and grabbable at the image border.
-  static const double _margin = _handleSize / 2;
+  static const double _marginDp = _handleSizeDp / 2;
 
-  static const double _loupeDiameter = 96;
+  static const double _loupeDiameterDp = 96;
   static const double _loupeScale = 2;
 
   /// Gap between the dragged corner and the loupe's center, clear of the
   /// finger.
-  static const double _loupeGap = _loupeDiameter / 2 + _handleSize;
+  static const double _loupeGapDp = _loupeDiameterDp / 2 + _handleSizeDp;
 
   /// One semantic nudge: 1 % of the shown width or height (XS-13 FR-9).
   static const double _nudgeStep = 0.01;
@@ -97,12 +97,15 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
   /// (contain-fitted) inside an area of [area].
   Rect _imageRect(Size area) {
     final inner = Size(
-      max(0, area.width - 2 * _margin),
-      max(0, area.height - 2 * _margin),
+      max(0, area.width - 2 * _marginDp),
+      max(0, area.height - 2 * _marginDp),
     );
     final shown = _page.quarterTurns.isOdd ? _imageSize.flipped : _imageSize;
     final fitted = applyBoxFit(BoxFit.contain, shown, inner).destination;
-    return Alignment.center.inscribe(fitted, Offset(_margin, _margin) & inner);
+    return Alignment.center.inscribe(
+      fitted,
+      Offset(_marginDp, _marginDp) & inner,
+    );
   }
 
   static Offset _toScreen(Rect rect, Point<double> p) =>
@@ -247,10 +250,10 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
 
   Widget _handle(QuadCorner shown, Offset center, ColorScheme colors) {
     return Positioned(
-      left: center.dx - _handleSize / 2,
-      top: center.dy - _handleSize / 2,
-      width: _handleSize,
-      height: _handleSize,
+      left: center.dx - _handleSizeDp / 2,
+      top: center.dy - _handleSizeDp / 2,
+      width: _handleSizeDp,
+      height: _handleSizeDp,
       child: Semantics(
         label: _labels[shown],
         customSemanticsActions: {
@@ -267,8 +270,8 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
           onPanCancel: _onDragEnd,
           child: Center(
             child: Container(
-              width: _handleDot,
-              height: _handleDot,
+              width: _handleDotDp,
+              height: _handleDotDp,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: shown == _selectedCorner
@@ -286,11 +289,11 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
   /// A 2× loupe over [corner], above it or below it near the top edge,
   /// kept inside [area] horizontally (XS-13 FR-8).
   Widget _loupe(Offset corner, Size area, ColorScheme colors) {
-    const radius = _loupeDiameter / 2;
-    final above = corner.dy - _loupeGap - radius >= 0;
+    const radius = _loupeDiameterDp / 2;
+    final above = corner.dy - _loupeGapDp - radius >= 0;
     final center = Offset(
       corner.dx.clamp(radius, max(radius, area.width - radius)),
-      above ? corner.dy - _loupeGap : corner.dy + _loupeGap,
+      above ? corner.dy - _loupeGapDp : corner.dy + _loupeGapDp,
     );
     return Positioned(
       left: center.dx - radius,
@@ -298,7 +301,7 @@ class _QuadEditorScreenState extends State<QuadEditorScreen> {
       child: IgnorePointer(
         child: ExcludeSemantics(
           child: RawMagnifier(
-            size: const Size.square(_loupeDiameter),
+            size: const Size.square(_loupeDiameterDp),
             magnificationScale: _loupeScale,
             focalPointOffset: corner - center,
             decoration: MagnifierDecoration(

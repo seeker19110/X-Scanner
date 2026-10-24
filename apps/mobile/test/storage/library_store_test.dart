@@ -142,6 +142,29 @@ void main() {
     });
   });
 
+  group('XC-PERF-006 manifest size cap', () {
+    test('a manifest at maxManifestBytes is listed; one byte over is '
+        'unreadable and left untouched', () async {
+      for (final (n, extra) in [(1, 0), (2, 1)]) {
+        final dir = writeDocument(doc(id(n)));
+        final file = File('${dir.path}/document.json');
+        final json = file.readAsBytesSync();
+        file.writeAsBytesSync([
+          ...json,
+          ...List<int>.filled(maxManifestBytes + extra - json.length, 0x20),
+        ]);
+      }
+      final before = snapshot();
+
+      final entries = await library.list();
+      expect(entries.first, isA<LibraryDocument>());
+      expect(entries.first.docId, id(1));
+      expect(entries.last, isA<LibraryUnreadable>());
+      expect(entries.last.docId, id(2));
+      expect(snapshot(), before);
+    });
+  });
+
   group('AC-4 newer schema', () {
     test('is listed as needing an update and left untouched', () async {
       writeFolder(id(1), '{"schemaVersion":3,"anything":[1,2]}');

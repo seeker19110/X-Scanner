@@ -32,7 +32,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   static const String _emptyText =
       'Chưa có trang nào. Chụp hoặc nhập ảnh để bắt đầu.';
   static const String _openingText = 'Đang mở phiên…';
-  static const double _thumbSide = 96;
+  static const double _thumbSideDp = 96;
   static const List<(ExportFormat, String)> _exportChoices = [
     (ExportFormat.pdf, 'PDF'),
     (ExportFormat.jpeg, 'JPG'),
@@ -98,12 +98,18 @@ class _ReviewScreenState extends State<ReviewScreen> {
           'Ảnh vẫn được giữ; hãy mở lại app để thử lại.',
   };
 
-  /// Asks a yes/no question; true only if [confirmLabel] was pressed.
-  Future<bool> _confirm(String question, String confirmLabel) async {
+  /// Asks a yes/no question with its [consequence], if any; true only if
+  /// [confirmLabel] was pressed. Back and Escape answer no.
+  Future<bool> _confirm(
+    String question,
+    String confirmLabel, {
+    String? consequence,
+  }) async {
     final answer = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        content: Text(question),
+        title: consequence == null ? null : Text(question),
+        content: Text(consequence ?? question),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -120,7 +126,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   Future<void> _remove(ScanPage page, int number) async {
-    if (await _confirm('Xoá trang $number?', 'Xoá')) {
+    if (await _confirm(
+      'Xoá trang $number?',
+      'Xoá',
+      // Saving the document deletes the page's original (DocumentStore).
+      consequence:
+          'Trang này và ảnh gốc của nó sẽ bị xoá khỏi tài liệu. '
+          'Không hoàn tác được.',
+    )) {
       await _controller.remove(page.id);
     }
   }
@@ -135,7 +148,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   Future<void> _clearAll() async {
-    if (await _confirm('Xoá tất cả trang?', 'Xoá tất cả')) {
+    if (await _confirm(
+      'Xoá tất cả trang?',
+      'Xoá tất cả',
+      consequence:
+          'Mọi trang và ảnh gốc của chúng sẽ bị xoá khỏi tài liệu. '
+          'Không hoàn tác được.',
+    )) {
       await _controller.clearAll();
     }
   }
@@ -145,6 +164,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
     final format = await showModalBottomSheet<ExportFormat>(
       context: context,
       isScrollControlled: true,
+      sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
+          ? AnimationStyle.noAnimation
+          : null,
       builder: (context) => SafeArea(
         child: ConstrainedBox(
           constraints: BoxConstraints(
@@ -462,7 +484,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
             child: Row(
               children: [
                 SizedBox.square(
-                  dimension: _thumbSide,
+                  dimension: _thumbSideDp,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: ColoredBox(
@@ -581,12 +603,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
   ) {
     final bytes = snapshot.data;
     if (bytes != null) {
-      final px = (_thumbSide * MediaQuery.devicePixelRatioOf(context)).ceil();
+      final sidePx = (_thumbSideDp * MediaQuery.devicePixelRatioOf(context))
+          .ceil();
       return Image(
         image: ResizeImage(
           MemoryImage(bytes),
-          width: px,
-          height: px,
+          width: sidePx,
+          height: sidePx,
           policy: ResizeImagePolicy.fit,
         ),
         fit: BoxFit.contain,

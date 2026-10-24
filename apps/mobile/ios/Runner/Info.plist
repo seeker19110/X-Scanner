@@ -24,6 +24,10 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>X-Scanner dùng camera để chụp trang tài liệu bạn muốn quét. Ảnh chỉ được lưu và xử lý trên thiết bị.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>X-Scanner mở thư viện ảnh khi bạn chọn nhập ảnh tài liệu có sẵn. Ảnh chỉ được lưu và xử lý trên thiết bị.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

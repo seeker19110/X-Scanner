@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:x_scanner/core/page_quad.dart';
 import 'package:x_scanner/core/scan_page.dart';
 import 'package:x_scanner/export/export_job.dart';
@@ -115,6 +116,12 @@ class HeldFinalExporter extends PageExporter {
 }
 
 const String _empty = 'Chưa có trang nào. Chụp hoặc nhập ảnh để bắt đầu.';
+const String _removeConsequence =
+    'Trang này và ảnh gốc của nó sẽ bị xoá khỏi tài liệu. '
+    'Không hoàn tác được.';
+const String _clearConsequence =
+    'Mọi trang và ảnh gốc của chúng sẽ bị xoá khỏi tài liệu. '
+    'Không hoàn tác được.';
 
 void main() {
   late Directory tmp;
@@ -769,6 +776,54 @@ void main() {
     expect(controller.session.pages, isEmpty);
     expect(find.text(_empty), findsOneWidget);
     expect(find.byTooltip('Xoá tất cả trang'), findsNothing);
+  });
+
+  for (final (tooltip, question, consequence) in [
+    ('Xoá trang', 'Xoá trang 1?', _removeConsequence),
+    ('Xoá tất cả trang', 'Xoá tất cả trang?', _clearConsequence),
+  ]) {
+    testWidgets('"$question" states its consequence; Escape and Back cancel '
+        'it without any change (UX-STATE-008)', (tester) async {
+      await start(tester, pages: 2);
+      final pages = controller.session.pages;
+      final originals = [for (final p in pages) controller.originalFile(p)];
+
+      Future<void> open() async {
+        await tester.tap(find.byTooltip(tooltip).first);
+        await tester.pumpAndSettle();
+        expect(find.text(question), findsOneWidget);
+        expect(find.text(consequence), findsOneWidget);
+      }
+
+      await open();
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await settle(tester);
+      expect(find.text(question), findsNothing);
+
+      await open();
+      // The system Back button or gesture.
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(find.text(question), findsNothing);
+
+      expect(controller.session.pages, pages);
+      expect([for (final f in originals) f.existsSync()], [true, true]);
+      expect(find.text('Trang 2'), findsOneWidget);
+    });
+  }
+
+  testWidgets('with reduced motion the export sheet appears in place '
+      '(UX-VISUAL-001)', (tester) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    await start(tester, pages: 1);
+    await tester.tap(find.byTooltip('Xuất'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+    final during = tester.getRect(find.text('Chọn định dạng'));
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.text('Chọn định dạng')), during);
   });
 
   testWidgets('retake needs confirmation and replaces the page', (

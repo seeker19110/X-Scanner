@@ -96,6 +96,10 @@ class _CountingFile implements File {
   Future<Uint8List> readAsBytes() => _real.readAsBytes();
 
   @override
+  Stream<List<int>> openRead([int? start, int? end]) =>
+      _real.openRead(start, end);
+
+  @override
   Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
     if (mode != FileMode.read) {
       _faults.hit('sync', path);
@@ -568,6 +572,28 @@ void main() {
       writeP1(1);
       File(at('session/session.json')).writeAsBytesSync([0x7b, 0xff, 0xfe]);
       await expectUnreadable();
+    });
+
+    /// Pads `session.json` with JSON whitespace to [size] bytes.
+    void padSession(int size) {
+      final file = File(at('session/session.json'));
+      final json = file.readAsBytesSync();
+      file.writeAsBytesSync([
+        ...json,
+        ...List<int>.filled(size - json.length, 0x20),
+      ]);
+    }
+
+    test('session.json one byte over maxManifestBytes (XC-PERF-006)', () async {
+      writeP1(1);
+      padSession(maxManifestBytes + 1);
+      await expectUnreadable();
+    });
+
+    test('session.json of exactly maxManifestBytes still migrates', () async {
+      writeP1(1);
+      padSession(maxManifestBytes);
+      expect(await migration().run(), isA<MigrationDone>());
     });
 
     test('a referenced original is missing', () async {

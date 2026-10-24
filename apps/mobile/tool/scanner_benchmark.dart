@@ -15,6 +15,20 @@ const _seed = 20261016;
 const _maxManifestBytes = 64 * 1024;
 const _maxJpegSide = 65535;
 
+/// Largest JSONL file of stage samples that `summarize` reads: 16 MiB.
+const _maxSamplesBytes = 16 << 20;
+
+/// Time metrics of a stage sample that `summarize` reports when present.
+const _timeMetrics = [
+  'durationMs',
+  'renderDurationMs',
+  'packageDurationMs',
+  'writeDurationMs',
+];
+
+/// Percentiles reported next to min and max (XC-PERF-004).
+const _percentiles = [50, 95, 99];
+
 typedef _Corpus = ({
   int width,
   int height,
@@ -83,6 +97,10 @@ Future<int> runBenchmark(
             'rssScope': 'process-lifetime-including-setup',
             'outcome': 'success',
           }),
+        );
+      case ['summarize', final path]:
+        output.writeln(
+          jsonEncode(_summarize(_readBounded(path, _maxSamplesBytes))),
         );
       default:
         return _usage(errors);
@@ -339,6 +357,54 @@ Future<Map<String, Object?>> _measure(_Corpus corpus, String stage) async {
     await temporary.delete(recursive: true);
   }
 }
+
+/// Summary of successful samples of one app/fixture/stage, one JSON object
+/// per line: count plus min, nearest-rank p50/p95/p99 and max of every time
+/// metric present in all samples. Throws [FormatException] for anything else.
+Map<String, Object?> _summarize(Uint8List bytes) {
+  final samples = [
+    for (final line in const LineSplitter().convert(utf8.decode(bytes)))
+      if (line.trim().isNotEmpty) jsonDecode(line),
+  ];
+  if (samples.isEmpty ||
+      samples.any(
+        (s) => s is! Map<String, Object?> || s['outcome'] != 'success',
+      )) {
+    throw const FormatException('samples must be successful stage results');
+  }
+  final rows = samples.cast<Map<String, Object?>>();
+  final identity = {
+    for (final key in ['schemaVersion', 'appSha', 'fixtureSha256', 'stage'])
+      key: rows.first[key],
+  };
+  if (rows.any((r) => identity.keys.any((k) => r[k] != identity[k]))) {
+    throw const FormatException('samples of different runs');
+  }
+  final metrics = <String, Object?>{};
+  for (final metric in _timeMetrics) {
+    final values = [for (final r in rows) r[metric]];
+    if (values.every((v) => v == null) && metric != 'durationMs') continue;
+    if (values.any((v) => v is! num || v < 0 || !v.isFinite)) {
+      throw const FormatException('invalid time metric');
+    }
+    final sorted = [for (final v in values) (v! as num).toDouble()]..sort();
+    metrics[metric] = {
+      'min': sorted.first,
+      for (final p in _percentiles) 'p$p': _nearestRank(sorted, p),
+      'max': sorted.last,
+    };
+  }
+  return {
+    ...identity,
+    'sampleCount': rows.length,
+    'percentileMethod': 'nearest-rank',
+    'metrics': metrics,
+  };
+}
+
+/// The smallest value with at least [percent] % of [sorted] at or below it.
+double _nearestRank(List<double> sorted, int percent) =>
+    sorted[(percent * sorted.length / 100).ceil() - 1];
 
 Future<void> main(List<String> arguments) async {
   exitCode = await runBenchmark(arguments, output: stdout, errors: stderr);

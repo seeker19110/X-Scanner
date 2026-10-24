@@ -25,7 +25,8 @@ final class LibraryNeedsUpdate extends LibraryEntry {
   const LibraryNeedsUpdate(super.docId);
 }
 
-/// `document.json` is missing, unreadable, invalid or has another id.
+/// `document.json` is missing, unreadable, larger than [maxManifestBytes],
+/// invalid or has another id.
 final class LibraryUnreadable extends LibraryEntry {
   const LibraryUnreadable(super.docId);
 }
@@ -125,7 +126,8 @@ class LibraryStore {
   /// Reads the manifest of folder [dir] named [docId]; never throws.
   static Future<LibraryEntry> _read(Directory dir, String docId) async {
     try {
-      final bytes = await File('${dir.path}/$_manifestName').readAsBytes();
+      final bytes = await readManifestBytes(File('${dir.path}/$_manifestName'));
+      if (bytes == null) return LibraryUnreadable(docId);
       return switch (decodeDocument(utf8.decode(bytes))) {
         DecodedDocument(:final document) when document.id == docId =>
           LibraryDocument(document),
