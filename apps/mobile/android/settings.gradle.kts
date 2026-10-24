@@ -17,6 +17,13 @@ pluginManagement {
     }
 }
 
+// Locks the settings classpath that carries AGP and the Kotlin plugin (settings-gradle.lockfile).
+buildscript {
+    configurations.classpath {
+        resolutionStrategy.activateDependencyLocking()
+    }
+}
+
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
     id("com.android.application") version "9.1.0" apply false

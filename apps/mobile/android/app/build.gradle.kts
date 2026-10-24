@@ -51,3 +51,9 @@ flutter {
 dependencies {
     testImplementation("junit:junit:4.13.2")
 }
+
+// Gradle dependency locking (BASE-DEP-001/002, SEC-SUPPLY-003): every resolved configuration must match
+// gradle.lockfile. Refresh after a dependency/Flutter change with the command in docs/ops/dependency-updates.md.
+dependencyLocking {
+    lockAllConfigurations()
+}
