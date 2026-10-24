@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-24-governance-docs
 - Yêu cầu / outcome: đóng nhóm MUST tài liệu quản trị của `BLUEPRINT.md` (batch D: SEC-TM-*, CMP-PRIV-001, PM-*, STD-*, OPS-IR-*, XC-DOCAI-*, WF-*, ARC-*, XC-GREEN-*) bằng tài liệu có bằng chứng; chỗ cần người thì ghi rõ.
-- Trạng thái: Active (commit cục bộ trên `local/backlog-d`; chưa push/PR — phiên chính tích hợp)
+- Trạng thái: Done — merge #66 (squash `9c813bd`) 2026-10-24; CI run 40068312572 xanh trên head `7609318` trước merge; 54 ID blueprint áp vào BLUEPRINT.md (D-005, D-006).
 - Chủ trì / writer: subagent của phiên chính, chỉ ghi tài liệu trong worktree `/home/user/xs-d`
 - Mức rủi ro / số PR: S (chỉ tài liệu, không đổi mã/CI/hook); 1 PR do phiên chính mở
 - Scope / non-goal: chỉ docs/templates; không sửa code, CI, hook, `.claude/`, `.xtemplates/`, `xt.yaml`, `BLUEPRINT.md`, `PROGRESS.md`, `docs/autopilot/*`, ADR cũ, spec đã Approved, file ghim checksum trong `docs/framework/FRAMEWORK-VERSION`.

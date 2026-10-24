@@ -1,0 +1,58 @@
+name: Supply chain
+
+# Vulnerability scan on every PR and weekly (SEC-SUPPLY-006, BASE-DEP-004, OPS-MAINT-004) and a weekly
+# toolchain end-of-life check (OPS-MAINT-003, BASE-DEP-003). Policy and SLA: docs/ops/VULN-SLA.md.
+# Not a required check: making it required needs a repository admin (docs/ops/x-scanner-repository-guards.md).
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '17 3 * * 1'   # Mondays 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supply-chain-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  osv-scan:
+    name: OSV vulnerability scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Scan lockfiles with OSV-Scanner
+        shell: bash
+        env:
+          # OSV-Scanner v2.7.0 (released 2026-10-12), checksum from osv-scanner_SHA256SUMS, verified 2026-10-24.
+          OSV_VERSION: 2.7.0
+          OSV_SHA256: 160c6253e2922e9e0a6a9771c5c4c40a4b3c6090b34a3cdd5e80c96cc2e4218b
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/osv-scanner" \
+            "https://github.com/google/osv-scanner/releases/download/v${OSV_VERSION}/osv-scanner_linux_amd64"
+          echo "$OSV_SHA256  $RUNNER_TEMP/osv-scanner" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/osv-scanner"
+          # pubspec.lock, gradle.lockfile and requirements-ci.txt are found by -r; the settings classpath lockfile
+          # has a name OSV does not detect, so it is passed explicitly. Exceptions with expiry: osv-scanner.toml.
+          "$RUNNER_TEMP/osv-scanner" scan source -r --config osv-scanner.toml \
+            -L gradle.lockfile:apps/mobile/android/settings-gradle.lockfile .
+
+  eol-check:
+    name: Toolchain end-of-life check
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check JDK, Gradle, Kotlin and Flutter support status
+        run: python3 scripts/eol-check.py

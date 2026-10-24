@@ -99,7 +99,9 @@ git push -u origin claude/abc --force-with-lease|force-push nhánh RIÊNG, chữ
 done
 
 echo "== 9. Cờ bỏ qua tường minh ALLOW_DANGEROUS_GIT=1 =="
-rc="$(printf '{"tool_input":{"command":"git reset --hard"}}' | ALLOW_DANGEROUS_GIT=1 bash "$DG" >/dev/null 2>&1; echo $?)"
+# Input qua here-string, không qua pipe: hook có cờ bỏ qua thoát trước khi đọc stdin, và với pipefail
+# printf dính SIGPIPE (exit 141) khi máy tải nặng — gate đỏ ngẫu nhiên 24/10 (TRAPS.md).
+rc="$(ALLOW_DANGEROUS_GIT=1 bash "$DG" >/dev/null 2>&1 <<<'{"tool_input":{"command":"git reset --hard"}}'; echo $?)"
 [ "$rc" = "0" ] && ok "cờ bỏ qua hoạt động" || bad "cờ ALLOW_DANGEROUS_GIT không hoạt động (exit $rc)"
 
 echo "== 10. NEGATIVE TEST cho hook chặn git (hook rỗng phải bị bắt) =="
@@ -110,7 +112,7 @@ echo "== 11. pre-commit-gate: commit trên main/master bị chặn; bí mật / 
 onmain="$(setup_project 0)"; git -C "$onmain" switch -q -c main 2>/dev/null || git -C "$onmain" checkout -q -b main
 rc="$(run_hook "$onmain" 'git commit -m "x"')"
 [ "$rc" = "2" ] && ok "chặn commit khi đang ở main (TRAPS 14)" || bad "KHÔNG chặn commit trên main (exit $rc)"
-rc="$(cd "$onmain" && printf '{"tool_input":{"command":"git commit -m x"}}' | ALLOW_COMMIT_ON_MAIN=1 CLAUDE_PROJECT_DIR="$onmain" bash "$HOOK" >/dev/null 2>&1; echo $?)"
+rc="$(cd "$onmain" && ALLOW_COMMIT_ON_MAIN=1 CLAUDE_PROJECT_DIR="$onmain" bash "$HOOK" >/dev/null 2>&1 <<<'{"tool_input":{"command":"git commit -m x"}}'; echo $?)"
 [ "$rc" = "0" ] && ok "ALLOW_COMMIT_ON_MAIN=1 cho qua" || bad "cờ ALLOW_COMMIT_ON_MAIN không hoạt động (exit $rc)"
 sec="$(setup_project 0)"
 # Khoá giả dựng lúc chạy (không viết literal — kẻo chính test này bị sweep/hook bắt).
@@ -146,7 +148,7 @@ rc="$(run_hook "$c5" 'git add a.txt && git commit -m "x"')"
 # Repo git lồng chưa theo dõi (vd .claude/worktrees/agent-*): `ls-files -o` in "dir/" → vòng đo cỡ file không được
 # đọc thư mục (bản trước in "[: integer expected" rồi bỏ qua phép đo) (2026-10-10, TRAPS mục 67).
 c6="$(setup_project 0)"; mkdir -p "$c6/vendor/lib"; echo x > "$c6/vendor/lib/f.txt"; git -C "$c6/vendor/lib" init -q
-rc="$(cd "$c6" && printf '{"tool_input":{"command":"git add -A && git commit -m x"}}' | CLAUDE_PROJECT_DIR="$c6" bash "$HOOK" >/dev/null 2>"$WORK/c6.err"; echo $?)"
+rc="$(cd "$c6" && CLAUDE_PROJECT_DIR="$c6" bash "$HOOK" >/dev/null 2>"$WORK/c6.err" <<<'{"tool_input":{"command":"git add -A && git commit -m x"}}'; echo $?)"
 [ "$rc" = "0" ] && ! grep -q 'integer expected' "$WORK/c6.err" && ok "cho qua: git add -A với repo lồng chưa theo dõi, không lỗi so số" || { bad "repo lồng chưa theo dõi: exit $rc / stderr lỗi"; cat "$WORK/c6.err"; }
 
 echo "== 12. block-dangerous-git: khuôn 5 — push xoá / ép ghi đè nhánh chính không có --force =="

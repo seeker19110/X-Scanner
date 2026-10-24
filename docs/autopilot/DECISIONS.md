@@ -43,3 +43,10 @@
 - Chọn: (1) MASVS MAS-L1
 - Lý do (tiêu chí chất lượng cuối): ASVS là chuẩn cho ứng dụng web/API; app offline không server, không tài khoản nên MASVS là chuẩn tương ứng cho mobile. Xem lại khi có server hoặc đồng bộ đám mây (khi đó thêm ASVS cho phần server)
 - Đường lùi: thêm ASVS vào mục Chuẩn áp dụng của `PROJECT.md`
+
+### D-007 · 2026-10-24T08:30:00+00:00 · OSV-Scanner báo lỗ hổng ở công cụ build Gradle (AGP/KGP), không ở APK
+
+- Phương án: (1) Ngoại lệ có hạn EXC-OSV-1/2 trong `osv-scanner.toml` · (2) Nâng AGP/KGP ngay (KGP chỉ có bản sửa Beta) · (3) Ép phiên bản đã sửa cho classpath plugin
+- Chọn: (1)
+- Lý do (tiêu chí chất lượng cuối): đúng phạm vi rủi ro (không vào APK, app offline); (2) dùng bản Beta, (3) ép phiên bản trong toolchain build dễ vỡ build. Hạn ngắn buộc xem lại
+- Đường lùi: xoá ngoại lệ, nâng AGP/KGP khi có bản ổn định

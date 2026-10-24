@@ -21,6 +21,11 @@ PY
     echo "LỆCH [$key]: project-commands.sh và xt.yaml khác nhau" >&2
     fail=1
   fi
+  # AGENTS.md trích nguyên văn lệnh này trong bảng "Lệnh của dự án" (XC-DOCAI-001); lệch = tài liệu cũ.
+  if ! grep -qF "| \`$want\` |" "$ROOT/AGENTS.md"; then
+    echo "LỆCH [$key]: bảng lệnh trong AGENTS.md không khớp project-commands.sh" >&2
+    fail=1
+  fi
 done
-[ "$fail" -eq 0 ] && echo "PASS: xt.yaml khớp .claude/project-commands.sh (format, lint, typecheck, test, build)"
+[ "$fail" -eq 0 ] && echo "PASS: xt.yaml và bảng lệnh AGENTS.md khớp .claude/project-commands.sh (format, lint, typecheck, test, build)"
 exit "$fail"

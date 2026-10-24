@@ -1,0 +1,163 @@
+# OSV-Scanner exceptions (SEC-SUPPLY-006, BASE-DEP-004), read by .github/workflows/supply-chain.yml.
+# Every entry needs a reason, who approved it and an expiry (`effectiveUntil` / `ignoreUntil`); after the
+# date the finding counts again and the scan fails. SLA and process: docs/ops/VULN-SLA.md.
+#
+# Template for one vulnerability:
+# [[IgnoredVulns]]
+# id = "GHSA-xxxx-xxxx-xxxx"
+# ignoreUntil = 2026-11-30
+# reason = "<why it does not affect X-Scanner>; approved_by: <name>, <date>"
+
+# EXC-OSV-1 (2026-10-24): AGP 9.1.0 pins these in its internal Unified Test Platform configurations
+# (_internal-unified-test-platform-*), listed in gradle.lockfile only because every configuration is locked.
+# They run only for connected-device instrumentation tests on a developer host, which the gate and CI never
+# run, and are not packaged in the APK. Fixed versions arrive with an AGP update (Dependabot gradle).
+# approved_by: AI session under CLAUDE.md §2 delegation, 2026-10-24; owner to confirm. Expires in 90 days.
+
+[[PackageOverrides]]
+name = "io.netty:netty-codec"
+version = "4.1.110.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "io.netty:netty-codec"
+version = "4.1.93.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "io.netty:netty-codec-http"
+version = "4.1.110.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "io.netty:netty-codec-http"
+version = "4.1.93.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "io.netty:netty-codec-http2"
+version = "4.1.110.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "io.netty:netty-codec-http2"
+version = "4.1.93.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "io.netty:netty-common"
+version = "4.1.110.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "io.netty:netty-common"
+version = "4.1.93.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "io.netty:netty-handler"
+version = "4.1.110.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "io.netty:netty-handler"
+version = "4.1.93.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "io.netty:netty-handler-proxy"
+version = "4.1.110.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "io.netty:netty-handler-proxy"
+version = "4.1.93.Final"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "org.apache.commons:commons-lang3"
+version = "3.16.0"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "org.apache.httpcomponents:httpclient"
+version = "4.5.6"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "org.bouncycastle:bcpkix-jdk18on"
+version = "1.79"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "org.bouncycastle:bcprov-jdk18on"
+version = "1.79"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2027-01-22
+reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
+
+# EXC-OSV-2 (2026-10-24): build classpath of AGP 9.1.0 / Kotlin Gradle plugin 2.4.0 (settings-gradle.lockfile).
+# They run on the developer/CI host while building our own reviewed sources; nothing reaches the APK.
+# KGP's fix exists only in 2.4.20-Beta1; jose4j/jdom2 come with AGP. Owner decision needed within the
+# High SLA (30 days): update AGP/KGP when a stable fix exists, or force the fixed versions on the classpath.
+# approved_by: AI session under CLAUDE.md §2 delegation, 2026-10-24; owner to confirm.
+[[IgnoredVulns]]
+id = "GHSA-3677-xxcr-wjqv"
+ignoreUntil = 2026-11-23
+reason = "EXC-OSV-2: org.bitbucket.b_c:jose4j 0.9.5 on the AGP build classpath only; approved_by AI session 2026-10-24, owner to confirm"
+
+[[IgnoredVulns]]
+id = "GHSA-2363-cqg2-863c"
+ignoreUntil = 2026-11-23
+reason = "EXC-OSV-2: org.jdom:jdom2 2.0.6 on the AGP build classpath only, parses build-time XML from this repo; approved_by AI session 2026-10-24, owner to confirm"
+
+[[IgnoredVulns]]
+id = "GHSA-r937-wjx7-w2jp"
+ignoreUntil = 2026-11-23
+reason = "EXC-OSV-2: Kotlin Gradle plugin 2.4.0 build tool, fix only in 2.4.20-Beta1; approved_by AI session 2026-10-24, owner to confirm"

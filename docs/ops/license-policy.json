@@ -1,0 +1,13 @@
+{
+  "_doc": "Dependency license policy (CMP-LIC-002), checked by scripts/check-licenses.py in the gate. Not the product's own license. Copyleft (GPL/LGPL/AGPL/MPL), source-available (BUSL/SSPL/Elastic/Commons Clause) and unknown licenses fail unless an exception has package, reason, approved_by and an ISO expires date; an expired exception fails.",
+  "allow": ["MIT", "Apache-2.0", "BSD-3-Clause", "BSD-2-Clause", "Zlib", "ISC"],
+  "license_overrides": [
+    {
+      "package": "io.flutter:*",
+      "license": "BSD-3-Clause",
+      "reason": "Flutter engine artifacts from download.flutter.io publish POMs without <licenses>; the engine is BSD-3-Clause (LICENSE of the pinned Flutter SDK).",
+      "approved_by": "AI session under CLAUDE.md §2 delegation, 2026-10-24"
+    }
+  ],
+  "exceptions": []
+}
