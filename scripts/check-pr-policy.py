@@ -3,7 +3,9 @@
 
 PR mode: title is a Conventional Commit subject (<= 72 chars); body has the template sections
 Summary/Validation/Risk and a `Work ID:` naming docs/work/<id>/ (bot authors are exempt from the body
-rule); a `fix` PR changes at least one test file; every commit subject in --commits is conventional.
+rule); a `fix` PR changes at least one test file; a PR by a person that changes a dependency manifest has a
+"## Dependencies" section saying how new dependencies were vetted (BASE-DEP-006); every commit subject in
+--commits is conventional.
 Commit-msg mode (git hook): the first non-comment line is a Conventional Commit subject.
 Usage: check-pr-policy.py --title T --body-file F --changed-files F [--commits F] [--author A] [--root DIR]
        check-pr-policy.py --commit-msg-file F
@@ -23,6 +25,7 @@ TEST_FILE = re.compile(
     r"(^|/)(test|tests)/|_test\.(dart|kt|py)$|(^|/)src/test/|(^|/)scripts/test-"
 )
 BOTS = ("dependabot[bot]", "github-actions[bot]")
+MANIFEST = re.compile(r"(^|/)(pubspec\.yaml|build\.gradle(\.kts)?|settings\.gradle(\.kts)?)$")
 
 
 def subject_errors(subject, label, max_len=72):
@@ -64,6 +67,14 @@ def pr_errors(args):
     if re.match(r"^fix(\(|!|:)", title) and not any(TEST_FILE.search(f) for f in files):
         errors.append(
             "fix PR changes no test file (add the red-first regression test, CLAUDE.md §3.6)"
+        )
+    if (
+        args.author not in BOTS
+        and any(MANIFEST.search(f) for f in files)
+        and "## Dependencies" not in body
+    ):
+        errors.append(
+            'PR changes a dependency manifest but has no "## Dependencies" section (BASE-DEP-006)'
         )
     if args.commits:
         for subject in args.commits.read_text(encoding="utf-8").splitlines():

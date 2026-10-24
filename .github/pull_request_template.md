@@ -53,8 +53,13 @@ Closes #
 | --- | --- | --- | --- |
 | Test count (Flutter) | | | `cd apps/mobile && flutter test` |
 | Lines in touched files | | | `wc -l <files>` |
-| Debug APK bytes | | | `stat -c %s apps/mobile/build/app/outputs/flutter-apk/app-debug.apk` |
+| Debug APK contents (uncompressed bytes) | | | `python3 scripts/check-apk-size.py --apk apps/mobile/build/app/outputs/flutter-apk/app-debug.apk --budget apps/mobile/apk-size-budget.json` |
 | Runtime dependencies | | | `apps/mobile/pubspec.yaml` |
+
+<!-- Only when the PR changes pubspec.yaml or a Gradle build file (scripts/check-pr-policy.py, BASE-DEP-006):
+add a level-2 section titled Dependencies. For each NEW dependency: repo not archived, a release in the last 12 months,
+license on docs/ops/license-policy.json, no telemetry/network, and why the existing code or SDK is not enough.
+A version bump or a manifest edit with no new dependency: write "None added". -->
 
 ## Risk, rollout and rollback
 
