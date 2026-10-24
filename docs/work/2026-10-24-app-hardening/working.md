@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-24-app-hardening
 - Yêu cầu / outcome: đóng lô blueprint C (BASE-ERR-002, UX-VISUAL-001, UX-STATE-008, XC-PERF-006, XC-UNITS-009, nhóm a11y, PRF-MOB-004/005, XC-PERF-004) trên app Flutter
-- Trạng thái: Active
+- Trạng thái: Ready — phiên chính tích hợp lên `claude/serene-ramanujan-h6674j` sau #67, gate B+C PASS (843 Flutter, coverage 96.33%); chờ PR/CI.
 - Chủ trì / writer: subagent lô C của phiên chính, chỉ ghi trong worktree `/home/user/xs-c`
 - Mức rủi ro / số PR: M; commit cục bộ trên `local/backlog-c`, phiên chính quyết định PR
 - Scope / non-goal: không thêm dependency, không đổi schema, không build iOS, không sửa BLUEPRINT/PROGRESS/.github/.claude

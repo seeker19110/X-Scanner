@@ -1,5 +1,5 @@
 {
-  "_doc": "Debug APK size budget for scripts/check-apk-size.py (XC-GREEN-002), checked by the gate build step. Baseline measured 2026-10-24 (Flutter 3.47.7, three ABIs, debug); max_bytes is baseline + 5%. Raise only in a reviewed PR that says why the app grew. Release APK size is not measured by the gate.",
-  "baseline_bytes": 163435741,
-  "max_bytes": 171607528
+  "_doc": "Debug APK size budget for scripts/check-apk-size.py (XC-GREEN-002), checked by the gate build step. Measures the uncompressed size of the APK entries (incremental Gradle packaging changes the compressed file size). Baseline measured 2026-10-24 on #67 (Flutter 3.47.7, three ABIs, debug); max_bytes is baseline + 5%. Raise only in a reviewed PR that says why the app grew. Release APK size is not measured by the gate.",
+  "baseline_bytes": 234056999,
+  "max_bytes": 245759848
 }

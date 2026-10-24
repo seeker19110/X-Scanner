@@ -369,32 +369,32 @@ class PrPolicy(Tmp):
 
 
 class ApkSize(Tmp):
-    def test_over_budget_fails(self):
-        apk = write(self.tmp, "a.apk", "x" * 100)
-        budget = write(self.tmp, "b.json", json.dumps({"max_bytes": 150}))
-        self.assertEqual(
-            script(
-                "check-apk-size.py", "--apk", str(apk), "--budget", str(budget)
-            ).returncode,
-            0,
-        )
-        budget.write_text(json.dumps({"max_bytes": 99}))
-        self.assertEqual(
-            script(
-                "check-apk-size.py", "--apk", str(apk), "--budget", str(budget)
-            ).returncode,
-            1,
-        )
-        self.assertEqual(
-            script(
-                "check-apk-size.py",
-                "--apk",
-                str(self.tmp / "none.apk"),
-                "--budget",
-                str(budget),
-            ).returncode,
-            1,
-        )
+    def apk(self, name, compression):
+        import zipfile
+
+        path = self.tmp / name
+        with zipfile.ZipFile(path, "w", compression) as apk:
+            apk.writestr("classes.dex", "x" * 60)
+            apk.writestr("lib/libapp.so", "y" * 40)
+        return path
+
+    def check(self, apk, max_bytes):
+        budget = write(self.tmp, "b.json", json.dumps({"max_bytes": max_bytes}))
+        return script("check-apk-size.py", "--apk", str(apk), "--budget", str(budget))
+
+    def test_measures_uncompressed_contents(self):
+        import zipfile
+
+        # Gradle may repackage incrementally with other compression: same contents, same size.
+        stored = self.apk("stored.apk", zipfile.ZIP_STORED)
+        deflated = self.apk("deflated.apk", zipfile.ZIP_DEFLATED)
+        for apk in (stored, deflated):
+            self.assertEqual(self.check(apk, 100).returncode, 0, apk.name)
+            self.assertEqual(self.check(apk, 99).returncode, 1, apk.name)
+
+    def test_missing_or_not_an_apk_fails(self):
+        self.assertEqual(self.check(self.tmp / "none.apk", 150).returncode, 1)
+        self.assertEqual(self.check(write(self.tmp, "a.apk", "x" * 10), 150).returncode, 1)
 
 
 class EolCheck(Tmp):
