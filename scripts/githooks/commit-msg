@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# commit-msg — Conventional Commits subject <= 72 chars (BASE-REPO-005), same rule as the PR hygiene workflow.
+# Enabled with `git config core.hooksPath scripts/githooks`. Merge/Revert/fixup!/squash! subjects pass.
+set -uo pipefail
+exec python3 "$(dirname "$0")/../check-pr-policy.py" --commit-msg-file "$1"
