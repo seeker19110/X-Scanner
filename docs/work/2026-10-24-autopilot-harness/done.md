@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-24-autopilot-harness
 - Yêu cầu / outcome: chủ repo gõ `/autopilot` (skill X-Templates từ #57) không đối số, sau khi #62/#63 merge. Outcome: harness của vòng autopilot đúng luật và blueprint được phân loại có bằng chứng; không mở tính năng mới (D-001).
-- Trạng thái: Implemented — T-001..T-004 xanh qua `loop record`; vòng `done-pending-human`; PR chờ CI/merge-check.
+- Trạng thái: Done — merge #64 (squash `22707f3`) 2026-10-24 sau CI xanh trên head cuối; vòng autopilot kết `done-pending-human`, các MUST còn mở chuyển sang Work ID 2026-10-24-backlog-ci / app-hardening / governance-docs.
 - Chủ trì / writer: phiên chính; 4 subagent chỉ đọc phân loại blueprint (trả JSON, phiên chính áp và kiểm).
 - Mức rủi ro / số PR: S; một PR (tài liệu/harness, không đổi app).
 - Scope / non-goal: PROGRESS, `xt.yaml`, BLUEPRINT, phản hồi khung. Không sửa hook/settings (F-077 chờ chủ repo), không chạy thiết bị (W-602).
@@ -24,7 +24,7 @@ Một PR. T-001 PROGRESS 4 mục ≤ 8 KB; T-002 `xt.yaml` khớp `.claude/proje
 
 ## Lần thử / blocker
 
-F-077 (hai gate song song ở hook commit) đỏ 2 lần trong phiên 23–24/10, đều PASS khi chạy lại sau build ấm. Không sửa hook: chờ chủ repo.
+F-077 (hai gate song song ở hook commit) đỏ 2 lần trong phiên 23–24/10; đóng bằng khoá gate ở #65 (`775f76a`, hồ sơ `docs/work/2026-10-24-gate-lock/done.md`).
 
 ## Bàn giao / bước tiếp theo
 

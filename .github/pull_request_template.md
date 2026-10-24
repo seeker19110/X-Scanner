@@ -45,6 +45,17 @@ Closes #
 
 <!-- Test counts, screenshots, metric/eval delta, migration query. -->
 
+### Refactor/perf only: before and after
+
+<!-- Required for refactor:/perf: PRs (no behaviour change, no feature mixed in). Same command, same machine. -->
+
+| Metric | Before | After | Command |
+| --- | --- | --- | --- |
+| Test count (Flutter) | | | `cd apps/mobile && flutter test` |
+| Lines in touched files | | | `wc -l <files>` |
+| Debug APK bytes | | | `stat -c %s apps/mobile/build/app/outputs/flutter-apk/app-debug.apk` |
+| Runtime dependencies | | | `apps/mobile/pubspec.yaml` |
+
 ## Risk, rollout and rollback
 
 - Risk level and affected critical flows:
@@ -56,13 +67,17 @@ Closes #
 
 ## Definition of Done
 
-- [ ] Feature research/spec was approved before source changes.
-- [ ] Implementation matches spec; deviations are reviewed.
-- [ ] Acceptance criteria map to evidence.
-- [ ] Targeted and full profile gates pass.
-- [ ] Inputs/errors/authorization/privacy/concurrency/idempotency handled.
-- [ ] No secrets, production data, debug/dead/generated noise.
-- [ ] Contracts/migrations/docs/ADR/telemetry/runbook updated.
-- [ ] Review threads resolved and required checks pass.
+<!-- Each item needs evidence after "Evidence:" (CI run link, test name, file path, command + result).
+     A ticked item without evidence counts as NOT done. Write "n/a: <reason>" when an item does not apply. -->
+
+- [ ] Feature research/spec was approved before source changes. Evidence:
+- [ ] Implementation matches spec; deviations are reviewed. Evidence:
+- [ ] Acceptance criteria map to tests (AC-xx / S-NNN -> test name). Evidence:
+- [ ] Targeted and full profile gates pass (`bash scripts/dev-task.sh gate`, CI run link). Evidence:
+- [ ] Inputs/errors/loading/empty states, authorization/privacy/concurrency/idempotency handled. Evidence:
+- [ ] No secrets, production or real user data, debug/dead/generated noise. Evidence:
+- [ ] Contracts/migrations/docs/ADR/runbook/threat model/data map updated. Evidence:
+- [ ] Self-reviewed the diff; review threads resolved and required checks pass. Evidence:
+- [ ] Tried on emulator/device (UAT) when behaviour changed, or stated why not. Evidence:
 
 ## Reviewer focus

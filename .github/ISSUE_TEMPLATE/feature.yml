@@ -37,3 +37,15 @@ body:
           required: true
         - label: Chỉ code sau Approved, approver và date.
           required: true
+  - type: checkboxes
+    id: ready
+    attributes:
+      label: Definition of Ready (tick khi đủ; chưa đủ thì hỏi, chưa code)
+      description: "Chủ repo gán nhãn ready chỉ khi mọi mục đã tick. Agent kiểm danh sách này ở đầu task."
+      options:
+        - label: Tiêu chí chấp nhận đo được, có ID (AC-xx / S-NNN), gồm ca biên và ca lỗi.
+        - label: Không còn câu hỏi mở quan trọng; câu hỏi đã đóng ghi D-NNN hoặc tên người + ngày.
+        - label: Phụ thuộc (spec/ADR/dependency/thiết bị) đã xác định và sẵn sàng.
+        - label: Luồng/thiết kế đủ rõ; UI có wireframe hoặc ảnh chụp tham chiếu, đủ trạng thái tải/rỗng/lỗi.
+        - label: Phạm vi gói trong một PR (nếu không, đã chia lát và ghi số PR).
+        - label: Dữ liệu và quyền riêng tư đã xét (docs/privacy/data-map.yaml, docs/THREAT-MODEL.md cần cập nhật không).

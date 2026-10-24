@@ -32,4 +32,15 @@ bash scripts/dev-task.sh gate
 Gate chạy build APK debug, kiểm manifest release đã gộp (`scripts/check-release-manifest.py`), analyze, format, test của app và kiểm tra repository/hooks.
 CI xanh cung cấp [APK UAT kèm checksum và commit SHA](docs/ops/android-uat.md), giữ 14 ngày trong Artifacts của run; đây là bản debug để thử nghiệm.
 Không chứng minh build iOS, chụp/xuất trên thiết bị thật, depth, chất lượng scan hay OCR. Không commit tài liệu cá nhân hoặc khóa API.
-Giấy phép sản phẩm chưa chọn; license nguồn giữ ở `third_party/projects-template.LICENSE`.
+Vận hành, UAT và việc chưa quyết định (phát hành, ký số): [RUNBOOK](docs/ops/RUNBOOK.md).
+
+## Đóng góp và liên hệ
+
+- Báo lỗi, đề xuất, câu hỏi: mở [GitHub Issue](https://github.com/seeker19110/X-Scanner/issues) theo template; không đính kèm giấy tờ thật hay nội dung OCR.
+- Lỗ hổng bảo mật: **không** mở issue công khai — xem [SECURITY.md](SECURITY.md).
+- Cách đóng góp, quy ước nhánh và PR: [CONTRIBUTING.md](CONTRIBUTING.md); ứng xử: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md); hỗ trợ: [SUPPORT.md](SUPPORT.md).
+
+## Giấy phép
+
+**Chưa chọn giấy phép — chủ repo quyết.** Quyền dùng lại mã sản phẩm khi chưa có giấy phép: cần chủ repo/luật sư xác nhận.
+License của nguồn template giữ ở `third_party/projects-template.LICENSE`; giấy phép từng dependency: [docs/RISKS.md](docs/RISKS.md) §2.

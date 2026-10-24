@@ -58,4 +58,5 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Đổi native policy / dependency review XS-05 | `.github/rulesets/main.json`, `.github/workflows/ci.yml`, `docs/ops/x-scanner-repository-guards.md` | gate/actionlint; đọc ruleset và applied rules live; kiểm CI không đạt bị BLOCKED; kiểm graph/compare trước khi đóng EX-2 |
 | Đổi kiểm adoption / placeholder | `scripts/check-adoption.py` | `python3 scripts/check-adoption.py && python3 scripts/check-adoption.py --lint` |
 | Mở việc mới | `bash scripts/new-work.sh <slug>` → `docs/work/<id>/working.md` | `bash scripts/test-new-work.sh` khi đổi script |
+| Threat model, sổ dữ liệu, DPIA, rủi ro, runbook/sự cố, giữ file tạm, baseline tài nguyên | `docs/THREAT-MODEL.md`, `docs/privacy/data-map.yaml`, `docs/DPIA.md`, `docs/RISKS.md`, `docs/ops/RUNBOOK.md`, `docs/ops/incidents/`, `docs/ops/retention.md`, `docs/perf/`; miền/module `docs/architecture/domains.md`; phạm vi `SCOPE.md` | đổi ranh giới tin cậy/nơi lưu/dependency → cập nhật cùng PR; kiểm link tay |
 | Spec / goal / ADR | `docs/specs/`, `docs/goals/`, `docs/adr/` (ADR mới, không sửa ADR cũ) | `bash scripts/spec-compiler.sh --trace <spec>` |
