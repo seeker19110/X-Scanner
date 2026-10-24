@@ -22,3 +22,10 @@
 - Chọn: Đổi Gate T-003 thành scripts/check-blueprint-triage.py (mọi MUST có kết cục; mục còn thiếu phải đã defer); giữ điều kiện done = blueprint-status --strict
 - Lý do (tiêu chí chất lượng cuối): Đúng: task là phân loại; --strict vẫn là điều kiện done nên kết quả là done-pending-human, không khai xong. Phương án 3 chạm cấu hình cổng/license/phát hành là điểm dừng
 - Đường lùi: Đặt lại Gate T-003 về --strict trong PLAN
+
+### D-004 · 2026-10-24T02:17:56+00:00 · Gate T-004 'feedback collect' không lũy đẳng (sinh bản trùng mỗi lần), loop verify luôn đỏ vì cây đổi
+
+- Phương án: (1) Đổi Gate T-004 sang kiểm 4 phản hồi tay tồn tại (FB-001..003, FB-164); vẫn chạy collect một lần trước báo cáo cuối và xoá bản trùng · (2) Giữ collect làm Gate
+- Chọn: Đổi Gate T-004 sang kiểm 4 phản hồi tay tồn tại (FB-001..003, FB-164); vẫn chạy collect một lần trước báo cáo cuối và xoá bản trùng
+- Lý do (tiêu chí chất lượng cuối): Gate phải lũy đẳng để verify trên cây cuối có nghĩa; nội dung phản hồi giữ nguyên, lỗi khung đã báo FB-164
+- Đường lùi: Đặt lại Gate T-004 về feedback collect khi khung sửa

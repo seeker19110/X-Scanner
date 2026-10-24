@@ -33,3 +33,5 @@ F-077 (hai gate song song ở hook commit) đỏ 2 lần trong phiên 23–24/10
 ### T-003 kết quả (24/10)
 
 4 agent chỉ đọc trả `out1..4.json`; phiên chính kiểm 402/402 ID duy nhất, đối chiếu 10 mục "đạt" ngẫu nhiên với file thật (ci.yml permissions, .gitattributes, analysis_options strict, rulesets/main.json…). Áp vào `BLUEPRINT.md`: 92 đạt + 2 tự sửa (`.gitignore` `*.pem`/`*.key`; test UTF-8 trong `document_store_test.dart`) = 94; 160 không áp dụng; 148 `loop defer`. Gate ban đầu `--strict` đỏ (đo hoàn tất, không đo phân loại) và khung không cho defer task đang đỏ → D-003 đổi Gate sang `scripts/check-blueprint-triage.py` (kiểm âm tính: bỏ một `— Thiếu:` → exit 1). Điều kiện `done` vẫn là `--strict` nên vòng kết `done-pending-human`. Danh sách chờ người: `docs/autopilot/GO-NO-GO.md`.
+
+- D-004: `feedback collect` không lũy đẳng (lần chạy lại sinh 56 bản trùng) → Gate T-004 kiểm 4 phản hồi tay; bản trùng xoá theo dòng `Nguồn`; lỗi khung báo FB-164. Giữ 160 phản hồi miễn trừ tự gom (một bản mỗi mục) vì khung cố ý gom chúng cho người bảo trì khung.
