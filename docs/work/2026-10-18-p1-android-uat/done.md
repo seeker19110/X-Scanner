@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-18-p1-android-uat
 - Outcome: install the authorized accelerated Android environment and execute P1 AC9 on a verified CI APK, with synthetic originals only.
-- Status: execution accepted by root18Oct under §3d; report/reconciliation enters next PR, not yet Done.
+- Status: **Done** — AC9 accepted 18Oct; report `docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json` merged via [#60](https://github.com/seeker19110/X-Scanner/pull/60) `30b47da`. Scope: P1 APK only; the library build (#62) needs its own run.
 - Owner: windows_uat owns isolated Windows/AVD/evidence; independent capacity_review audits readonly; root verifies hashes/screenshots/manifest/authority and owns report/gates/PR.
 - Risk S verification, no app source change; part of goal2026-10-18-upgrade-completion S4. D4 keeps emulator choice. User delegated technical acceptance/gates and replied “tự cài đi”; do not claim owner personally ran the scenario.
 - Artifact source b227825a3145a2a73e2198320d58d4a08b5f327b / builda810e3fbf8f30acc2db977683aabf5fe79b318d5, CI39088067553/artifact12120799566; same tree as mainc50670a. Root checked exact artifact ancestry separately before PR58 merge.

@@ -1,7 +1,7 @@
 # X-Scanner
 
 Ứng dụng scan tài liệu, hướng tới xuất **PDF hoặc ảnh**.
-**Trạng thái: P1 scan và xuất đã merge (Android, offline): chụp bằng camera hệ thống hoặc nhập ảnh, sắp xếp, xoay, chỉnh 4 góc, lưu phiên giữ bản gốc, xuất PDF/JPG/PNG qua share sheet. Chờ UAT trên emulator (AC-9).**
+**Trạng thái (2026-10-23): app Android offline mở vào thư viện nhiều tài liệu (XS-09); mỗi tài liệu: chụp bằng camera hệ thống hoặc nhập ảnh, sắp xếp, xoay, chỉnh 4 góc, giữ bản gốc, xuất PDF/JPG/PNG qua share sheet. Dữ liệu P1 được chuyển một lần sang thư viện. P1 AC-9 đã nghiệm thu trên emulator 18/10; bản có thư viện chưa chạy trên emulator/thiết bị.**
 
 ## Bắt đầu
 

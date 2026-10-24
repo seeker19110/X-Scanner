@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-18-xs09-picker-core
 - Outcome: pure Dart pending-picker journal/copy leaf theo spec root duyệt trước source.
-- State: **GREEN_TARGETED_FROZEN** trên209c808, typedfailure theo FR4 đã được root independently reproduce; chờ root review/full gates. Chưa commit/PR/merge.
+- State: **Done** — merged qua [#60](https://github.com/seeker19110/X-Scanner/pull/60) `30b47da` (2026-10-18); dùng trong app từ [#62](https://github.com/seeker19110/X-Scanner/pull/62) `4956064`. Đóng khi reconcile 23/10.
 - Owner: `/root/picker_contract`; root nghiệm thu/PR/gate/merge.
 - Spec: `docs/specs/2026-10-18-xs09-picker-preservation.md` Approved18Oct; PLAN trong root work.
 - Scope ghi: `apps/mobile/lib/storage/pending_pick_store.dart`, `apps/mobile/test/storage/pending_pick_store_test.dart`, file này. Không sửa frozen design/spec/PLAN/root docs/UI/pub/controller/main.

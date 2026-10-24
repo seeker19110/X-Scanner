@@ -125,3 +125,27 @@ XS09PR4b đã được chủ repo duyệt rõ và xác nhận P1 chưa phân ph�
 ## Current AC9 execution — 2026-10-18 after PR59
 
 PR59/209c808 capacityleaf merged after658Flutter+11freshJVM localgate/hook, finalCI39121270944/nativeexacthead/tree; app migration still inactive. AC9 controlledWindowsWHPX execution now accepted by root under delegated§3d: actual3camera/edit/reorder/PDF/share/Librera all3pages, unchangedoriginals/cancel/restart. Report `docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json`, work2026-10-18-p1-android-uat; report merge/finalconvergence audit remain before closing P1completion records. Pending picker leaf and XS09AC13 integration are separate active approvedoutcomes. Historical WAITING forenvironment/AC9 is superseded only for this controlledemulator scope.
+
+
+## Pha 4 lần 4 và nghiệm thu — 2026-10-23 trên `main` `4956064`
+
+Re-audit nhóm bị ảnh hưởng: `docs/ops/COMPREHENSIVE-AUDIT-STATUS.md` mục "Re-audit Pha 4 lần 4" (F-073..F-079, 0 Cao). Kế hoạch đóng theo `/auto-complete` (phiên chính duyệt theo §3d, 2026-10-23).
+
+| ID | Từ phát hiện | Việc | Trạng thái | Bằng chứng |
+|----|--------------|------|-----------|------------|
+| W-601 | F-073, F-074 | Đồng bộ README/PROJECT/README app; đóng 8 hồ sơ đã xong; goal P1 COMPLETE | ✅ | PR reconcile Work ID `2026-10-12-p1-completion` |
+| W-602 | F-078 | Chạy APK có thư viện trên emulator/thiết bị (migration P1 → thư viện, StatFs, picker, mở lại) | ⏳ | Cần môi trường Android tăng tốc; goal `2026-10-18-upgrade-completion` |
+
+Đối chiếu Definition of Complete (P1):
+
+- [x] 0 Cao còn mở; F-073..F-079 có kết cục (sửa / chấp nhận / WAITING).
+- [x] LC-1..LC-3 có widget/integration test; toàn bộ test xanh trên CI — #62 run 40039328590 SUCCESS (805 Flutter + JVM trong gate cục bộ). E2E thiết bị: P1 AC-9 nghiệm thu 18/10 (`docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json`).
+- [x] Bug sửa có test hồi quy (gồm F1/F2 của review #62); khuôn mới ghi `TRAPS.md` (fake-async).
+- [x] Nhóm 12: `SessionStore` trùng `DocumentStore` đã gỡ (DEBT cũ đóng); CONVENTIONS trỏ `document_store.dart`.
+- [x] Cổng chặn thật: ruleset `main` + required check (XS-05), pre-commit gate.
+- [x] Bảo mật/riêng tư: sweep 🔴 duy nhất là dương tính giả (F-075); không dependency/quyền/mạng mới.
+- [x] Tài liệu khớp code sau W-601.
+- [x] Hiệu năng: số đo host (XS-06a, #61); thiết bị dời theo spec.
+- [x] `PROGRESS.md` phản ánh trạng thái; WAITING còn lại: W-602 (ngoài DoC P1, thuộc XS-09/goal nâng cấp).
+
+Kết luận: kế hoạch hoàn thiện P1 **đóng**. Việc mới là chu kỳ mới.

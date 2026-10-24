@@ -4,8 +4,8 @@
 | --- | --- |
 | Goal ID | 2026-10-11-p1-scan-export |
 | Owner | Chủ repo; thực thi: phiên chính + worker |
-| State | ACTIVE |
-| Default-branch SHA đã reconcile | `6177e29` |
+| State | COMPLETE |
+| Default-branch SHA đã reconcile | `4956064` (2026-10-23) |
 | Bắt đầu / review | 2026-10-11 |
 | Quyền AI | research / branch / PR / merge khi CI xanh; không deploy/release |
 | Budget | Không chi phí mới; CI runner Linux |
@@ -27,7 +27,7 @@
 | S2 | Nắn phối cảnh, AC-5 | S1 | như trên | #8 | DONE | merge `1cc15e3`, CI xanh |
 | S3 | UI chụp/xem lại/chỉnh góc + Dark/Light, AC-4, AC-7, AC-8 | S2 | như trên | #9 | DONE | merge `99027ba`, CI xanh |
 | S4 | Xuất PDF/ảnh + chia sẻ, AC-6 | S3 | như trên | #10 | DONE | merge `6177e29`, CI xanh |
-| S5 | UAT AC-9 | S4 | như trên | report in next PR | ACCEPTED; report merge pending | work2026-10-18-p1-android-uat; committed ac9.json |
+| S5 | UAT AC-9 | S4 | như trên | report in next PR | DONE (report merged #60 `30b47da`) | work2026-10-18-p1-android-uat; committed ac9.json |
 
 ## Risk register
 

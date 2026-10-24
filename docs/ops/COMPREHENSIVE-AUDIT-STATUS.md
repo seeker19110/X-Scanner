@@ -128,3 +128,21 @@ F004: image4.12.0 đủtuổi, archivehash/taglibverified, wholelockchỉimageđ
 F004 đóng bởi PR58/c50670a: reviewed4.12.0, hash/age/tag/lock chính thức, actual stagedRED→GREEN, rootgate/hook639+639, CI39088067553 SUCCESS, core/AOT/CLI originals unchanged, nativeproof đúnghead/base. EX1 đóng. Rà nhóm2/7 và core bị ảnh hưởng không có finding mới từ review cuối23files; đây không phải full security audit hay deviceRAM acceptance. Những dòng W104b/EX1WAITING trong checkpoint12–17Oct là lịch sử.
 
 Capacityleaf dùng StatFs trên filesDir, mock/JVM/error-boundary tests và gate bổ sung; chưa nối app nên chưa nghiệm thu XS09AC13. Pendingpicker actual plugin read-clear và perdoc recovery được ghi để chặn crossdoc data-loss trước khi tích hợp.
+
+
+## Re-audit Pha 4 lần 4 — 2026-10-23 (sau #61 `e21e2cb`, #57 `4ce9a76`, #62 `4956064`)
+
+Phạm vi: các nhóm bị ảnh hưởng — 2/10 (dữ liệu: migration P1 bật trong app, luồng ảnh picker), 3 (logic), 4/8 (test, hook/CI từ #57), 6 (a11y màn thư viện/tài liệu), 9 (tài liệu), 12 (thống nhất). Không phải full 12 nhóm, không phải chứng nhận bảo mật.
+Đầu vào: review độc lập của #62 (2 phát hiện F1/F2, đã sửa có RED trước khi merge); `scripts/maintenance-sweep.sh` (🔴 1 · 🟡 1); `scripts/arch-health-radar.sh --scan` (54/100); grep tài liệu.
+
+| ID | Nhóm | Mức | Phát hiện | Kết cục |
+|----|------|-----|-----------|---------|
+| F-073 | 9 | Thấp | README/PROJECT/README app còn "lưu phiên", "chờ UAT AC-9" sau khi AC-9 nghiệm thu và #62 merge | Sửa trong PR reconcile này |
+| F-074 | 9 | Thấp | 8 hồ sơ `working.md` đã xong (picker leaf, PR-4b, AC-9 UAT, P1, X-Templates) chưa đóng | Đổi `done.md` kèm SHA trong PR này |
+| F-075 | 2 | Thấp | `maintenance-sweep` 🔴 "bí mật" ở `.xtemplates/scripts/xt.py:144` là regex dùng để che khoá riêng, không phải khoá | Dương tính giả; chấp nhận, không xoay khoá. Xem lại khi: thêm allowlist cho file vendored |
+| F-076 | 8 | Thấp | Radar 54/100 do script khung chưa có test, spec khung thiếu mục, file vendored dài (`xt.py`, `guard.py`) | Ngoài phạm vi sản phẩm (khung/template); chấp nhận |
+| F-077 | 8 | Trung | Sau #57 mỗi `git commit` từ Claude Code chạy gate 2 lần **song song** (PreToolUse `pre-commit-gate.sh` + `pre-bash-guard.sh`) trên cùng `apps/mobile/build/`; 23/10 lần commit đầu của PR reconcile hỏng build vì hai bản va nhau (`Could not set file mode 644 … kernel_blob.bin`), lần thử lại PASS | Đổi hook/settings là cấu hình cổng → chủ repo quyết (đề xuất của #57: tắt gate trong guard, giữ hook cũ). Tới khi đó: thất bại build ở hook commit phải đọc log trước khi coi là lỗi code |
+| F-078 | 2/10 | Trung | APK có thư viện (#62) chưa chạy trên emulator/thiết bị: migration thật, StatFs thật, picker thật | WAITING — cần môi trường Android tăng tốc (container không có KVM) |
+| F-079 | 3 | Thấp | `retrieveLost` chỉ bắt `PlatformException`; lỗi khác để marker rỗng tới lần khởi động sau | Chấp nhận (tự hết ở lần khởi động sau, không mất byte) |
+
+Hội tụ: 0 phát hiện Cao mới; Trung F-078 có kết cục WAITING ghi nhận.

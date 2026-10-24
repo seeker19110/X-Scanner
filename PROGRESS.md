@@ -5,7 +5,8 @@ Ngày cập nhật: 2026-10-23
 ## 2026-10-23: merge #61, #57 và XS-09 PR-4b.2 nối thư viện vào app
 
 Theo yêu cầu chủ repo ("merge các PR đang mở", "/autopilot"): [#61](https://github.com/seeker19110/X-Scanner/pull/61) squash `e21e2cb` và [#57](https://github.com/seeker19110/X-Scanner/pull/57) squash `4ce9a76`, cả hai sau CI bắt buộc xanh trên head cuối.
-PR-4b.2 (hồ sơ [2026-10-18-xs09-pr4b-integration](docs/work/2026-10-18-xs09-pr4b-integration/working.md), contract C1–C6 trong spec XS-09): app mở vào Thư viện, migration P1 + khôi phục ảnh picker một lần khi khởi động, màn tài liệu trên `DocumentStore`, gỡ `SessionStore`. Kết quả gate/PR ghi trong hồ sơ; chưa chạy APK mới trên emulator/thiết bị.
+PR-4b.2 (hồ sơ [2026-10-18-xs09-pr4b-integration](docs/work/2026-10-18-xs09-pr4b-integration/done.md), contract C1–C6 trong spec XS-09): app mở vào Thư viện, migration P1 + khôi phục ảnh picker một lần khi khởi động, màn tài liệu trên `DocumentStore`, gỡ `SessionStore`. [#62](https://github.com/seeker19110/X-Scanner/pull/62) squash `4956064` sau CI [40039328590](https://github.com/seeker19110/X-Scanner/actions/runs/40039328590) SUCCESS; review độc lập tìm 2 lỗi (F1 `.part` sót, F2 mở lại khi đang lưu), đã sửa có RED trước khi merge.
+`/completion` Pha 4 lần 4 (F-073..F-079, 0 Cao): đóng kế hoạch hoàn thiện P1 và 8 hồ sơ đã xong; goal P1 COMPLETE. **Đang chờ (WAITING, W-602):** chạy APK có thư viện trên emulator/thiết bị — container AI không có KVM. Chờ chủ repo: 5 điểm mở của #57 (gate chạy 2 lần mỗi commit, `@AGENTS.md` trong `CLAUDE.md` để dùng skill `autopilot`, …).
 
 ## 2026-10-23: nâng trải nghiệm và hiệu năng, giữ workflow P1
 
@@ -63,25 +64,25 @@ PR seeker19110/X-Scanner#1 (`cf620cf`), seeker19110/X-Scanner#2 (`37658f9`).
 Stack chốt ở ADR-0002 (Flutter 3.47.7, Android trước); spec P0 nền Approved bởi chủ repo 2026-10-11.
 App nền `apps/mobile` + lõi `PageQuad`/`ScanPage`: build APK debug, analyze, test chạy trong gate/CI (PR-2).
 
-## Code xong, chờ UAT: P1 scan và xuất (2026-10-12)
+## Đã xong: P1 scan và xuất (2026-10-12; AC-9 nghiệm thu 18/10)
 
-Hồ sơ `docs/work/2026-10-11-p1-scan-export/working.md` · goal `docs/goals/2026-10-11-p1-scan-export.md` (gap: S5 = AC-9).
+Hồ sơ `docs/work/2026-10-11-p1-scan-export/done.md` · goal `docs/goals/2026-10-11-p1-scan-export.md` (COMPLETE 23/10).
 Spec P1 `docs/specs/2026-10-11-p1-scan-export.md` Approved bởi chủ repo (D1 camera hệ thống, D2 5 dependency,
 D3 tắt backup, D4 UAT emulator do chủ repo chạy); ADR-0003. Chuẩn bị: #4 ghim Flutter, #5 spec (hồ sơ `2026-10-11-p1-readiness` done).
 PR seeker19110/X-Scanner#6 (`a1549c5`), #7 (`df902de`), #8 (`1cc15e3`), #9 (`99027ba`), #10 (`6177e29`). AC-1..8 có test trên `main`.
 Spike camera/ARCore depth trên thiết bị thật vẫn cần thiết bị.
 
-## Chờ điều kiện: hoàn thiện P1 (`/completion`, 2026-10-12)
+## Đã xong: hoàn thiện P1 (`/completion`, 2026-10-12 → đóng 2026-10-23)
 
-Hồ sơ `docs/work/2026-10-12-p1-completion/working.md` · kế hoạch `docs/ops/COMPLETION-PLAN.md` · audit `docs/ops/COMPREHENSIVE-AUDIT-STATUS.md`
+Hồ sơ `docs/work/2026-10-12-p1-completion/done.md` · kế hoạch `docs/ops/COMPLETION-PLAN.md` · audit `docs/ops/COMPREHENSIVE-AUDIT-STATUS.md`
 (62 phát hiện sau ba lượt quét lại Pha 4: 3 Cao, 16 Trung, 43 Thấp; lần quét đầu 42). Nợ có chủ đích: mục "Phát hiện dời đợt sau" của kế hoạch; exception `docs/ops/supply-chain-exceptions.md`.
 PR seeker19110/X-Scanner#11–#22, #24 (`0327ab7`) merged; quét lại hội tụ, Definition of Complete có bằng chứng.
-W-104a hàng rào ảnh đầu vào (JPEG/PNG/WebP theo nội dung, trần 64 MiB, ngân sách 60 s có kill isolate; WebP động bị từ chối): merged #28 `474fa28`. W-104b/EX1 đã đóng ở PR58/c50670a18Oct. WAITING: UAT AC-9 cần môi trường chạy được; F-014 native đã kiểm ở XS-05, F-009 alerts/graph/review đã kiểm sau merge PR #53, EX-2 đóng16/10.
+W-104a hàng rào ảnh đầu vào (JPEG/PNG/WebP theo nội dung, trần 64 MiB, ngân sách 60 s có kill isolate; WebP động bị từ chối): merged #28 `474fa28`. W-104b/EX1 đã đóng ở PR58/c50670a18Oct. AC-9 nghiệm thu 18/10 (báo cáo merged #60); F-014 native đã kiểm ở XS-05, F-009 alerts/graph/review đã kiểm sau merge PR #53, EX-2 đóng16/10.
 Dependabot (chủ repo duyệt 2026-10-13, F-009 phần version updates): `.github/dependabot.yml` cho pub + github-actions, cooldown 7 ngày; #47 `81cae78`, hồ sơ `docs/work/2026-10-13-dependabot/done.md`. Alerts/graph đã bật ở XS-05; workflow review đã merge PR #53, EX-2 đóng16/10. #48 `f188b14` (`image_picker` 1.2.4) merge sau kiểm; luật tự merge PR bot patch/minor: `docs/ops/dependency-updates.md`, #50 `cd1f53b`, hồ sơ `docs/work/2026-10-13-dependabot-merge-rule/done.md`.
 
 ## Chưa thực hiện
 
-Chưa build iOS; chưa chạy chụp/xuất trên thiết bị (AC-9 chờ chủ repo), OCR, depth hoặc benchmark trên thiết bị.
+Chưa build iOS; chưa chạy bản có thư viện (#62) trên emulator/thiết bị; chưa camera vật lý, OCR, depth hoặc benchmark trên thiết bị (P1 AC-9 đã chạy trên emulator 18/10).
 Ruleset/alerts native đã được kiểm ở XS-05; CI dependency review và phép kiểm trạng thái chặn merge xem hồ sơ XS-05. Không suy ra full security audit từ các controls này.
 Release, auto-merge, cloud ứng dụng và tác vụ định kỳ chưa bật. P0–P4 chỉ là gợi ý.
 
@@ -108,6 +109,6 @@ Hồ sơ [capacity](docs/work/2026-10-18-xs09-android-capacity/done.md); spec Ap
 
 [Capacity Done](docs/work/2026-10-18-xs09-android-capacity/done.md): [PR59](https://github.com/seeker19110/X-Scanner/pull/59) đã merge209c808 sau review29files/findings[], gate/hook4/4 với658Flutter+11freshJVM và CI39121270944 SUCCESS/native/treeproof. Adapter chưa được app gọi, không suy runtime từ mocks/JVM.
 
-[UAT AC9](docs/work/2026-10-18-p1-android-uat/working.md): WindowsWHPX/API36 đã boot và chạy exactCI58APK; ba lần camera→crop/rotate/reorder→PDF/share→Librera đủ3trang. Root nghiệm thu theo§3d, agent thực hiện, không ghi chủ repo tự chạy. Kiểm bản gốc trước/sau bằng byte/hash, cancel/restart UI/manifest, Dark/Light và offline export/viewer. [Proof](docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json); report/reconciliation đang vào PR tiếp. Các đoạn chờ AC9/môi trường phía trên là checkpoint lịch sử trước bằng chứng18Oct, không còn blocker của narrowAC9. Chưa physicalcamera/OCR/depth/iOS/release.
+[UAT AC9](docs/work/2026-10-18-p1-android-uat/done.md): WindowsWHPX/API36 đã boot và chạy exactCI58APK; ba lần camera→crop/rotate/reorder→PDF/share→Librera đủ3trang. Root nghiệm thu theo§3d, agent thực hiện, không ghi chủ repo tự chạy. Kiểm bản gốc trước/sau bằng byte/hash, cancel/restart UI/manifest, Dark/Light và offline export/viewer. [Proof](docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json); report/reconciliation đang vào PR tiếp. Các đoạn chờ AC9/môi trường phía trên là checkpoint lịch sử trước bằng chứng18Oct, không còn blocker của narrowAC9. Chưa physicalcamera/OCR/depth/iOS/release.
 
-[Pending preservation](docs/work/2026-10-18-xs09-picker-preservation/working.md): spec Approved trước behavior, rootactualRED86case trướclogic; durableowner/journal/copy/retainedrejection leaf đangreview trênmain209c808. Chưa nối app/library/migration. XS09AC13 và parentgoal còn ACTIVE; bước tiếp là mergeleaf đủgates rồi tích hợp app bằng contract/test, giữsession.migrated và synthetic3pageAVD cho UATmigration.
+[Pending preservation](docs/work/2026-10-18-xs09-picker-preservation/done.md): spec Approved trước behavior, rootactualRED86case trướclogic; durableowner/journal/copy/retainedrejection leaf đangreview trênmain209c808. Chưa nối app/library/migration. XS09AC13 và parentgoal còn ACTIVE; bước tiếp là mergeleaf đủgates rồi tích hợp app bằng contract/test, giữsession.migrated và synthetic3pageAVD cho UATmigration.

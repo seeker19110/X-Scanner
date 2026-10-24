@@ -2,7 +2,7 @@
 
 - Work ID: 2026-10-11-p1-scan-export
 - Yêu cầu / outcome: `/auto-complete` lần 3; chủ repo duyệt spec P1 theo đề xuất (D1 A, D2 5 dependency, D3 tắt backup, D4 emulator). Outcome: Goal DoD ở `docs/goals/2026-10-11-p1-scan-export.md`.
-- Trạng thái: In progress — PR-0 (#6 `a1549c5`), PR-1 (#7 `df902de`), PR-2 (#8 `1cc15e3`), PR-3 (#9 `99027ba`), PR-4 (#10 `6177e29`) merged; chờ AC-9 (chủ repo). Phát hiện sau P1 xử lý ở `docs/work/2026-10-12-p1-completion/working.md`.
+- Trạng thái: **Done** — PR-0..PR-4 (#6 `a1549c5`, #7 `df902de`, #8 `1cc15e3`, #9 `99027ba`, #10 `6177e29`) merged; AC-9 nghiệm thu 18/10 trên emulator Windows WHPX (hồ sơ `2026-10-18-p1-android-uat`, báo cáo merged #60 `30b47da`). Không gồm camera vật lý/iOS/release.
 - Chủ trì / writer: phiên chính (PR-0, review/gate/tích hợp); PR-1..4 giao `complex-implementer`.
 - Mức rủi ro / số PR: L (dữ liệu tài liệu nhạy cảm, 5 dependency, nhiều màn hình); 5 PR tuần tự vì chung `pubspec.lock`.
 - Scope / non-goal: spec §5. Non-goal: tự nhận mép, OCR, depth, iOS, cloud, release.

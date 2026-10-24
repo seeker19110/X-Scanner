@@ -11,7 +11,7 @@ Exact7method (including retainRejected)/value/journal/copy/error/retention contr
 
 ## Danh sách việc
 ### T1 — Durable pending storage `route: complex`
-- Điểm chạm: apps/mobile/lib/storage/pending_pick_store.dart, apps/mobile/test/storage/pending_pick_store_test.dart, docs/work/2026-10-18-xs09-picker-core/working.md.
+- Điểm chạm: apps/mobile/lib/storage/pending_pick_store.dart, apps/mobile/test/storage/pending_pick_store_test.dart, docs/work/2026-10-18-xs09-picker-core/done.md.
 - Đặc tả: specFR1..8/AC1..3.
 - Phụ thuộc: rootCPUgrantforRED; nocompilerwhilecapacitygate/hook.
 - Tiêu chí chấp nhận: compilingstubtests actualbehaviorRED rootverified beforeGREENLIGHT; exactassertionsGREEN, ownformat/analyze/targetedchecks, freezehashes/logs; nofullgate/commit/push/merge.
