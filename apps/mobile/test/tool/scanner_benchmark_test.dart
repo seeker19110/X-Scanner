@@ -450,4 +450,137 @@ void main() {
       },
     );
   });
+
+  group('summarize (XC-PERF-004)', () {
+    /// One sample line as the stage commands print it.
+    Map<String, Object?> sample(int k) => {
+      'schemaVersion': 1,
+      'appSha': appSha,
+      'fixtureSha256': 'f' * 64,
+      'stage': 'thumbnail',
+      'durationMs': k.toDouble(),
+      'renderDurationMs': 2.0 * k,
+      'packageDurationMs': null,
+      'writeDurationMs': null,
+      'outcome': 'success',
+    };
+
+    String samples(Iterable<Object?> lines) {
+      final file = File('${temporaryDirectory().path}/samples.jsonl')
+        ..writeAsStringSync(lines.map(jsonEncode).join('\n'));
+      return file.path;
+    }
+
+    test('reports count, min, p50, p95, p99 and max per metric', () async {
+      // 1..20 in a scrambled order: nearest-rank p95 is the 19th value.
+      final order = [for (var i = 0; i < 20; i++) (i * 7) % 20 + 1];
+      final result = await invoke([
+        'summarize',
+        samples([for (final k in order) sample(k)]),
+      ]);
+      expect(result.errors, isEmpty);
+      expect(result.code, 0);
+      expect(jsonDecode(result.output), {
+        'schemaVersion': 1,
+        'appSha': appSha,
+        'fixtureSha256': 'f' * 64,
+        'stage': 'thumbnail',
+        'sampleCount': 20,
+        'percentileMethod': 'nearest-rank',
+        'metrics': {
+          'durationMs': {
+            'min': 1.0,
+            'p50': 10.0,
+            'p95': 19.0,
+            'p99': 20.0,
+            'max': 20.0,
+          },
+          'renderDurationMs': {
+            'min': 2.0,
+            'p50': 20.0,
+            'p95': 38.0,
+            'p99': 40.0,
+            'max': 40.0,
+          },
+        },
+      });
+    });
+
+    test('a single sample is every percentile', () async {
+      final result = await invoke([
+        'summarize',
+        samples([sample(3)]),
+      ]);
+      expect(result.code, 0);
+      final metrics = jsonDecode(result.output)['metrics'] as Map;
+      expect(metrics['durationMs'], {
+        'min': 3.0,
+        'p50': 3.0,
+        'p95': 3.0,
+        'p99': 3.0,
+        'max': 3.0,
+      });
+    });
+
+    for (final (name, lines) in <(String, List<Object?>)>[
+      ('no samples', []),
+      ('a line that is not an object', [1]),
+      (
+        'a missing duration',
+        [
+          {...sample(1)}..remove('durationMs'),
+        ],
+      ),
+      (
+        'a negative duration',
+        [
+          {...sample(1), 'durationMs': -1.0},
+        ],
+      ),
+      (
+        'a failed run',
+        [
+          {...sample(1), 'outcome': 'failure'},
+        ],
+      ),
+      (
+        'samples of different stages',
+        [
+          sample(1),
+          {...sample(2), 'stage': 'render-pdf'},
+        ],
+      ),
+      (
+        'samples of different fixtures',
+        [
+          sample(1),
+          {...sample(2), 'fixtureSha256': 'e' * 64},
+        ],
+      ),
+    ]) {
+      test('rejects $name with a fixed error', () async {
+        final path = samples(lines);
+        final result = await invoke(['summarize', path]);
+        expect(result.code, 1);
+        expect(result.output, isEmpty);
+        expect(result.errors, 'scanner-benchmark: benchmark failed\n');
+      });
+    }
+
+    test('rejects an oversized samples file before reading it', () async {
+      final path = '${temporaryDirectory().path}/samples.jsonl';
+      final file = File(path).openSync(mode: FileMode.write);
+      file.truncateSync(16 * 1024 * 1024 + 1);
+      file.closeSync();
+      final result = await invoke(['summarize', path]);
+      expect(result.code, 1);
+      expect(result.errors, 'scanner-benchmark: benchmark failed\n');
+      expect(result.errors, isNot(contains(path)));
+    });
+
+    test('rejects a missing path argument as usage', () async {
+      final result = await invoke(['summarize']);
+      expect(result.code, 2);
+    });
+  });
 }

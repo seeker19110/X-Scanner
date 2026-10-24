@@ -190,3 +190,18 @@ thumbnail lịch sử (median13.237269→13.375609s); chưa xác định nguyên
 sharedhost, không suy ra tốc độ thiết bị hoặc xoá quan sát trước đó.
 
 Hồ sơ: [XS-07a](../work/2026-10-17-xs07a-full-frame-render/done.md).
+
+## Tóm tắt phân vị (XC-PERF-004)
+
+Từ 2026-10-24 (Work ID `2026-10-24-app-hardening`), sau khi chạy nhiều process cùng stage/corpus/app,
+ghép các dòng JSON vào một file JSONL rồi chạy (trong `apps/mobile`):
+
+```
+dart run tool/scanner_benchmark.dart summarize <samples.jsonl>
+```
+
+Lệnh in số mẫu và min/p50/p95/p99/max (nearest-rank) cho `durationMs` và từng thời gian stage có mặt.
+Nó từ chối (exit 1, lỗi chung không lộ đường dẫn) file trên 16 MiB, mẫu không `success`, thời gian âm/thiếu,
+hoặc mẫu trộn khác `appSha`/`fixtureSha256`/`stage`/`schemaVersion`. Báo cáo mới ghi p95/p99 kèm số mẫu;
+không dùng trung bình làm cổng. Với ít mẫu (vd 5 process), p95/p99 bằng max: ghi rõ số mẫu, không suy ra đuôi phân phối.
+Chưa có histogram; bảng min/median/max cũ ở trên giữ nguyên làm lịch sử.
