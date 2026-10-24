@@ -144,5 +144,6 @@ Phạm vi: các nhóm bị ảnh hưởng — 2/10 (dữ liệu: migration P1 b�
 | F-077 | 8 | Trung | Sau #57 mỗi `git commit` từ Claude Code chạy gate 2 lần **song song** (PreToolUse `pre-commit-gate.sh` + `pre-bash-guard.sh`) trên cùng `apps/mobile/build/`; 23/10 lần commit đầu của PR reconcile hỏng build vì hai bản va nhau (`Could not set file mode 644 … kernel_blob.bin`), lần thử lại PASS | **Đóng 24/10** (chủ repo: "làm hết các việc còn lại"): `dev-task.sh gate` khoá `flock` theo worktree nên hai hook nối tiếp; không sửa hook vendored (hash khung). Test `scripts/test-dev-task-gate-lock.sh` đỏ trước (`start start end end`), xanh sau |
 | F-078 | 2/10 | Trung | APK có thư viện (#62) chưa chạy trên emulator/thiết bị: migration thật, StatFs thật, picker thật | WAITING — cần môi trường Android tăng tốc (container không có KVM) |
 | F-079 | 3 | Thấp | `retrieveLost` chỉ bắt `PlatformException`; lỗi khác để marker rỗng tới lần khởi động sau | Chấp nhận (tự hết ở lần khởi động sau, không mất byte) |
+| F-080 | 4 | Trung bình | `test-hooks-gate.sh` pipe JSON vào hook có cờ bỏ qua dưới `pipefail`: hook thoát trước khi đọc stdin → SIGPIPE 141, gate đỏ ngẫu nhiên khi máy tải nặng (2 lần 24/10) | Đóng 24/10 — here-string thay pipe, TRAPS.md (Work ID 2026-10-24-backlog-ci) |
 
 Hội tụ: 0 phát hiện Cao mới; Trung F-078 có kết cục WAITING ghi nhận.
