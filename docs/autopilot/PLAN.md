@@ -38,13 +38,13 @@ Tóm tắt duyệt (≤ 30 dòng):
 
 ### Lát 1 — Harness đúng luật
 - [x] `T-001` `PROGRESS.md` về đúng 4 mục, ≤ 8 KB; lịch sử chuyển sang `docs/changelog/2026-10-progress-history.md` (giữ nguyên văn) — Gate: `python3 .xtemplates/scripts/xt.py progress-check PROGRESS.md`
-- [ ] `T-002` `xt.yaml` khớp `.claude/project-commands.sh` (test thiếu JVM `:app:testDebugUnitTest`); thêm script kiểm khớp — Gate: `bash scripts/check-xt-yaml-sync.sh`
+- [x] `T-002` `xt.yaml` khớp `.claude/project-commands.sh` (test thiếu JVM `:app:testDebugUnitTest`); thêm script kiểm khớp — Gate: `bash scripts/check-xt-yaml-sync.sh`
 
 ### Lát 2 — Blueprint có bằng chứng
 - [ ] `T-003` Phân loại mọi MUST của `BLUEPRINT.md`: `[x]` + bằng chứng, `[~] — Không áp dụng: <điều kiện>`, còn lại `loop defer` cho người — Gate: `python3 .xtemplates/scripts/xt.py blueprint-status BLUEPRINT.md --strict`
 
 ### Lát 3 — Khung
-- [ ] `T-004` Ghi phản hồi khung (doctor báo nhầm `..`, F-077 hai gate song song, guard thiếu `flutter pub add`) — Gate: `python3 .xtemplates/scripts/xt.py feedback collect`
+- [x] `T-004` Ghi phản hồi khung (doctor báo nhầm `..`, F-077 hai gate song song, guard thiếu `flutter pub add`) — Gate: `python3 .xtemplates/scripts/xt.py feedback collect`
 
 ## Phụ thuộc ngoài
 | Việc | Bên ngoài | Ngày cam kết | Kế hoạch B |
