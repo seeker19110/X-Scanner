@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'app/error_handling.dart';
 import 'app/theme.dart';
 import 'core/scan_document.dart';
 import 'export/file_sharer.dart';
@@ -33,6 +34,7 @@ typedef DocumentControllerFactory = SessionController Function(
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  installErrorHandlers();
   final support = await getApplicationSupportDirectory();
   final temp = await getTemporaryDirectory();
   final library = LibraryStore(Directory('${support.path}/documents'));
