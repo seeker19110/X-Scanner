@@ -17,3 +17,11 @@
 ## Bàn giao / bước tiếp theo
 
 Mở PR, CI xanh thì squash. Sau đó xử lý PR Dependabot #68 theo `docs/ops/dependency-updates.md` (cần cập nhật lockfile Gradle).
+
+## Checkpoint 2026-10-24 — PR Dependabot #68 (Gradle)
+
+- #70 đã merge (`ff3c97d`). CI đỏ duy nhất: #68 (AGP 9.1.0→9.4.1, KGP 2.4.0→2.4.21, Gradle 9.3.1→9.8.1) — build đỏ vì lockfile Gradle còn ghim bản cũ (`Dependency version enforced by Dependency Locking`).
+- Nhánh `claude/stoic-albattani-yv4krl` từ `main` `ff3c97d`: áp thay đổi của #68 + sinh lại `gradle.lockfile`/`settings-gradle.lockfile` theo `docs/ops/dependency-updates.md`. Runtime APK chỉ đổi `kotlin-stdlib` 2.4.0→2.4.21; còn lại là công cụ build (cấu hình mới `androidLintTool` của AGP 9.4).
+- OSV 2.7.0 trên lock mới: BouncyCastle 1.80.2 (classpath AGP + `androidLintTool`, 4 advisory) → thêm vào EXC-OSV-2 (hạn 2026-11-23, như jose4j/jdom2, chủ repo xác nhận); bỏ GHSA-r937-wjx7-w2jp (đã sửa ở Kotlin 2.4.21). OSV: No issues found.
+- Môi trường: Maven Central giới hạn IP của container (429/404) → init script Gradle cục bộ (`~/.gradle/init.d`, ngoài repo) đi qua mirror Google; lockfile chỉ ghi toạ độ.
+- Chưa merge #68: chưa kiểm bước 1 (tuổi ≥ 7 ngày) và bước 3 (changelog) của `dependency-updates.md`; CI cần chạy trên PR.

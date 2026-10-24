@@ -142,10 +142,12 @@ vulnerability.ignore = true
 effectiveUntil = 2027-01-22
 reason = "EXC-OSV-1: AGP-internal UTP build tool, not in the APK or gate; approved_by AI session 2026-10-24, owner to confirm"
 
-# EXC-OSV-2 (2026-10-24): build classpath of AGP 9.1.0 / Kotlin Gradle plugin 2.4.0 (settings-gradle.lockfile).
-# They run on the developer/CI host while building our own reviewed sources; nothing reaches the APK.
-# KGP's fix exists only in 2.4.20-Beta1; jose4j/jdom2 come with AGP. Owner decision needed within the
-# High SLA (30 days): update AGP/KGP when a stable fix exists, or force the fixed versions on the classpath.
+# EXC-OSV-2 (2026-10-24): build classpath of AGP 9.4.1 (settings-gradle.lockfile; BouncyCastle also in the
+# androidLintTool configuration of gradle.lockfile). They run on the developer/CI host while building our own
+# reviewed sources; nothing reaches the APK. jose4j/jdom2/BouncyCastle 1.80.2 come with AGP (the BouncyCastle
+# advisories cover certificate path validation, untrusted ASN.1, LDAP; fixed in 1.84/1.85). The KGP finding
+# GHSA-r937-wjx7-w2jp was removed: fixed by Kotlin 2.4.21 (#68). Owner decision needed within the High SLA
+# (30 days): update AGP when a stable fix exists, or force the fixed versions on the classpath.
 # approved_by: AI session under CLAUDE.md §2 delegation, 2026-10-24; owner to confirm.
 [[IgnoredVulns]]
 id = "GHSA-3677-xxcr-wjqv"
@@ -157,7 +159,18 @@ id = "GHSA-2363-cqg2-863c"
 ignoreUntil = 2026-11-23
 reason = "EXC-OSV-2: org.jdom:jdom2 2.0.6 on the AGP build classpath only, parses build-time XML from this repo; approved_by AI session 2026-10-24, owner to confirm"
 
-[[IgnoredVulns]]
-id = "GHSA-r937-wjx7-w2jp"
-ignoreUntil = 2026-11-23
-reason = "EXC-OSV-2: Kotlin Gradle plugin 2.4.0 build tool, fix only in 2.4.20-Beta1; approved_by AI session 2026-10-24, owner to confirm"
+[[PackageOverrides]]
+name = "org.bouncycastle:bcpkix-jdk18on"
+version = "1.80.2"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2026-11-23
+reason = "EXC-OSV-2: AGP 9.4.1 build classpath and lint tool only, not in the APK; approved_by AI session 2026-10-24, owner to confirm"
+
+[[PackageOverrides]]
+name = "org.bouncycastle:bcprov-jdk18on"
+version = "1.80.2"
+ecosystem = "Maven"
+vulnerability.ignore = true
+effectiveUntil = 2026-11-23
+reason = "EXC-OSV-2: AGP 9.4.1 build classpath and lint tool only, not in the APK; approved_by AI session 2026-10-24, owner to confirm"
