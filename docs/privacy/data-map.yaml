@@ -1,0 +1,89 @@
+# data-map.yaml — sổ dữ liệu cá nhân của X-Scanner (CMP-PRIV-001, BASE-SEC-013, PM-REQ-009).
+# Lập 2026-10-24 từ code tại commit edbdc50 (apps/mobile/lib). Đổi nơi lưu/trường dữ liệu → sửa file này trong cùng PR.
+# App KHÔNG có server, CSDL, tài khoản, mạng, telemetry: "hệ thống" duy nhất là thư mục riêng của app trên máy người dùng.
+# Không có cột CSDL nên chưa có script đối chiếu schema ↔ data map; trường của document.json lấy từ
+# apps/mobile/lib/core/session_manifest.dart (encode document schema 2).
+# Phân loại pháp lý (dữ liệu cá nhân cơ bản / nhạy cảm theo Luật 91/2025/QH15) và cơ sở pháp lý: CẦN CHỦ REPO/LUẬT SƯ XÁC NHẬN.
+# Quy ước phân loại nội bộ: nhay-cam-mac-dinh = app không biết nội dung ảnh (có thể là CCCD, hồ sơ bệnh, sao kê) nên đối xử như nhạy cảm.
+
+version: 1
+updated: 2026-10-24
+controller_note: "Dữ liệu chỉ nằm trên máy người dùng; nhà phát triển không nhận bản nào. Vai trò pháp lý của nhà phát triển cần luật sư xác nhận (PROJECT.md mục Khung pháp lý)."
+recipients_default: "không có; chỉ app do người dùng tự chọn trong share sheet"
+replication: "không; sao lưu đám mây và chuyển thiết bị bị tắt (AndroidManifest.xml allowBackup=false, data_extraction_rules.xml)"
+legal_basis: "chưa xác định — cần luật sư (app chưa phát hành, chưa có người dùng thật)"
+
+items:
+  - id: D-ORIG
+    what: "Ảnh gốc từng trang (JPEG/PNG/WebP, giữ nguyên byte)"
+    location: "getApplicationSupportDirectory()/documents/{docId}/originals/{pageId}.{ext}"
+    code: apps/mobile/lib/storage/document_store.dart
+    fields: [image_bytes]
+    classification: nhay-cam-mac-dinh
+    purpose: "Giữ bản gốc để chỉnh lại và xuất; không bao giờ thay bằng bản đã xử lý"
+    retention: "Tới khi người dùng xoá trang, xoá tất cả trang của tài liệu, hoặc xoá dữ liệu/gỡ app. Chưa có thao tác xoá cả tài liệu (XS-10)."
+    deletion: "SessionController.remove / clearAll → DocumentStore.save xoá bản gốc không còn tham chiếu"
+    encryption_at_rest: "không do app; dựa vào mã hoá theo file của Android (THREAT-MODEL TM-12)"
+  - id: D-MANIFEST
+    what: "document.json (schema 2)"
+    location: "support/documents/{docId}/document.json"
+    code: apps/mobile/lib/core/session_manifest.dart
+    fields:
+      - {name: document.id, classification: ky-thuat}
+      - {name: document.title, classification: ca-nhan-co-the, note: "người dùng gõ, 1–120 ký tự; có thể chứa tên người"}
+      - {name: document.createdAt, classification: ky-thuat, note: "UTC"}
+      - {name: document.updatedAt, classification: ky-thuat, note: "UTC"}
+      - {name: pages[].id, classification: ky-thuat}
+      - {name: pages[].original, classification: ky-thuat}
+      - {name: pages[].quad, classification: ky-thuat}
+      - {name: pages[].quarterTurns, classification: ky-thuat}
+      - {name: pages[].revision, classification: ky-thuat}
+    purpose: "Cấu trúc tài liệu: tên, thứ tự trang, khung cắt, xoay"
+    retention: "Như D-ORIG"
+    deletion: "Xoá dữ liệu app / gỡ app"
+  - id: D-CORRUPT
+    what: "Bản manifest hỏng bị cách ly (document.corrupt-*.json) và bản gốc của tài liệu đó"
+    location: "support/documents/{docId}/"
+    code: apps/mobile/lib/storage/document_store.dart
+    classification: nhay-cam-mac-dinh
+    purpose: "Không xoá dữ liệu khi không đọc được"
+    retention: "Tới khi xoá dữ liệu app (DEBT trong document_store.dart: chưa có UI khôi phục/xoá)"
+  - id: D-PENDING
+    what: "Ảnh picker đang chờ gắn vào trang, journal, và ảnh bị từ chối giữ riêng (*.rejected-*)"
+    location: "support/pending-pick/ và support/pending-pick.rejected-{pageId}/"
+    code: apps/mobile/lib/storage/pending_pick_store.dart
+    classification: nhay-cam-mac-dinh
+    purpose: "Không mất ảnh khi app bị dừng giữa lúc chụp"
+    retention: "Ảnh chờ: xoá khi nhập xong. Ảnh bị từ chối: giữ tới khi xoá dữ liệu app (DEBT, tới XS-10)"
+  - id: D-P1
+    what: "Phiên P1 cũ sau migration (session.migrated, session.migrated-2, …) và migration.json"
+    location: "support/session.migrated*/, support/migration.json"
+    code: apps/mobile/lib/storage/p1_migration.dart
+    classification: nhay-cam-mac-dinh
+    purpose: "Bản quay lại nếu migration sai (ADR-0011)"
+    retention: "session.migrated*: không tự xoá, tới khi xoá dữ liệu app. migration.json: xoá khi migration xong."
+  - id: D-PICKER-CACHE
+    what: "Bản sao ảnh do image_picker để trong cache"
+    location: "getTemporaryDirectory()/ (và cache/{uuid}/)"
+    code: apps/mobile/lib/ui/page_source.dart
+    classification: nhay-cam-mac-dinh
+    purpose: "Đầu vào tạm của picker"
+    retention: "Xoá ngay sau khi app có bản riêng (discard); nếu xoá lỗi thì để hệ điều hành thu hồi cache"
+  - id: D-EXPORT
+    what: "File xuất PDF/JPG/PNG và bản sao share_plus"
+    location: "temp/exports/, temp/share_plus/"
+    code: apps/mobile/lib/export/page_exporter.dart
+    classification: nhay-cam-mac-dinh
+    purpose: "Đưa file cho share sheet"
+    retention: "temp/exports: xoá sau mỗi lần chia sẻ và khi mở tài liệu. temp/share_plus: xoá khi mở tài liệu (clearLeftovers)."
+    recipients: "app người dùng chọn trong share sheet"
+  - id: D-THEME
+    what: "Chế độ Dark/Light"
+    location: "chỉ trong RAM"
+    classification: khong-ca-nhan
+    retention: "mất khi đóng app"
+
+not_collected:
+  - "tài khoản, email, số điện thoại, vị trí, danh bạ, định danh thiết bị, quảng cáo"
+  - "log, crash report, analytics, telemetry"
+  - "dữ liệu gửi qua mạng (manifest release không có quyền INTERNET; scripts/check-release-manifest.py chặn)"
