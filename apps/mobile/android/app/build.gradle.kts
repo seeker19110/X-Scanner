@@ -57,3 +57,15 @@ dependencies {
 dependencyLocking {
     lockAllConfigurations()
 }
+
+// AGP registers these lazily; constrain build tools without adding an app dependency.
+configurations.matching { configuration ->
+    configuration.name == "androidLintTool" ||
+        configuration.name.startsWith("_internal-unified-test-platform-")
+}.configureEach {
+    dependencyConstraints.add(
+        project.dependencies.constraints.create("com.google.guava:guava:33.7.2-jre") {
+            because("CVE-2026-102554: patched build-tool deserialization")
+        }
+    )
+}

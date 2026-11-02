@@ -68,3 +68,11 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Bí mật toàn lịch sử, ADR đã chấp nhận, JDK/Flutter ghim | `.gitleaksignore`, `scripts/check-adr-immutable.py`, `.java-version`, `apps/mobile/pubspec.yaml` (`scripts/flutter-version.sh`) | các bước trong `.github/workflows/ci.yml` |
 | Quét lỗ hổng/EOL, PR hygiene (không bắt buộc) | `.github/workflows/supply-chain.yml` + `osv-scanner.toml` + `scripts/eol-check.py` (SLA `docs/ops/VULN-SLA.md`); `.github/workflows/pr-hygiene.yml` + `scripts/check-pr-policy.py` (cũng là hook `scripts/githooks/commit-msg`) | `python3 scripts/test-repo-checks.py`; xem run trên PR |
 | Khoá Gradle | `apps/mobile/android/app/gradle.lockfile`, `settings-gradle.lockfile` | lệnh sinh lại trong `docs/ops/dependency-updates.md` + gate |
+
+## Guava build-tool security
+
+Guava is constrained to the patched floor in `apps/mobile/android/settings.gradle.kts` (AGP/Kotlin classpath)
+and `apps/mobile/android/app/build.gradle.kts` (lazy lint/UTP configurations). Regenerate both Gradle locks with
+the actual resolver; keep runtime configuration GAV memberships unchanged. Regression:
+`apps/mobile/test/build_dependency_security_test.dart`. Run `bash scripts/dev-task.sh gate` and the existing
+OSV source scan; use `docs/ops/dependency-updates.md`. No scan exceptions were added for CVE-2026-102554.

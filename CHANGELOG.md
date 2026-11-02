@@ -7,6 +7,10 @@ Chưa có app release: mọi mục nằm trong `[Unreleased]`. Ngày trong ngo�
 
 ## [Unreleased]
 
+### Security
+- Constrain build-tool Guava to 33.7.2-jre for CVE-2026-102554, regenerate actual Gradle locks and remove obsolete AGP-only entries. APK runtime dependency graph stays unchanged; add three lockfile security regressions.
+
+
 ### Added
 
 - (2026-10-24) App hardening (Work ID `2026-10-24-app-hardening`): handler lỗi toàn cục giữ app chạy, bản release chỉ ghi kiểu lỗi (không nội dung/đường dẫn) và hiện câu lỗi chung; tôn trọng giảm chuyển động cho chuyển trang và bảng xuất; dialog xoá trang/xoá tất cả nêu rõ ảnh gốc bị xoá, Back/Esc huỷ; trần 4 MiB khi đọc/ghi `document.json` và đọc `session.json` (vượt trần không đọc, không đổi tên, không xoá gì); nút "Tài liệu mới" chỉ còn icon khi nhãn không vừa màn 320 dp chữ lớn; khai báo iOS `PrivacyInfo.xcprivacy` và usage string camera/ảnh (chưa build iOS); benchmark `summarize` in p50/p95/p99. Thêm test tương phản mức token, bàn phím Tab/Enter/Esc.
