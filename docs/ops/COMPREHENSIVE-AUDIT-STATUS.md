@@ -147,3 +147,16 @@ Phạm vi: các nhóm bị ảnh hưởng — 2/10 (dữ liệu: migration P1 b�
 | F-080 | 4 | Trung bình | `test-hooks-gate.sh` pipe JSON vào hook có cờ bỏ qua dưới `pipefail`: hook thoát trước khi đọc stdin → SIGPIPE 141, gate đỏ ngẫu nhiên khi máy tải nặng (2 lần 24/10) | Đóng 24/10 — here-string thay pipe, TRAPS.md (Work ID 2026-10-24-backlog-ci) |
 
 Hội tụ: 0 phát hiện Cao mới; Trung F-078 có kết cục WAITING ghi nhận.
+
+
+## Re-audit tích hợp X-Templates 3.29.0 — 2026-11-02
+
+Phạm vi delta: nhóm 4/8 (test/hook), 9 (tài liệu), 12 (đường gọi gate). Không phải full audit app hay nghiệm thu Android runtime.
+
+| ID | Nhóm | Mức | Phát hiện | Kết cục |
+|----|------|-----|-----------|---------|
+| F-081 | 4/8/12 | Trung | Hook mới ưu tiên gate vendored, tránh wrapper dự án có flock F-077 | Sửa route project trước/vendor fallback. `GateRoutingTests` RED trước (chọn vendor) → GREEN, suite repository 36/36 và lock trace nối tiếp. Full gate PASS 4/4, Flutter 843 + JVM 11 sau khôi phục toolchain; hồ sơ `docs/work/2026-11-02-xtemplates-completion/working.md`. |
+
+Các mục owner/legal/device trước đây vẫn giữ kết cục; cập nhật khung không biến chúng thành đã đạt.
+
+- F-082 (nhóm 4/8/12, Trung): installer đăng ký formatter hai lần và đổi hook thành đường dẫn tương đối. Hai test integration RED trước sửa; settings giữ đường dẫn theo CLAUDE_PROJECT_DIR và một formatter; full gate chạy lại trước commit.

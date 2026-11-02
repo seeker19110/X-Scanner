@@ -50,3 +50,10 @@
 - Chọn: (1)
 - Lý do (tiêu chí chất lượng cuối): đúng phạm vi rủi ro (không vào APK, app offline); (2) dùng bản Beta, (3) ép phiên bản trong toolchain build dễ vỡ build. Hạn ngắn buộc xem lại
 - Đường lùi: xoá ngoại lệ, nâng AGP/KGP khi có bản ổn định
+
+### D-008 · 2026-11-02T16:26:20+00:00 · Duyệt PLAN-2026-11-02-toolchain
+
+- Phương án: (1) Khôi phục pin và chạy gate thật · (2) Dừng vì launcher thiếu SDK
+- Chọn: Khôi phục pin và chạy gate thật
+- Lý do (tiêu chí chất lượng cuối): Công cụ tải miễn phí từ nguồn chính thức, không đổi source/gate; có checksum và bằng chứng chạy thật
+- Đường lùi: Giữ toolchain ngoài repo; bỏ khỏi PATH nếu chủ repo đổi hướng

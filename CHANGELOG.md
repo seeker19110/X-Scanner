@@ -7,6 +7,14 @@ Chưa có app release: mọi mục nằm trong `[Unreleased]`. Ngày trong ngo�
 
 ## [Unreleased]
 
+### Fixed
+- Giữ hook chạy được từ thư mục con và đăng ký formatter một lần sau khi nâng installer (F-082).
+- Giữ hook commit đi qua dispatcher có khóa flock của X-Scanner khi nâng khung; test tích hợp gate đỏ chặn commit và vendor chỉ fallback (F-081).
+
+### Changed
+- Cập nhật X-Templates từ 2.0.0 lên stable 3.29.0 (tag v3.29.0), gộp harness giữ quyền/cổng X-Scanner và helpers hook cũ; thêm giấy phép nguồn. Chưa nghiệm thu gate app trong môi trường thiếu Flutter/Android SDK.
+
+
 ### Added
 
 - (2026-10-24) App hardening (Work ID `2026-10-24-app-hardening`): handler lỗi toàn cục giữ app chạy, bản release chỉ ghi kiểu lỗi (không nội dung/đường dẫn) và hiện câu lỗi chung; tôn trọng giảm chuyển động cho chuyển trang và bảng xuất; dialog xoá trang/xoá tất cả nêu rõ ảnh gốc bị xoá, Back/Esc huỷ; trần 4 MiB khi đọc/ghi `document.json` và đọc `session.json` (vượt trần không đọc, không đổi tên, không xoá gì); nút "Tài liệu mới" chỉ còn icon khi nhãn không vừa màn 320 dp chữ lớn; khai báo iOS `PrivacyInfo.xcprivacy` và usage string camera/ảnh (chưa build iOS); benchmark `summarize` in p50/p95/p99. Thêm test tương phản mức token, bàn phím Tab/Enter/Esc.

@@ -68,3 +68,10 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 | Bí mật toàn lịch sử, ADR đã chấp nhận, JDK/Flutter ghim | `.gitleaksignore`, `scripts/check-adr-immutable.py`, `.java-version`, `apps/mobile/pubspec.yaml` (`scripts/flutter-version.sh`) | các bước trong `.github/workflows/ci.yml` |
 | Quét lỗ hổng/EOL, PR hygiene (không bắt buộc) | `.github/workflows/supply-chain.yml` + `osv-scanner.toml` + `scripts/eol-check.py` (SLA `docs/ops/VULN-SLA.md`); `.github/workflows/pr-hygiene.yml` + `scripts/check-pr-policy.py` (cũng là hook `scripts/githooks/commit-msg`) | `python3 scripts/test-repo-checks.py`; xem run trên PR |
 | Khoá Gradle | `apps/mobile/android/app/gradle.lockfile`, `settings-gradle.lockfile` | lệnh sinh lại trong `docs/ops/dependency-updates.md` + gate |
+
+## Cập nhật X-Templates
+
+`.xtemplates/` là bản vendored X-Templates 3.29.0, nguồn/tag và quy tắc gộp harness ở
+[adoption](docs/adoption/README.md). Dùng installer chính thức từ nguồn sạch; giữ phần projects-template trong
+`.claude/hooks/_lib.sh`, quyền riêng và cổng Flutter. Kiểm `python3 .xtemplates/scripts/xt.py validate`,
+`python3 .xtemplates/scripts/xt.py doctor` rồi `bash scripts/dev-task.sh gate`.

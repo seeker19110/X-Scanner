@@ -206,7 +206,8 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-bash-guard.sh\"",
-            "timeout": 600
+            "timeout": 600,
+            "onFailure": "block"
           }
         ]
       },
@@ -216,17 +217,19 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-edit-guard.sh\"",
-            "timeout": 10
+            "timeout": 10,
+            "onFailure": "block"
           }
         ]
       },
       {
-        "matcher": "mcp__.*(merge_pull_request|auto_merge).*",
+        "matcher": "mcp__.*(merge_pull_request|auto_merge|create_pull_request|update_pull_request|create_or_update_file|push_files|delete_file|issue_comment|pull_request_review_write|comment_to_pending_review|reply_to_pull_request_comment).*",
         "hooks": [
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-mcp-guard.sh\"",
-            "timeout": 120
+            "timeout": 120,
+            "onFailure": "block"
           }
         ]
       }
@@ -277,6 +280,15 @@
             "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/telemetry-record.sh"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/subagent-stop.sh\"",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PreCompact": [
@@ -297,6 +309,44 @@
           }
         ]
       }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/permission-request.sh\"",
+            "timeout": 600
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/post-tool-failure.sh\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/task-completed.sh\"",
+            "timeout": 30
+          }
+        ]
+      }
     ]
+  },
+  "env": {
+    "XT_GUARD_POLICY": "strict"
   }
 }
