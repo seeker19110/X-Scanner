@@ -1,16 +1,18 @@
 # PROGRESS.md — X-Scanner
 
-> Giai đoạn hiện tại: P1 + XS-09 thư viện đã merge (#62); hoàn thiện P1 đóng (#63); harness autopilot (#64) và khoá gate F-077 (#65) đã merge; đang làm backlog MUST blueprint · Cập nhật: 2026-11-03 · Nhánh: `codex/guava-security-fix`
+> Giai đoạn hiện tại: P1 + XS-09 thư viện đã merge (#62); hoàn thiện P1 đóng (#63); harness autopilot (#64) và khoá gate F-077 (#65) đã merge; đang làm backlog MUST blueprint · Cập nhật: 2026-11-03 · Nhánh: `codex/xtemplates-completion`
 > Lịch sử đến 2026-10-24: `docs/changelog/2026-10-progress-history.md` · CHANGELOG: `CHANGELOG.md` · Goal đang chờ: `docs/goals/2026-10-18-upgrade-completion.md` (WAITING)
 
 ## Đang làm
-- Guava build-tool security (F-083): `docs/work/2026-11-03-guava-security/working.md`, nâng fixed floor 33.7.2-jre, không thêm exception hay đổi runtime app. Root đang kiểm độc lập, chờ PR/CI/owner L1 merge.
+- XS-09 Android UAT: `docs/work/2026-11-03-xs09-android-uat/working.md`; WHPX usable nhưng 2 lần boot thiếu chỗ (cần 7.37 GB), chưa chạy migration; cần ≥8 GB trống trên ổ Windows hoặc Android test.
+- Goal hai slice khung + security CI: `docs/goals/2026-11-03-autopilot-hardening.md`; Guava [PR #74](https://github.com/seeker19110/X-Scanner/pull/74) đã squash merge tại `5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de`; gate/OSV/CI xanh, runtime app không đổi. Hồ sơ: `docs/work/2026-11-03-guava-security/working.md`.
+- Cập nhật X-Templates 3.29.0 và kiểm chứng completion: `docs/work/2026-11-02-xtemplates-completion/working.md`; toolchain đã khôi phục; gate PASS 4/4 (843 Flutter + 11 JVM), PR #73 đang đồng bộ với main sau #74 theo lệnh merge và chuyển /complete của chủ repo; verify-all đỏ do 3 khóa sàn khung còn thiếu; theo kế hoạch `docs/autopilot/PLAN-2026-11-02-toolchain.md`.
 - Backlog MUST blueprint ("làm hết các việc còn lại", 24/10): D (#66), B (#67), C (#69) đã merge; lát cuối `docs/work/2026-10-24-backlog-final/working.md` (PR này). Blueprint: 189 đạt · 166 không áp dụng · 47 còn mở, tất cả là việc của chủ repo (`docs/autopilot/GO-NO-GO.md`)
 
 ## Tiếp theo
-1. Chủ repo chạy APK có thư viện (CI của #62/`main`) trên emulator/thiết bị có tăng tốc: cài đè lên dữ liệu P1 đã giữ từ lần UAT 18/10, kiểm migration → một tài liệu, bản gốc trùng byte, mở lại app (W-602 / F-078).
+1. Sau khi có ≥8 GB trống trên ổ emulator Windows hoặc Android test, chạy APK có thư viện trên dữ liệu P1 tổng hợp đã giữ: cài đè lên dữ liệu P1 đã giữ từ lần UAT 18/10, kiểm migration → một tài liệu, bản gốc trùng byte, mở lại app (W-602 / F-078).
 2. 4 điểm mở còn lại của #57 (F-077 đã đóng ở #65).
-3. 47 MUST còn mở là việc của chủ repo, gom theo việc trong `docs/autopilot/GO-NO-GO.md` (LICENSE, bật báo lỗ hổng riêng, ruleset, phát hành, iOS, thiết bị, pháp lý). PR Dependabot #68 (Gradle) cần cập nhật lockfile.
+3. 47 MUST còn mở là việc của chủ repo, gom theo việc trong `docs/autopilot/GO-NO-GO.md` (LICENSE, bật báo lỗ hổng riêng, ruleset, phát hành, iOS, thiết bị, pháp lý). Lockfile Gradle đã cập nhật ở #71; PR Dependabot #72 đang mở, chưa đánh giá trong slice này.
 4. Tính năng tiếp theo (XS-10 xoá/thùng rác, khôi phục ảnh bị giữ riêng…) cần chủ repo duyệt spec; roadmap `docs/plans/` vẫn ADVISORY.
 
 ## Quyết định
@@ -23,8 +25,8 @@
 - Nợ kỹ thuật chấp nhận: ảnh picker bị từ chối giữ riêng chưa có UI khôi phục (`DEBT:` ở `pending_pick_store.dart`, tới XS-10); khe plugin xoá kết quả trước khi Dart ghi nhật ký (`DEBT:` ở `pick_import.dart`) — hạn trả: trước khi phân phối
 
 ## Bàn giao phiên
-- Commit cuối trên nhánh chính: `a99493def4e76824641abcf3529e965fb52afd36` (#69) · CI: xanh — 4 check trên head PR trước merge
+- Default branch đã fetch: `5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de` (#74), đang tích hợp vào #73
 - Lệnh kiểm nhanh: `bash scripts/dev-task.sh gate` → PASS 4/4, 843 Flutter (coverage 96.33% dòng) + JVM, 2026-10-24 (gói B+C)
-- Đang chặn: không (W-602, F-077 là việc chờ người, không chặn vòng)
-- Việc dở chưa commit: không
-- Câu hỏi cần người: không (đang làm backlog theo "làm hết các việc còn lại", 24/10)
+- Chủ repo đã duyệt merge #74/#73 và chuyển /complete trong phiên 03/11; UAT W-602/F-078 vẫn thiếu chỗ Windows/thiết bị. Không bật auto-merge.
+- Hồ sơ đang mở: khung #73, Guava security và XS-09 UAT (xem mục Đang làm).
+- Cần operator: dung lượng/thiết bị UAT, quyết định pháp lý/release còn mở; không coi là Project Complete.

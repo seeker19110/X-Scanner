@@ -8,6 +8,7 @@ that silently stops checking turns this suite red. Run: python3 scripts/test-rep
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -691,6 +692,99 @@ class RepoConfig(unittest.TestCase):
         self.assertEqual(
             text.count("package-ecosystem:"), text.count("open-pull-requests-limit:")
         )
+
+
+class GateRoutingTests(unittest.TestCase):
+    def check_route(self, own_gate):
+        with tempfile.TemporaryDirectory(prefix="xs-gate-route-") as tmp:
+            root = Path(tmp)
+            hooks = root / ".claude/hooks"
+            hooks.mkdir(parents=True)
+            for name in ("_lib.sh", "guard.py", "pre-bash-guard.sh"):
+                shutil.copy2(ROOT / ".claude/hooks" / name, hooks / name)
+            subprocess.run(
+                ["git", "init", "-q", "--initial-branch=codex/test-routing", tmp],
+                check=True,
+            )
+            trace = root / "route.txt"
+            candidates = (
+                ("scripts", "project", 77),
+                (".xtemplates/scripts", "vendor", 0),
+            )
+            for directory, label, status in candidates:
+                if directory == "scripts" and not own_gate:
+                    continue
+                script = root / directory / "dev-task.sh"
+                script.parent.mkdir(parents=True)
+                script.write_text(
+                    f"#!/usr/bin/env bash\nprintf '%s\\n' {label} >> route.txt\nexit {status}\n"
+                )
+                script.chmod(0o755)
+            payload = json.dumps({
+                "tool_name": "Bash",
+                "tool_input": {"command": "git commit -m 'test: routing'"},
+            })
+            result = subprocess.run(
+                ["bash", str(hooks / "pre-bash-guard.sh")],
+                input=payload,
+                text=True,
+                capture_output=True,
+                cwd=root,
+                env={
+                    **os.environ,
+                    "CLAUDE_PROJECT_DIR": tmp,
+                    "XT_GUARD_POLICY": "strict",
+                },
+            )
+            self.assertTrue(trace.exists(), result.stdout + result.stderr)
+            self.assertEqual(
+                trace.read_text().splitlines(), ["project" if own_gate else "vendor"]
+            )
+            self.assertEqual(
+                result.returncode, 2 if own_gate else 0, result.stdout + result.stderr
+            )
+
+    def test_registered_hook_works_from_a_project_subdirectory(self):
+        settings = json.loads((ROOT / ".claude/settings.json").read_text())
+        command = next(
+            hook["command"]
+            for entry in settings["hooks"]["PreToolUse"]
+            for hook in entry["hooks"]
+            if "pre-bash-guard.sh" in hook["command"]
+        )
+        with tempfile.TemporaryDirectory(prefix="xs-hook-cwd-") as tmp:
+            root = Path(tmp)
+            hooks = root / ".claude/hooks"
+            hooks.mkdir(parents=True)
+            for name in ("_lib.sh", "guard.py", "pre-bash-guard.sh"):
+                shutil.copy2(ROOT / ".claude/hooks" / name, hooks / name)
+            subdir = root / "apps/mobile"
+            subdir.mkdir(parents=True)
+            result = subprocess.run(
+                ["bash", "-c", command],
+                input=json.dumps({"tool_name": "Bash", "tool_input": {"command": "ls"}}),
+                capture_output=True,
+                text=True,
+                cwd=subdir,
+                env={**os.environ, "CLAUDE_PROJECT_DIR": tmp},
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_formatter_is_registered_once(self):
+        settings = json.loads((ROOT / ".claude/settings.json").read_text())
+        commands = [
+            hook["command"]
+            for entry in settings["hooks"]["PostToolUse"]
+            for hook in entry["hooks"]
+            if "auto-format.sh" in hook["command"]
+        ]
+        self.assertEqual(len(commands), 1, commands)
+
+    def test_project_gate_failure_blocks_commit(self):
+        self.check_route(True)
+
+    def test_vendor_gate_is_fallback(self):
+        self.check_route(False)
 
 
 if __name__ == "__main__":
