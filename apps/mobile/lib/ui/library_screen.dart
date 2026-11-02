@@ -123,27 +123,35 @@ class _LibraryScreenState extends State<LibraryScreen> {
         '${two(t.hour)}:${two(t.minute)}';
   }
 
-  /// Shows [document] of [store]; the list is refreshed once it is closed.
-  /// Ignored while a new document is being created.
-  Future<void> _openDocument(DocumentStore store, ScanDocument document) async {
-    if (_creating) return;
+  /// Only one create/open owns navigation, until its route and refresh finish.
+  Future<void> _withDocumentRoute(Future<void> Function() action) async {
+    if (!mounted || _creating) return;
+    setState(() => _creating = true);
+    try {
+      await action();
+    } finally {
+      if (mounted) setState(() => _creating = false);
+    }
+  }
+
+  Future<void> _openDocument(DocumentStore store, ScanDocument document) =>
+      _withDocumentRoute(() => _showDocument(store, document));
+
+  Future<void> _showDocument(DocumentStore store, ScanDocument document) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (context) => widget.documentScreen(context, store, document),
       ),
     );
-    await _controller.refresh();
+    if (mounted) await _controller.refresh();
   }
 
-  Future<void> _create() async {
-    setState(() => _creating = true);
+  Future<void> _create() => _withDocumentRoute(() async {
     final created = await _controller.createDocument();
-    if (!mounted) return;
-    setState(() => _creating = false);
-    if (created == null) return;
+    if (!mounted || created == null) return;
     final (store, document) = created;
-    await _openDocument(store, document);
-  }
+    await _showDocument(store, document);
+  });
 
   Future<void> _rename(ScanDocument document) async {
     final title = await showDialog<String>(
