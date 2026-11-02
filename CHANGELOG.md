@@ -12,7 +12,10 @@ Chưa có app release: mọi mục nằm trong `[Unreleased]`. Ngày trong ngo�
 - Giữ hook commit đi qua dispatcher có khóa flock của X-Scanner khi nâng khung; test tích hợp gate đỏ chặn commit và vendor chỉ fallback (F-081).
 
 ### Changed
-- Cập nhật X-Templates từ 2.0.0 lên stable 3.29.0 (tag v3.29.0), gộp harness giữ quyền/cổng X-Scanner và helpers hook cũ; thêm giấy phép nguồn. Chưa nghiệm thu gate app trong môi trường thiếu Flutter/Android SDK.
+- Cập nhật X-Templates từ 2.0.0 lên stable 3.29.0 (tag v3.29.0), gộp harness giữ quyền/cổng X-Scanner và helpers hook cũ; thêm giấy phép nguồn. Gate Android local và CI đã PASS; UAT thư viện trên thiết bị vẫn mở.
+
+### Security
+- Constrain build-tool Guava to 33.7.2-jre for CVE-2026-102554, regenerate actual Gradle locks and remove obsolete AGP-only entries. APK runtime dependency graph stays unchanged; add three lockfile security regressions.
 
 
 ### Added

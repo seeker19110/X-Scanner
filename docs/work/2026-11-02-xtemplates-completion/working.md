@@ -131,3 +131,9 @@ Self-review diff PASS; TDD F-081/F-082 đã RED trước; phần vendor/generate
 - `source /home/liend/.local/share/x-scanner/env.sh` rồi `python3 .xtemplates/scripts/xt.py loop verify --all`: task T-101/T-102 exit0, stable=true; gate khung PASS4/4,843 Flutter +11 JVM +38 repo. Overall exit1 chỉ vì thiếu/no-op format_check/coverage/e2e trong xt.yaml. Log: /home/liend/.local/share/x-scanner/xt-root-verify-final.log; verified.json giữ ok=false, không sửa bằng tay.
 - Không thay xt.yaml/gate thêm trong lượt này: format và coverage đã chạy thật trong lệnh repo, E2E thiết bị chưa có; đổi khai báo cổng và cấu hình nằm trong điểm dừng owner. Không làm widget tests thành bằng chứng migration Android, không hạ scale để né sàn.
 - Chặn còn lại: owner L1 review/merge và thứ tự PR (FIFO); dung lượng emulator ≥8 GB hoặc Android test; quyết định gate config và 47 MUST owner/device/legal/release đã defer. Không phát hành, không auto-merge, không done.md/Project Complete.
+
+## Merge và chuyển /complete — chủ repo duyệt 2026-11-03
+
+- Người dùng yêu cầu "xong rồi merge chuyển qua pha /complete": cấp quyền merge cặp PR #74/#73 theo phụ thuộc, vượt thứ tự tạo giữa cặp này và để #72 ngoài scope; cho phép phase-entry config theo skill /complete. Không cấp quyền release/signing/cloud hay xoá dữ liệu.
+- Fresh premerge #74 gate exit0:846 Flutter,11 JVM,34 repository; pinned OSV exit0/No issues found. Squash merge #74 tại5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de, expected-head5e076d5; native strict ruleset không bypass.
+- #73 merge main có 4 xung đột docs (CHANGELOG/CODEMAP/PROGRESS/TRAPS): giữ cả hai nội dung khung và security, hợp nhất trạng thái PROGRESS theo SHA merge thật; sửa câu SDK thiếu đã cũ trong CHANGELOG. Không xung đột app source. Chọn giữ hai scope và lịch sử, không ours/theirs toàn file; full gate trên cây tích hợp trước commit/CI.

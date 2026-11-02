@@ -19,6 +19,13 @@ pluginManagement {
 
 // Locks the settings classpath that carries AGP and the Kotlin plugin (settings-gradle.lockfile).
 buildscript {
+    dependencies {
+        constraints {
+            add("classpath", "com.google.guava:guava:33.7.2-jre") {
+                because("CVE-2026-102554: patched build-tool deserialization")
+            }
+        }
+    }
     configurations.classpath {
         resolutionStrategy.activateDependencyLocking()
     }

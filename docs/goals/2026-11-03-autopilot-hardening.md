@@ -36,3 +36,7 @@ Root sở hữu PROGRESS/CODEMAP/CHANGELOG/goal; worker không sửa các file �
 Root đã review độc lập, hai lần gate integration/hook trên security branch đều PASS (846 Flutter +11 JVM +34 repository); OSV đúng binary/config CI exit0, runtime graph 24970 byte identical. PR #74 OSV và hygiene CI SUCCESS, Android còn chạy ở checkpoint này. PR #73 Android CI SUCCESS trên f166056 nhưng supply-chain còn đỏ do base Guava; owner cần review thứ tự và merge fix riêng trước khi reconcile nhánh khung. Không waiver/skip scan, không coi finding trên main đã đóng.
 
 `loop verify --all` trên nhánh khung đã source đúng env: T-101/T-102 exit0, stable=true, nhưng overall exit1 vì thiếu format_check/coverage/e2e trong xt.yaml. Format/coverage thực vẫn PASS trong gate hiện hành; không tạo alias giả hay coi widget test là device E2E. Đổi xt.yaml/gate là điểm dừng cần owner; W-602/F-078 cũng chưa có bằng chứng thiết bị. DoD goal/project chưa đạt; giữ hồ sơ working.md và chờ quyền/tài nguyên thật.
+
+## Operator authorization và reconcile — 2026-11-03
+
+Chủ repo yêu cầu merge rồi chuyển /complete; #74 merged 5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de sau fresh gate và OSV. #73 đang tích hợp main mới, giữ cả hai phía xung đột docs; cần fresh gate/CI trên head tích hợp trước merge. Quyền phase-entry xt.yaml theo /complete đã được cấp; release/signing/dữ liệu thật vẫn ngoài quyền. Ổ C đo lại2573086720 byte, ADB5039 rỗng; UAT chưa được chứng minh.

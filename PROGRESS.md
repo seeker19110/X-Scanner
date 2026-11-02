@@ -5,8 +5,8 @@
 
 ## Đang làm
 - XS-09 Android UAT: `docs/work/2026-11-03-xs09-android-uat/working.md`; WHPX usable nhưng 2 lần boot thiếu chỗ (cần 7.37 GB), chưa chạy migration; cần ≥8 GB trống trên ổ Windows hoặc Android test.
-- Goal hai slice khung + security CI: `docs/goals/2026-11-03-autopilot-hardening.md`; Guava [PR #74](https://github.com/seeker19110/X-Scanner/pull/74): root gate PASS (846 Flutter +11 JVM), OSV CI xanh, Android CI đang chạy; runtime app không đổi, không thêm ignore.
-- Cập nhật X-Templates 3.29.0 và kiểm chứng completion: `docs/work/2026-11-02-xtemplates-completion/working.md`; toolchain đã khôi phục; gate PASS 4/4 (843 Flutter + 11 JVM), PR #73 Android CI xanh/finding Guava chờ #74; verify-all đỏ do 3 khóa sàn khung còn thiếu; theo kế hoạch `docs/autopilot/PLAN-2026-11-02-toolchain.md`.
+- Goal hai slice khung + security CI: `docs/goals/2026-11-03-autopilot-hardening.md`; Guava [PR #74](https://github.com/seeker19110/X-Scanner/pull/74) đã squash merge tại `5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de`; gate/OSV/CI xanh, runtime app không đổi. Hồ sơ: `docs/work/2026-11-03-guava-security/working.md`.
+- Cập nhật X-Templates 3.29.0 và kiểm chứng completion: `docs/work/2026-11-02-xtemplates-completion/working.md`; toolchain đã khôi phục; gate PASS 4/4 (843 Flutter + 11 JVM), PR #73 đang đồng bộ với main sau #74 theo lệnh merge và chuyển /complete của chủ repo; verify-all đỏ do 3 khóa sàn khung còn thiếu; theo kế hoạch `docs/autopilot/PLAN-2026-11-02-toolchain.md`.
 - Backlog MUST blueprint ("làm hết các việc còn lại", 24/10): D (#66), B (#67), C (#69) đã merge; lát cuối `docs/work/2026-10-24-backlog-final/working.md` (PR này). Blueprint: 189 đạt · 166 không áp dụng · 47 còn mở, tất cả là việc của chủ repo (`docs/autopilot/GO-NO-GO.md`)
 
 ## Tiếp theo
@@ -25,8 +25,8 @@
 - Nợ kỹ thuật chấp nhận: ảnh picker bị từ chối giữ riêng chưa có UI khôi phục (`DEBT:` ở `pending_pick_store.dart`, tới XS-10); khe plugin xoá kết quả trước khi Dart ghi nhật ký (`DEBT:` ở `pick_import.dart`) — hạn trả: trước khi phân phối
 
 ## Bàn giao phiên
-- Default branch đã fetch: `a1959b449d19b4495171c7226d64e2e5f1aeb7bd` (#71), không lệch base của nhánh cập nhật khung
+- Default branch đã fetch: `5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de` (#74), đang tích hợp vào #73
 - Lệnh kiểm nhanh: `bash scripts/dev-task.sh gate` → PASS 4/4, 843 Flutter (coverage 96.33% dòng) + JVM, 2026-10-24 (gói B+C)
-- Đang chặn: UAT W-602/F-078 thiếu chỗ Windows; merge PR mới theo L1 chờ owner, không bật auto-merge.
+- Chủ repo đã duyệt merge #74/#73 và chuyển /complete trong phiên 03/11; UAT W-602/F-078 vẫn thiếu chỗ Windows/thiết bị. Không bật auto-merge.
 - Hồ sơ đang mở: khung #73, Guava security và XS-09 UAT (xem mục Đang làm).
-- Cần operator: dung lượng/thiết bị UAT và review/merge theo L1; không coi là Project Complete.
+- Cần operator: dung lượng/thiết bị UAT, quyết định pháp lý/release còn mở; không coi là Project Complete.

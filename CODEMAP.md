@@ -75,3 +75,11 @@ Hướng phụ thuộc: `ui` → `export`, `storage`, `imaging`, `core`; `export
 [adoption](docs/adoption/README.md). Dùng installer chính thức từ nguồn sạch; giữ phần projects-template trong
 `.claude/hooks/_lib.sh`, quyền riêng và cổng Flutter. Kiểm `python3 .xtemplates/scripts/xt.py validate`,
 `python3 .xtemplates/scripts/xt.py doctor` rồi `bash scripts/dev-task.sh gate`.
+
+## Guava build-tool security
+
+Guava is constrained to the patched floor in `apps/mobile/android/settings.gradle.kts` (AGP/Kotlin classpath)
+and `apps/mobile/android/app/build.gradle.kts` (lazy lint/UTP configurations). Regenerate both Gradle locks with
+the actual resolver; keep runtime configuration GAV memberships unchanged. Regression:
+`apps/mobile/test/build_dependency_security_test.dart`. Run `bash scripts/dev-task.sh gate` and the existing
+OSV source scan; use `docs/ops/dependency-updates.md`. No scan exceptions were added for CVE-2026-102554.
