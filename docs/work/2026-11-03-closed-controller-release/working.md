@@ -16,3 +16,7 @@
 Root nhập staged patch vào codex/review-closed-controller-release từ maind22e622 tree-trùng candidate976c71d; cùng PR có CODEMAP/TRAPS(F085)/PROGRESS. Reviewer-alt max APPROVE source; runtime model superiority không được giả nhận. Root đang full gate/CI, chưa merge.
 
 Root final PASS4/4:846 Flutter,11 JVM,38 repository; analyzer0; format70/0; licenses142; coverage96.30% lines/92.26% branches; manifest/16KB/size pass; log complete-controller-full-gate.log. Giữ toàn bộ assertions bàn giao actual save và successor; native commit hook sẽ kiểm lại, chưa device/heap claim.
+
+Kiểm tích hợp cùng PR76/78: full gate đầu bắt fixture app smoke retap trước guard refresh xong (handoffs vẫn1); sửa chỉ predicate đợi FAB hiện/enabled, không await idle hay complete held saves sớm, giữ mọi assertion. Reviewer-alt APPROVE delta7+/2-. Target app+keyboard3/3, combined full gate851Flutter+11JVM+38repo PASS, coverage96.31/92.41 (log complete-combined-integration-gate-final.log). Bản vá nguồn không đổi; root kiểm lại nhánh riêng và CI head mới.
+
+Nhánh riêng sau readiness follow-up: full gate846Flutter/11JVM/38repo PASS, coverage96.30/92.26, analyzer0/format70file0change; log complete-controller-readiness-gate.log. Native hook chạy lại trước commit, CI mới phải xanh trước merge.

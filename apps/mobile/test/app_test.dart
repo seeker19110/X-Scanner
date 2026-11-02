@@ -120,7 +120,11 @@ void main() {
         },
       ),
     );
-    await settle(tester, () => controller.status == LibraryStatus.ready);
+    final createButton = find.byType(FloatingActionButton);
+    bool libraryReady() =>
+        createButton.evaluate().isNotEmpty &&
+        tester.widget<FloatingActionButton>(createButton).onPressed != null;
+    await settle(tester, libraryReady);
     await tester.pumpAndSettle();
 
     expect(find.text('Thư viện'), findsOneWidget);
@@ -140,7 +144,7 @@ void main() {
     expect(find.byType(BackButton), findsOneWidget);
 
     await tester.tap(find.byType(BackButton));
-    await settle(tester, () => controller.status == LibraryStatus.ready);
+    await settle(tester, libraryReady);
     await tester.pumpAndSettle();
     expect(find.text('Thư viện'), findsOneWidget);
 
@@ -154,6 +158,7 @@ void main() {
     Future<void> closeAndReopen(int count) async {
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
+      await settle(tester, libraryReady);
       await tester.tap(find.textContaining('0 trang'));
       await tester.pump();
       await settle(tester, () => handoffs.length == count);
