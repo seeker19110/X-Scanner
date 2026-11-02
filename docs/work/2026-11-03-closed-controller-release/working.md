@@ -20,3 +20,9 @@ Root final PASS4/4:846 Flutter,11 JVM,38 repository; analyzer0; format70/0; lice
 Kiểm tích hợp cùng PR76/78: full gate đầu bắt fixture app smoke retap trước guard refresh xong (handoffs vẫn1); sửa chỉ predicate đợi FAB hiện/enabled, không await idle hay complete held saves sớm, giữ mọi assertion. Reviewer-alt APPROVE delta7+/2-. Target app+keyboard3/3, combined full gate851Flutter+11JVM+38repo PASS, coverage96.31/92.41 (log complete-combined-integration-gate-final.log). Bản vá nguồn không đổi; root kiểm lại nhánh riêng và CI head mới.
 
 Nhánh riêng sau readiness follow-up: full gate846Flutter/11JVM/38repo PASS, coverage96.30/92.26, analyzer0/format70file0change; log complete-controller-readiness-gate.log. Native hook chạy lại trước commit, CI mới phải xanh trước merge.
+
+## Đồng bộ sau quyền merge của chủ repo — 2026-11-03
+- Chủ repo duyệt merge #76 → #77 → #78 → #79; #75 ngoài phạm vi, không phát hành.
+- #76 đã squash merge tại `90b07c6f53864a70225e1b9662890016fb221e3a`; tích hợp main thật vào #77, giữ cả hai sửa lỗi và hồ sơ.
+- Theo ủy quyền §3d: giải xung đột CODEMAP/PROGRESS/TRAPS bằng giữ cả hai nội dung; chạy lại full gate và CI trên head tích hợp trước merge.
+- Full gate tích hợp PASS4/4: 849 Flutter, 11 JVM (0 failures/errors/skips), 38 repository; analyzer0, format70/0, licenses142; coverage96.30/92.39. Log `approved-77-integrated-gate.log`; chưa nhận UAT/device/heap acceptance.
