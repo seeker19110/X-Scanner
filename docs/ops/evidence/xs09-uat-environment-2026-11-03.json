@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "date": "2026-11-03",
+  "work_id": "2026-11-03-xs09-android-uat",
+  "result": "BLOCKED_BEFORE_GUEST_BOOT",
+  "accelerator": {
+    "command": "emulator.exe -accel-check",
+    "exit_code": 0,
+    "output": "WHPX(10.0.26300) is installed and usable"
+  },
+  "attempts": [
+    {
+      "number": 1,
+      "available_mb": 4596.31,
+      "required_mb": 7372.8
+    },
+    {
+      "number": 2,
+      "available_mb": 2843.23,
+      "required_mb": 7372.8
+    }
+  ],
+  "failure": "Not enough space to create userdata partition",
+  "artifact_verified": {
+    "run": 41489001004,
+    "artifact": 13163652089,
+    "archive_sha256": "d35410ed2cc2f11ae939b761a533109d61ddef1df26a15757420703d7e0e0af1",
+    "source": "f1660564ef7e96b4f66f1bb86c616251c539e3ab",
+    "build": "8c7eb177650325d74f07fc9c418739d9f1448465",
+    "apk_sha256": "f0e4376cca2cd0085e5a11b75f80efd89dca75c6ff44c9ce93d5ddc91f213f0e"
+  },
+  "device_checks": {
+    "apk_install": "NOT_RUN",
+    "migration": "NOT_RUN",
+    "original_bytes_after_migration": "NOT_RUN",
+    "library_reopen": "NOT_RUN",
+    "picker_statfs": "NOT_RUN"
+  },
+  "preservation": {
+    "old_p1_avd": "not booted or overwritten by this attempt",
+    "task_clone": "preserved outside repository",
+    "real_user_documents": "none used"
+  },
+  "next_step": "Provide at least 8 GB free on the Windows emulator drive, or an attached Android device; rerun UAT and record actual migration/original-byte/reopen evidence. Do not uninstall/clear P1 data on signer mismatch."
+}

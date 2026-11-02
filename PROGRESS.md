@@ -4,11 +4,13 @@
 > Lịch sử đến 2026-10-24: `docs/changelog/2026-10-progress-history.md` · CHANGELOG: `CHANGELOG.md` · Goal đang chờ: `docs/goals/2026-10-18-upgrade-completion.md` (WAITING)
 
 ## Đang làm
-- Cập nhật X-Templates 3.29.0 và kiểm chứng completion: `docs/work/2026-11-02-xtemplates-completion/working.md`; toolchain đã khôi phục; gate PASS 4/4 (843 Flutter + 11 JVM), đang hoàn tất PR qua kế hoạch `docs/autopilot/PLAN-2026-11-02-toolchain.md`.
+- XS-09 Android UAT: `docs/work/2026-11-03-xs09-android-uat/working.md`; WHPX usable nhưng 2 lần boot thiếu chỗ (cần 7.37 GB), chưa chạy migration; cần ≥8 GB trống trên ổ Windows hoặc Android test.
+- Goal hai slice khung + security CI: `docs/goals/2026-11-03-autopilot-hardening.md`; Guava [PR #74](https://github.com/seeker19110/X-Scanner/pull/74): root gate PASS (846 Flutter +11 JVM), OSV CI xanh, Android CI đang chạy; runtime app không đổi, không thêm ignore.
+- Cập nhật X-Templates 3.29.0 và kiểm chứng completion: `docs/work/2026-11-02-xtemplates-completion/working.md`; toolchain đã khôi phục; gate PASS 4/4 (843 Flutter + 11 JVM), PR #73 Android CI xanh/finding Guava chờ #74; verify-all đỏ do 3 khóa sàn khung còn thiếu; theo kế hoạch `docs/autopilot/PLAN-2026-11-02-toolchain.md`.
 - Backlog MUST blueprint ("làm hết các việc còn lại", 24/10): D (#66), B (#67), C (#69) đã merge; lát cuối `docs/work/2026-10-24-backlog-final/working.md` (PR này). Blueprint: 189 đạt · 166 không áp dụng · 47 còn mở, tất cả là việc của chủ repo (`docs/autopilot/GO-NO-GO.md`)
 
 ## Tiếp theo
-1. Chủ repo chạy APK có thư viện (CI của #62/`main`) trên emulator/thiết bị có tăng tốc: cài đè lên dữ liệu P1 đã giữ từ lần UAT 18/10, kiểm migration → một tài liệu, bản gốc trùng byte, mở lại app (W-602 / F-078).
+1. Sau khi có ≥8 GB trống trên ổ emulator Windows hoặc Android test, chạy APK có thư viện trên dữ liệu P1 tổng hợp đã giữ: cài đè lên dữ liệu P1 đã giữ từ lần UAT 18/10, kiểm migration → một tài liệu, bản gốc trùng byte, mở lại app (W-602 / F-078).
 2. 4 điểm mở còn lại của #57 (F-077 đã đóng ở #65).
 3. 47 MUST còn mở là việc của chủ repo, gom theo việc trong `docs/autopilot/GO-NO-GO.md` (LICENSE, bật báo lỗ hổng riêng, ruleset, phát hành, iOS, thiết bị, pháp lý). Lockfile Gradle đã cập nhật ở #71; PR Dependabot #72 đang mở, chưa đánh giá trong slice này.
 4. Tính năng tiếp theo (XS-10 xoá/thùng rác, khôi phục ảnh bị giữ riêng…) cần chủ repo duyệt spec; roadmap `docs/plans/` vẫn ADVISORY.
@@ -25,6 +27,6 @@
 ## Bàn giao phiên
 - Default branch đã fetch: `a1959b449d19b4495171c7226d64e2e5f1aeb7bd` (#71), không lệch base của nhánh cập nhật khung
 - Lệnh kiểm nhanh: `bash scripts/dev-task.sh gate` → PASS 4/4, 843 Flutter (coverage 96.33% dòng) + JVM, 2026-10-24 (gói B+C)
-- Đang chặn: không (W-602, F-077 là việc chờ người, không chặn vòng)
-- Việc dở chưa commit: không
-- Câu hỏi cần người: không (đang làm backlog theo "làm hết các việc còn lại", 24/10)
+- Đang chặn: UAT W-602/F-078 thiếu chỗ Windows; merge PR mới theo L1 chờ owner, không bật auto-merge.
+- Hồ sơ đang mở: khung #73, Guava security và XS-09 UAT (xem mục Đang làm).
+- Cần operator: dung lượng/thiết bị UAT và review/merge theo L1; không coi là Project Complete.

@@ -110,3 +110,24 @@ F-082 — cấu hình hook sau installer: giữ đường dẫn hook theo `${CLA
 Full gate trên F-081 + F-082 cuối: PASS 4/4, build debug 13.5 s, manifest/size/16KB PASS; analyzer 0 issue; format 69 file/0 đổi; repository 38/38; Flutter 843/843; JVM 11/11, 0 lỗi/skips; coverage 96.29% dòng / 92.24% nhánh. Đã đọc toàn bộ output, gộp dòng tiến độ lặp; full log local `/tmp/x-scanner-autopilot-gate-full.log`. Source/tree được giữ nguyên trong lần đo; toàn bộ runtime mobile và manifests/locks không đổi.
 
 Self-review diff PASS; TDD F-081/F-082 đã RED trước; phần vendor/generated áp ngoại lệ code sinh từ installer, không sửa logic CLI vendored. Gate commit hook vẫn bắt buộc chạy lại, không dùng no-verify. Giữ working.md vì PR/CI/merge còn chờ.
+
+## PR và phát hiện CI — 2026-11-03
+
+- PR #73: https://github.com/seeker19110/X-Scanner/pull/73 , head f1660564ef7e96b4f66f1bb86c616251c539e3ab, local pre-commit hook full gate PASS, tree sạch sau commit/push. Native auto-merge false, L1 người merge.
+- PR hygiene SUCCESS. Android gate CI SUCCESS (run41489001004, job125426731728): full gate, gitleaks, ADR immutability, SBOM và artifacts đều qua. Supply-chain run 41489001047/job125426732249 FAIL: GHSA-xxph-c9ww-hj94 Guava ở lockfile base, 4 entries (32.0.1-jre, 33.3.1-jre, 33.4.0-jre). Không thêm ignore. Chính sách VULN-SLA yêu cầu PR upgrade riêng.
+- Goal điều phối hai slice: `docs/goals/2026-11-03-autopilot-hardening.md`. Worker guava_security ở worktree riêng /home/liend/.local/share/x-scanner/worktrees/guava-security, không chạm file framework/docs root, không quyền push/merge. Root sẽ kiểm độc lập sau khi worker dừng Gradle.
+- Đã hỏi phương án UAT qua async (KVM riêng cho liend / Android USB / để sau), chưa nhận lựa chọn; chưa thay quyền thiết bị.
+
+### Audit delta và UAT — 2026-11-03
+
+- Guava có PR maintenance riêng theo VULN-SLA. Root kiểm lại OSV 2.7.0 và runtime graph độc lập, không dùng lời worker làm nghiệm thu. PR khung không sửa Gradle/OSV config để che finding có sẵn ở main; supply-chain của #73 vẫn đỏ cho đến khi bản vá riêng được tích hợp theo review/L1.
+- Đã thử UAT Windows WHPX (acceleration check exit0), không cần đổi quyền KVM. Hai lần boot dừng vì thiếu dung lượng tạo userdata (cần 7372.80 MB), chưa chạy guest/install/migration. AVD P1 cũ và task clone giữ nguyên; chỉ dùng fixture tổng hợp. Hồ sơ/bằng chứng: `docs/work/2026-11-03-xs09-android-uat/working.md`, `docs/ops/evidence/xs09-uat-environment-2026-11-03.json`. W-602/F-078 chưa đóng.
+- Artifact Android CI đã kiểm SHA256SUMS và source/build provenance; không đồng nghĩa device UAT PASS. Operator cần ≥8 GB trống ở ổ emulator Windows hoặc Android test; không tự xoá dữ liệu/compact WSL/thay quyền host.
+- Cập nhật hồ sơ này, goal và PROGRESS trong cùng PR #73; giữ working.md và goal ACTIVE/WAITING đến review/merge thật, không tick Project Complete.
+
+### Checkpoint cuối trước bàn giao
+
+- Security [PR #74](https://github.com/seeker19110/X-Scanner/pull/74) head5e076d5, 2 commits; worker8efc3ce + root docs. Root full gate và native commit hook đều PASS 4/4 (846 Flutter,11 JVM,34 repo), root OSV2.7.0 checksum đúng CI / exit0, không thêm ignore. PR74 OSV/hygiene CI SUCCESS; Android CI pending tại checkpoint.
+- `source /home/liend/.local/share/x-scanner/env.sh` rồi `python3 .xtemplates/scripts/xt.py loop verify --all`: task T-101/T-102 exit0, stable=true; gate khung PASS4/4,843 Flutter +11 JVM +38 repo. Overall exit1 chỉ vì thiếu/no-op format_check/coverage/e2e trong xt.yaml. Log: /home/liend/.local/share/x-scanner/xt-root-verify-final.log; verified.json giữ ok=false, không sửa bằng tay.
+- Không thay xt.yaml/gate thêm trong lượt này: format và coverage đã chạy thật trong lệnh repo, E2E thiết bị chưa có; đổi khai báo cổng và cấu hình nằm trong điểm dừng owner. Không làm widget tests thành bằng chứng migration Android, không hạ scale để né sàn.
+- Chặn còn lại: owner L1 review/merge và thứ tự PR (FIFO); dung lượng emulator ≥8 GB hoặc Android test; quyết định gate config và 47 MUST owner/device/legal/release đã defer. Không phát hành, không auto-merge, không done.md/Project Complete.
