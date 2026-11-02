@@ -2,7 +2,7 @@
 
 - Work ID: 2026-11-02-xtemplates-completion
 - Yêu cầu / outcome: “cài x-templates và hoàn thiện dự án”; bổ sung “cập nhật lên bản mới nhất” ngày 2026-11-02.
-- Trạng thái: In progress; chưa nghiệm thu Project Complete.
+- Trạng thái: Complete — vendor/harness và checkpoint đã merge; Project Complete chưa đạt.
 - Chủ trì / writer: phiên chính.
 - Mức rủi ro / số PR: S, một PR cập nhật khung và đối chiếu completion; không mở tính năng sản phẩm mới.
 - Scope / non-goal: cập nhật bản vendored + harness tương thích, giữ quyền và cổng X-Scanner. Không release, cloud, scheduler, auto-merge, OCR/depth, không thay đổi dữ liệu scan.
@@ -137,3 +137,5 @@ Self-review diff PASS; TDD F-081/F-082 đã RED trước; phần vendor/generate
 - Người dùng yêu cầu "xong rồi merge chuyển qua pha /complete": cấp quyền merge cặp PR #74/#73 theo phụ thuộc, vượt thứ tự tạo giữa cặp này và để #72 ngoài scope; cho phép phase-entry config theo skill /complete. Không cấp quyền release/signing/cloud hay xoá dữ liệu.
 - Fresh premerge #74 gate exit0:846 Flutter,11 JVM,34 repository; pinned OSV exit0/No issues found. Squash merge #74 tại5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de, expected-head5e076d5; native strict ruleset không bypass.
 - #73 merge main có 4 xung đột docs (CHANGELOG/CODEMAP/PROGRESS/TRAPS): giữ cả hai nội dung khung và security, hợp nhất trạng thái PROGRESS theo SHA merge thật; sửa câu SDK thiếu đã cũ trong CHANGELOG. Không xung đột app source. Chọn giữ hai scope và lịch sử, không ours/theirs toàn file; full gate trên cây tích hợp trước commit/CI.
+
+PR73 squash d22e622e421fc0656d46ea5aff93b0200b29e4b8, head976c71d; gate/hook846Flutter/11JVM/38repo + all CI SUCCESS, gồm main Guava fix. Nối /complete trong Work2026-11-03-complete-harden.

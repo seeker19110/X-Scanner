@@ -3,7 +3,7 @@
 | Thuộc tính | Giá trị |
 |---|---|
 | Goal ID | 2026-11-03-autopilot-hardening |
-| State | WAITING — owner L1 merge, UAT storage/device and explicit gate-config approval |
+| State | ACTIVE — maintenance đã merge; chủ repo yêu cầu tiếp /complete |
 | Owner | Chủ repo; root điều phối, security worker worktree riêng |
 | Base đã reconcile | a1959b449d19b4495171c7226d64e2e5f1aeb7bd, origin/main |
 | Quyền | Sửa/research/spec/branch/PR và gate trong scope; L1 người merge, không release/auto-merge/cloud/scheduler/quyền thiết bị |
@@ -40,3 +40,5 @@ Root đã review độc lập, hai lần gate integration/hook trên security br
 ## Operator authorization và reconcile — 2026-11-03
 
 Chủ repo yêu cầu merge rồi chuyển /complete; #74 merged 5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de sau fresh gate và OSV. #73 đang tích hợp main mới, giữ cả hai phía xung đột docs; cần fresh gate/CI trên head tích hợp trước merge. Quyền phase-entry xt.yaml theo /complete đã được cấp; release/signing/dữ liệu thật vẫn ngoài quyền. Ổ C đo lại2573086720 byte, ADB5039 rỗng; UAT chưa được chứng minh.
+
+03Nov scope nối /complete: #74 merged5a8ecad, #73 mergedd22e622 sau fresh gate/OSV và all CI green; DoD maintenance đạt. Tiếp PLAN-harden và audit13 nhóm với3 repair PR disjoint; DoD phần nối là fixes main+strict audit/floor, không gồm cấp quyền release hay chọn license. E2E/thiết bị và owner/legal/signoff còn mở, không Project Complete.

@@ -19,6 +19,7 @@ format_file: ""
 merge_autonomy: L1
 merge_risk_paths: ""
 # Tuỳ chọn, agent đọc và chạy trực tiếp (dev-task không chạy)
+# Device E2E absent: W-602/F-078 require dedicated Android and exact-APK evidence; floor stays RED.
 e2e: ""
 audit: ""
 
@@ -27,16 +28,18 @@ harness_permissions: own
 
 # Khoá mới của khung (bản 3.29.0 (3a3c1010e59690fa474f594a34b25ecc0756dd40)) — bật bằng cách bỏ "# "; vắng khoá = hành vi cũ
 # setup: ""             # cài phụ thuộc trước mỗi job CI (npm ci · pip install …); trống = bỏ qua
-# format_check: ""      # sàn M/L: kiểm format không ghi file, đỏ khi lệch
-# coverage: ""          # sàn M/L: test có ngưỡng coverage; artefact ra mktemp, không `|| true`
+format_check: "cd apps/mobile && dart format --output=none --set-exit-if-changed lib test tool"
+coverage: "cd apps/mobile && TZ=UTC LANG=C.UTF-8 LC_ALL=C.UTF-8 flutter test --branch-coverage && python3 ../../scripts/check-coverage.py --lcov coverage/lcov.info --baseline coverage-baseline.json"
 # commit_gate: fast
 # test_fast: ""         # test liên quan file đổi (XT_CHANGED_FILES, mỗi dòng một file); trống → test
 # merge_hard_exceptions: auto
-# delivery_phase: build
+delivery_phase: harden
 # e2e_setup: ""         # trước e2e: cài trình duyệt (vd npx playwright install --with-deps chromium)
 # e2e_affected: ""      # chỉ spec của lát đang làm (Gate mỗi task); trống = e2e
-# attack: ""            # tấn công thử: DAST (ZAP baseline/API scan) · fuzz API (schemathesis run …) trên bản chạy cục bộ/staging
-# perf: ""              # kiểm tải có ngưỡng, đỏ khi vượt ngân sách (vd k6 run với thresholds)
+# No server/DAST target; decoder regressions run in gate, broader fuzz/signoff remains owner work.
+attack: ""
+# No approved device p95/SLA yet (P2); do not invent a threshold or claim perf acceptance.
+perf: ""
 # preview: ""           # cách chạy thử bản trình người duyệt (`xt.py stage submit` ghi lại — ADR-0058); vd npm run preview
 # preview_smoke: ""     # Gate bản trình: `stage submit` chạy (qua guard), exit ≠ 0 → không trình (D-247); vd npm run build && npx playwright test smoke
 # claude_min_version: ""   # doctor cảnh báo khi Claude Code thấp hơn (LOOP-HARNESS-026)

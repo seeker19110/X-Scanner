@@ -2,7 +2,7 @@
 
 - Work ID: 2026-11-03-guava-security
 - Yêu cầu / outcome: root giao sửa GHSA-xxph-c9ww-hj94/CVE-2026-102554 phát hiện bởi CI PR #73; PR riêng theo docs/ops/VULN-SLA.md.
-- Trạng thái: Worker commit 8efc3ce hoàn tất; root review/validation + integration docs, PR/CI/owner L1 merge còn chờ.
+- Trạng thái: Complete — PR74 đã merge, không còn finding Guava trên main.
 - Chủ trì / writer: guava_security; root review/tích hợp và làm mọi thao tác đối ngoại.
 - Mức rủi ro / số PR: S, một PR dependency/security config, không tính năng app.
 - Scope: settings.gradle.kts, app/build.gradle.kts, hai lockfile Gradle và hồ sơ này. Không thay app source/runtime dependencies, quyền Android, gate/CI, exception OSV, baseline hay secret.
@@ -79,3 +79,5 @@ Chưa nghiệm thu. Root sẽ đối chiếu artifacts/gate và tạo PR; L1 gi�
 - Root adds CODEMAP/CHANGELOG/TRAPS/PROGRESS in the same security PR; no follow-up cleanup PR. Full gate and pinned OSV will be repeated on these final files before the root docs commit. FIFO/L1 remain owner-controlled; no merge or auto-merge authorized.
 
 - Root final validation on unchanged integration tree: full gate exit0 (846 Flutter, 11 JVM/0 failures/errors/skips, 34 repository checks, analyzer0, format70/0 changes), read complete output. Log: /home/liend/.local/share/x-scanner/guava-root-gate.log. Pinned OSV SHA256 matched CI; root scan exit0 / No issues found, same two existing unrelated ignores; log guava-root-osv.log. Native precommit hook will enforce gate again on the final docs.
+
+PR74 squash5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de, expected head5e076d5; fresh gate846Flutter/11JVM/34repo, pinnedOSV exit0, allCI SUCCESS; root theo lệnh merge của owner03Nov.

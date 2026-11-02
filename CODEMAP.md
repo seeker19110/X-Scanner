@@ -83,3 +83,5 @@ and `apps/mobile/android/app/build.gradle.kts` (lazy lint/UTP configurations). R
 the actual resolver; keep runtime configuration GAV memberships unchanged. Regression:
 `apps/mobile/test/build_dependency_security_test.dart`. Run `bash scripts/dev-task.sh gate` and the existing
 OSV source scan; use `docs/ops/dependency-updates.md`. No scan exceptions were added for CVE-2026-102554.
+
+Harden /complete: `docs/autopilot/PLAN-harden-2026-11-03.md`, audit ledger/report ở `docs/ops/`; xt.yaml thêm alias format/coverage giữ thresholds, E2E chưa có vẫn đỏ.
