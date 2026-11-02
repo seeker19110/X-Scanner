@@ -5,7 +5,7 @@
 | Goal ID | 2026-11-03-autopilot-hardening |
 | State | ACTIVE — maintenance đã merge; chủ repo yêu cầu tiếp /complete |
 | Owner | Chủ repo; root điều phối, security worker worktree riêng |
-| Base đã reconcile | a1959b449d19b4495171c7226d64e2e5f1aeb7bd, origin/main |
+| Base đã reconcile | d22e622e421fc0656d46ea5aff93b0200b29e4b8, main sau #74/#73 |
 | Quyền | Sửa/research/spec/branch/PR và gate trong scope; L1 người merge, không release/auto-merge/cloud/scheduler/quyền thiết bị |
 | Ngân sách | Phiên /autopilot hiện tại, không paid API; không chạy hai Gradle gate cùng lúc trên host 6 GB |
 
@@ -19,8 +19,8 @@ DoD của goal: hai outcome có PR riêng được review, full gate local và C
 
 | Slice | Phạm vi | PR / state | Writer / files |
 |---|---|---|---|
-| S1 | X-Templates 3.29.0 + F-081/F-082 + toolchain host | #73, f166056, local gate PASS; CI supply-chain đỏ do Guava đã có ở base | root, harness/vendor và hồ sơ khung |
-| S2 | GHSA-xxph-c9ww-hj94/CVE-2026-102554, Guava build/lint/UTP | [PR #74](https://github.com/seeker19110/X-Scanner/pull/74), head5e076d5; local/root gate + OSV PASS, CI Android pending, chưa merge | guava_security, /home/liend/.local/share/x-scanner/worktrees/guava-security, branch codex/guava-security-fix; hai Gradle build/settings files, hai lockfiles, 3-case regression và work record; root đã thêm docs sau bàn giao |
+| S1 | X-Templates3.29.0 + F081/F082 + toolchain | #73 merged d22e622, head976c71d full gate và all CI xanh | root, vendor/harness/docs; maintenance Complete |
+| S2 | GHSA-xxph-c9ww-hj94, Guava build tools33.7.2 | #74 merged5a8ecad, head5e076d5 gate/OSV/all CI xanh, runtime graph unchanged | guava_security và root; maintenance Complete |
 
 Root sở hữu PROGRESS/CODEMAP/CHANGELOG/goal; worker không sửa các file đó, không push/PR/merge. Không có hai writer cùng file, không chạy gate hai worktree đồng thời. Root review diff + kiểm độc lập trước PR. Discovery này không cấp quyền merge, không tự đổi FIFO; owner quyết thứ tự khi cần security dependency đi trước PR khung.
 
@@ -33,9 +33,9 @@ Root sở hữu PROGRESS/CODEMAP/CHANGELOG/goal; worker không sửa các file �
 
 ## Current truth
 
-Root đã review độc lập, hai lần gate integration/hook trên security branch đều PASS (846 Flutter +11 JVM +34 repository); OSV đúng binary/config CI exit0, runtime graph 24970 byte identical. PR #74 OSV và hygiene CI SUCCESS, Android còn chạy ở checkpoint này. PR #73 Android CI SUCCESS trên f166056 nhưng supply-chain còn đỏ do base Guava; owner cần review thứ tự và merge fix riêng trước khi reconcile nhánh khung. Không waiver/skip scan, không coi finding trên main đã đóng.
+Hai maintenance outcome đã merge theo lệnh owner03Nov, không waiver Guava: #74/5a8ecad rồi #73/d22e622, fresh gates và all CI xanh. /complete đang ở PLAN-harden-2026-11-03.md: repair PR#76/#77/#78 đã có TDD và full gate riêng; kiểm kết hợp cả3 PASS851Flutter/11JVM/38repo, coverage96.31/92.41. Follow-up77 chỉ sửa test đợi UI-ready; CI hiện tại xem trực tiếp PR, không dùng snapshot cũ làm trạng thái mới.
 
-`loop verify --all` trên nhánh khung đã source đúng env: T-101/T-102 exit0, stable=true, nhưng overall exit1 vì thiếu format_check/coverage/e2e trong xt.yaml. Format/coverage thực vẫn PASS trong gate hiện hành; không tạo alias giả hay coi widget test là device E2E. Đổi xt.yaml/gate là điểm dừng cần owner; W-602/F-078 cũng chưa có bằng chứng thiết bị. DoD goal/project chưa đạt; giữ hồ sơ working.md và chờ quyền/tài nguyên thật.
+Phase/audit PR#79 khai harden/format/coverage thật,13 nhóm được rà và main còn findings mở vì source repairs chưa merge. Verify-all trên checkpoint7b268c3 stable=true, task201/202 và2floor commands exit0, overall đỏ chỉ thiếu E2E. Strict audit/release NO-GO: cần owner L1 review/merge, tài nguyên/device E2E và47 owner/legal items; không Project Complete, không quyền release/signing/license.
 
 ## Operator authorization và reconcile — 2026-11-03
 

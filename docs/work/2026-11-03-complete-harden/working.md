@@ -21,3 +21,6 @@
 - Scope không gồm Dependabot#72, đổi ruleset/scheduler/auto-merge, cấp quyền KVM, chọn giấy phép hay phát hành. Sổ owner/device/legal47 MUST không được tự tick hoàn tất.
 ## Kế hoạch sửa tự duyệt sau xác minh — 2026-11-03
 - D-009 sửa ba slice theo bằng chứng/verifier/gate chi tiết tại AUDIT-REPORT-2026-11-03.md (canonical, giữ lịch sử F001–F083); UI guard không CAS/schema, owner release sau idle/identity, UTF8 cap trước write và finite corners. Mỗi fix test RED trước, file/worktree disjoint, root docs/gates, không nested/parallel Flutter/Gradle.
+
+Checkpoint tích hợp:3 source patches cùng full gate PASS851Flutter/11JVM/38repo, coverage96.31/92.41; lần đầu bắt app-smoke đợi controller.status thay vì FAB-ready, sửa test77 giữ mọi held-save/identity assertion, reviewer-alt approve, nhánh77/hook846 xanh rồi CI head mới. Giữ snapshot integration trong stash và patch/tree receipt user-local, không commit app source vào PR phase. Goal current truth được cập nhật theo SHA merge thật; không để bảng pending cũ làm trạng thái hiện tại.
+Quyết định §3d: gói audit/PLAN/mergereceipts và checkpoint atomic trong PR metadata, dù hơn150 dòng hồ sơ; nhận làn review chuẩn/max, không nới ngưỡng fast-lane150 hay native gate, không mở PR thứ6 vượt WIP. Ít quy trình hơn và trạng thái đúng ưu tiên hơn tách hồ sơ qua PR sau; source fixes riêng vẫn≤150 dòng.
