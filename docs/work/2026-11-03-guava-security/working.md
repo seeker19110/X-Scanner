@@ -2,11 +2,11 @@
 
 - Work ID: 2026-11-03-guava-security
 - Yêu cầu / outcome: root giao sửa GHSA-xxph-c9ww-hj94/CVE-2026-102554 phát hiện bởi CI PR #73; PR riêng theo docs/ops/VULN-SLA.md.
-- Trạng thái: In progress, chưa commit/PR/merge.
+- Trạng thái: Worker commit 8efc3ce hoàn tất; root review/validation + integration docs, PR/CI/owner L1 merge còn chờ.
 - Chủ trì / writer: guava_security; root review/tích hợp và làm mọi thao tác đối ngoại.
 - Mức rủi ro / số PR: S, một PR dependency/security config, không tính năng app.
 - Scope: settings.gradle.kts, app/build.gradle.kts, hai lockfile Gradle và hồ sơ này. Không thay app source/runtime dependencies, quyền Android, gate/CI, exception OSV, baseline hay secret.
-- Nhánh / base SHA: codex/guava-security-fix @ a1959b449d19b4495171c7226d64e2e5f1aeb7bd, worktree /tmp/x-scanner-guava-security.
+- Nhánh / base SHA: codex/guava-security-fix @ a1959b449d19b4495171c7226d64e2e5f1aeb7bd, worktree /home/liend/.local/share/x-scanner/worktrees/guava-security.
 
 ## Kế hoạch và hợp đồng
 
@@ -14,7 +14,7 @@
 2. OSV RED trên locks trước sửa; ghi graph releaseRuntimeClasspath trước.
 3. Constraint tối thiểu chỉ build classpath/lint/UTP, regenerate locks thật; so toàn bộ delta và release runtime.
 4. OSV GREEN, full gate thật, review diff. Root giữ PROGRESS/CODEMAP/CHANGELOG; không ghi chung file.
-Approved for implementation — phiên chính giao theo ủy quyền §3d, 2026-11-03. Config-only dependency upgrade áp ngoại lệ TDD config thuần; không thêm business logic/nhánh xử lý lỗi hay quyền. OSV RED trước vẫn được giữ làm bằng chứng.
+Approved for implementation — phiên chính giao theo ủy quyền §3d, 2026-11-03. Không thêm business logic/nhánh xử lý lỗi hay quyền sản phẩm. Selector Kotlin có nhánh chọn cấu hình được kiểm bằng OSV RED trước sửa và resolver/GREEN thật; chỉ tài liệu và lock sinh tự động áp ngoại lệ đóng. Persistent regression cũng RED trước regenerate lock.
 
 ## Nghiên cứu và quyết định
 
@@ -69,3 +69,13 @@ Chưa nghiệm thu. Root sẽ đối chiếu artifacts/gate và tạo PR; L1 gi�
 - OSV repeated after the full build at new path: /home/liend/.local/share/x-scanner/guava-osv-final.log, No issues found; no exception changes.
 - Self-review diff: only four Gradle files, one regression file, this work record. Existing APK runtime package+versions unaffected; source app, Android permissions, baselines, CI/gates/hooks and suppressions unchanged. Root must add its assigned integration documentation to the same dependency PR before final review/merge.
 - Commit hook will rerun full gate, not skipped. Work remains working.md pending actual PR/CI/owner L1 merge; host gates are not device, iOS, OCR, quality or release acceptance.
+
+
+## Root integration review — 2026-11-03
+
+- Inspected the four Gradle files/lock deltas and the 3-case regression; no source-app, permission, CI/gate, baseline or OSV-exception change. Existing OSV RED predates source constraints; persistent floor regressions also ran RED before lock regeneration.
+- Root independently resolved releaseRuntimeClasspath on baseline/framework and patched worktrees, byte-identical SHA256 db382ab69009b17cc381437eb0da389fc40ef5a580f6a55a0b6225a6da135994 (24970 bytes). This is fresh resolver output, not acceptance based only on a worker claim.
+- Official release notes read by worker across 33.4.1–33.7.2: 33.4.3 removes JSR-305; 33.4.4 moves Checker Framework nullness to JSpecify; modular-JAR/Unsafe work in 33.4.5–33.4.8 and Java9/10 manifest correction in 33.7.1 are exercised by Java21 gate. Android-flavor minSdk changes do not apply to this JRE-only build classpath. Sources: https://github.com/google/guava/releases/tag/v33.4.3 , https://github.com/google/guava/releases/tag/v33.4.4 , https://github.com/google/guava/releases/tag/v33.7.1 , https://github.com/google/guava/releases/tag/v33.7.2 .
+- Root adds CODEMAP/CHANGELOG/TRAPS/PROGRESS in the same security PR; no follow-up cleanup PR. Full gate and pinned OSV will be repeated on these final files before the root docs commit. FIFO/L1 remain owner-controlled; no merge or auto-merge authorized.
+
+- Root final validation on unchanged integration tree: full gate exit0 (846 Flutter, 11 JVM/0 failures/errors/skips, 34 repository checks, analyzer0, format70/0 changes), read complete output. Log: /home/liend/.local/share/x-scanner/guava-root-gate.log. Pinned OSV SHA256 matched CI; root scan exit0 / No issues found, same two existing unrelated ignores; log guava-root-osv.log. Native precommit hook will enforce gate again on the final docs.
