@@ -83,3 +83,5 @@ and `apps/mobile/android/app/build.gradle.kts` (lazy lint/UTP configurations). R
 the actual resolver; keep runtime configuration GAV memberships unchanged. Regression:
 `apps/mobile/test/build_dependency_security_test.dart`. Run `bash scripts/dev-task.sh gate` and the existing
 OSV source scan; use `docs/ops/dependency-updates.md`. No scan exceptions were added for CVE-2026-102554.
+
+P1Migration kiểm cap UTF8 output trước journal và dùng readManifestBytes khi recovery; withCornerMoved kiểm finite trước clamp. Regression: p1_migration_test/quad_editing_test (AUD-DATA-002/CODE-001).
