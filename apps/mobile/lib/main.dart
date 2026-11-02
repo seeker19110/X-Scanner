@@ -107,8 +107,8 @@ class _XScannerAppState extends State<XScannerApp> {
   /// the app.
   final ValueNotifier<ThemeMode> _themeMode = ValueNotifier(ThemeMode.dark);
 
-  /// The last controller of each opened document; a reopened document waits
-  /// for it to finish (PR-4b.2 review F2).
+  /// Active controllers and closed controllers whose writes are still running;
+  /// a reopened document waits for the previous writes (PR-4b.2 review F2).
   final Map<String, SessionController> _last = {};
 
   SessionController _open(DocumentStore store, ScanDocument document) =>
@@ -117,6 +117,12 @@ class _XScannerAppState extends State<XScannerApp> {
         document,
         after: _last[document.id]?.idle,
       );
+
+  Future<void> _releaseClosed(SessionController controller) async {
+    await controller.idle;
+    final id = controller.document.id;
+    if (identical(_last[id], controller)) _last.remove(id);
+  }
 
   @override
   void dispose() {
@@ -143,6 +149,7 @@ class _XScannerAppState extends State<XScannerApp> {
           onToggleTheme: _toggleTheme,
           documentScreen: (context, store, document) => _DocumentPage(
             open: () => _open(store, document),
+            onClosed: _releaseClosed,
             themeMode: _themeMode,
             onToggleTheme: _toggleTheme,
           ),
@@ -157,11 +164,13 @@ class _XScannerAppState extends State<XScannerApp> {
 class _DocumentPage extends StatefulWidget {
   const _DocumentPage({
     required this.open,
+    required this.onClosed,
     required this.themeMode,
     required this.onToggleTheme,
   });
 
   final SessionController Function() open;
+  final Future<void> Function(SessionController) onClosed;
   final ValueListenable<ThemeMode> themeMode;
   final VoidCallback onToggleTheme;
 
@@ -181,6 +190,7 @@ class _DocumentPageState extends State<_DocumentPage> {
   @override
   void dispose() {
     _controller.dispose();
+    unawaited(widget.onClosed(_controller));
     super.dispose();
   }
 

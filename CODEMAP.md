@@ -83,3 +83,5 @@ and `apps/mobile/android/app/build.gradle.kts` (lazy lint/UTP configurations). R
 the actual resolver; keep runtime configuration GAV memberships unchanged. Regression:
 `apps/mobile/test/build_dependency_security_test.dart`. Run `bash scripts/dev-task.sh gate` and the existing
 OSV source scan; use `docs/ops/dependency-updates.md`. No scan exceptions were added for CVE-2026-102554.
+
+XScannerApp._releaseClosed bỏ owner chỉ sau route dispose + idle, so identity để giữ successor; hồi quy handoff/save ở app_test.dart (AUD-PERF-001).
