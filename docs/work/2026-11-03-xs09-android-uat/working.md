@@ -1,7 +1,7 @@
 # Công việc: XS-09 migration Android UAT trên Windows WHPX
 
 - Work ID: 2026-11-03-xs09-android-uat
-- Trạng thái: BLOCKED trước guest boot — thiếu dung lượng ổ Windows; chưa nghiệm thu.
+- Trạng thái: W-602/F-078 đạt UAT kỹ thuật, chờ merge hồ sơ.
 - Yêu cầu / outcome: nối /autopilot hoàn thiện P1/XS-09, xử lý W-602/F-078 bằng kiểm Android thật trên emulator, không thay source app.
 - Scope / non-goal: chỉ SDK/AVD đã có của phiên18Oct, copy trạng thái test tổng hợp, kiểm APK debug/thư viện/migration/byte gốc/StatFs/picker và mở lại. Không thay quyền host, không dữ liệu thật, không release/signing/cloud; không xoá/ghi đè AVD/bằng chứng cũ.
 - Rủi ro / PR: S test/doc trên dữ liệu tổng hợp, đưa bằng chứng vào PR #73 (cùng yêu cầu completion), không thêm PR tính năng.
@@ -19,10 +19,17 @@
 
 Giữ working.md đến khi chứng minh DoD và PR đã merge. Evidence mới tách riêng, chỉ fixture tổng hợp; không đính kèm raw userdata images/encryption keys vào Git hoặc dịch vụ.
 
-## Kết quả thật — chưa chạy UAT
+## Hai lần boot ban đầu — lịch sử
 
 - Hai lần boot AVD mới đều dừng trước guest: cần 7372.80 MB, lần đầu có 4596.31 MB, lần hai 2843.23 MB. ADB không có thiết bị; không install/clear/uninstall APK, không chạy migration. Dừng thử sau hai lỗi cùng nguyên nhân, không né kiểm dung lượng.
 - AVD P1 cũ giữ nguyên; bản clone phục vụ phiên này được chuyển nguyên trạng sang user-local Linux để giữ lại. Không đưa userdata/key/APK vào Git hay dịch vụ. Chỉ dọn archive toolchain mới tải, đã giải nén và kiểm hash; không compact/shutdown WSL hay xoá dữ liệu cá nhân.
 - Artifact Android CI run41489001004/artifact13163652089 đã tải và kiểm SHA256SUMS thật; source f1660564ef7e96b4f66f1bb86c616251c539e3ab, APK SHA256 f0e4376cca2cd0085e5a11b75f80efd89dca75c6ff44c9ce93d5ddc91f213f0e. Receipt: `docs/ops/evidence/xs09-uat-environment-2026-11-03.json`. Đây là provenance, không phải UAT PASS.
 - Đối chiếu ba frozen synthetic originals với ac9.json: hash/99780 byte mỗi ảnh khớp. Chưa có kiểm byte sau migration. Local APK signer khác APK P1; CI APK chưa được kiểm signer/install nên không kết luận khả năng cài đè.
 - Bước cần operator: giải phóng ít nhất 8 GB trên ổ Windows chạy emulator hoặc nối Android test. WHPX đã dùng được, không cần đổi quyền KVM theo câu hỏi async cũ. W-602/F-078 và Project Complete vẫn mở.
+
+## Nghiệm thu Android — 2026-11-03
+- Sau khi chủ repo giải phóng dung lượng, AVD mới API 36 boot bằng WHPX. Theo §3d, dùng APK debug build cục bộ từ main sạch `15548048210c0b087635f2be9240b49b17f2f986` trong T-201 vì đường tải artifact CI chậm. CI main run 41635715890 xanh riêng. So SHA APK cài với bản build và xác minh signer công khai.
+- Seed fixture schema 1 dựng lại trước lần mở đầu. Ba ảnh gốc trùng hash AC9. Manifest khác hash lịch sử và signer APK khác bản P1, nên kết luận áp cho migration từ fixture.
+- Migration thành một tài liệu ba trang, đúng thứ tự/quad/xoay/revision, byte gốc và rollback giữ nguyên qua hai lần mở lại. Native StatFs đi qua nhánh thành công.
+- Hủy camera giữ manifest. Camera và photo picker mỗi lần lưu đúng một trang. Sau `am kill` lúc camera mở, trang dự trữ xuất hiện đúng một lần trong tài liệu sở hữu và tài liệu khác giữ nguyên qua hai lần mở lại. PDF 5 trang mở qua Print Preview, bản share trùng byte file xuất.
+- Nghiệm thu W-602/F-078 theo §3d. Bằng chứng `docs/ops/evidence/xs09-android-uat-2026-11-03.json`. Sàn E2E tự động và signoff theo PLAN-harden còn mở.

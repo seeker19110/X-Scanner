@@ -26,7 +26,7 @@ Blueprint: **189 đạt · 166 không áp dụng · 47 còn mở**. Mỗi mục 
 | Tạo nhãn `major` trên GitHub | 1 thao tác | OPS-MAINT-005 |
 | Phát hành: chọn kênh, khoá upload/Play App Signing, SemVer tự động, tag/Release, rollback, crash reporting, Android vitals | quyết định phát hành | WF-REL-001, WF-REL-003, WF-REL-004, OPS-DEPLOY-001, PRF-MOB-001, PRF-MOB-008, PRF-MOB-009, WF-DOC-008 |
 | iOS: build bằng Xcode 26 trên macOS, Play Data safety + URL chính sách riêng tư | máy macOS, tài khoản store | PRF-MOB-003, PRF-MOB-004 |
-| Thiết bị thật/emulator có tăng tốc: W-602, TalkBack/bàn phím có biên bản, E2E, font tiếng Việt, số đo hiệu năng, spike camera | thiết bị | STD-A11Y-004, PRF-MOB-011, QA-E2E-001, UX-DS-006, QA-PERF-006, XC-PERF-003, PM-RISK-003 |
+| Thiết bị thật/emulator có tăng tốc: TalkBack/bàn phím có biên bản, E2E, font tiếng Việt, số đo hiệu năng, spike camera | thiết bị | STD-A11Y-004, PRF-MOB-011, QA-E2E-001, UX-DS-006, QA-PERF-006, XC-PERF-003, PM-RISK-003 |
 | Pháp lý/quyền riêng tư: luật sư xác nhận khung pháp lý, cơ sở pháp lý, mã hoá at-rest, đầu mối pháp lý sự cố, ngày diễn tập năm | luật sư/chủ repo | PM-RISK-007, CMP-PRIV-001, BASE-SEC-013, OPS-IR-010, CMP-AUDIT-010 |
 | Cấu trúc/quy trình cần duyệt: chia `lib/` theo miền, script đối chiếu AC/S-NNN ↔ test, README smoke từ clone sạch, hook commit < 30 s | thay đổi lớn cần duyệt | ARC-MOD-008, WF-SDD-003, PM-SPEC-004, BASE-DOC-005, XC-DX-001, XC-DX-006 |
 | Harness khung vendored (`.xtemplates/`, có hash): guard hỏi khi sửa `analysis_options.yaml`/migration Dart, `skip:` của Dart test, độ sâu subagent; tên model trong `CLAUDE.md` | sửa ở khung X-Templates | LOOP-ORCH-001, LOOP-CI-001, LOOP-STOP-003, QA-COV-008, XC-DOCAI-005 |
@@ -45,11 +45,11 @@ Blueprint: **189 đạt · 166 không áp dụng · 47 còn mở**. Mỗi mục 
 | Thay đổi hành vi app (cần spec duyệt) | chuẩn hoá NFC tên, bắt lỗi toàn cục, giảm chuyển động, i18n/ARB, dialog xoá nêu hậu quả, trần đọc `document.json` | BASE-DATA-002, UX-CONTENT-002, XC-I18N-001/003/005/009, BASE-ERR-002, UX-VISUAL-001, UX-STATE-008, UX-DS-003/006, UX-RESP-001, XC-PERF-006, XC-UNITS-009 |
 | Tài liệu quản trị dự án | threat model, sổ rủi ro, runbook, MoSCoW, spec dạng Given/When/Then | SEC-TM-001/003/005/006, SEC-SECRET-011, OPS-IR-001/010, CMP-AUDIT-010, PM-REQ-001/007, PM-HANDOVER-002/005, PM-PRIO-001/003/004, PM-RISK-001/003/006, PM-SPEC-001/003/004/020, WF-SDD-002/003, WF-TEAM-003/004, WF-DOC-008, ARC-STYLE-001, ARC-MOD-008, BASE-DOC-003, BASE-REPO-007/013, XC-DOCAI-001/004/005, XC-PERF-001/004, XC-GREEN-001/005/007, QA-STATIC-005 |
 
-Cùng việc chờ ngoài blueprint: **W-602** chạy APK có thư viện trên emulator/thiết bị; **F-077** hai gate song song ở hook commit (`docs/ops/COMPREHENSIVE-AUDIT-STATUS.md`).
+W-602 đã đạt UAT có kiểm soát (`docs/ops/evidence/xs09-android-uat-2026-11-03.json`). F-077 đã đóng qua #65. `release-check` trên main `1554804` còn NO-GO vì sàn E2E, audit và các mục ký duyệt.
 
 ## Đề xuất thứ tự cho chủ repo
 
-1. F-077 + nhóm cổng/CI (một quyết định mở khoá nhiều mục).
+1. Nhóm cổng/CI, gồm E2E tự động.
 2. LICENSE + khung pháp lý/chuẩn nhắm tới (đổi được thành ghi PROJECT.md trong một PR).
-3. W-602 trên máy có tăng tốc.
+3. Đo hiệu năng và trợ năng thiết bị theo tiêu chí đã duyệt.
 4. Duyệt spec nhỏ cho nhóm "thay đổi hành vi app" (NFC tên, bắt lỗi toàn cục) trước XS-10.

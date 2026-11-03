@@ -35,7 +35,7 @@ Root sở hữu PROGRESS/CODEMAP/CHANGELOG/goal; worker không sửa các file �
 
 Hai maintenance outcome đã merge theo lệnh owner03Nov, không waiver Guava: #74/5a8ecad rồi #73/d22e622, fresh gates và all CI xanh. /complete đang ở PLAN-harden-2026-11-03.md: PR #76, #77 và #78 đã merge, main `2f9eb53e810b84ef71b13ea76830a8ffd999edbd`. Gate và CI tích hợp #78 qua 851 Flutter, 11 JVM và 38 repository. Coverage 96.31% dòng và 92.41% nhánh.
 
-Phase/audit PR#79 khai harden/format/coverage thật,13 nhóm được rà. Sổ audit ghi bốn phát hiện đã sửa trên main. Checkpoint trước tích hợp thiếu E2E. Emulator đã boot sau khi chủ repo giải phóng dung lượng. Cần APK đúng SHA main, UAT, sàn E2E và signoff.
+PR #79 đã merge tại `15548048210c0b087635f2be9240b49b17f2f986` và vào harden. Sổ audit ghi bốn phát hiện đã sửa. W-602/F-078 đạt UAT với APK debug build từ main. Sàn E2E tự động và signoff còn mở.
 
 ## Operator authorization và reconcile — 2026-11-03
 

@@ -149,3 +149,7 @@ Re-audit nhóm bị ảnh hưởng: `docs/ops/COMPREHENSIVE-AUDIT-STATUS.md` m�
 - [x] `PROGRESS.md` phản ánh trạng thái; WAITING còn lại: W-602 (ngoài DoC P1, thuộc XS-09/goal nâng cấp).
 
 Kết luận: kế hoạch hoàn thiện P1 **đóng**. Việc mới là chu kỳ mới.
+
+## Đối chiếu W-602 — 2026-11-03
+
+W-602 đạt UAT kỹ thuật trên emulator WHPX API 36. Xem `docs/ops/evidence/xs09-android-uat-2026-11-03.json` cho migration, StatFs, picker và mở lại.
