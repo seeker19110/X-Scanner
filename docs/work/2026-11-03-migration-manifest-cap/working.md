@@ -19,3 +19,8 @@
 Root nhập frozen staged patch vào codex/review-migration-boundaries từ maind22e622 (tree-trùng candidate976c71d); reviewer-alt max APPROVE source, không giả runtime model comparison. Cùng PR có CODEMAP/TRAPS F086/F087/PROGRESS. Đang full gate trước commit/CI, chưa merge.
 
 Root final PASS4/4:848 Flutter,11 JVM,38 repository; analyzer0; format70/0; licenses142; coverage96.29% lines/92.26% branches; manifest/16KB/size pass; log complete-boundaries-full-gate.log, native hook sẽ kiểm lại. RED gồm2 matcher failures và1 intentional first-write _Killed tripwire, không phải compile/environment failure. Giữ originals/oversized target, không device/release acceptance.
+
+## Đồng bộ main — 2026-11-03
+- Chủ repo duyệt thứ tự #76 → #77 → #78 → #79. #76 đã merge tại `90b07c6`, #77 tại `b9a3f192b10e9d6163dc93b2136a30a23df92613`.
+- Giữ hồ sơ và mã của cả hai phía khi giải xung đột CODEMAP, PROGRESS và TRAPS theo §3d. Chạy full gate và CI cho cây tích hợp trước merge.
+- Full gate tích hợp PASS4/4 với 851 Flutter, 11 JVM, 38 repository. Coverage 96.31% dòng và 92.41% nhánh. Analyzer không báo vấn đề, format 70 file không đổi. Log `approved-78-integrated-gate.log`.

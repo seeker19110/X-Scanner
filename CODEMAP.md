@@ -84,4 +84,6 @@ the actual resolver; keep runtime configuration GAV memberships unchanged. Regre
 `apps/mobile/test/build_dependency_security_test.dart`. Run `bash scripts/dev-task.sh gate` and the existing
 OSV source scan; use `docs/ops/dependency-updates.md`. No scan exceptions were added for CVE-2026-102554.
 
+XScannerApp._releaseClosed bỏ owner chỉ sau route dispose + idle, so identity để giữ successor; hồi quy handoff/save ở app_test.dart (AUD-PERF-001).
+Một editor/create route qua LibraryScreen._withDocumentRoute; hồi quy duplicate InkWell/Semantics/create ở library_screen_test.dart (AUD-DATA-001).
 P1Migration kiểm cap UTF8 output trước journal và dùng readManifestBytes khi recovery; withCornerMoved kiểm finite trước clamp. Regression: p1_migration_test/quad_editing_test (AUD-DATA-002/CODE-001).

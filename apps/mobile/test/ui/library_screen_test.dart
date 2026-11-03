@@ -134,6 +134,57 @@ void main() {
     return controller;
   }
 
+  for (final second in ['same row', 'other row']) {
+    testWidgets('AUD-DATA-001 duplicate activation: $second', (tester) async {
+      writeDocument(1, title: 'Hoá đơn');
+      writeDocument(2, title: 'Biên nhận');
+      await open(tester);
+      final newButton = find.byType(FloatingActionButton);
+      final row = tester
+          .widget<InkWell>(find.widgetWithText(InkWell, 'Hoá đơn'))
+          .onTap!;
+      final other = tester
+          .widget<Semantics>(find.bySemanticsLabel(RegExp('Biên nhận,.*')))
+          .properties
+          .onTap!;
+      row();
+      (second == 'same row' ? row : other)();
+      await pumpUntil(tester, () => opened.isNotEmpty);
+      expect(opened, hasLength(1));
+      row();
+      await tester.pumpAndSettle();
+      expect(opened, hasLength(1));
+      await tester.pageBack();
+      await pumpUntil(
+        tester,
+        () =>
+            newButton.evaluate().isNotEmpty &&
+            tester.widget<FloatingActionButton>(newButton).onPressed != null,
+      );
+      row();
+      await pumpUntil(tester, () => opened.length > 1);
+      expect(opened, hasLength(2));
+      await tester.pumpWidget(const SizedBox.shrink());
+      row();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('AUD-DATA-001 repeated create reserves one document', (
+    tester,
+  ) async {
+    final controller = await open(tester);
+    final create = tester
+        .widget<FloatingActionButton>(find.byType(FloatingActionButton))
+        .onPressed!;
+    create();
+    create();
+    await pumpUntil(tester, () => opened.isNotEmpty);
+    expect(opened, hasLength(1));
+    expect(controller.entries, hasLength(1));
+  });
+
   group('library shows every state (AC-11)', () {
     testWidgets('loading while migrating, then empty', (tester) async {
       final hold = Completer<MigrationOutcome>();

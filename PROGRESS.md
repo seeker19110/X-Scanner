@@ -4,7 +4,9 @@
 > Lịch sử đến 2026-10-24: `docs/changelog/2026-10-progress-history.md` · CHANGELOG: `CHANGELOG.md` · Goal đang chờ: `docs/goals/2026-10-18-upgrade-completion.md` (WAITING)
 
 ## Đang làm
-- /complete input boundaries: `docs/work/2026-11-03-migration-manifest-cap/working.md`; main đã gồm #74/#73 d22e622. Chặn manifest output quá cap và nonfinite corners, không đổi schema/page cap/permission.
+- /complete input boundaries: `docs/work/2026-11-03-migration-manifest-cap/working.md`; main b9a3f19 đã gồm #74/#73/#76/#77. Chặn manifest output quá cap và nonfinite corners, không đổi schema/page cap/permission.
+- Lifecycle đã merge ở #77, SHA `b9a3f192b10e9d6163dc93b2136a30a23df92613`. Hồ sơ `docs/work/2026-11-03-closed-controller-release/working.md`.
+- Guard một editor đã merge: [PR #76](https://github.com/seeker19110/X-Scanner/pull/76), SHA `90b07c6f53864a70225e1b9662890016fb221e3a`; hồ sơ `docs/work/2026-11-03-single-editor-guard/working.md`.
 - XS-09 Android UAT: `docs/work/2026-11-03-xs09-android-uat/working.md`; WHPX usable nhưng 2 lần boot thiếu chỗ (cần 7.37 GB), chưa chạy migration; cần ≥8 GB trống trên ổ Windows hoặc Android test.
 - Goal hai slice khung + security CI: `docs/goals/2026-11-03-autopilot-hardening.md`; Guava [PR #74](https://github.com/seeker19110/X-Scanner/pull/74) đã squash merge tại `5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de`; gate/OSV/CI xanh, runtime app không đổi. Hồ sơ: `docs/work/2026-11-03-guava-security/working.md`.
 - Cập nhật X-Templates 3.29.0 và kiểm chứng completion: `docs/work/2026-11-02-xtemplates-completion/working.md`; toolchain đã khôi phục; gate PASS 4/4 (843 Flutter + 11 JVM), PR #73 đang đồng bộ với main sau #74 theo lệnh merge và chuyển /complete của chủ repo; verify-all đỏ do 3 khóa sàn khung còn thiếu; theo kế hoạch `docs/autopilot/PLAN-2026-11-02-toolchain.md`.
