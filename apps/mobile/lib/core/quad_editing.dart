@@ -18,6 +18,7 @@ Point<double> cornerOf(PageQuad quad, QuadCorner corner) => switch (corner) {
 /// (self-intersecting, concave, too small or non-finite). The caller keeps
 /// the previous quad in that case.
 PageQuad? withCornerMoved(PageQuad quad, QuadCorner corner, Point<double> to) {
+  if (!to.x.isFinite || !to.y.isFinite) return null;
   final p = Point<double>(_unit(to.x), _unit(to.y));
   Point<double> at(QuadCorner c) => c == corner ? p : cornerOf(quad, c);
   try {
@@ -32,7 +33,7 @@ PageQuad? withCornerMoved(PageQuad quad, QuadCorner corner, Point<double> to) {
   }
 }
 
-/// Clamps [v] into `[0, 1]`; NaN stays NaN so [PageQuad] rejects it.
+/// Clamps finite [v] into `[0, 1]`.
 double _unit(double v) => v.clamp(0.0, 1.0);
 
 /// Where the normalized point [p] of the unrotated image appears after the

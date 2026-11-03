@@ -1,10 +1,11 @@
 # PROGRESS.md — X-Scanner
 
-> Giai đoạn hiện tại: P1 + XS-09 thư viện đã merge (#62); hoàn thiện P1 đóng (#63); harness autopilot (#64) và khoá gate F-077 (#65) đã merge; đang làm backlog MUST blueprint · Cập nhật: 2026-11-03 · Nhánh: `codex/review-closed-controller-release`
+> Giai đoạn hiện tại: P1 + XS-09 thư viện đã merge (#62); hoàn thiện P1 đóng (#63); harness autopilot (#64) và khoá gate F-077 (#65) đã merge; đang làm backlog MUST blueprint · Cập nhật: 2026-11-03 · Nhánh: `codex/review-migration-boundaries`
 > Lịch sử đến 2026-10-24: `docs/changelog/2026-10-progress-history.md` · CHANGELOG: `CHANGELOG.md` · Goal đang chờ: `docs/goals/2026-10-18-upgrade-completion.md` (WAITING)
 
 ## Đang làm
-- /complete lifecycle/cache: `docs/work/2026-11-03-closed-controller-release/working.md`; main90b07c6 đã gồm #73/#74/#76, giữ save đang chạy và release closed controller, chưa device/heap acceptance.
+- /complete input boundaries: `docs/work/2026-11-03-migration-manifest-cap/working.md`; main b9a3f19 đã gồm #74/#73/#76/#77. Chặn manifest output quá cap và nonfinite corners, không đổi schema/page cap/permission.
+- Lifecycle đã merge ở #77, SHA `b9a3f192b10e9d6163dc93b2136a30a23df92613`. Hồ sơ `docs/work/2026-11-03-closed-controller-release/working.md`.
 - Guard một editor đã merge: [PR #76](https://github.com/seeker19110/X-Scanner/pull/76), SHA `90b07c6f53864a70225e1b9662890016fb221e3a`; hồ sơ `docs/work/2026-11-03-single-editor-guard/working.md`.
 - XS-09 Android UAT: `docs/work/2026-11-03-xs09-android-uat/working.md`; WHPX usable nhưng 2 lần boot thiếu chỗ (cần 7.37 GB), chưa chạy migration; cần ≥8 GB trống trên ổ Windows hoặc Android test.
 - Goal hai slice khung + security CI: `docs/goals/2026-11-03-autopilot-hardening.md`; Guava [PR #74](https://github.com/seeker19110/X-Scanner/pull/74) đã squash merge tại `5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de`; gate/OSV/CI xanh, runtime app không đổi. Hồ sơ: `docs/work/2026-11-03-guava-security/working.md`.

@@ -6,7 +6,7 @@ import '../core/scan_document.dart';
 import '../core/scan_page.dart';
 import '../core/scan_session.dart';
 import '../core/session_manifest.dart';
-import 'document_store.dart' show readManifestBytes;
+import 'document_store.dart' show maxManifestBytes, readManifestBytes;
 
 /// Why a migration did not finish; carries no path or title.
 enum MigrationFailure { insufficientSpace, io }
@@ -182,6 +182,9 @@ class P1Migration {
         pages: pages,
       ),
     );
+    if (utf8.encode(json).length > maxManifestBytes) {
+      return const MigrationFailed(MigrationFailure.io);
+    }
     try {
       if (resumedDocId == null) {
         await _writeJournal(_State.copying, docId);
@@ -400,7 +403,9 @@ class P1Migration {
     }
     final DocumentDecodeResult decoded;
     try {
-      decoded = decodeDocument(utf8.decode(await File(manifest).readAsBytes()));
+      final bytes = await readManifestBytes(File(manifest));
+      if (bytes == null) return false;
+      decoded = decodeDocument(utf8.decode(bytes));
     } on FormatException {
       return false;
     } on FileSystemException {

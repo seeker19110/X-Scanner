@@ -349,6 +349,78 @@ void main() {
     }
   });
 
+  test('AUD-DATA-002 expanded manifest is rejected before any write', () async {
+    final pages = List.generate(25000, (i) {
+      final id = (i + 1).toRadixString(16).padLeft(32, '0');
+      return ScanPage(id: id, originalPath: 'originals/$id.jpg');
+    });
+    final source = File(at('session/${pages.first.originalPath}'));
+    source.parent.createSync(recursive: true);
+    source.writeAsBytesSync([1]);
+    final json = encodeManifest(ScanSession(pages: pages));
+    expect(utf8.encode(json).length, lessThanOrEqualTo(maxManifestBytes));
+    File(at('session/session.json')).writeAsStringSync(json);
+    final before = tree(root);
+    final faults = _Faults(root.path, at: 1);
+    final real = _RealIO();
+    final prefix = at('session/originals/');
+    // Every logical original is the same synthetic byte; no 25000 copies.
+    final outcome = await IOOverrides.runZoned(
+      () => migration(newDocId: () => _docA).run(),
+      createFile: (path) => _CountingFile(
+        real.createFile(path.startsWith(prefix) ? source.path : path),
+        faults,
+      ),
+      createDirectory: (path) =>
+          _CountingDirectory(real.createDirectory(path), faults),
+      fseGetType: (path, followLinks) => path.startsWith(prefix)
+          ? Future.value(FileSystemEntityType.file)
+          : real.fseGetType(path, followLinks),
+    );
+    expect(
+      outcome,
+      isA<MigrationFailed>().having(
+        (failure) => failure.reason,
+        'reason',
+        MigrationFailure.io,
+      ),
+    );
+    expect(faults.ops, isEmpty);
+    expect(tree(root), before);
+  });
+
+  test(
+    'AUD-DATA-002 recovery refuses an oversized committed manifest',
+    () async {
+      final pages = writeP1(1);
+      final before = tree(session());
+      final dir = Directory(at('documents/$_docA/originals'))
+        ..createSync(recursive: true);
+      File(at('session/${pages.single.originalPath}'))
+          .copySync('${dir.path}/${pages.single.id}.jpg');
+      final json = encodeDocument(
+        ScanDocument(
+          id: _docA,
+          title: 'Synthetic',
+          createdAt: _mtime.toUtc(),
+          updatedAt: _mtime.toUtc(),
+          pages: pages,
+        ),
+      );
+      File(at('documents/$_docA/document.json')).writeAsStringSync(
+        '$json${' ' * (maxManifestBytes + 1 - utf8.encode(json).length)}',
+      );
+      journal().writeAsStringSync(
+        jsonEncode({'version': 1, 'state': 'committed', 'docId': _docA}),
+      );
+      final target = tree(Directory(at('documents/$_docA')));
+      expect(await migration().run(), isA<MigrationFailed>());
+      expect(tree(session()), before);
+      expect(tree(Directory(at('documents/$_docA'))), target);
+      expect(rollbacks(), isEmpty);
+    },
+  );
+
   group('AC-14 the rollback copy is kept', () {
     test('later runs are not needed and change nothing', () async {
       final pages = writeP1(3);
