@@ -12,11 +12,11 @@
 | 6 | A11Y | Trợ năng/UX | đã quét | 2f9eb53e810b84ef71b13ea76830a8ffd999edbd | 2026-11-03 | Rà duplicate Semantics và keyboard readiness. TalkBack thiết bị còn mở. |
 | 7 | DEP | Phụ thuộc | đã quét | d22e622e421fc0656d46ea5aff93b0200b29e4b8 | 2026-11-03 | candidate976c71d có tree trùng main; root đối chiếu git diff exit0 |
 | 8 | CI | CI/CD | đã quét | d22e622e421fc0656d46ea5aff93b0200b29e4b8 | 2026-11-03 | candidate976c71d có tree trùng main; root đối chiếu git diff exit0 |
-| 9 | DOC | Tài liệu | đã quét | 2f9eb53e810b84ef71b13ea76830a8ffd999edbd | 2026-11-03 | Đối chiếu CODEMAP, TRAPS, PROGRESS và ba hồ sơ sửa lỗi trên main. |
-| 10 | DATA | Filesystem/migration | đã quét | 2f9eb53e810b84ef71b13ea76830a8ffd999edbd | 2026-11-03 | Rà ownership, prewrite cap và rollback. Migration trên Android chờ UAT. |
+| 9 | DOC | Tài liệu | đã quét | 15548048210c0b087635f2be9240b49b17f2f986 | 2026-11-03 | Đối chiếu hồ sơ #79, audit và kết quả UAT với main. |
+| 10 | DATA | Filesystem/migration | đã quét | 15548048210c0b087635f2be9240b49b17f2f986 | 2026-11-03 | Rà ownership, prewrite cap và rollback. W-602 đạt với fixture P1 trên API 36. |
 | 11 | CFG | Cấu hình | đã quét | d22e622e421fc0656d46ea5aff93b0200b29e4b8 | 2026-11-03 | candidate976c71d có tree trùng main; root đối chiếu git diff exit0 |
 | 12 | XFEAT | Chéo tính năng | đã quét | 2f9eb53e810b84ef71b13ea76830a8ffd999edbd | 2026-11-03 | Rà handoff route và controller cùng smoke giữ pending save. |
-| 13 | HAR | Harness | đã quét | 2f9eb53e810b84ef71b13ea76830a8ffd999edbd | 2026-11-03 | Rà CI và hồ sơ đối chiếu main. E2E thiết bị đang chờ APK. |
+| 13 | HAR | Harness | đã quét | 15548048210c0b087635f2be9240b49b17f2f986 | 2026-11-03 | Delta #79: rà xt.yaml, gate native và verify T201–T205, format/coverage exit 0. E2E tự động còn thiếu. |
 ## Phát hiện
 | ID | Mức | Trạng thái | Tóm tắt | Bằng chứng | Gate | Ghi chú |
 |---|---|---|---|---|---|---|
@@ -24,5 +24,5 @@
 | AUD-PERF-001 | 🟠 | đã sửa | Controller/cache của mọi tài liệu đã đóng còn được giữ | suy luận: main.dart _last strong refs; SessionController.dispose không giải phóng map owner | `cd apps/mobile && flutter test test/app_test.dart` | #77 đã merge tại `b9a3f192b10e9d6163dc93b2136a30a23df92613`. Handoff qua gate tích hợp, đo heap thiết bị còn mở. |
 | AUD-DATA-002 | 🟠 | đã sửa | Migration công bố manifest vượt cap app đọc | đo được: schema1 4194269≤4194304, target4535227, MigrationDone nhưng LibraryUnreadable | `cd apps/mobile && flutter test test/storage/p1_migration_test.dart` | #78 đã merge tại `2f9eb53e810b84ef71b13ea76830a8ffd999edbd`. Tripwire trước ghi và recovery qua gate tích hợp. |
 | AUD-CODE-001 | 🟢 | đã sửa | NaN corner bị clamp thành tọa độ hợp lệ | đo được: NaN.clamp=1, TR/BR accepted | `cd apps/mobile && flutter test test/core/quad_editing_test.dart` | #78 đã merge tại `2f9eb53e810b84ef71b13ea76830a8ffd999edbd`. Hồi quy NaN và ±Infinity qua gate tích hợp. |
-| AUD-HAR-001 | 🟠 | mở | E2E thiết bị chưa có cổng/bằng chứng | đo được: floor thiếu e2e. Emulator WHPX API 36 đã boot và ADB đã nhận | `python3 .xtemplates/scripts/xt.py floor --run --strict` | W-602/F-078: chờ APK từ main và chạy UAT. |
-| AUD-DOC-001 | 🟢 | mở | Mô tả logging/gitleaks/màn hình/AC9 đã cũ | đo được: FEATURE-MAP, THREAT-MODEL, BLUEPRINT lệch source/CI/AC9 receipt | `python3 scripts/check-links.py` | phase docs sửa văn bản; link gate không chứng minh ngữ nghĩa |
+| AUD-HAR-001 | 🟠 | mở | Thiếu suite E2E tự động | đo được: verify --all thiếu e2e dù W-602 đã đạt trên emulator | `python3 .xtemplates/scripts/xt.py floor --run --strict` | Bằng chứng UAT `docs/ops/evidence/xs09-android-uat-2026-11-03.json`. Giữ mục sàn E2E mở. |
+| AUD-DOC-001 | 🟢 | đã sửa | Mô tả logging/gitleaks/màn hình/AC9 đã cũ | đo được: FEATURE-MAP, THREAT-MODEL, BLUEPRINT lệch source/CI/AC9 receipt | `python3 scripts/check-links.py` | #79 đã sửa ở `1554804`, review đối chiếu prose với source và bằng chứng AC9 |

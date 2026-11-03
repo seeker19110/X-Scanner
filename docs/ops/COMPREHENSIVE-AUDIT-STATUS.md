@@ -160,3 +160,7 @@ Phạm vi delta: nhóm 4/8 (test/hook), 9 (tài liệu), 12 (đường gọi gat
 Các mục owner/legal/device trước đây vẫn giữ kết cục; cập nhật khung không biến chúng thành đã đạt.
 
 - F-082 (nhóm 4/8/12, Trung): installer đăng ký formatter hai lần và đổi hook thành đường dẫn tương đối. Hai test integration RED trước sửa; settings giữ đường dẫn theo CLAUDE_PROJECT_DIR và một formatter; full gate chạy lại trước commit.
+
+## Đối chiếu F-078 — 2026-11-03
+
+F-078 / W-602 đạt trên APK debug build từ main `15548048210c0b087635f2be9240b49b17f2f986`: migration từ fixture tổng hợp, nhánh StatFs thành công, picker và mở lại. Bằng chứng `docs/ops/evidence/xs09-android-uat-2026-11-03.json`.

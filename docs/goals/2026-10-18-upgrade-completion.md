@@ -4,8 +4,8 @@
 | --- | --- |
 | Goal ID | 2026-10-18-upgrade-completion |
 | Owner | Chủ repo; root tích hợp/nghiệm thu, worker riêng theo contract |
-| State | WAITING |
-| Default-branch SHA đã reconcile | `4956064` (2026-10-23, after #62) |
+| State | ACTIVE — UAT đạt, hồ sơ chờ merge |
+| Default-branch SHA đã reconcile | `15548048210c0b087635f2be9240b49b17f2f986` (2026-11-03, sau #79) |
 | Bắt đầu / review | 2026-10-18 |
 | Quyền AI | research/spec/branch/PR/review/merge sau gates theo goalP1 + yêu cầu tiếp; không deploy/auto-merge/release |
 | Budget | Không paidAPI/dịch vụ mới; chỉ công cụ/dev/CI hiện có, checkpoint trước ngưỡng ngữ cảnh |
@@ -74,3 +74,7 @@ PR59/209c808 merged11:06UTC, finalCI39121270944/rootgate+hook658Flutter+11freshJ
 ### Iteration5 — 2026-10-23 close-out
 
 #62 merged `4956064` (CI 40039328590). Re-audit Pha 4 lần 4: 0 Cao. Goal DoD met on host/CI except the device run of the library APK (W-602 / F-078): container has no KVM. State WAITING on an accelerated Android environment; next step: install the #62 CI APK over the preserved P1 AVD data from the 18/10 run and verify migration + reopen.
+
+## Đối chiếu UAT — 2026-11-03
+
+W-602/F-078 đã đạt trên bản debug main `15548048210c0b087635f2be9240b49b17f2f986`. Dùng fixture tổng hợp dựng lại, đối chiếu gốc/rollback, nhánh StatFs, picker và hai lần mở lại. Bằng chứng `docs/ops/evidence/xs09-android-uat-2026-11-03.json`. Hồ sơ chờ merge theo L1.

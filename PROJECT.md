@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-P1 scan và xuất đã merge (2026-10-12); AC-9 được root nghiệm thu trên emulator18/10 theo ủy quyền, agent thực hiện (bằng chứng `docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json`). XS-09 thư viện nhiều tài liệu + migration P1 nối vào app ở #62 (2026-10-23); chưa UAT bản này trên emulator/thiết bị. Chủ dự án: @seeker19110.
+P1 scan và xuất đã merge (2026-10-12); AC-9 được root nghiệm thu trên emulator18/10 theo ủy quyền, agent thực hiện (bằng chứng `docs/ops/evidence/p1-android-uat-2026-10-18/ac9.json`). XS-09 thư viện nhiều tài liệu + migration P1 nối vào app ở #62 (2026-10-23); W-602/F-078 đã đạt trên emulator API 36 với fixture P1 dựng lại (bằng chứng `docs/ops/evidence/xs09-android-uat-2026-11-03.json`). Chủ dự án: @seeker19110.
 Đã duyệt ngày 2026-10-11: lưu nghiên cứu, áp dụng projects-template, stack ADR-0002, spec P0 nền và spec P1 scan và xuất.
 Mục tiêu sản phẩm: scan tài liệu, xuất PDF hoặc ảnh; nghiên cứu khoảng cách/depth để tăng chất lượng.
 Người dùng: người cần số hóa tài liệu; phân khúc cụ thể và nền tảng phát hành chưa chốt.

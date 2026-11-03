@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "date": "2026-11-03",
+  "recorded_utc": "2026-11-03T12:38:16.867010+00:00",
+  "work_id": "2026-11-03-xs09-android-uat",
+  "result": "PASS_W602_F078_CONTROLLED_ANDROID_UAT",
+  "main": "15548048210c0b087635f2be9240b49b17f2f986",
+  "main_ci_run": 41635715890,
+  "apk_origin": "local debug build from clean main during T-201 in loop verify --all",
+  "apk_bytes": 190811360,
+  "apk_sha256": "ef3b33e47c0c2a28f15816db40c6a88b6d73be7f1dc897d3b83ca4b98e9ee268",
+  "installed_base_apk_sha256": "ef3b33e47c0c2a28f15816db40c6a88b6d73be7f1dc897d3b83ca4b98e9ee268",
+  "apk_public_signer_sha256": "95f5243c794ebc7e29e23c1fb60ba35b01b1a7a9d36541b67f5cd1c6c254e1f1",
+  "flutter": "3.47.7",
+  "dart": "3.13.5",
+  "device": {
+    "avd": "xs_finalmain_api36_20261103",
+    "serial": "emulator-5584",
+    "api": 36,
+    "abi": "x86_64",
+    "emulator": "37.2.12",
+    "accelerator": "Windows WHPX"
+  },
+  "fixture": {
+    "kind": "reconstructed synthetic P1 schema 1",
+    "sha256": "8221445e8b703201cf1222fad4ac12191c69453327b84f0711b3f1495ea68e89",
+    "historical_ac9_manifest_sha256": "0770a52070923bbc316f1ecc8b12b526530837038342368c91a44897cbf0f069",
+    "originals": [
+      {"id": "996fe429e48c3aed6304f19d7182ef5d", "bytes": 99780, "sha256": "0890fd5e22d87e9c9ae368e9dd0600c0a4edc47b4984522b12679e07d1cdabc2"},
+      {"id": "e7e9e6eb55f1ec75948e01ca8f3c221e", "bytes": 99780, "sha256": "284a67b38283efcfb5f998a4c592da3dfcec8eab082178fcb776ad1e33ae409c"},
+      {"id": "f00dbfd8ecbfa7ab9e2a854b82dac1db", "bytes": 99780, "sha256": "3ddb158679d5e9e0d6b0da98f13f9456c3656eb3b935f33fc19b27ab937f8d67"}
+    ]
+  },
+  "migration": {
+    "document_id": "a89617eb767885c87b25b691f132d815",
+    "pages": 3,
+    "schema": 2,
+    "order": ["e7e9e6eb55f1ec75948e01ca8f3c221e", "996fe429e48c3aed6304f19d7182ef5d", "f00dbfd8ecbfa7ab9e2a854b82dac1db"],
+    "manifest_sha256": "08ddecf3e8e3762361e13615d1e681cf1d9d47e248d687323d05cf55895884aa",
+    "recipes_and_revision_zero_match": true,
+    "current_and_rollback_originals_equal_bytes": true,
+    "rollback_manifest_sha256": "8221445e8b703201cf1222fad4ac12191c69453327b84f0711b3f1495ea68e89",
+    "cold_reopens": 2
+  },
+  "statfs": {
+    "success_path": "native StatFs(filesDir).availableBytes used by nonempty migration",
+    "required_bytes": 329274,
+    "guest_df_available_kib_after_migration": 4356564,
+    "raw_channel_value_and_error_cases": "NOT_MEASURED"
+  },
+  "picker": {
+    "rapid_double_tap_one_back_returns_library": true,
+    "cancel_preserves_manifest_and_originals": true,
+    "camera_page": {"sha256": "852e8c18545989ce6be6cf2583b82bef909164eda7ad2a114c7bdf9113e39871", "bytes": 99780},
+    "gallery_page": {"sha256": "82e677a1d7aa0cfc3a6a99932f505ca5bbf88074b481e88149d07f42988ddf2e", "bytes": 13398},
+    "gallery_bytes_match_fixture": true,
+    "process_kill": {
+      "before_pid": 5550,
+      "after_kill_pid": null,
+      "restored_pid": 7137,
+      "owner": "cdc6acbc3825afb2e828c821645484bd",
+      "reserved_page": "2aac7442bbf50c895af5de4235ebcb65",
+      "count_after_two_more_restarts": 1,
+      "other_document_unchanged": true,
+      "pending_intent_absent": true
+    }
+  },
+  "pdf": {
+    "pages_in_android_print_preview": 5,
+    "sha256": "409eff992f0ecc5a5bcbc981fbb66b2a794adde4cbe6fdc1d158d0c81940a9be",
+    "bytes": 536181,
+    "export_and_share_bytes_equal": true,
+    "rotation_and_revision_increment_once": true
+  },
+  "final_page_counts": {"a89617eb767885c87b25b691f132d815": 5, "cdc6acbc3825afb2e828c821645484bd": 1},
+  "limits": [
+    "Fresh install with seeded fixture. In-place upgrade from the historical P1 APK was not exercised.",
+    "Native emulator camera used a synthetic image. Physical camera, iOS, production signing and release acceptance are outside this receipt.",
+    "Device UAT is recorded separately from the missing automated E2E floor."
+  ]
+}
