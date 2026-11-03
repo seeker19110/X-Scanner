@@ -57,3 +57,10 @@
 - Chọn: Khôi phục pin và chạy gate thật
 - Lý do (tiêu chí chất lượng cuối): Công cụ tải miễn phí từ nguồn chính thức, không đổi source/gate; có checksum và bằng chứng chạy thật
 - Đường lùi: Giữ toolchain ngoài repo; bỏ khỏi PATH nếu chủ repo đổi hướng
+
+### D-009 · 2026-11-02T18:33:20+00:00 · Duyệt PLAN-harden 03Nov và 3 slice sửa lỗi đã xác minh
+
+- Phương án: (1) Sửa input/lifecycle guard tối thiểu, giữ originals và cổng hiện có · (2) Thêm CAS/schema hoặc trì hoãn bug dưới metadata phase
+- Chọn: Sửa input/lifecycle guard tối thiểu, giữ originals và cổng hiện có
+- Lý do (tiêu chí chất lượng cuối): Bảo toàn dữ liệu trước; defect đo thật, TDD và file/worktree disjoint; user đã yêu cầu /complete, không quyền release
+- Đường lùi: Revert từng PR qua gate/review, không khôi phục bằng xoá dữ liệu

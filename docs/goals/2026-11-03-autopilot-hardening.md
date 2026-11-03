@@ -3,10 +3,10 @@
 | Thuộc tính | Giá trị |
 |---|---|
 | Goal ID | 2026-11-03-autopilot-hardening |
-| State | WAITING — owner L1 merge, UAT storage/device and explicit gate-config approval |
+| State | ACTIVE — maintenance đã merge; chủ repo yêu cầu tiếp /complete |
 | Owner | Chủ repo; root điều phối, security worker worktree riêng |
-| Base đã reconcile | a1959b449d19b4495171c7226d64e2e5f1aeb7bd, origin/main |
-| Quyền | Sửa/research/spec/branch/PR và gate trong scope; L1 người merge, không release/auto-merge/cloud/scheduler/quyền thiết bị |
+| Base đã reconcile | 2f9eb53e810b84ef71b13ea76830a8ffd999edbd, main sau #74/#73/#76/#77/#78 |
+| Quyền | Sửa/research/spec/branch/PR và gate trong scope; Chủ repo duyệt merge #76 → #77 → #78 → #79 theo L1 |
 | Ngân sách | Phiên /autopilot hiện tại, không paid API; không chạy hai Gradle gate cùng lúc trên host 6 GB |
 
 ## Outcome và DoD
@@ -19,8 +19,8 @@ DoD của goal: hai outcome có PR riêng được review, full gate local và C
 
 | Slice | Phạm vi | PR / state | Writer / files |
 |---|---|---|---|
-| S1 | X-Templates 3.29.0 + F-081/F-082 + toolchain host | #73, f166056, local gate PASS; CI supply-chain đỏ do Guava đã có ở base | root, harness/vendor và hồ sơ khung |
-| S2 | GHSA-xxph-c9ww-hj94/CVE-2026-102554, Guava build/lint/UTP | [PR #74](https://github.com/seeker19110/X-Scanner/pull/74), head5e076d5; local/root gate + OSV PASS, CI Android pending, chưa merge | guava_security, /home/liend/.local/share/x-scanner/worktrees/guava-security, branch codex/guava-security-fix; hai Gradle build/settings files, hai lockfiles, 3-case regression và work record; root đã thêm docs sau bàn giao |
+| S1 | X-Templates3.29.0 + F081/F082 + toolchain | #73 merged d22e622, head976c71d full gate và all CI xanh | root, vendor/harness/docs; maintenance Complete |
+| S2 | GHSA-xxph-c9ww-hj94, Guava build tools33.7.2 | #74 merged5a8ecad, head5e076d5 gate/OSV/all CI xanh, runtime graph unchanged | guava_security và root; maintenance Complete |
 
 Root sở hữu PROGRESS/CODEMAP/CHANGELOG/goal; worker không sửa các file đó, không push/PR/merge. Không có hai writer cùng file, không chạy gate hai worktree đồng thời. Root review diff + kiểm độc lập trước PR. Discovery này không cấp quyền merge, không tự đổi FIFO; owner quyết thứ tự khi cần security dependency đi trước PR khung.
 
@@ -33,10 +33,12 @@ Root sở hữu PROGRESS/CODEMAP/CHANGELOG/goal; worker không sửa các file �
 
 ## Current truth
 
-Root đã review độc lập, hai lần gate integration/hook trên security branch đều PASS (846 Flutter +11 JVM +34 repository); OSV đúng binary/config CI exit0, runtime graph 24970 byte identical. PR #74 OSV và hygiene CI SUCCESS, Android còn chạy ở checkpoint này. PR #73 Android CI SUCCESS trên f166056 nhưng supply-chain còn đỏ do base Guava; owner cần review thứ tự và merge fix riêng trước khi reconcile nhánh khung. Không waiver/skip scan, không coi finding trên main đã đóng.
+Hai maintenance outcome đã merge theo lệnh owner03Nov, không waiver Guava: #74/5a8ecad rồi #73/d22e622, fresh gates và all CI xanh. /complete đang ở PLAN-harden-2026-11-03.md: PR #76, #77 và #78 đã merge, main `2f9eb53e810b84ef71b13ea76830a8ffd999edbd`. Gate và CI tích hợp #78 qua 851 Flutter, 11 JVM và 38 repository. Coverage 96.31% dòng và 92.41% nhánh.
 
-`loop verify --all` trên nhánh khung đã source đúng env: T-101/T-102 exit0, stable=true, nhưng overall exit1 vì thiếu format_check/coverage/e2e trong xt.yaml. Format/coverage thực vẫn PASS trong gate hiện hành; không tạo alias giả hay coi widget test là device E2E. Đổi xt.yaml/gate là điểm dừng cần owner; W-602/F-078 cũng chưa có bằng chứng thiết bị. DoD goal/project chưa đạt; giữ hồ sơ working.md và chờ quyền/tài nguyên thật.
+Phase/audit PR#79 khai harden/format/coverage thật,13 nhóm được rà. Sổ audit ghi bốn phát hiện đã sửa trên main. Checkpoint trước tích hợp thiếu E2E. Emulator đã boot sau khi chủ repo giải phóng dung lượng. Cần APK đúng SHA main, UAT, sàn E2E và signoff.
 
 ## Operator authorization và reconcile — 2026-11-03
 
 Chủ repo yêu cầu merge rồi chuyển /complete; #74 merged 5a8ecada2ecb6b0b86807fb2b5f2d09ee9e1d8de sau fresh gate và OSV. #73 đang tích hợp main mới, giữ cả hai phía xung đột docs; cần fresh gate/CI trên head tích hợp trước merge. Quyền phase-entry xt.yaml theo /complete đã được cấp; release/signing/dữ liệu thật vẫn ngoài quyền. Ổ C đo lại2573086720 byte, ADB5039 rỗng; UAT chưa được chứng minh.
+
+03Nov scope nối /complete: #74 merged5a8ecad, #73 mergedd22e622 sau fresh gate/OSV và all CI green; DoD maintenance đạt. Tiếp PLAN-harden và audit13 nhóm với3 repair PR disjoint; DoD phần nối là fixes main+strict audit/floor, không gồm cấp quyền release hay chọn license. E2E/thiết bị và owner/legal/signoff còn mở, không Project Complete.
