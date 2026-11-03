@@ -17,3 +17,6 @@
 | AUD-DOC-001 🟢 | Source/CI/18Oct AC9 receipt khác prose; hai auditor kiểm độc lập. | Sửa prose/entrypoints, giữ XS09/device UAT pending. |
 ## Kế hoạch tự duyệt và giới hạn
 Root duyệt D-009 theo §3d: PR#76(route),#77(lifecycle),#78(migration+quad) disjoint (route; lifecycle; migration+quad boundaries), mỗi fix test RED trước, gate thật; root phase/audit/docs riêng. Known data safety đứng trước metadata phase. PLAN-harden và working.md ghi hợp đồng/ủy quyền. Release-check trước sửa NO-GO: blueprint47, audit thiếu sổ, verify chưa khớp cây, tree draft; attack/perf cần người ký lý do. Không chọn license, bật scheduler/cloud/auto-merge hoặc phát hành. Audit schema PASS không phải audit strict/Project Complete; finding đỏ/cam giữ mở đến main được sửa và kiểm lại. 47 owner/device/legal MUST không được tick nhờ bản vá code.
+
+## Delta sau merge sửa lỗi
+Đối chiếu main `2f9eb53e810b84ef71b13ea76830a8ffd999edbd` với baseline d22e622. Các nhóm có thay đổi được rà theo source, test và hồ sơ #76/#77/#78. Full gate tích hợp #78 đạt 851 Flutter, 11 JVM và 38 repository, coverage 96.31% dòng và 92.41% nhánh. CI cùng head đã qua Android gate, OSV và PR hygiene. Emulator Android 36 đã boot. UAT còn chờ APK main sau #79.

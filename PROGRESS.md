@@ -4,12 +4,12 @@
 > Lịch sử đến 2026-10-24: `docs/changelog/2026-10-progress-history.md` · CHANGELOG: `CHANGELOG.md` · Goal đang chờ: `docs/goals/2026-10-18-upgrade-completion.md` (WAITING)
 
 ## Đang làm
-- /complete: `docs/work/2026-11-03-complete-harden/working.md`, `docs/autopilot/PLAN-harden-2026-11-03.md`, audit13 nhóm `docs/ops/AUDIT-STATUS.md`; #74 merged5a8ecad, #73 mergedd22e622. PR#76/#77/#78 giữ test RED→GREEN, full gate xanh, CI/review theo PR (main chưa sửa); E2E/license/signoff chưa đạt.
-- XS-09 Android UAT: `docs/work/2026-11-03-xs09-android-uat/working.md`; WHPX usable nhưng 2 lần boot thiếu chỗ (cần 7.37 GB), chưa chạy migration; cần ≥8 GB trống trên ổ Windows hoặc Android test.
+- /complete: `docs/work/2026-11-03-complete-harden/working.md`, `docs/autopilot/PLAN-harden-2026-11-03.md`, audit13 nhóm `docs/ops/AUDIT-STATUS.md`; #74 merged5a8ecad, #73 mergedd22e622. PR #76, #77 và #78 đã merge với gate và CI xanh. Bằng chứng từng bản sửa ở sổ audit. E2E và signoff còn mở.
+- XS-09 Android UAT: `docs/work/2026-11-03-xs09-android-uat/working.md`. Chủ repo đã giải phóng ổ C. Emulator WHPX API 36 đã boot, chờ APK từ main sau #79.
 - Backlog MUST blueprint ("làm hết các việc còn lại", 24/10): D (#66), B (#67), C (#69) đã merge; lát cuối `docs/work/2026-10-24-backlog-final/working.md` (PR này). Blueprint: 189 đạt · 166 không áp dụng · 47 còn mở, tất cả là việc của chủ repo (`docs/autopilot/GO-NO-GO.md`)
 
 ## Tiếp theo
-1. Sau khi có ≥8 GB trống trên ổ emulator Windows hoặc Android test, chạy APK có thư viện trên dữ liệu P1 tổng hợp đã giữ: cài đè lên dữ liệu P1 đã giữ từ lần UAT 18/10, kiểm migration → một tài liệu, bản gốc trùng byte, mở lại app (W-602 / F-078).
+1. Xác minh APK từ CI main sau #79, chạy migration và picker bằng fixture P1 tổng hợp trên emulator riêng. So byte ảnh gốc và bản rollback qua các lần mở lại (W-602 / F-078).
 2. 4 điểm mở còn lại của #57 (F-077 đã đóng ở #65).
 3. 47 MUST còn mở là việc của chủ repo, gom theo việc trong `docs/autopilot/GO-NO-GO.md` (LICENSE, bật báo lỗ hổng riêng, ruleset, phát hành, iOS, thiết bị, pháp lý). Lockfile Gradle đã cập nhật ở #71; Dependabot #72 đã được thay bằng #75, ngoài slice này.
 4. Tính năng tiếp theo (XS-10 xoá/thùng rác, khôi phục ảnh bị giữ riêng…) cần chủ repo duyệt spec; roadmap `docs/plans/` vẫn ADVISORY.
@@ -24,8 +24,8 @@
 - Nợ kỹ thuật chấp nhận: ảnh picker bị từ chối giữ riêng chưa có UI khôi phục (`DEBT:` ở `pending_pick_store.dart`, tới XS-10); khe plugin xoá kết quả trước khi Dart ghi nhật ký (`DEBT:` ở `pick_import.dart`) — hạn trả: trước khi phân phối
 
 ## Bàn giao phiên
-- Default branch đã fetch: `d22e622e421fc0656d46ea5aff93b0200b29e4b8` (#73, gồm #74), đã đối chiếu tree với candidate976c71d
-- Lệnh kiểm nhanh: `bash scripts/dev-task.sh gate` → PASS 4/4, 843 Flutter (coverage 96.33% dòng) + JVM, 2026-10-24 (gói B+C)
-- Chủ repo đã duyệt merge #74/#73 và chuyển /complete trong phiên 03/11; UAT W-602/F-078 vẫn thiếu chỗ Windows/thiết bị. Không bật auto-merge.
-- Hồ sơ đang mở: khung #73, Guava security và XS-09 UAT (xem mục Đang làm).
-- Cần operator: dung lượng/thiết bị UAT, quyết định pháp lý/release còn mở; không coi là Project Complete.
+- Default branch đã fetch: `2f9eb53e810b84ef71b13ea76830a8ffd999edbd` (#78, gồm #74/#73/#76/#77)
+- Lệnh kiểm nhanh: `bash scripts/dev-task.sh gate` → PASS 4/4 trên cây #78 tích hợp với 851 Flutter, 11 JVM và 38 repository. Coverage 96.31% dòng và 92.41% nhánh
+- Chủ repo đã duyệt #76 → #77 → #78 → #79. UAT W-602/F-078 chờ APK và kết quả thử nghiệm.
+- Hồ sơ đang mở: harden và XS-09 UAT (xem mục Đang làm).
+- Cần operator cho các quyết định pháp lý và signoff còn mở.

@@ -131,7 +131,17 @@ void main() {
     expect(opened, [document.title]);
     await _tabTo(tester, find.byType(BackButton));
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await pumpUntil(tester, () => find.text('Thư viện').evaluate().isNotEmpty);
+    await pumpUntil(
+      tester,
+      () =>
+          find.byType(FloatingActionButton).evaluate().isNotEmpty &&
+          tester
+                  .widget<FloatingActionButton>(
+                    find.byType(FloatingActionButton),
+                  )
+                  .onPressed !=
+              null,
+    );
 
     // Rename opens a dialog that Escape closes without renaming.
     await _tabTo(tester, find.byTooltip('Đổi tên'));

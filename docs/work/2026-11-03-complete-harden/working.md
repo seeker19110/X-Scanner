@@ -1,7 +1,7 @@
 # Công việc: /complete — chuyển harden và audit có bằng chứng
 
 - Work ID: 2026-11-03-complete-harden
-- Trạng thái: /complete active; #74/#73 merged, repair PR#76/#77/#78 prepared; T201 full gate exit0, T202 audit schema exit0. Thiết bị/signoff chưa đạt; không Project Complete.
+- Trạng thái: /complete active; #74/#73 merged, repair PR #76/#77/#78 đã merge; T201 full gate exit0, T202 audit schema exit0. Thiết bị/signoff chưa đạt; không Project Complete.
 - Yêu cầu: chủ repo ngày03/11 "xong rồi merge chuyển qua pha /complete"; chuyển batch cũ bằng CLI stop→init (lưu state/verified, không force/khai done khi E2E còn đỏ).
 - Quyền: merge #74 rồi #73 theo phụ thuộc và mở pha harden; không release/signing/cloud/secret/license selection/xoá dữ liệu thật.
 - Mức: điều phối nhiều PR maintenance S, không tính năng mới; giữ nguyên approved P1/XS09, không áp roadmap advisory.
@@ -24,3 +24,8 @@
 
 Checkpoint tích hợp:3 source patches cùng full gate PASS851Flutter/11JVM/38repo, coverage96.31/92.41; lần đầu bắt app-smoke đợi controller.status thay vì FAB-ready, sửa test77 giữ mọi held-save/identity assertion, reviewer-alt approve, nhánh77/hook846 xanh rồi CI head mới. Giữ snapshot integration trong stash và patch/tree receipt user-local, không commit app source vào PR phase. Goal current truth được cập nhật theo SHA merge thật; không để bảng pending cũ làm trạng thái hiện tại.
 Quyết định §3d: gói audit/PLAN/mergereceipts và checkpoint atomic trong PR metadata, dù hơn150 dòng hồ sơ; nhận làn review chuẩn/max, không nới ngưỡng fast-lane150 hay native gate, không mở PR thứ6 vượt WIP. Ít quy trình hơn và trạng thái đúng ưu tiên hơn tách hồ sơ qua PR sau; source fixes riêng vẫn≤150 dòng.
+
+## Đồng bộ sau quyền merge — 2026-11-03
+- Chủ repo duyệt #76 → #77 → #78 → #79. Đã merge ba bản sửa ở main `2f9eb53e810b84ef71b13ea76830a8ffd999edbd`.
+- Delta theo §3d giữ CODEMAP, PROGRESS và TRAPS của cả hai phía. Rà diff source/test, xác nhận audit theo từng SHA merge. T203–T205 có full gate 851 Flutter, 11 JVM và 38 repository cùng CI xanh trên head tích hợp #78.
+- C còn 62122348544 byte khi đồng bộ. Máy ảo riêng `xs_finalmain_api36_20261103` đã boot API 36 qua WHPX và ADB 5039 nhận serial emulator-5584. UAT cần APK main sau #79. Manifest fixture dựng lại có hash riêng, ba bản gốc khớp AC9.

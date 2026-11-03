@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:x_scanner/core/scan_document.dart';
 import 'package:x_scanner/export/file_sharer.dart';
 import 'package:x_scanner/export/page_exporter.dart';
 import 'package:x_scanner/main.dart';
+import 'package:x_scanner/storage/document_store.dart';
 import 'package:x_scanner/storage/library_store.dart';
 import 'package:x_scanner/storage/p1_migration.dart';
 import 'package:x_scanner/storage/pending_pick_store.dart';
@@ -39,6 +41,22 @@ class _NoSharer implements FileSharer {
 class _RoomyStorage implements Storage {
   @override
   Future<int> freeBytes(Directory dir) async => 1 << 40;
+}
+
+/// Holds an actual save before its durable write, using the existing store seam.
+class _HeldSaveStore extends DocumentStore {
+  _HeldSaveStore(this.delegate) : super(delegate.dir);
+  final DocumentStore delegate;
+  Completer<void>? hold;
+  bool saving = false;
+  @override
+  Future<DocumentLoadResult> load() => delegate.load();
+  @override
+  Future<void> save(ScanDocument document) async {
+    saving = true;
+    await hold?.future;
+    await delegate.save(document);
+  }
 }
 
 void main() {
@@ -83,24 +101,30 @@ void main() {
       recover: (outcome) => recovery.recover(library, outcome),
     );
     SessionController? opened;
+    _HeldSaveStore? openedStore;
+    final handoffs = <Future<void>?>[];
     await tester.pumpWidget(
       XScannerApp(
         library: controller,
-        openDocument: (store, ScanDocument document, {after}) =>
-            opened = SessionController(
-              store: store,
-              document: document,
-              after: after,
-              pending: pending,
-              source: source,
-              exporter: PageExporter(
-                exportDir: Directory('${tmp.path}/exports'),
-              ),
-              sharer: _NoSharer(),
-            ),
+        openDocument: (store, ScanDocument document, {after}) {
+          handoffs.add(after);
+          return opened = SessionController(
+            store: openedStore = _HeldSaveStore(store),
+            document: document,
+            after: after,
+            pending: pending,
+            source: source,
+            exporter: PageExporter(exportDir: Directory('${tmp.path}/exports')),
+            sharer: _NoSharer(),
+          );
+        },
       ),
     );
-    await settle(tester, () => controller.status == LibraryStatus.ready);
+    final createButton = find.byType(FloatingActionButton);
+    bool libraryReady() =>
+        createButton.evaluate().isNotEmpty &&
+        tester.widget<FloatingActionButton>(createButton).onPressed != null;
+    await settle(tester, libraryReady);
     await tester.pumpAndSettle();
 
     expect(find.text('Thư viện'), findsOneWidget);
@@ -120,8 +144,59 @@ void main() {
     expect(find.byType(BackButton), findsOneWidget);
 
     await tester.tap(find.byType(BackButton));
-    await settle(tester, () => controller.status == LibraryStatus.ready);
+    await settle(tester, libraryReady);
     await tester.pumpAndSettle();
     expect(find.text('Thư viện'), findsOneWidget);
+
+    // A completed closed document must release its previous controller.
+    await tester.tap(find.textContaining('0 trang'));
+    await tester.pump();
+    await settle(tester, () => handoffs.length == 2 && !opened!.busy);
+    await tester.pumpAndSettle();
+    final completedWasReleased = handoffs.last == null;
+
+    Future<void> closeAndReopen(int count) async {
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+      await settle(tester, libraryReady);
+      await tester.tap(find.textContaining('0 trang'));
+      await tester.pump();
+      await settle(tester, () => handoffs.length == count);
+    }
+
+    final firstResult = Completer<void>();
+    final firstStore = openedStore!..hold = firstResult;
+    final firstController = opened!;
+    unawaited(firstController.clearAll());
+    final firstIdle = firstController.idle;
+    await settle(tester, () => firstStore.saving);
+    await closeAndReopen(3);
+    expect(
+      handoffs.last,
+      same(firstIdle),
+      reason: 'wait for the pending durable save',
+    );
+    expect(opened!.busy, isTrue);
+    firstResult.complete();
+    await settle(tester, () => !opened!.busy);
+    await tester.pumpAndSettle();
+
+    // Completion of the old controller must not evict its active successor.
+    final nextResult = Completer<void>();
+    final nextStore = openedStore!..hold = nextResult;
+    unawaited(opened!.clearAll());
+    final nextIdle = opened!.idle;
+    await settle(tester, () => nextStore.saving);
+    await closeAndReopen(4);
+    expect(handoffs.last, same(nextIdle), reason: 'keep the active successor');
+    expect(opened!.busy, isTrue);
+    nextResult.complete();
+    await settle(tester, () => !opened!.busy);
+    await tester.pumpAndSettle();
+    expect(
+      completedWasReleased,
+      isTrue,
+      reason: 'closed caches may be collected',
+    );
   });
 }

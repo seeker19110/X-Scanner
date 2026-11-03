@@ -87,11 +87,23 @@ void main() {
     expect(moved.bottomRight, _base.bottomRight);
   });
 
-  test('non-finite targets are rejected', () {
-    expect(
-      withCornerMoved(_base, QuadCorner.topLeft, const Point(double.nan, 0.1)),
-      isNull,
-    );
+  test('non-finite targets are rejected for every corner and axis', () {
+    for (final corner in QuadCorner.values) {
+      final old = cornerOf(_base, corner);
+      for (final bad in [
+        double.nan,
+        double.infinity,
+        double.negativeInfinity,
+      ]) {
+        for (final to in [Point(bad, old.y), Point(old.x, bad)]) {
+          expect(
+            withCornerMoved(_base, corner, to),
+            isNull,
+            reason: '${corner.name} target $to',
+          );
+        }
+      }
+    }
   });
 
   group('display mapping (XS-13 AC-5)', () {

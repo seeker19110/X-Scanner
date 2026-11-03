@@ -5,8 +5,8 @@
 | Goal ID | 2026-11-03-autopilot-hardening |
 | State | ACTIVE — maintenance đã merge; chủ repo yêu cầu tiếp /complete |
 | Owner | Chủ repo; root điều phối, security worker worktree riêng |
-| Base đã reconcile | d22e622e421fc0656d46ea5aff93b0200b29e4b8, main sau #74/#73 |
-| Quyền | Sửa/research/spec/branch/PR và gate trong scope; L1 người merge, không release/auto-merge/cloud/scheduler/quyền thiết bị |
+| Base đã reconcile | 2f9eb53e810b84ef71b13ea76830a8ffd999edbd, main sau #74/#73/#76/#77/#78 |
+| Quyền | Sửa/research/spec/branch/PR và gate trong scope; Chủ repo duyệt merge #76 → #77 → #78 → #79 theo L1 |
 | Ngân sách | Phiên /autopilot hiện tại, không paid API; không chạy hai Gradle gate cùng lúc trên host 6 GB |
 
 ## Outcome và DoD
@@ -33,9 +33,9 @@ Root sở hữu PROGRESS/CODEMAP/CHANGELOG/goal; worker không sửa các file �
 
 ## Current truth
 
-Hai maintenance outcome đã merge theo lệnh owner03Nov, không waiver Guava: #74/5a8ecad rồi #73/d22e622, fresh gates và all CI xanh. /complete đang ở PLAN-harden-2026-11-03.md: repair PR#76/#77/#78 đã có TDD và full gate riêng; kiểm kết hợp cả3 PASS851Flutter/11JVM/38repo, coverage96.31/92.41. Follow-up77 chỉ sửa test đợi UI-ready; CI hiện tại xem trực tiếp PR, không dùng snapshot cũ làm trạng thái mới.
+Hai maintenance outcome đã merge theo lệnh owner03Nov, không waiver Guava: #74/5a8ecad rồi #73/d22e622, fresh gates và all CI xanh. /complete đang ở PLAN-harden-2026-11-03.md: PR #76, #77 và #78 đã merge, main `2f9eb53e810b84ef71b13ea76830a8ffd999edbd`. Gate và CI tích hợp #78 qua 851 Flutter, 11 JVM và 38 repository. Coverage 96.31% dòng và 92.41% nhánh.
 
-Phase/audit PR#79 khai harden/format/coverage thật,13 nhóm được rà và main còn findings mở vì source repairs chưa merge. Verify-all trên checkpoint7b268c3 stable=true, task201/202 và2floor commands exit0, overall đỏ chỉ thiếu E2E. Strict audit/release NO-GO: cần owner L1 review/merge, tài nguyên/device E2E và47 owner/legal items; không Project Complete, không quyền release/signing/license.
+Phase/audit PR#79 khai harden/format/coverage thật,13 nhóm được rà. Sổ audit ghi bốn phát hiện đã sửa trên main. Checkpoint trước tích hợp thiếu E2E. Emulator đã boot sau khi chủ repo giải phóng dung lượng. Cần APK đúng SHA main, UAT, sàn E2E và signoff.
 
 ## Operator authorization và reconcile — 2026-11-03
 
