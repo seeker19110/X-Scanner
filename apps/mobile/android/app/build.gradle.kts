@@ -64,7 +64,7 @@ configurations.matching { configuration ->
         configuration.name.startsWith("_internal-unified-test-platform-")
 }.configureEach {
     dependencyConstraints.add(
-        project.dependencies.constraints.create("com.google.guava:guava:33.7.2-jre") {
+        project.dependencies.constraints.create("com.google.guava:guava:33.8.0-jre") {
             because("CVE-2026-102554: patched build-tool deserialization")
         }
     )
